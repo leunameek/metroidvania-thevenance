@@ -11,9 +11,7 @@ public class HandGestureTracker : MonoBehaviour
     [SerializeField] private float connectionTimeout = 1f;
 
     public bool RightHandPresent { get; private set; }
-    public bool RightHandOpen { get; private set; }
     public bool LeftHandPresent { get; private set; }
-    public bool LeftHandOpen { get; private set; }
 
     public bool IsConnected => Time.realtimeSinceStartup - _lastResultRealtime < connectionTimeout;
 
@@ -120,7 +118,6 @@ public class HandGestureTracker : MonoBehaviour
                 {
                     sawRight = true;
                     RightHandPresent = true;
-                    RightHandOpen = open;
 
                     if (_hasRightReference && open) _rightDeltaYAccum += palm.y - _rightLastPosition.y;
                     _rightLastPosition = palm;
@@ -133,7 +130,6 @@ public class HandGestureTracker : MonoBehaviour
                 {
                     sawLeft = true;
                     LeftHandPresent = true;
-                    LeftHandOpen = open;
 
                     if (_hasLeftReference && open) _leftDeltaXAccum += palm.x - _leftLastPosition.x;
                     _leftLastPosition = palm;
@@ -148,7 +144,6 @@ public class HandGestureTracker : MonoBehaviour
         if (!sawRight)
         {
             RightHandPresent = false;
-            RightHandOpen = false;
             _hasRightReference = false;
             _rightPoints.Clear();
         }
@@ -156,7 +151,6 @@ public class HandGestureTracker : MonoBehaviour
         if (!sawLeft)
         {
             LeftHandPresent = false;
-            LeftHandOpen = false;
             _hasLeftReference = false;
             _leftPoints.Clear();
         }
@@ -174,19 +168,12 @@ public class HandGestureTracker : MonoBehaviour
 
     private bool IsFingerExtended(List<NormalizedLandmark> landmarks, int pipIndex, int tipIndex)
     {
-        NormalizedLandmark wrist = landmarks[0];
-        NormalizedLandmark pip = landmarks[pipIndex];
-        NormalizedLandmark tip = landmarks[tipIndex];
+        Vector2 wrist = new Vector2(landmarks[0].x, landmarks[0].y);
+        Vector2 pip = new Vector2(landmarks[pipIndex].x, landmarks[pipIndex].y);
+        Vector2 tip = new Vector2(landmarks[tipIndex].x, landmarks[tipIndex].y);
 
-        float wristToPip = Distance(wrist, pip);
-        float wristToTip = Distance(wrist, tip);
+        float wristToPip = Vector2.Distance(wrist, pip);
+        float wristToTip = Vector2.Distance(wrist, tip);
         return wristToTip > wristToPip * openFingerMargin;
-    }
-
-    private static float Distance(NormalizedLandmark a, NormalizedLandmark b)
-    {
-        float dx = a.x - b.x;
-        float dy = a.y - b.y;
-        return Mathf.Sqrt(dx * dx + dy * dy);
     }
 }

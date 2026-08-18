@@ -14,7 +14,11 @@ public class PlayerController : MonoBehaviour
     [Header("Dash")]
     [SerializeField] private float dashSpeed = 12f;
     [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashChainWindow = 0.2f;
+    [SerializeField] private float dashChainWindow = 0.5f;
+    [SerializeField] private float dashDamage = 20f;
+
+    [Tooltip("Downward speed applied while grounded to keep the controller stuck to descending ramps. Must stay ahead of moveSpeed/dashSpeed or isGrounded flickers false when going downhill, blocking jump.")]
+    [SerializeField] private float groundStickSpeed = 15f;
 
     private CharacterController _controller;
     private Vector3 _verticalVelocity;
@@ -26,13 +30,18 @@ public class PlayerController : MonoBehaviour
     private float _lastDashPressTime = -999f;
     private Vector3 _dashDirection;
     private Vector3 _dashVelocity;
+    private bool _airJumpAvailable;
 
     public int DashTier { get; private set; }
-    public bool HasDash => DashTier > 0;
     public Transform FaceAnchor => faceAnchor;
+    public float DashDamage => dashDamage;
+    public int DashChainCount => _dashChainCount;
+    public int DashInstanceId { get; private set; }
+    public bool IsDashing => _dashTimeRemaining > 0f;
+    public bool IsGrounded => _controller.isGrounded;
+    public bool HasDoubleJump { get; private set; }
 
     private bool IsOnLadder => _laddersTouching > 0;
-    private bool IsDashing => _dashTimeRemaining > 0f;
 
     private void Awake()
     {
@@ -44,6 +53,11 @@ public class PlayerController : MonoBehaviour
         if (tier > DashTier) DashTier = tier;
     }
 
+    public void GrantDoubleJump()
+    {
+        HasDoubleJump = true;
+    }
+
     public void SetInputLocked(bool locked)
     {
         _inputLocked = locked;
@@ -52,7 +66,27 @@ public class PlayerController : MonoBehaviour
             _verticalVelocity = Vector3.zero;
             _dashTimeRemaining = 0f;
             _dashChainCount = 0;
+            _airJumpAvailable = false;
         }
+    }
+
+    public void Teleport(Vector3 position)
+    {
+        _controller.enabled = false;
+        transform.position = position;
+        _verticalVelocity = Vector3.zero;
+        _dashTimeRemaining = 0f;
+        _dashChainCount = 0;
+        _airJumpAvailable = false;
+        _controller.enabled = true;
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (!IsDashing) return;
+
+        ShieldEnemy shieldEnemy = hit.collider.GetComponent<ShieldEnemy>();
+        if (shieldEnemy != null) shieldEnemy.RegisterDashChainHit(_dashChainCount);
     }
 
     private void Update()
@@ -97,10 +131,16 @@ public class PlayerController : MonoBehaviour
 
         if (_controller.isGrounded)
         {
-            if (_verticalVelocity.y < 0f) _verticalVelocity.y = -2f;
+            if (_verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
+            _airJumpAvailable = HasDoubleJump;
 
             if (keyboard.spaceKey.wasPressedThisFrame)
                 _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+        else if (keyboard.spaceKey.wasPressedThisFrame && _airJumpAvailable)
+        {
+            _airJumpAvailable = false;
+            _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
         _verticalVelocity.y += gravity * Time.deltaTime;
@@ -123,6 +163,7 @@ public class PlayerController : MonoBehaviour
                 _dashVelocity += _dashDirection * dashSpeed;
                 _dashTimeRemaining = dashDuration;
                 _lastDashPressTime = Time.time;
+                DashInstanceId++;
             }
 
             return;
@@ -134,6 +175,7 @@ public class PlayerController : MonoBehaviour
         _dashChainCount = 1;
         _dashTimeRemaining = dashDuration;
         _lastDashPressTime = Time.time;
+        DashInstanceId++;
 
         transform.rotation = Quaternion.LookRotation(_dashDirection, Vector3.up);
     }
@@ -142,7 +184,7 @@ public class PlayerController : MonoBehaviour
     {
         _dashTimeRemaining -= Time.deltaTime;
 
-        if (_controller.isGrounded && _verticalVelocity.y < 0f) _verticalVelocity.y = -2f;
+        if (_controller.isGrounded && _verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
         _verticalVelocity.y += gravity * Time.deltaTime;
 
         Vector3 motion = _dashVelocity;
@@ -154,7 +196,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<Ladder>() != null)
+        if (other.CompareTag("Ladder"))
         {
             _laddersTouching++;
             _dashTimeRemaining = 0f;
@@ -164,6 +206,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.GetComponent<Ladder>() != null) _laddersTouching--;
+        if (other.CompareTag("Ladder")) _laddersTouching--;
     }
 }
