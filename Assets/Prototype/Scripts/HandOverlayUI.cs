@@ -21,7 +21,6 @@ public class HandOverlayUI : MonoBehaviour
     {
         _tracker = GetComponent<HandGestureTracker>();
         BuildUI();
-        SetVisible(false);
     }
 
     public void SetVisible(bool visible)

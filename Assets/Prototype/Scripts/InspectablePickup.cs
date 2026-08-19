@@ -20,7 +20,6 @@ public class InspectablePickup : MonoBehaviour
     private PulsingOrb _pulsingOrb;
     private IPickupReward _reward;
     private HandGestureTracker _handTracker;
-    private HandOverlayUI _handOverlay;
     private Transform _cameraTransform;
 
     private Vector3 _transitionStartPos;
@@ -92,8 +91,6 @@ public class InspectablePickup : MonoBehaviour
         if (_cameraFollow != null) _cameraFollow.enabled = false;
         if (_pulsingOrb != null) _pulsingOrb.SetFloating(false);
         if (_handTracker == null) _handTracker = FindFirstObjectByType<HandGestureTracker>();
-        if (_handOverlay == null) _handOverlay = FindFirstObjectByType<HandOverlayUI>();
-        if (_handOverlay != null) _handOverlay.SetVisible(true);
 
         _player.SetInputLocked(true);
 
@@ -162,7 +159,6 @@ public class InspectablePickup : MonoBehaviour
 
         if (_cameraFollow != null) _cameraFollow.enabled = true;
         if (_pulsingOrb != null) _pulsingOrb.SetFloating(true);
-        if (_handOverlay != null) _handOverlay.SetVisible(false);
         if (_player != null) _player.SetInputLocked(false);
         _state = State.World;
     }

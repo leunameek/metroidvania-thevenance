@@ -10,12 +10,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float climbSpeed = 4f;
     [SerializeField] private float rotationSpeed = 540f;
     [SerializeField] private Transform faceAnchor;
-    //test branch
     [Header("Dash")]
     [SerializeField] private float dashSpeed = 12f;
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashChainWindow = 0.5f;
     [SerializeField] private float dashDamage = 20f;
+
+    [Header("Boss Dodge")]
+    [SerializeField] private float dodgeDistance = 4f;
+    [SerializeField] private float dodgeDuration = 0.25f;
 
     [Tooltip("Downward speed applied while grounded to keep the controller stuck to descending ramps. Must stay ahead of moveSpeed/dashSpeed or isGrounded flickers false when going downhill, blocking jump.")]
     [SerializeField] private float groundStickSpeed = 15f;
@@ -31,6 +34,9 @@ public class PlayerController : MonoBehaviour
     private Vector3 _dashDirection;
     private Vector3 _dashVelocity;
     private bool _airJumpAvailable;
+
+    private float _dodgeTimeRemaining;
+    private Vector3 _dodgeVelocity;
 
     public int DashTier { get; private set; }
     public Transform FaceAnchor => faceAnchor;
@@ -67,6 +73,7 @@ public class PlayerController : MonoBehaviour
             _dashTimeRemaining = 0f;
             _dashChainCount = 0;
             _airJumpAvailable = false;
+            _dodgeTimeRemaining = 0f;
         }
     }
 
@@ -78,7 +85,18 @@ public class PlayerController : MonoBehaviour
         _dashTimeRemaining = 0f;
         _dashChainCount = 0;
         _airJumpAvailable = false;
+        _dodgeTimeRemaining = 0f;
         _controller.enabled = true;
+    }
+
+    // Boss-fight reactive dodge: a short lateral burst, independent of the platformer dash
+    // (no chaining, no DashHurtbox) so it works while normal input is locked.
+    public void PerformDodge(int direction)
+    {
+        if (direction == 0 || _dodgeTimeRemaining > 0f) return;
+
+        _dodgeVelocity = transform.right * Mathf.Sign(direction) * (dodgeDistance / dodgeDuration);
+        _dodgeTimeRemaining = dodgeDuration;
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -91,6 +109,12 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (_dodgeTimeRemaining > 0f)
+        {
+            UpdateDodgeMotion();
+            return;
+        }
+
         if (_inputLocked) return;
 
         Keyboard keyboard = Keyboard.current;
@@ -192,6 +216,18 @@ public class PlayerController : MonoBehaviour
         _controller.Move(motion * Time.deltaTime);
 
         if (_dashTimeRemaining <= 0f) _dashChainCount = 0;
+    }
+
+    private void UpdateDodgeMotion()
+    {
+        _dodgeTimeRemaining -= Time.deltaTime;
+
+        if (_controller.isGrounded && _verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
+        _verticalVelocity.y += gravity * Time.deltaTime;
+
+        Vector3 motion = _dodgeVelocity;
+        motion.y = _verticalVelocity.y;
+        _controller.Move(motion * Time.deltaTime);
     }
 
     private void OnTriggerEnter(Collider other)
