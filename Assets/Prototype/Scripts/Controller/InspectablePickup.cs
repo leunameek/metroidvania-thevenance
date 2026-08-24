@@ -12,24 +12,13 @@ public class InspectablePickup : MonoBehaviour
     [SerializeField] private bool invertVertical;
     [SerializeField] private bool invertHorizontal;
 
-    private enum State { World, EnteringInspect, Inspecting }
-
-    private State _state = State.World;
+    private InspectionModel _inspection;
     private PlayerController _player;
     private CameraFollow _cameraFollow;
     private PulsingOrb _pulsingOrb;
     private IPickupReward _reward;
     private HandGestureTracker _handTracker;
     private Transform _cameraTransform;
-
-    private Vector3 _transitionStartPos;
-    private Quaternion _transitionStartRot;
-    private Vector3 _inspectCameraPos;
-    private Quaternion _inspectCameraRot;
-    private float _transitionTime;
-
-    private float _yaw;
-    private float _pitch;
 
     private bool _playerInRange;
     private bool _collected;
@@ -38,6 +27,7 @@ public class InspectablePickup : MonoBehaviour
     {
         _pulsingOrb = GetComponent<PulsingOrb>();
         _reward = GetComponent<IPickupReward>();
+        _inspection = new InspectionModel(transitionDuration, rotationSensitivity, handRotationSensitivity, invertVertical, invertHorizontal);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -62,18 +52,18 @@ public class InspectablePickup : MonoBehaviour
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        switch (_state)
+        switch (_inspection.CurrentState)
         {
-            case State.World:
+            case InspectionModel.State.World:
                 if (_playerInRange && keyboard.eKey.wasPressedThisFrame)
                     BeginInspect();
                 break;
 
-            case State.EnteringInspect:
+            case InspectionModel.State.EnteringInspect:
                 BlendIntoInspect();
                 break;
 
-            case State.Inspecting:
+            case InspectionModel.State.Inspecting:
                 UpdateInspectRotation();
                 if (keyboard.eKey.wasPressedThisFrame) Claim();
                 else if (keyboard.escapeKey.wasPressedThisFrame) EndInspect();
@@ -94,51 +84,34 @@ public class InspectablePickup : MonoBehaviour
 
         _player.SetInputLocked(true);
 
-        Vector3 eulerAngles = transform.eulerAngles;
-        _yaw = eulerAngles.y;
-        _pitch = eulerAngles.x;
-
         Transform anchor = _player.FaceAnchor;
-        _inspectCameraPos = anchor != null ? anchor.position : transform.position + Vector3.back * inspectDistance;
-        _inspectCameraRot = Quaternion.LookRotation(transform.position - _inspectCameraPos);
+        Vector3 inspectCameraPos = anchor != null ? anchor.position : transform.position + Vector3.back * inspectDistance;
+        Quaternion inspectCameraRot = Quaternion.LookRotation(transform.position - inspectCameraPos);
 
-        _transitionStartPos = _cameraTransform.position;
-        _transitionStartRot = _cameraTransform.rotation;
-        _transitionTime = 0f;
-        _state = State.EnteringInspect;
+        _inspection.BeginInspect(transform.eulerAngles, _cameraTransform.position, _cameraTransform.rotation, inspectCameraPos, inspectCameraRot);
     }
 
     private void BlendIntoInspect()
     {
-        _transitionTime += Time.deltaTime;
-        float t = transitionDuration <= 0f ? 1f : Mathf.Clamp01(_transitionTime / transitionDuration);
-
-        _cameraTransform.position = Vector3.Lerp(_transitionStartPos, _inspectCameraPos, t);
-        _cameraTransform.rotation = Quaternion.Slerp(_transitionStartRot, _inspectCameraRot, t);
-
-        if (t >= 1f) _state = State.Inspecting;
+        (Vector3 position, Quaternion rotation) = _inspection.TickBlend(Time.deltaTime);
+        _cameraTransform.position = position;
+        _cameraTransform.rotation = rotation;
     }
 
     private void UpdateInspectRotation()
     {
+        Quaternion rotation;
         if (_handTracker != null && _handTracker.IsConnected)
         {
-            float handDeltaY = _handTracker.ConsumeRightHandDeltaY();
-            float pitchDelta = handDeltaY * handRotationSensitivity * (invertVertical ? -1f : 1f);
-            _pitch += pitchDelta;
-            
-            float handDeltaX = _handTracker.ConsumeLeftHandDeltaX();
-            float yawDelta = handDeltaX * handRotationSensitivity * (invertHorizontal ? -1f : 1f);
-            _yaw += yawDelta;
+            rotation = _inspection.ApplyHandRotation(_handTracker.ConsumeRightHandDeltaY(), _handTracker.ConsumeLeftHandDeltaX());
         }
         else
         {
             Vector2 delta = Mouse.current != null ? Mouse.current.delta.ReadValue() : Vector2.zero;
-            _yaw += delta.x * rotationSensitivity;
-            _pitch -= delta.y * rotationSensitivity;
+            rotation = _inspection.ApplyMouseRotation(delta);
         }
 
-        transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
+        transform.rotation = rotation;
     }
 
     private void Claim()
@@ -153,13 +126,13 @@ public class InspectablePickup : MonoBehaviour
     {
         if (_cameraTransform != null)
         {
-            _cameraTransform.position = _transitionStartPos;
-            _cameraTransform.rotation = _transitionStartRot;
+            _cameraTransform.position = _inspection.TransitionStartPosition;
+            _cameraTransform.rotation = _inspection.TransitionStartRotation;
         }
 
         if (_cameraFollow != null) _cameraFollow.enabled = true;
         if (_pulsingOrb != null) _pulsingOrb.SetFloating(true);
         if (_player != null) _player.SetInputLocked(false);
-        _state = State.World;
+        _inspection.EndInspect();
     }
 }

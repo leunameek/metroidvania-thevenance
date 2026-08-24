@@ -24,45 +24,31 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundStickSpeed = 15f;
 
     private CharacterController _controller;
+    private PlayerAbilityModel _abilities;
     private Vector3 _verticalVelocity;
     private int _laddersTouching;
     private bool _inputLocked;
 
-    private int _dashChainCount;
-    private float _dashTimeRemaining;
-    private float _lastDashPressTime = -999f;
-    private Vector3 _dashDirection;
-    private Vector3 _dashVelocity;
-    private bool _airJumpAvailable;
-
-    private float _dodgeTimeRemaining;
-    private Vector3 _dodgeVelocity;
-
-    public int DashTier { get; private set; }
     public Transform FaceAnchor => faceAnchor;
     public float DashDamage => dashDamage;
-    public int DashChainCount => _dashChainCount;
-    public int DashInstanceId { get; private set; }
-    public bool IsDashing => _dashTimeRemaining > 0f;
+    public int DashTier => _abilities.DashTier;
+    public int DashChainCount => _abilities.DashChainCount;
+    public int DashInstanceId => _abilities.DashInstanceId;
+    public bool IsDashing => _abilities.IsDashing;
     public bool IsGrounded => _controller.isGrounded;
-    public bool HasDoubleJump { get; private set; }
+    public bool HasDoubleJump => _abilities.HasDoubleJump;
 
     private bool IsOnLadder => _laddersTouching > 0;
 
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
+        _abilities = new PlayerAbilityModel(dashSpeed, dashDuration, dashChainWindow, dodgeDistance, dodgeDuration);
     }
 
-    public void GrantDash(int tier)
-    {
-        if (tier > DashTier) DashTier = tier;
-    }
+    public void GrantDash(int tier) => _abilities.GrantDash(tier);
 
-    public void GrantDoubleJump()
-    {
-        HasDoubleJump = true;
-    }
+    public void GrantDoubleJump() => _abilities.GrantDoubleJump();
 
     public void SetInputLocked(bool locked)
     {
@@ -70,10 +56,7 @@ public class PlayerController : MonoBehaviour
         if (locked)
         {
             _verticalVelocity = Vector3.zero;
-            _dashTimeRemaining = 0f;
-            _dashChainCount = 0;
-            _airJumpAvailable = false;
-            _dodgeTimeRemaining = 0f;
+            _abilities.ResetTransient();
         }
     }
 
@@ -82,10 +65,7 @@ public class PlayerController : MonoBehaviour
         _controller.enabled = false;
         transform.position = position;
         _verticalVelocity = Vector3.zero;
-        _dashTimeRemaining = 0f;
-        _dashChainCount = 0;
-        _airJumpAvailable = false;
-        _dodgeTimeRemaining = 0f;
+        _abilities.ResetTransient();
         _controller.enabled = true;
     }
 
@@ -93,10 +73,7 @@ public class PlayerController : MonoBehaviour
     // (no chaining, no DashHurtbox) so it works while normal input is locked.
     public void PerformDodge(int direction)
     {
-        if (direction == 0 || _dodgeTimeRemaining > 0f) return;
-
-        _dodgeVelocity = transform.right * Mathf.Sign(direction) * (dodgeDistance / dodgeDuration);
-        _dodgeTimeRemaining = dodgeDuration;
+        _abilities.TryStartDodge(direction, transform.right);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -104,13 +81,14 @@ public class PlayerController : MonoBehaviour
         if (!IsDashing) return;
 
         ShieldEnemy shieldEnemy = hit.collider.GetComponent<ShieldEnemy>();
-        if (shieldEnemy != null) shieldEnemy.RegisterDashChainHit(_dashChainCount);
+        if (shieldEnemy != null) shieldEnemy.RegisterDashChainHit(DashChainCount);
     }
 
     private void Update()
     {
-        if (_dodgeTimeRemaining > 0f)
+        if (_abilities.IsDodging)
         {
+            _abilities.TickDodge(Time.deltaTime);
             UpdateDodgeMotion();
             return;
         }
@@ -156,14 +134,13 @@ public class PlayerController : MonoBehaviour
         if (_controller.isGrounded)
         {
             if (_verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
-            _airJumpAvailable = HasDoubleJump;
+            _abilities.OnGrounded();
 
             if (keyboard.spaceKey.wasPressedThisFrame)
                 _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
-        else if (keyboard.spaceKey.wasPressedThisFrame && _airJumpAvailable)
+        else if (keyboard.spaceKey.wasPressedThisFrame && _abilities.TryConsumeAirJump())
         {
-            _airJumpAvailable = false;
             _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
@@ -175,57 +152,31 @@ public class PlayerController : MonoBehaviour
 
     private void HandleDashPress(float x, float z)
     {
-        if (DashTier <= 0 || IsOnLadder) return;
-
-        bool withinChainWindow = Time.time - _lastDashPressTime <= dashChainWindow;
-
-        if (IsDashing)
-        {
-            if (withinChainWindow && _dashChainCount < DashTier)
-            {
-                _dashChainCount++;
-                _dashVelocity += _dashDirection * dashSpeed;
-                _dashTimeRemaining = dashDuration;
-                _lastDashPressTime = Time.time;
-                DashInstanceId++;
-            }
-
-            return;
-        }
-
         Vector3 inputDirection = new Vector3(x, 0f, z);
-        _dashDirection = inputDirection.sqrMagnitude > 0.0001f ? inputDirection.normalized : transform.forward;
-        _dashVelocity = _dashDirection * dashSpeed;
-        _dashChainCount = 1;
-        _dashTimeRemaining = dashDuration;
-        _lastDashPressTime = Time.time;
-        DashInstanceId++;
+        DashPressResult result = _abilities.TryPressDash(inputDirection, transform.forward, IsOnLadder, Time.time);
 
-        transform.rotation = Quaternion.LookRotation(_dashDirection, Vector3.up);
+        if (result == DashPressResult.Started)
+            transform.rotation = Quaternion.LookRotation(_abilities.LastDashDirection, Vector3.up);
     }
 
     private void UpdateDashMotion()
     {
-        _dashTimeRemaining -= Time.deltaTime;
+        _abilities.TickDash(Time.deltaTime);
 
         if (_controller.isGrounded && _verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
         _verticalVelocity.y += gravity * Time.deltaTime;
 
-        Vector3 motion = _dashVelocity;
+        Vector3 motion = _abilities.DashVelocity;
         motion.y = _verticalVelocity.y;
         _controller.Move(motion * Time.deltaTime);
-
-        if (_dashTimeRemaining <= 0f) _dashChainCount = 0;
     }
 
     private void UpdateDodgeMotion()
     {
-        _dodgeTimeRemaining -= Time.deltaTime;
-
         if (_controller.isGrounded && _verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
         _verticalVelocity.y += gravity * Time.deltaTime;
 
-        Vector3 motion = _dodgeVelocity;
+        Vector3 motion = _abilities.DodgeVelocity;
         motion.y = _verticalVelocity.y;
         _controller.Move(motion * Time.deltaTime);
     }
@@ -235,8 +186,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Ladder"))
         {
             _laddersTouching++;
-            _dashTimeRemaining = 0f;
-            _dashChainCount = 0;
+            _abilities.CancelDash();
         }
     }
 

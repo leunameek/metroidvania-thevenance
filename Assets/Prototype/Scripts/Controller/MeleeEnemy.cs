@@ -10,11 +10,12 @@ public class MeleeEnemy : MonoBehaviour
     [SerializeField] private float attackCooldown = 1.2f;
 
     private PlayerController _player;
-    private float _cooldownRemaining;
+    private MeleeModel _melee;
 
     private void Awake()
     {
         _player = FindFirstObjectByType<PlayerController>();
+        _melee = new MeleeModel(chaseRange, attackRange, attackCooldown);
     }
 
     private void Update()
@@ -24,7 +25,7 @@ public class MeleeEnemy : MonoBehaviour
         Vector3 toPlayer = _player.transform.position - transform.position;
         toPlayer.y = 0f;
         float distance = toPlayer.magnitude;
-        if (distance > chaseRange) return;
+        if (!_melee.IsPlayerInChaseRange(distance)) return;
 
         if (toPlayer.sqrMagnitude > 0.0001f)
         {
@@ -32,19 +33,18 @@ public class MeleeEnemy : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
         }
 
-        _cooldownRemaining -= Time.deltaTime;
+        _melee.TickCooldown(Time.deltaTime);
 
-        if (distance > attackRange)
+        if (!_melee.IsPlayerInAttackRange(distance))
         {
             transform.position += toPlayer.normalized * moveSpeed * Time.deltaTime;
             return;
         }
 
-        if (_cooldownRemaining <= 0f)
+        if (_melee.TryConsumeAttack())
         {
             Health health = _player.GetComponent<Health>();
             if (health != null) health.TakeDamage(attackDamage);
-            _cooldownRemaining = attackCooldown;
         }
     }
 }

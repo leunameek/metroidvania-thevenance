@@ -8,7 +8,8 @@ of truth for everything that changed or was added on top of it. Read both — th
 repeat what's still correct there.
 
 Scene: `Assets/Prototype/Scenes/Movement.unity`
-Scripts: `Assets/Prototype/Scripts/`
+Scripts: `Assets/Prototype/Scripts/{Model,View,Controller}/` — split into an MVC layout after
+this doc was written; see "Architecture (MVC)" in `Technical-Summary.md` for the map.
 Prefabs: `Assets/Prototype/Prefabs/`
 Materials: `Assets/Prototype/Materials/`
 

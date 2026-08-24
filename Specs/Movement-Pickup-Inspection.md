@@ -7,7 +7,10 @@ hand-gesture control of the inspection camera, and the health/combat system (das
 context quickly — check the scene/scripts against this if anything drifted.
 
 Scene: `Assets/Prototype/Scenes/Movement.unity`
-Scripts: `Assets/Prototype/Scripts/`
+Scripts: `Assets/Prototype/Scripts/{Model,View,Controller}/` — the flat script folder was split
+into an MVC layout after this doc was written; a script named below now lives in whichever of
+those three subfolders matches its role (same filename/GUID, just moved, plus a few were split
+into a `*Model.cs` counterpart). See "Architecture (MVC)" in `Technical-Summary.md` for the map.
 Prefabs: `Assets/Prototype/Prefabs/`
 Materials: `Assets/Prototype/Materials/`
 Setup/run instructions for teammates (Spanish): `README.md` at repo root.

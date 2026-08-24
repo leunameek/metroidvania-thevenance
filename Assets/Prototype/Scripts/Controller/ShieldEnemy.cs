@@ -4,8 +4,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Health))]
 public class ShieldEnemy : MonoBehaviour
 {
-    private enum ChargeState { Idle, Windup, Charging, Recovering }
-
     [SerializeField] private DashHurtbox dashHurtbox;
     [SerializeField] private GameObject shieldVisual;
     [SerializeField] private Collider shieldCollider;
@@ -30,17 +28,11 @@ public class ShieldEnemy : MonoBehaviour
     [SerializeField] private Vector2 alertSize = new Vector2(28f, 90f);
     [SerializeField] private Vector2 alertMargin = new Vector2(0f, 40f);
 
-    public bool IsShielded { get; private set; } = true;
+    public bool IsShielded => _shield.IsShielded;
 
     private PlayerController _player;
     private Health _health;
-    private ChargeState _state;
-    private float _stateTimeRemaining;
-    private Vector3 _chargeDirection;
-
-    private Vector3 _spawnPosition;
-    private Vector3 _patrolTarget;
-    private float _patrolPauseRemaining;
+    private ShieldEnemyModel _shield;
 
     private static GameObject _alertGo;
 
@@ -48,8 +40,10 @@ public class ShieldEnemy : MonoBehaviour
     {
         if (dashHurtbox != null) dashHurtbox.enabled = false;
         _player = FindFirstObjectByType<PlayerController>();
-        _spawnPosition = transform.position;
-        _patrolTarget = _spawnPosition;
+
+        _shield = new ShieldEnemyModel(transform.position, detectionRange, minChargeRange, chargeSpeed,
+            windupDuration, chargeDuration, cooldown, hitRadius, chargeDamage,
+            patrolRadius, patrolSpeed, patrolPauseDuration);
 
         _health = GetComponent<Health>();
         _health.Died += HandleDied;
@@ -102,13 +96,8 @@ public class ShieldEnemy : MonoBehaviour
 
     public void RegisterDashChainHit(int chainCount)
     {
-        if (!IsShielded || chainCount < 3) return;
-        BreakShield();
-    }
+        if (!_shield.RegisterDashChainHit(chainCount)) return;
 
-    private void BreakShield()
-    {
-        IsShielded = false;
         if (shieldVisual != null) shieldVisual.SetActive(false);
         if (shieldCollider != null) shieldCollider.isTrigger = true;
         if (dashHurtbox != null) dashHurtbox.enabled = true;
@@ -118,101 +107,65 @@ public class ShieldEnemy : MonoBehaviour
     {
         if (_player == null) return;
 
-        switch (_state)
+        switch (_shield.State)
         {
-            case ChargeState.Idle:
-                if (!TryStartWindup()) UpdatePatrol();
+            case ShieldEnemyModel.ChargeState.Idle:
+                UpdateIdle();
                 break;
-            case ChargeState.Windup:
+            case ShieldEnemyModel.ChargeState.Windup:
                 UpdateWindup();
                 break;
-            case ChargeState.Charging:
+            case ShieldEnemyModel.ChargeState.Charging:
                 UpdateCharge();
                 break;
-            case ChargeState.Recovering:
-                _stateTimeRemaining -= Time.deltaTime;
-                if (_stateTimeRemaining <= 0f) _state = ChargeState.Idle;
+            case ShieldEnemyModel.ChargeState.Recovering:
+                _shield.TickRecovery(Time.deltaTime);
                 break;
         }
     }
 
-    private bool TryStartWindup()
+    private void UpdateIdle()
     {
         Vector3 toPlayer = _player.transform.position - transform.position;
         toPlayer.y = 0f;
-        float distance = toPlayer.magnitude;
-        if (distance > detectionRange || distance < minChargeRange) return false;
 
-        _chargeDirection = toPlayer.normalized;
-        _state = ChargeState.Windup;
-        _stateTimeRemaining = windupDuration;
-        if (_alertGo != null) _alertGo.SetActive(true);
-        return true;
-    }
-
-    private void UpdatePatrol()
-    {
-        Vector3 toTarget = _patrolTarget - transform.position;
-        toTarget.y = 0f;
-
-        if (toTarget.magnitude < 0.3f)
+        if (_shield.TryStartWindup(toPlayer))
         {
-            _patrolPauseRemaining -= Time.deltaTime;
-            if (_patrolPauseRemaining <= 0f) PickNewPatrolTarget();
+            if (_alertGo != null) _alertGo.SetActive(true);
             return;
         }
 
-        Vector3 direction = toTarget.normalized;
-        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-
-        Vector3 delta = direction * patrolSpeed * Time.deltaTime;
-        delta.y = 0f;
-        transform.position += delta;
-    }
-
-    private void PickNewPatrolTarget()
-    {
-        Vector2 offset = Random.insideUnitCircle * patrolRadius;
-        _patrolTarget = _spawnPosition + new Vector3(offset.x, 0f, offset.y);
-        _patrolPauseRemaining = patrolPauseDuration;
+        Vector3 moveDelta = _shield.TickPatrol(transform.position, Time.deltaTime);
+        if (moveDelta != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDelta.normalized, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        }
+        transform.position += moveDelta;
     }
 
     private void UpdateWindup()
     {
-        Quaternion targetRotation = Quaternion.LookRotation(_chargeDirection, Vector3.up);
+        Quaternion targetRotation = Quaternion.LookRotation(_shield.ChargeDirection, Vector3.up);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
 
-        _stateTimeRemaining -= Time.deltaTime;
-        if (_stateTimeRemaining <= 0f)
-        {
-            _state = ChargeState.Charging;
-            _stateTimeRemaining = chargeDuration;
-            if (_alertGo != null) _alertGo.SetActive(false);
-        }
+        if (_shield.TickWindup(Time.deltaTime) && _alertGo != null) _alertGo.SetActive(false);
     }
 
     private void UpdateCharge()
     {
-        transform.position += _chargeDirection * chargeSpeed * Time.deltaTime;
+        transform.position += _shield.GetChargeMoveDelta(Time.deltaTime);
 
         Vector3 toPlayer = _player.transform.position - transform.position;
         toPlayer.y = 0f;
-        if (toPlayer.magnitude <= hitRadius)
+
+        if (_shield.CheckChargeHit(toPlayer))
         {
             Health playerHealth = _player.GetComponent<Health>();
-            if (playerHealth != null) playerHealth.TakeDamage(chargeDamage);
-            EndCharge();
+            if (playerHealth != null) playerHealth.TakeDamage(_shield.ChargeDamage);
             return;
         }
 
-        _stateTimeRemaining -= Time.deltaTime;
-        if (_stateTimeRemaining <= 0f) EndCharge();
-    }
-
-    private void EndCharge()
-    {
-        _state = ChargeState.Recovering;
-        _stateTimeRemaining = cooldown;
+        _shield.TickChargeExpiry(Time.deltaTime);
     }
 }

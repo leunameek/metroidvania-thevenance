@@ -9,11 +9,12 @@ public class ArcherEnemy : MonoBehaviour
     [SerializeField] private GameObject arrowPrefab;
 
     private PlayerController _player;
-    private float _cooldownRemaining;
+    private ArcherModel _archer;
 
     private void Awake()
     {
         _player = FindFirstObjectByType<PlayerController>();
+        _archer = new ArcherModel(detectionRange, fireCooldown);
     }
 
     private void Update()
@@ -23,7 +24,7 @@ public class ArcherEnemy : MonoBehaviour
         Vector3 toPlayer = _player.transform.position - transform.position;
         toPlayer.y = 0f;
         float distance = toPlayer.magnitude;
-        if (distance > detectionRange) return;
+        if (!_archer.IsPlayerInRange(distance)) return;
 
         if (toPlayer.sqrMagnitude > 0.0001f)
         {
@@ -31,12 +32,7 @@ public class ArcherEnemy : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
         }
 
-        _cooldownRemaining -= Time.deltaTime;
-        if (_cooldownRemaining <= 0f)
-        {
-            Fire();
-            _cooldownRemaining = fireCooldown;
-        }
+        if (_archer.TickShouldFire(Time.deltaTime)) Fire();
     }
 
     private void Fire()
