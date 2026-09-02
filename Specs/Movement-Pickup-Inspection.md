@@ -207,16 +207,15 @@ which required standing almost inside the tiny orb — bumped up so the prompt z
 
 `UpdateInspectRotation()` checks `_handTracker != null && _handTracker.IsConnected` (a result
 arrived within the last second) — if so, uses hand deltas; otherwise falls back to
-`Mouse.current.delta`. Mapping (mirrors the mouse-drag convention: hand-down ≡ mouse-down,
-hand-right ≡ mouse-right):
+`Mouse.current.delta`. Mapping:
 
 - Right hand (open only) vertical movement → pitch, via `ConsumeRightHandDeltaY()`.
-- Left hand (open only) horizontal movement → yaw, via `ConsumeLeftHandDeltaX()`.
+- Left hand (open only) horizontal movement → yaw in the opposite direction of the tracked
+  movement, via `ConsumeLeftHandDeltaX()` with `invertHorizontal` enabled.
 - `handRotationSensitivity` (400, much larger than mouse's `rotationSensitivity` 0.3 since hand
   deltas are normalized `[0,1]` image coordinates, not raw pixels).
-- `invertVertical`/`invertHorizontal` checkboxes — **added as a safety net because the actual
-  sign/mirroring was never verified live in this session** (no webcam access while building
-  it). If gestures rotate the object backwards, flip these before touching code.
+- `invertVertical`/`invertHorizontal` checkboxes remain available per pickup. Horizontal is
+  enabled by default after live feedback; vertical remains disabled.
 
 ## Hand tracking — MediaPipe integration
 

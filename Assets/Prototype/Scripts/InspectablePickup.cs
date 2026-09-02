@@ -10,7 +10,7 @@ public class InspectablePickup : MonoBehaviour
     [Header("Hand tracking (optional - falls back to mouse if not connected)")]
     [SerializeField] private float handRotationSensitivity = 400f;
     [SerializeField] private bool invertVertical;
-    [SerializeField] private bool invertHorizontal;
+    [SerializeField] private bool invertHorizontal = true;
 
     private enum State { World, EnteringInspect, Inspecting }
 

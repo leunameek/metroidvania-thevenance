@@ -5,7 +5,7 @@ Prototipo de metroidvania en 3D. Este documento explica como instalar y correr e
 ## Requisitos
 
 - Unity 6000.3.21f1 (instalar esta version exacta desde Unity Hub para evitar problemas de compatibilidad).
-- Git.
+- Git y Git LFS.
 - Camara web (necesaria solo para la funcionalidad de tracking de manos, ver seccion correspondiente).
 
 ## Clonar el repositorio
@@ -18,15 +18,16 @@ Abrir la carpeta del proyecto desde Unity Hub, seleccionando la version 6000.3.2
 
 ## Instalar el plugin de MediaPipe
 
-El proyecto usa `MediaPipeUnityPlugin` (de homuler) para el tracking de manos. Este paquete no se instala solo al clonar el repositorio porque se agrego desde un archivo local (tarball), y esa ruta es especifica de la maquina donde se instalo originalmente. Cada persona del equipo tiene que instalarlo una vez en su propia maquina siguiendo estos pasos:
+El proyecto usa `MediaPipeUnityPlugin` 0.16.3 (de homuler) para el tracking de manos. El tarball oficial esta incluido en `LocalPackages` y `Packages/manifest.json` lo referencia mediante una ruta relativa, por lo que no hay que descargarlo ni seleccionarlo manualmente en Package Manager.
 
-1. Descargar el archivo `com.github.homuler.mediapipe-0.16.3.tgz` desde la pagina de releases del proyecto:
-   `https://github.com/homuler/MediaPipeUnityPlugin/releases/tag/v0.16.3`
-2. En Unity: `Window > Package Manager` -> boton `+` (arriba a la izquierda) -> `Add package from tarball...` -> seleccionar el archivo descargado.
-3. Unity va a mostrar una advertencia indicando que no puede verificar la firma del paquete. Esto es normal para paquetes que no vienen del Unity Registry, no bloquea nada, se puede continuar sin problema.
-4. En Package Manager, con el paquete seleccionado, abrir la pestana `Samples` e importar `Official Solutions`.
+Como el tarball es un binario grande, esta versionado con Git LFS. Antes de abrir el proyecto por primera vez, ejecutar:
 
-Despues de este paso, `Packages/manifest.json` va a mostrar un cambio local en tu maquina (la ruta al tarball va a apuntar a donde vos lo descargaste). Eso es esperado, no hace falta commitear ese cambio ni preocuparse por el.
+```
+git lfs install
+git lfs pull
+```
+
+Los samples `Official Solutions` necesarios para el tracking tambien estan incluidos en el repositorio. Unity debe resolver el paquete automaticamente al abrir el proyecto.
 
 ## Escenas del proyecto
 
@@ -47,7 +48,7 @@ Ambas escenas ya estan agregadas en `Build Settings`, es un requisito de Unity p
 
 ## Sobre el tracking de manos
 
-Es una funcionalidad opcional: si no hay camara disponible o el plugin no esta instalado, la inspeccion de objetos sigue funcionando igual con mouse. No es necesario tener la camara conectada para poder jugar.
+Es una funcionalidad opcional durante la ejecucion: si no hay camara disponible o el tracking no puede inicializarse, la inspeccion de objetos sigue funcionando con mouse. El paquete de MediaPipe si es necesario para compilar el proyecto, pero no es necesario tener una camara conectada para jugar.
 
 ## Funciona en Mac
 

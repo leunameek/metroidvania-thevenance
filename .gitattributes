@@ -139,6 +139,7 @@ Packages/packages-lock.json linguist-generated
 *.7z                    lfs
 *.bz2                   lfs
 *.gz                    lfs
+*.tgz                   lfs
 *.rar                   lfs
 *.tar                   lfs
 *.zip                   lfs
