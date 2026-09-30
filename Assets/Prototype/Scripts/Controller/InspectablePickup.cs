@@ -10,7 +10,7 @@ public class InspectablePickup : MonoBehaviour
     [Header("Hand tracking (optional - falls back to mouse if not connected)")]
     [SerializeField] private float handRotationSensitivity = 400f;
     [SerializeField] private bool invertVertical;
-    [SerializeField] private bool invertHorizontal;
+    [SerializeField] private bool invertHorizontal = true;
 
     private InspectionModel _inspection;
     private PlayerController _player;
@@ -22,6 +22,7 @@ public class InspectablePickup : MonoBehaviour
 
     private bool _playerInRange;
     private bool _collected;
+    private bool _cameraFollowWasEnabled;
 
     private void Awake()
     {
@@ -73,12 +74,17 @@ public class InspectablePickup : MonoBehaviour
 
     private void BeginInspect()
     {
+        if (_collected || _player == null || _player.InputLocked || _inspection.CurrentState != InspectionModel.State.World) return;
         Camera cam = Camera.main;
         if (cam == null) return;
 
         _cameraTransform = cam.transform;
         _cameraFollow = cam.GetComponent<CameraFollow>();
-        if (_cameraFollow != null) _cameraFollow.enabled = false;
+        if (_cameraFollow != null)
+        {
+            _cameraFollowWasEnabled = _cameraFollow.enabled;
+            _cameraFollow.enabled = false;
+        }
         if (_pulsingOrb != null) _pulsingOrb.SetFloating(false);
         if (_handTracker == null) _handTracker = FindFirstObjectByType<HandGestureTracker>();
 
@@ -116,6 +122,7 @@ public class InspectablePickup : MonoBehaviour
 
     private void Claim()
     {
+        if (_collected || _inspection.CurrentState != InspectionModel.State.Inspecting) return;
         _collected = true;
         if (_reward != null) _reward.Grant(_player);
         EndInspect();
@@ -124,15 +131,22 @@ public class InspectablePickup : MonoBehaviour
 
     private void EndInspect()
     {
+        if (_inspection == null || _inspection.CurrentState == InspectionModel.State.World) return;
         if (_cameraTransform != null)
         {
             _cameraTransform.position = _inspection.TransitionStartPosition;
             _cameraTransform.rotation = _inspection.TransitionStartRotation;
         }
 
-        if (_cameraFollow != null) _cameraFollow.enabled = true;
+        if (_cameraFollow != null) _cameraFollow.enabled = _cameraFollowWasEnabled;
         if (_pulsingOrb != null) _pulsingOrb.SetFloating(true);
         if (_player != null) _player.SetInputLocked(false);
         _inspection.EndInspect();
+    }
+
+    private void OnDisable()
+    {
+        EndInspect();
+        _playerInRange = false;
     }
 }

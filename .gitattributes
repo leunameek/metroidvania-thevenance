@@ -9,7 +9,7 @@
 # Define macros (only works in top-level gitattributes files)
 [attr]lfs               filter=lfs diff=lfs merge=lfs -text
 [attr]unity-json        eol=lf linguist-language=json
-[attr]unity-yaml        merge=unityyamlmerge eol=lf linguist-language=yaml
+[attr]unity-yaml        merge=unityyamlmerge eol=lf linguist-language=yaml whitespace=-blank-at-eol
 
 # Optionally collapse Unity YAML files on GitHub diffs
 # [attr]unity-yaml        merge=unityyamlmerge text linguist-language=yaml linguist-generated
@@ -75,6 +75,7 @@ Packages/packages-lock.json linguist-generated
 *.unitypackage          lfs
 
 # 3D models
+*.glb                   lfs
 *.3dm                   lfs
 *.3ds                   lfs
 *.blend                 lfs
@@ -120,6 +121,9 @@ Packages/packages-lock.json linguist-generated
 *.wmv                   lfs
 
 # Images
+*.[pP][nN][gG]          lfs
+*.[jJ][pP][gG]          lfs
+*.[jJ][pP][eE][gG]      lfs
 *.bmp                   lfs
 *.exr                   lfs
 *.gif                   lfs
@@ -136,6 +140,7 @@ Packages/packages-lock.json linguist-generated
 *.webp                  lfs
 
 # Compressed Archive
+*.tgz                   lfs
 *.7z                    lfs
 *.bz2                   lfs
 *.gz                    lfs
@@ -169,3 +174,8 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+Assets/StreamingAssets/hand_landmarker.bytes lfs
+# Preserve generated third-party formatting and Markdown hard line breaks.
+"Assets/TextMesh Pro/**" linguist-vendored whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+Assets/Nemequene/UI/Fonts/OFL-Cinzel.txt whitespace=-blank-at-eol
+*.md text whitespace=-blank-at-eol

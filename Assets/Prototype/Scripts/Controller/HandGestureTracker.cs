@@ -12,6 +12,8 @@ public class HandGestureTracker : MonoBehaviour
 
     public bool RightHandPresent => _rightHand.IsPresent;
     public bool LeftHandPresent => _leftHand.IsPresent;
+    public bool RightHandOpen => _rightHand.IsOpen;
+    public bool LeftHandOpen => _leftHand.IsOpen;
     public IReadOnlyList<Vector2> RightHandPoints => _rightHand.Points;
     public IReadOnlyList<Vector2> LeftHandPoints => _leftHand.Points;
 
@@ -42,6 +44,8 @@ public class HandGestureTracker : MonoBehaviour
     {
         if (runner != null && _subscribed) runner.ResultUpdated -= OnResultUpdated;
         _subscribed = false;
+        _rightHand.MarkAbsent();
+        _leftHand.MarkAbsent();
     }
 
     private void TryConnectToRunner()
@@ -80,6 +84,11 @@ public class HandGestureTracker : MonoBehaviour
         }
 
         if (hasNew) _lastResultRealtime = Time.realtimeSinceStartup;
+        else if (!IsConnected)
+        {
+            _rightHand.MarkAbsent();
+            _leftHand.MarkAbsent();
+        }
     }
 
     public float ConsumeRightHandDeltaY() => _rightHand.ConsumeDeltaY();

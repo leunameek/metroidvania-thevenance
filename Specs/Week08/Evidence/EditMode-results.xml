@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="19" result="Passed" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.0433264">
+  <test-suite type="TestSuite" id="1000" name="metroidvania-thevenance" fullname="metroidvania-thevenance" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.043326" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1025" name="Prototype.Tests.EditMode.dll" fullname="D:/Universidad/Juegos/metroidvania-thevenance/Logs/Week08/ValidationProject/Library/ScriptAssemblies/Prototype.Tests.EditMode.dll" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.036398" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="49256" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1001" name="BossFightModelTests" fullname="BossFightModelTests" classname="BossFightModelTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.025628" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1003" name="MissedReact_FiresOnceReactWindowExpiresWithNoDodge" fullname="BossFightModelTests.MissedReact_FiresOnceReactWindowExpiresWithNoDodge" methodname="MissedReact_FiresOnceReactWindowExpiresWithNoDodge" classname="BossFightModelTests" runstate="Runnable" seed="116805823" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.011033" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1004" name="RequestDodge_DuringReactWindow_ResolvesImmediatelyWithoutMissing" fullname="BossFightModelTests.RequestDodge_DuringReactWindow_ResolvesImmediatelyWithoutMissing" methodname="RequestDodge_DuringReactWindow_ResolvesImmediatelyWithoutMissing" classname="BossFightModelTests" runstate="Runnable" seed="834826158" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000593" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1005" name="RequestDodge_OutsidePlayerReact_IsIgnored" fullname="BossFightModelTests.RequestDodge_OutsidePlayerReact_IsIgnored" methodname="RequestDodge_OutsidePlayerReact_IsIgnored" classname="BossFightModelTests" runstate="Runnable" seed="331747758" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000396" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1002" name="StartFight_WhileAlreadyActive_IsRejected" fullname="BossFightModelTests.StartFight_WhileAlreadyActive_IsRejected" methodname="StartFight_WhileAlreadyActive_IsRejected" classname="BossFightModelTests" runstate="Runnable" seed="1520188574" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000286" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1006" name="ExplorationObjectiveModelTests" fullname="ExplorationObjectiveModelTests" classname="ExplorationObjectiveModelTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.001485" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1008" name="MissingConfigurationIsNotReportedAsCompletion" fullname="ExplorationObjectiveModelTests.MissingConfigurationIsNotReportedAsCompletion" methodname="MissingConfigurationIsNotReportedAsCompletion" classname="ExplorationObjectiveModelTests" runstate="Runnable" seed="1864567863" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000428" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1007" name="RevisitingObjectDoesNotUnlockCompletionBeforeAllRequiredObjects" fullname="ExplorationObjectiveModelTests.RevisitingObjectDoesNotUnlockCompletionBeforeAllRequiredObjects" methodname="RevisitingObjectDoesNotUnlockCompletionBeforeAllRequiredObjects" classname="ExplorationObjectiveModelTests" runstate="Runnable" seed="12518780" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000277" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1009" name="HandGestureModelTests" fullname="HandGestureModelTests" classname="HandGestureModelTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.003719" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1010" name="ClosedHand_FreezesDeltaAccumulation" fullname="HandGestureModelTests.ClosedHand_FreezesDeltaAccumulation" methodname="ClosedHand_FreezesDeltaAccumulation" classname="HandGestureModelTests" runstate="Runnable" seed="1864680077" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.002429" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1012" name="HandDisappearing_ResetsReferenceSoReappearingDoesNotJump" fullname="HandGestureModelTests.HandDisappearing_ResetsReferenceSoReappearingDoesNotJump" methodname="HandDisappearing_ResetsReferenceSoReappearingDoesNotJump" classname="HandGestureModelTests" runstate="Runnable" seed="1278333068" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000353" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1011" name="ReopeningHand_ResumesWithNoJump" fullname="HandGestureModelTests.ReopeningHand_ResumesWithNoJump" methodname="ReopeningHand_ResumesWithNoJump" classname="HandGestureModelTests" runstate="Runnable" seed="630245196" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000202" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1013" name="PlayerAbilityModelTests" fullname="PlayerAbilityModelTests" classname="PlayerAbilityModelTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.002237" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1017" name="TryPressDash_ChainPressOutsideWindow_IsIgnored" fullname="PlayerAbilityModelTests.TryPressDash_ChainPressOutsideWindow_IsIgnored" methodname="TryPressDash_ChainPressOutsideWindow_IsIgnored" classname="PlayerAbilityModelTests" runstate="Runnable" seed="1066830993" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000577" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1018" name="TryPressDash_OnLadder_IsIgnored" fullname="PlayerAbilityModelTests.TryPressDash_OnLadder_IsIgnored" methodname="TryPressDash_OnLadder_IsIgnored" classname="PlayerAbilityModelTests" runstate="Runnable" seed="396230611" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000156" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1015" name="TryPressDash_Tier1_CannotChain" fullname="PlayerAbilityModelTests.TryPressDash_Tier1_CannotChain" methodname="TryPressDash_Tier1_CannotChain" classname="PlayerAbilityModelTests" runstate="Runnable" seed="917822339" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000153" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1016" name="TryPressDash_Tier3_ChainsUpToThreeWithinWindow" fullname="PlayerAbilityModelTests.TryPressDash_Tier3_ChainsUpToThreeWithinWindow" methodname="TryPressDash_Tier3_ChainsUpToThreeWithinWindow" classname="PlayerAbilityModelTests" runstate="Runnable" seed="807007419" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000278" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1014" name="TryPressDash_WithNoTier_IsIgnored" fullname="PlayerAbilityModelTests.TryPressDash_WithNoTier_IsIgnored" methodname="TryPressDash_WithNoTier_IsIgnored" classname="PlayerAbilityModelTests" runstate="Runnable" seed="2144111302" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000117" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1019" name="ShieldEnemyModelTests" fullname="ShieldEnemyModelTests" classname="ShieldEnemyModelTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.001629" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1023" name="RegisterDashChainHit_BreaksShield_OnlyAtThreeChainedHits" fullname="ShieldEnemyModelTests.RegisterDashChainHit_BreaksShield_OnlyAtThreeChainedHits" methodname="RegisterDashChainHit_BreaksShield_OnlyAtThreeChainedHits" classname="ShieldEnemyModelTests" runstate="Runnable" seed="452847010" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000252" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1024" name="RegisterDashChainHit_OnceBroken_DoesNotReportBreakingAgain" fullname="ShieldEnemyModelTests.RegisterDashChainHit_OnceBroken_DoesNotReportBreakingAgain" methodname="RegisterDashChainHit_OnceBroken_DoesNotReportBreakingAgain" classname="ShieldEnemyModelTests" runstate="Runnable" seed="1795140815" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000126" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1022" name="TryStartWindup_BeyondDetectionRange_IsRejected" fullname="ShieldEnemyModelTests.TryStartWindup_BeyondDetectionRange_IsRejected" methodname="TryStartWindup_BeyondDetectionRange_IsRejected" classname="ShieldEnemyModelTests" runstate="Runnable" seed="1575075124" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000188" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1021" name="TryStartWindup_InChargeBand_Starts" fullname="ShieldEnemyModelTests.TryStartWindup_InChargeBand_Starts" methodname="TryStartWindup_InChargeBand_Starts" classname="ShieldEnemyModelTests" runstate="Runnable" seed="508808590" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000113" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1020" name="TryStartWindup_TooClose_IsRejected" fullname="ShieldEnemyModelTests.TryStartWindup_TooClose_IsRejected" methodname="TryStartWindup_TooClose_IsRejected" classname="ShieldEnemyModelTests" runstate="Runnable" seed="1149044553" result="Passed" start-time="2026-09-06 22:06:11Z" end-time="2026-09-06 22:06:11Z" duration="0.000111" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: C:/Users/Usuario/AppData/LocalLow/DefaultCompany/metroidvania-thevenance\TestResults.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

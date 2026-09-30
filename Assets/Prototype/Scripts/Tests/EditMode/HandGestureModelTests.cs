@@ -4,6 +4,27 @@ using UnityEngine;
 
 public class HandGestureModelTests
 {
+    [Test]
+    public void LossOfTrackingDiscardsUnconsumedMovement()
+    {
+        var model = new HandGestureModel(1.2f);
+        model.Update(BuildHand(Vector2.zero, true));
+        model.Update(BuildHand(new Vector2(0.2f, 0.2f), true));
+        model.MarkAbsent();
+        Assert.AreEqual(0, model.ConsumeDeltaX());
+        Assert.AreEqual(0, model.ConsumeDeltaY());
+        Assert.IsFalse(model.IsOpen);
+    }
+
+    [Test]
+    public void ReopeningAtNewPositionDoesNotApplyClosedHandMotion()
+    {
+        var model = new HandGestureModel(1.2f);
+        model.Update(BuildHand(Vector2.zero, true));
+        model.Update(BuildHand(Vector2.zero, false));
+        model.Update(BuildHand(new Vector2(0.6f, 0), true));
+        Assert.AreEqual(0, model.ConsumeDeltaX());
+    }
     // Builds a 21-point landmark set with the wrist at the origin and the palm (index 9) at
     // the given position. When open, every finger's tip sits far past its pip (extended);
     // when closed, tip and pip sit at the same distance (curled in) - matches the

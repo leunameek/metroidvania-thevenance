@@ -1,0 +1,1027 @@
+{
+  "entries": [
+    {
+      "key": "on",
+      "value": "Activado"
+    },
+    {
+      "key": "off",
+      "value": "Desactivado"
+    },
+    {
+      "key": "begin",
+      "value": "Comenzar"
+    },
+    {
+      "key": "back",
+      "value": "Volver · Esc"
+    },
+    {
+      "key": "cancel",
+      "value": "Cancelar"
+    },
+    {
+      "key": "confirm",
+      "value": "Confirmar"
+    },
+    {
+      "key": "start.subtitle",
+      "value": "Entre la piedra y la memoria"
+    },
+    {
+      "key": "start.press",
+      "value": "Presiona cualquier tecla"
+    },
+    {
+      "key": "version",
+      "value": "Versión {0} · Vertical slice"
+    },
+    {
+      "key": "first.title",
+      "value": "A tu manera"
+    },
+    {
+      "key": "first.body",
+      "value": "Puedes examinar objetos con las manos y usar tu voz en el combate. La cámara y el micrófono son opcionales.\n\nSiempre tendrás teclado y mouse. Puedes configurar los dispositivos más adelante."
+    },
+    {
+      "key": "first.configure",
+      "value": "Configurar cámara y micrófono"
+    },
+    {
+      "key": "first.fallback",
+      "value": "Utilizar teclado y mouse"
+    },
+    {
+      "key": "continue.unavailable",
+      "value": "Continuar · sin partida guardada"
+    },
+    {
+      "key": "newGame",
+      "value": "Nueva partida"
+    },
+    {
+      "key": "settings",
+      "value": "Configuración"
+    },
+    {
+      "key": "accessibility",
+      "value": "Accesibilidad"
+    },
+    {
+      "key": "calibrate",
+      "value": "Calibrar cámara y micrófono"
+    },
+    {
+      "key": "credits",
+      "value": "Créditos"
+    },
+    {
+      "key": "quit",
+      "value": "Salir del juego"
+    },
+    {
+      "key": "pause",
+      "value": "Pausa"
+    },
+    {
+      "key": "resume",
+      "value": "Continuar"
+    },
+    {
+      "key": "map",
+      "value": "Mapa"
+    },
+    {
+      "key": "objectives",
+      "value": "Tu recorrido"
+    },
+    {
+      "key": "poporo",
+      "value": "Poporo"
+    },
+    {
+      "key": "archive",
+      "value": "Archivo cultural"
+    },
+    {
+      "key": "controls",
+      "value": "Controles y ayuda"
+    },
+    {
+      "key": "restart",
+      "value": "Reiniciar desde último punto"
+    },
+    {
+      "key": "mainMenu",
+      "value": "Volver al menú principal"
+    },
+    {
+      "key": "finish",
+      "value": "Finalizar esta visita"
+    },
+    {
+      "key": "done",
+      "value": "Completado"
+    },
+    {
+      "key": "pending",
+      "value": "Pendiente"
+    },
+    {
+      "key": "unlocked",
+      "value": "Abierto"
+    },
+    {
+      "key": "locked",
+      "value": "Bloqueado"
+    },
+    {
+      "key": "available",
+      "value": "Disponible"
+    },
+    {
+      "key": "objectives.body",
+      "value": "Estaciones activadas: {0} / {1}\nEntrenamiento: {2}\nPortales: {3}"
+    },
+    {
+      "key": "controls.body",
+      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nEsc · Cerrar inspección\n\nCOMBATE\nE o ATACAR · Atacar en tu turno\nEspacio o ESQUIVAR · Esquivar\nF o BLOQUEAR · Bloquear\nCtrl izquierdo · Pulsar para hablar\nEsc · Pausa\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica."
+    },
+    {
+      "key": "tutorial.repeat",
+      "value": "Repetir instrucciones"
+    },
+    {
+      "key": "tutorial.move",
+      "value": "Muévete con WASD. Acércate a una estación y pulsa E para examinarla."
+    },
+    {
+      "key": "credits.body",
+      "value": "El asedio de Bacatá\nVertical slice · Plaza Núñez\n\nEl equipo autoral y los créditos culturales están pendientes de incorporación.\n\nTipografía: Cinzel, Noto Sans y Noto Serif, bajo SIL Open Font License.\nReconocimiento de manos: MediaPipe Unity Plugin, homuler.\nMotor: Unity.\n\nLa plaza y las piezas de práctica son interpretaciones artísticas. No son reproducciones arqueológicas ni descripciones históricas validadas."
+    },
+    {
+      "key": "defeat",
+      "value": "Has caído"
+    },
+    {
+      "key": "defeat.body",
+      "value": "Al reintentar, comenzarás el recorrido desde el principio."
+    },
+    {
+      "key": "complete",
+      "value": "Visita completada"
+    },
+    {
+      "key": "complete.body",
+      "value": "Estaciones activadas: {0} / {1}\nZonas visitadas: {2}"
+    },
+    {
+      "key": "replay",
+      "value": "Repetir experiencia"
+    },
+    {
+      "key": "navigation",
+      "value": "Flechas o Tab · Seleccionar\nEnter · Confirmar\nEsc · Volver\nRueda · Desplazar"
+    },
+    {
+      "key": "confirm.quit",
+      "value": "¿Salir del juego? El progreso de esta visita no se guarda."
+    },
+    {
+      "key": "confirm.restart",
+      "value": "¿Volver al último punto guardado? Se perderán los cambios posteriores."
+    },
+    {
+      "key": "confirm.new",
+      "value": "¿Comenzar una nueva partida? Se reiniciará el recorrido actual."
+    },
+    {
+      "key": "confirm.menu",
+      "value": "¿Volver al menú? El progreso de esta visita no se guarda."
+    },
+    {
+      "key": "confirm.access",
+      "value": "¿Restablecer los ajustes de accesibilidad?"
+    },
+    {
+      "key": "health",
+      "value": "Vida  {0} / {1}"
+    },
+    {
+      "key": "hud.objective",
+      "value": "Examina las estaciones · {0} / {1}"
+    },
+    {
+      "key": "hud.portals",
+      "value": "Los portales están abiertos. Elige tu próximo camino."
+    },
+    {
+      "key": "hud.duel",
+      "value": "Completa el duelo en el círculo de entrenamiento."
+    },
+    {
+      "key": "hud.inspect",
+      "value": "E · Examinar {0}"
+    },
+    {
+      "key": "hud.travel",
+      "value": "E · Viajar a {0}"
+    },
+    {
+      "key": "hud.blocked",
+      "value": "{0} · Camino bloqueado\nCompleta las estaciones y el duelo"
+    },
+    {
+      "key": "hud.startCombat",
+      "value": "E · Comenzar entrenamiento"
+    },
+    {
+      "key": "hud.controls",
+      "value": "WASD · Caminar     E · Interactuar     Tab · Mapa     H · Ayuda     Esc · Pausa"
+    },
+    {
+      "key": "world.plaza",
+      "value": "Plaza Núñez"
+    },
+    {
+      "key": "world.lower",
+      "value": "Mundo inferior"
+    },
+    {
+      "key": "world.upper",
+      "value": "Mundo superior"
+    },
+    {
+      "key": "inspection.close",
+      "value": "Cerrar · Esc"
+    },
+    {
+      "key": "inspection.mouse",
+      "value": "Arrastra para girar. Suelta para detener.\nC activa la cámara; M cambia de entrada."
+    },
+    {
+      "key": "inspection.hands",
+      "value": "Izquierda abierta: gira.\nDerecha abierta: inclina.\nCierra los puños para detener.\nM permite utilizar el mouse."
+    },
+    {
+      "key": "inspection.complete",
+      "value": "Estación activada"
+    },
+    {
+      "key": "inspection.progress",
+      "value": "{0} %"
+    },
+    {
+      "key": "lesson.0",
+      "value": "Gira el objeto de lado a lado."
+    },
+    {
+      "key": "lesson.1",
+      "value": "Inclina el objeto arriba y abajo."
+    },
+    {
+      "key": "lesson.2",
+      "value": "Combina ambos giros y detén el objeto."
+    },
+    {
+      "key": "culture.heading",
+      "value": "Contexto cultural"
+    },
+    {
+      "key": "culture.pending",
+      "value": "Sin contexto histórico validado para esta pieza."
+    },
+    {
+      "key": "fiction.heading",
+      "value": "Interpretación dentro del juego"
+    },
+    {
+      "key": "combat.attack",
+      "value": "Atacar · E"
+    },
+    {
+      "key": "combat.dodge",
+      "value": "Esquivar · Espacio"
+    },
+    {
+      "key": "combat.block",
+      "value": "Bloquear · F"
+    },
+    {
+      "key": "combat.return",
+      "value": "Volver a la plaza · E"
+    },
+    {
+      "key": "combat.phase.Idle",
+      "value": "Entrenamiento"
+    },
+    {
+      "key": "combat.phase.Attack",
+      "value": "Tu turno"
+    },
+    {
+      "key": "combat.phase.Telegraph",
+      "value": "Prepárate"
+    },
+    {
+      "key": "combat.phase.React",
+      "value": "¡AHORA!"
+    },
+    {
+      "key": "combat.phase.Feedback",
+      "value": "Resultado"
+    },
+    {
+      "key": "combat.phase.Won",
+      "value": "Prueba superada"
+    },
+    {
+      "key": "combat.body.Idle",
+      "value": "Acércate al círculo para practicar."
+    },
+    {
+      "key": "combat.body.Attack",
+      "value": "Ataca cuando estés listo."
+    },
+    {
+      "key": "combat.body.Telegraph",
+      "value": "Espera la señal."
+    },
+    {
+      "key": "combat.body.React",
+      "value": ""
+    },
+    {
+      "key": "combat.body.Feedback",
+      "value": "Observa el resultado de tu acción."
+    },
+    {
+      "key": "combat.body.Won",
+      "value": "Completa las estaciones para abrir los portales."
+    },
+    {
+      "key": "combat.enemy",
+      "value": "Guardián · {0} / 3"
+    },
+    {
+      "key": "combat.success",
+      "value": "Defensa correcta."
+    },
+    {
+      "key": "combat.retry",
+      "value": "Espera la señal y repite la defensa."
+    },
+    {
+      "key": "combat.seconds",
+      "value": "{0} s"
+    },
+    {
+      "key": "combat.reward",
+      "value": "Entrenamiento completado · Progreso actualizado"
+    },
+    {
+      "key": "notice.discovery",
+      "value": "Objeto descubierto · Archivo actualizado"
+    },
+    {
+      "key": "map.current",
+      "value": "Estás en {0}"
+    },
+    {
+      "key": "map.visited",
+      "value": "{0} · Explorado"
+    },
+    {
+      "key": "map.objects",
+      "value": "Estaciones conocidas"
+    },
+    {
+      "key": "map.combat",
+      "value": "Círculo de entrenamiento"
+    },
+    {
+      "key": "map.path",
+      "value": "Acceso a {0} · {1}"
+    },
+    {
+      "key": "map.note",
+      "value": "El mapa solo registra lugares y accesos que has encontrado durante esta visita."
+    },
+    {
+      "key": "archive.unknown",
+      "value": "Examina una estación para añadirla al archivo."
+    },
+    {
+      "key": "poporo.empty",
+      "value": "El poporo no está disponible en este tramo.\n\nPuedes consultar tus descubrimientos en el archivo cultural y las rutas conocidas en el mapa."
+    },
+    {
+      "key": "settings.gameplay",
+      "value": "Jugabilidad"
+    },
+    {
+      "key": "settings.audio",
+      "value": "Audio"
+    },
+    {
+      "key": "settings.graphics",
+      "value": "Gráficos"
+    },
+    {
+      "key": "settings.objectives",
+      "value": "Avisar cuando cambie el objetivo"
+    },
+    {
+      "key": "settings.tutorials",
+      "value": "Tutoriales contextuales"
+    },
+    {
+      "key": "settings.notices",
+      "value": "Duración de avisos (s)"
+    },
+    {
+      "key": "settings.sensitivity",
+      "value": "Sensibilidad de cámara"
+    },
+    {
+      "key": "settings.invert",
+      "value": "Invertir eje vertical"
+    },
+    {
+      "key": "audio.master",
+      "value": "Volumen general"
+    },
+    {
+      "key": "audio.effects",
+      "value": "Efectos"
+    },
+    {
+      "key": "audio.ambience",
+      "value": "Ambiente"
+    },
+    {
+      "key": "audio.ui",
+      "value": "Sonidos de interfaz"
+    },
+    {
+      "key": "audio.unavailable",
+      "value": "Este tramo utiliza efectos y ambiente. La salida de audio se elige en la configuración de Windows."
+    },
+    {
+      "key": "graphics.resolution",
+      "value": "Resolución"
+    },
+    {
+      "key": "graphics.fullscreen",
+      "value": "Pantalla completa"
+    },
+    {
+      "key": "graphics.apply",
+      "value": "Probar resolución"
+    },
+    {
+      "key": "graphics.quality",
+      "value": "Calidad"
+    },
+    {
+      "key": "graphics.vsync",
+      "value": "Sincronización vertical"
+    },
+    {
+      "key": "graphics.shadows",
+      "value": "Sombras"
+    },
+    {
+      "key": "graphics.aa",
+      "value": "Antialiasing"
+    },
+    {
+      "key": "graphics.fps",
+      "value": "Límite de fotogramas"
+    },
+    {
+      "key": "unlimited",
+      "value": "Sin límite"
+    },
+    {
+      "key": "graphics.limitations",
+      "value": "La resolución anterior se restaura en 15 segundos si no confirmas."
+    },
+    {
+      "key": "graphics.keep",
+      "value": "¿Conservar esta resolución? Volverá al modo anterior en 15 segundos si no confirmas."
+    },
+    {
+      "key": "controls.fixed",
+      "value": "Los atajos de este prototipo son fijos. Las acciones de combate también pueden elegirse con mouse."
+    },
+    {
+      "key": "voice",
+      "value": "Voz"
+    },
+    {
+      "key": "hands",
+      "value": "Manos y cámara"
+    },
+    {
+      "key": "voice.enable",
+      "value": "Comandos de voz en combate"
+    },
+    {
+      "key": "voice.ptt",
+      "value": "Pulsar Ctrl para hablar"
+    },
+    {
+      "key": "voice.toggle",
+      "value": "Alternar escucha con Ctrl"
+    },
+    {
+      "key": "voice.confidence",
+      "value": "Confianza mínima"
+    },
+    {
+      "key": "voice.gain",
+      "value": "Sensibilidad del medidor"
+    },
+    {
+      "key": "low",
+      "value": "Baja"
+    },
+    {
+      "key": "medium",
+      "value": "Media"
+    },
+    {
+      "key": "high",
+      "value": "Alta"
+    },
+    {
+      "key": "hands.sensitivity",
+      "value": "Sensibilidad de manos"
+    },
+    {
+      "key": "hands.smoothing",
+      "value": "Suavizado del cursor (s)"
+    },
+    {
+      "key": "hands.dwell",
+      "value": "Tiempo de selección (s)"
+    },
+    {
+      "key": "hands.deadzone",
+      "value": "Zona muerta del cursor"
+    },
+    {
+      "key": "hands.left",
+      "value": "Cursor con mano izquierda"
+    },
+    {
+      "key": "hands.cursor",
+      "value": "Mostrar cursor de manos"
+    },
+    {
+      "key": "hands.guide",
+      "value": "Mostrar guía del cursor"
+    },
+    {
+      "key": "access.text",
+      "value": "Tamaño de texto"
+    },
+    {
+      "key": "access.contrast",
+      "value": "Alto contraste"
+    },
+    {
+      "key": "access.motion",
+      "value": "Reducir movimiento de interfaz"
+    },
+    {
+      "key": "access.camera",
+      "value": "Suavizado de cámara"
+    },
+    {
+      "key": "access.flash",
+      "value": "Intensidad de destellos del duelo"
+    },
+    {
+      "key": "access.subtitles",
+      "value": "Mostrar subtítulos"
+    },
+    {
+      "key": "access.subtitleSize",
+      "value": "Tamaño de subtítulos"
+    },
+    {
+      "key": "access.subtitleOpacity",
+      "value": "Fondo de subtítulos"
+    },
+    {
+      "key": "access.speakers",
+      "value": "Identificar hablantes"
+    },
+    {
+      "key": "access.captions",
+      "value": "Describir sonidos importantes"
+    },
+    {
+      "key": "access.reaction",
+      "value": "Tiempo de reacción (multiplicador)"
+    },
+    {
+      "key": "access.fallback",
+      "value": "El teclado y el mouse siempre están disponibles. Una falla de reconocimiento permite repetir la defensa del entrenamiento."
+    },
+    {
+      "key": "access.reset",
+      "value": "Restablecer accesibilidad"
+    },
+    {
+      "key": "settings.saved",
+      "value": "Ajustes guardados"
+    },
+    {
+      "key": "voice.calibrate",
+      "value": "Calibrar micrófono"
+    },
+    {
+      "key": "voice.explain",
+      "value": "Prueba la entrada y di «atacar». El reconocimiento utiliza el micrófono y el idioma de voz de Windows. El selector solo cambia la entrada del medidor."
+    },
+    {
+      "key": "voice.device",
+      "value": "Micrófono del medidor: {0}"
+    },
+    {
+      "key": "device.default",
+      "value": "Predeterminada"
+    },
+    {
+      "key": "device.next",
+      "value": "Seleccionar siguiente dispositivo"
+    },
+    {
+      "key": "voice.measure",
+      "value": "Medir ruido ambiental"
+    },
+    {
+      "key": "voice.say",
+      "value": "Di: ATACAR"
+    },
+    {
+      "key": "voice.test",
+      "value": "Probar comando / repetir"
+    },
+    {
+      "key": "voice.next",
+      "value": "Calibrar cámara"
+    },
+    {
+      "key": "voice.quiet",
+      "value": "Guarda silencio durante tres segundos…"
+    },
+    {
+      "key": "voice.noisy",
+      "value": "Ruido elevado · Acerca el micrófono y repite."
+    },
+    {
+      "key": "voice.measured",
+      "value": "Ruido medido · Puedes probar ATACAR."
+    },
+    {
+      "key": "voice.disconnected",
+      "value": "Se perdió la entrada del micrófono. Reconéctalo y repite la prueba."
+    },
+    {
+      "key": "voice.state.Inactive",
+      "value": "Micrófono inactivo"
+    },
+    {
+      "key": "voice.state.Preparing",
+      "value": "Ctrl · Hablar"
+    },
+    {
+      "key": "voice.state.Listening",
+      "value": "Escuchando…"
+    },
+    {
+      "key": "voice.state.Processing",
+      "value": "Procesando comando…"
+    },
+    {
+      "key": "voice.state.Recognized",
+      "value": "Comando reconocido"
+    },
+    {
+      "key": "voice.state.Unrecognized",
+      "value": "No entendimos el comando. Puedes repetir."
+    },
+    {
+      "key": "voice.state.NoSignal",
+      "value": "Sin señal de micrófono. Usa los botones."
+    },
+    {
+      "key": "voice.state.PermissionDenied",
+      "value": "Sin permiso de micrófono. Revisa los permisos de Windows, o usa los botones."
+    },
+    {
+      "key": "voice.state.Unavailable",
+      "value": "Voz no disponible. Revisa el micrófono y el idioma de Windows, o usa los botones."
+    },
+    {
+      "key": "hands.calibrate",
+      "value": "Calibrar manos"
+    },
+    {
+      "key": "hands.device",
+      "value": "Cámara: {0}"
+    },
+    {
+      "key": "hands.start",
+      "value": "Activar cámara / repetir"
+    },
+    {
+      "key": "hands.preview",
+      "value": "Mostrar vista previa"
+    },
+    {
+      "key": "hands.fallback",
+      "value": "Utilizar mouse"
+    },
+    {
+      "key": "hands.missing",
+      "value": "No se encontró una cámara. Puedes utilizar el mouse."
+    },
+    {
+      "key": "hands.light",
+      "value": "Ilumina tus manos y deja espacio alrededor."
+    },
+    {
+      "key": "calibration.finish",
+      "value": "Terminar calibración"
+    },
+    {
+      "key": "hands.step.0",
+      "value": "Coloca tu mano dentro del área."
+    },
+    {
+      "key": "hands.step.1",
+      "value": "Mueve la mano para controlar el cursor."
+    },
+    {
+      "key": "hands.step.2",
+      "value": "Mantén la mano abierta para confirmar."
+    },
+    {
+      "key": "hands.step.3",
+      "value": "Prueba completada. Puedes continuar."
+    },
+    {
+      "key": "hands.state.Inactive",
+      "value": "Cámara inactiva"
+    },
+    {
+      "key": "hands.state.Searching",
+      "value": "Buscando mano · Acércala a la cámara"
+    },
+    {
+      "key": "hands.state.Detected",
+      "value": "Mano detectada"
+    },
+    {
+      "key": "hands.state.GestureStarted",
+      "value": "Mantén el gesto"
+    },
+    {
+      "key": "hands.state.Confirmed",
+      "value": "Gesto confirmado"
+    },
+    {
+      "key": "hands.state.Lost",
+      "value": "Se perdió el seguimiento · Usa M para cambiar al mouse"
+    },
+    {
+      "key": "hands.state.Selected",
+      "value": "Objeto seleccionado"
+    },
+    {
+      "key": "hands.state.CalibrationRequired",
+      "value": "Repite la calibración"
+    },
+    {
+      "key": "loading",
+      "value": "Cargando la plaza…"
+    },
+    {
+      "key": "loading.tip",
+      "value": "Las manos te ayudan a examinar objetos. La voz se utiliza en los combates."
+    },
+    {
+      "key": "loading.error",
+      "value": "No fue posible cargar la escena. Vuelve al menú e inténtalo de nuevo."
+    },
+    {
+      "key": "dialogue.next",
+      "value": "Continuar · Enter"
+    },
+    {
+      "key": "dialogue.skip",
+      "value": "Omitir diálogo"
+    },
+    {
+      "key": "caption.portal",
+      "value": "[El portal comienza a abrirse]"
+    },
+    {
+      "key": "tutorial.step.0",
+      "value": "Muévete con WASD. H abre la ayuda."
+    },
+    {
+      "key": "tutorial.step.1",
+      "value": "Acércate a una estación y pulsa E para examinarla."
+    },
+    {
+      "key": "tutorial.step.2",
+      "value": "Sigue la instrucción junto al objeto. M cambia entre manos y mouse."
+    },
+    {
+      "key": "tutorial.step.3",
+      "value": "Ve al círculo de entrenamiento y pulsa E para comenzar el duelo."
+    },
+    {
+      "key": "tutorial.step.4",
+      "value": "Los portales están abiertos. Tab permite consultar el mapa."
+    },
+    {
+      "key": "component.action",
+      "value": "Seleccionar"
+    },
+    {
+      "key": "component.option",
+      "value": "Opción"
+    },
+    {
+      "key": "component.value",
+      "value": "Valor"
+    },
+    {
+      "key": "component.status",
+      "value": "Estado"
+    },
+    {
+      "key": "component.state.Normal",
+      "value": "Disponible"
+    },
+    {
+      "key": "component.state.Hover",
+      "value": "Apuntando"
+    },
+    {
+      "key": "component.state.Focus",
+      "value": "En foco"
+    },
+    {
+      "key": "component.state.Pressed",
+      "value": "Presionado"
+    },
+    {
+      "key": "component.state.Selected",
+      "value": "Seleccionado"
+    },
+    {
+      "key": "component.state.Disabled",
+      "value": "Desactivado"
+    },
+    {
+      "key": "component.state.Loading",
+      "value": "Cargando…"
+    },
+    {
+      "key": "component.state.Success",
+      "value": "Completado"
+    },
+    {
+      "key": "component.state.Warning",
+      "value": "Advertencia"
+    },
+    {
+      "key": "component.state.Error",
+      "value": "Error"
+    },
+    {
+      "key": "dialogue.auto",
+      "value": "Avance automático de diálogos"
+    },
+    {
+      "key": "dialogue.instant",
+      "value": "Texto de diálogo instantáneo"
+    },
+    {
+      "key": "dialogue.speed",
+      "value": "Velocidad de diálogo (caracteres/s)"
+    },
+    {
+      "key": "dialogue.page",
+      "value": "Página {0} de {1}"
+    },
+    { "key": "title.exit", "value": "Salir" },
+    { "key": "title.playHint", "value": "Comienza tu viaje en la Plaza Núñez." },
+    { "key": "title.settingsHint", "value": "Ajusta el texto, el contraste, el sonido y los controles." },
+    { "key": "game.title", "value": "El asedio de Bacatá" },
+    { "key": "title.exitHint", "value": "Cierra El asedio de Bacatá y vuelve al escritorio." },
+    { "key": "title.navigation", "value": "Flechas o Tab · Elegir     Enter · Confirmar" },
+    { "key": "title.accessIntro", "value": "Adapta la experiencia antes de comenzar. Estos ajustes también se aplican durante el juego." },
+    { "key": "title.musicIntro", "value": "Bruma del umbral\nUna pieza ambiental creada para este menú." },
+    { "key": "title.music", "value": "Música del menú" },
+    { "key": "title.musicShortcut", "value": "M · Silenciar música" },
+    { "key": "title.musicMuted", "value": "Música silenciada · M para activar" },
+    { "key": "title.resolutionNote", "value": "Al cambiar la resolución tendrás 15 segundos para confirmarla. Si no confirmas, se restaura la anterior." },
+    { "key": "title.controlsIntro", "value": "Puedes jugar con teclado y mouse. La cámara y el micrófono son opcionales; se calibran desde la pausa del juego." },
+    { "key": "title.credits", "value": "Menú: paisaje de fantasía generado, emblema adaptado de la referencia visual del proyecto y composición ambiental original por síntesis. No representan una reconstrucción histórica o musical muisca." },
+    { "key": "title.back", "value": "Volver al menú" },
+    { "key": "title.settingsFooter", "value": "Esc · Volver   |   Rueda o Tab · Recorrer opciones\nLos ajustes se guardan al volver al menú." },
+    { "key": "title.quitConfirm", "value": "¿Salir de El asedio de Bacatá?" },
+    { "key": "title.loading", "value": "Preparando tu llegada a la Plaza Núñez…" },
+    { "key": "title.returning", "value": "Volviendo al menú principal…" },
+    { "key": "title.revert", "value": "Restauración automática en {0} s" },
+    {"key": "journal", "value": "Diario"},
+    {"key": "hud.cameraActive", "value": "Cámara activa · C para pausar"},
+    {"key": "inspection.archived", "value": "Descubrimiento guardado en el diario."},
+    {"key": "inspection.return", "value": "Volver · E"},
+    {"key": "inspection.fallback", "value": "M · Utilizar mouse"},
+    {"key": "inspection.mouse.0", "value": "Arrastra con clic izquierdo hacia los lados."},
+    {"key": "inspection.mouse.1", "value": "Arrastra con clic izquierdo hacia arriba o abajo."},
+    {"key": "inspection.mouse.2", "value": "Arrastra en ambas direcciones y suelta el botón."},
+    {"key": "inspection.hands.0", "value": "Mueve la mano izquierda abierta hacia los lados."},
+    {"key": "inspection.hands.1", "value": "Mueve la mano derecha abierta hacia arriba o abajo."},
+    {"key": "inspection.hands.2", "value": "Gira con ambas manos abiertas y cierra los puños."},
+    {"key":"combat.promptDodge","value":"Esquiva el ataque."},
+    {"key":"combat.promptBlock","value":"Bloquea el ataque."},
+    {"key":"save.continue","value":"Continuar"},
+    {"key":"save.load","value":"Cargar partida"},
+    {"key":"save.title","value":"Partidas guardadas"},
+    {"key":"save.slot","value":"Ranura {0} · {1}\n{2} % · {3} jugados · {4}"},
+    {"key":"save.empty","value":"Ranura {0} · Vacía"},
+    {"key":"save.corrupt","value":"Ranura {0} · No se puede leer"},
+    {"key":"save.delete","value":"Eliminar"},
+    {"key":"save.replaceConfirm","value":"¿Crear una nueva partida aquí? Se perderá el progreso de esta ranura."},
+    {"key":"save.deleteConfirm","value":"¿Eliminar esta partida? Esta acción no se puede deshacer."},
+    {"key":"save.game","value":"Guardar partida"},
+    {"key":"save.saved","value":"Partida guardada en Plaza Núñez."},
+    {"key":"save.unavailable","value":"Solo puedes guardar durante la exploración de una partida iniciada desde el menú."},
+    {"key":"save.checkpointNote","value":"Las partidas reaparecen en Plaza Núñez con las lecciones y el entrenamiento completados. Puedes guardar aquí o en la ranura activa desde la pausa."},
+    {"key":"save.loadConfirm","value":"¿Cargar esta partida? Se perderán los cambios desde el último guardado."},
+    {"key":"confirm.replay","value":"¿Repetir desde el comienzo? Se reemplazará el progreso de la ranura actual."},
+    {"key":"inventory","value":"Inventario"},
+    {"key":"inventory.intro","value":"Las piezas examinadas se conservan como hallazgos de esta partida."},
+    {"key":"inventory.unknown","value":"Por descubrir"},
+    {"key":"inventory.locked","value":"Bloqueado"},
+    {"key":"inventory.empty","value":"Aún no has obtenido piezas. Examina una estación de la plaza para registrar un hallazgo."},
+    {"key":"inventory.use","value":"Uso: consulta este hallazgo en el archivo cultural. No es un objeto consumible."},
+    {"key":"access.readableFont","value":"Tipografía de alta legibilidad"},
+    {
+      "key": "defeat.quote",
+      "value": "«La tierra recuerda a quienes se levantan.»"
+    },
+    {
+      "key": "hud.health",
+      "value": "Vida"
+    },
+    {
+      "key": "hud.objectiveTitle",
+      "value": "Objetivo actual"
+    },
+    {
+      "key": "combat.guardian",
+      "value": "Guardián"
+    },
+    {
+      "key": "complete.time",
+      "value": "Tiempo de la visita"
+    },
+    {
+      "key": "complete.stations",
+      "value": "Estaciones activadas"
+    },
+    {
+      "key": "complete.zones",
+      "value": "Zonas visitadas"
+    },
+    {
+      "key": "complete.training",
+      "value": "Entrenamiento"
+    },
+    {
+      "key": "tutorial.title",
+      "value": "Primeros pasos"
+    },
+    {
+      "key": "tutorial.ok",
+      "value": "Entendido"
+    },
+    {
+      "key": "loading.tipTitle",
+      "value": "Consejo"
+    }
+  ]
+}

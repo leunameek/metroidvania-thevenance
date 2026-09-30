@@ -1,0 +1,7 @@
+Isolated title scene, music, settings, direct new game and return
+Configuration: True
+Exploration: True
+Pause: True
+Return to title: True
+Errors: 0
+Passed: True

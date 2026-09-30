@@ -1,0 +1,1566 @@
+[
+  {
+    "key": "inicio",
+    "title": "01 · Inicio independiente",
+    "subtitle": "Entrada directa, ajustes opcionales y salida confirmada.",
+    "screens": [
+      {
+        "id": "I01",
+        "kind": "home",
+        "title": "Menú principal",
+        "note": "Actual · Nueva partida seleccionada al abrir. Música propia; M silencia. No se carga el tutorial detrás del menú.",
+        "actions": [
+          [
+            "Nueva partida",
+            "I03"
+          ],
+          [
+            "Configuración",
+            "I02"
+          ],
+          [
+            "Salir",
+            "I04"
+          ]
+        ]
+      },
+      {
+        "id": "I02",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Accesibilidad",
+        "origin": "title",
+        "rows": [
+          [
+            "Tamaño de texto",
+            "100 %",
+            "Selector"
+          ],
+          [
+            "Alto contraste",
+            "Desactivado",
+            "Interruptor"
+          ],
+          [
+            "Reducir movimiento",
+            "Desactivado",
+            "Interruptor"
+          ],
+          [
+            "Mostrar subtítulos",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tamaño de subtítulos",
+            "100 %",
+            "Selector"
+          ]
+        ],
+        "more": "A01",
+        "note": "Actual · Primera sección al abrir Configuración. Ajustes compartidos con la partida. Continuación de opciones: A01."
+      },
+      {
+        "id": "I03",
+        "kind": "loading",
+        "title": "Plaza Núñez",
+        "body": "Preparando tu llegada a la Plaza Núñez…",
+        "progress": 0.6,
+        "next": "E01",
+        "note": "Actual · Carga asíncrona, sin botones inoperantes. El prototipo avanza automáticamente; no representa un tiempo de carga real."
+      },
+      {
+        "id": "I04",
+        "kind": "modal",
+        "title": "¿Salir de El asedio de Bacatá?",
+        "body": "",
+        "actions": [
+          [
+            "Cancelar",
+            "I01"
+          ],
+          [
+            "Confirmar",
+            "C08"
+          ]
+        ],
+        "note": "Actual · Cancelar recibe el foco inicial. Escape cancela y recupera el foco de Salir."
+      },
+      {
+        "id": "I05",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Audio",
+        "origin": "title",
+        "rows": [
+          [
+            "Volumen general",
+            "80 %",
+            "Deslizador"
+          ],
+          [
+            "Música del menú",
+            "30 %",
+            "Deslizador"
+          ],
+          [
+            "Sonidos de interfaz",
+            "70 %",
+            "Deslizador"
+          ],
+          [
+            "Efectos",
+            "80 %",
+            "Deslizador"
+          ],
+          [
+            "Ambiente",
+            "60 %",
+            "Deslizador"
+          ]
+        ],
+        "note": "Actual · Bruma del umbral suena solo en el inicio. Valores ilustrativos; volumen musical persistente."
+      },
+      {
+        "id": "I06",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Gráficos",
+        "origin": "title",
+        "rows": [
+          [
+            "Resolución",
+            "1920 × 1080",
+            "Selector"
+          ],
+          [
+            "Pantalla completa",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Sincronización vertical",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Calidad",
+            "Nivel actual",
+            "Selector"
+          ],
+          [
+            "Límite de fotogramas",
+            "60",
+            "Selector"
+          ]
+        ],
+        "actions": [
+          [
+            "Probar resolución",
+            "A10"
+          ]
+        ],
+        "note": "Actual · 720p, 1080p, 1440p y 16:10. Cancelar o esperar 15 s revierte el cambio."
+      },
+      {
+        "id": "I07",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Controles",
+        "origin": "title",
+        "body": "Puedes jugar con teclado y mouse. La cámara y el micrófono son opcionales; se calibran desde la pausa del juego.",
+        "rows": [
+          [
+            "Sensibilidad de cámara",
+            "1,00",
+            "Deslizador"
+          ],
+          [
+            "Invertir eje vertical",
+            "Desactivado",
+            "Interruptor"
+          ],
+          [
+            "Tutoriales contextuales",
+            "Activado",
+            "Interruptor"
+          ]
+        ],
+        "actions": [
+          [
+            "Consultar controles completos",
+            "A07"
+          ]
+        ],
+        "note": "Actual · Lista completa de teclas en contenido desplazable; A07 documenta esa lista."
+      },
+      {
+        "id": "I08",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Créditos",
+        "origin": "title",
+        "body": "El asedio de Bacatá\nVertical slice · Plaza Núñez\n\nEquipo autoral y créditos culturales pendientes de incorporación.\n\nNoto Sans y Noto Serif · SIL OFL\nMediaPipe Unity Plugin · homuler\nMotor · Unity\n\nPaisaje de fantasía y música original por síntesis. No son una reconstrucción histórica o musical muisca.",
+        "note": "Actual · Se conserva la atribución disponible; no se inventan autores."
+      }
+    ]
+  },
+  {
+    "key": "ajustes",
+    "title": "02 · Configuración y accesibilidad",
+    "subtitle": "Secciones del juego y continuación de opciones extensas. Valores de ejemplo.",
+    "screens": [
+      {
+        "id": "A01",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Accesibilidad",
+        "origin": "title",
+        "rows": [
+          [
+            "Fondo de subtítulos",
+            "80 %",
+            "Deslizador"
+          ],
+          [
+            "Identificar hablantes",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Describir sonidos importantes",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tiempo de reacción",
+            "× 2,00",
+            "Deslizador"
+          ],
+          [
+            "Movimiento de cámara",
+            "50 %",
+            "Deslizador"
+          ],
+          [
+            "Intensidad de destellos",
+            "30 %",
+            "Deslizador"
+          ]
+        ],
+        "actions": [
+          [
+            "Restablecer accesibilidad",
+            "A11"
+          ]
+        ],
+        "note": "Actual · Continuación desplazada del panel I02; no es otra pantalla dentro del juego."
+      },
+      {
+        "id": "A02",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Accesibilidad",
+        "rows": [
+          [
+            "Tamaño de texto",
+            "150 %",
+            "Selector"
+          ],
+          [
+            "Alto contraste",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Reducir movimiento",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Mostrar subtítulos",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tamaño de subtítulos",
+            "150 %",
+            "Selector"
+          ]
+        ],
+        "more": "A03",
+        "note": "Actual · Accesibilidad desde Pausa. Esc vuelve a Pausa; los cambios afectan a todas las pantallas."
+      },
+      {
+        "id": "A03",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Accesibilidad",
+        "rows": [
+          [
+            "Fondo de subtítulos",
+            "100 %",
+            "Deslizador"
+          ],
+          [
+            "Identificar hablantes",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Describir sonidos importantes",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tiempo de reacción",
+            "× 3,00",
+            "Deslizador"
+          ],
+          [
+            "Avisos de objetivo",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tiempo de selección de manos",
+            "1,5 s",
+            "Deslizador"
+          ]
+        ],
+        "actions": [
+          [
+            "Restablecer accesibilidad",
+            "A11"
+          ]
+        ],
+        "note": "Actual · Tramo inferior del scroll. Cámara y destellos también disponibles como en A01."
+      },
+      {
+        "id": "A04",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Jugabilidad",
+        "rows": [
+          [
+            "Avisos de objetivo",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Tutoriales contextuales",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Duración de avisos",
+            "7 s",
+            "Deslizador"
+          ],
+          [
+            "Sensibilidad de cámara",
+            "1,00",
+            "Deslizador"
+          ],
+          [
+            "Invertir eje vertical",
+            "Desactivado",
+            "Interruptor"
+          ]
+        ],
+        "actions": [
+          [
+            "Reiniciar recorrido",
+            "C01"
+          ],
+          [
+            "Créditos",
+            "C06"
+          ]
+        ],
+        "note": "Actual · Reiniciar recarga la visita completa; no hay checkpoint. Ocultar consejos no completa el tutorial."
+      },
+      {
+        "id": "A05",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Audio",
+        "rows": [
+          [
+            "Volumen general",
+            "80 %",
+            "Deslizador"
+          ],
+          [
+            "Música del menú",
+            "30 %",
+            "Deslizador"
+          ],
+          [
+            "Efectos",
+            "80 %",
+            "Deslizador"
+          ],
+          [
+            "Ambiente",
+            "60 %",
+            "Deslizador"
+          ],
+          [
+            "Sonidos de interfaz",
+            "70 %",
+            "Deslizador"
+          ]
+        ],
+        "note": "Actual · Salida de audio gestionada por Windows. No hay canal de voces narrativas integrado."
+      },
+      {
+        "id": "A06",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Gráficos",
+        "rows": [
+          [
+            "Resolución",
+            "1920 × 1080",
+            "Selector"
+          ],
+          [
+            "Pantalla completa",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Calidad",
+            "Nivel actual",
+            "Selector"
+          ],
+          [
+            "Sincronización vertical",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Sombras",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Antialiasing",
+            "4×",
+            "Selector"
+          ],
+          [
+            "Límite de fotogramas",
+            "60",
+            "Selector"
+          ]
+        ],
+        "actions": [
+          [
+            "Probar resolución",
+            "A10"
+          ]
+        ],
+        "note": "Actual · Ajustes gráficos del juego. Scroll vertical; la prueba de resolución requiere confirmación."
+      },
+      {
+        "id": "A07",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Controles",
+        "body": "EXPLORACIÓN\nWASD · Caminar   /   Shift · Correr\nEspacio · Saltar   /   Q · Dash\nBotón derecho + mouse · Cámara\nE · Interactuar   /   Tab · Diario   /   H · Ayuda\nV · Silenciar   /   R · Reiniciar   /   Esc · Pausa\n\nINSPECCIÓN\nArrastrar · Rotar   /   Rueda · Zoom\nC · Cámara   /   M · Manos o mouse   /   Esc · Cerrar\n\nCOMBATE\nE · Atacar   /   Espacio · Esquivar   /   F · Bloquear\nCtrl izquierdo · Hablar",
+        "actions": [
+          [
+            "Repetir consejos",
+            "E01"
+          ]
+        ],
+        "note": "Actual · Atajos fijos. Esc pausa también durante el duelo con la UI actual. El diagrama histórico describe la cancelación del HUD anterior."
+      },
+      {
+        "id": "A08",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Voz",
+        "rows": [
+          [
+            "Comandos de voz en combate",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Pulsar Ctrl para hablar",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Alternar escucha con Ctrl",
+            "Desactivado",
+            "Interruptor"
+          ],
+          [
+            "Confianza mínima",
+            "Media",
+            "Selector"
+          ],
+          [
+            "Sensibilidad del medidor",
+            "1,00",
+            "Deslizador"
+          ],
+          [
+            "Tiempo de reacción",
+            "× 2,00",
+            "Deslizador"
+          ]
+        ],
+        "actions": [
+          [
+            "Calibrar micrófono",
+            "D01"
+          ]
+        ],
+        "note": "Actual · Escucha solo en turnos válidos o prueba explícita. Los botones siguen disponibles."
+      },
+      {
+        "id": "A09",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Manos y cámara",
+        "rows": [
+          [
+            "Sensibilidad de manos",
+            "1,00",
+            "Deslizador"
+          ],
+          [
+            "Suavizado del cursor",
+            "0,12 s",
+            "Deslizador"
+          ],
+          [
+            "Tiempo de selección",
+            "1,5 s",
+            "Deslizador"
+          ],
+          [
+            "Zona muerta",
+            "0,02",
+            "Deslizador"
+          ],
+          [
+            "Mano izquierda",
+            "Desactivado",
+            "Interruptor"
+          ],
+          [
+            "Mostrar cursor",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Mostrar guía",
+            "Activado",
+            "Interruptor"
+          ]
+        ],
+        "actions": [
+          [
+            "Calibrar manos",
+            "D05"
+          ]
+        ],
+        "note": "Actual · Ajustes independientes. La selección de cámara y la prueba se realizan en Calibrar manos."
+      },
+      {
+        "id": "A10",
+        "kind": "modal",
+        "title": "¿Conservar esta resolución?",
+        "body": "Se restaura el modo anterior en 15 segundos si no confirmas.\n\nRestauración automática en 12 s",
+        "actions": [
+          [
+            "Cancelar",
+            "A06"
+          ],
+          [
+            "Confirmar",
+            "A06"
+          ]
+        ],
+        "note": "Actual · Cancelación, Escape y vencimiento restauran la resolución anterior. Regresa al panel que la abrió."
+      },
+      {
+        "id": "A11",
+        "kind": "modal",
+        "title": "¿Restablecer accesibilidad?",
+        "body": "Se restaurarán las preferencias de accesibilidad.",
+        "actions": [
+          [
+            "Cancelar",
+            "A02"
+          ],
+          [
+            "Confirmar",
+            "A02"
+          ]
+        ],
+        "note": "Actual · Foco inicial en Cancelar; vuelve al origen (menú o pausa)."
+      }
+    ]
+  },
+  {
+    "key": "exploracion",
+    "title": "03 · Exploración y tutorial",
+    "subtitle": "Plaza, interacciones contextuales y dos umbrales visitables.",
+    "screens": [
+      {
+        "id": "E01",
+        "kind": "world",
+        "title": "Llegada a Plaza Núñez",
+        "zone": "Plaza Núñez",
+        "notice": "Examina las estaciones · 0 / 3",
+        "tutorial": "Muévete con WASD. H abre la ayuda.",
+        "next": "E02",
+        "note": "Actual · Zona y objetivo son temporales. No hay asistente obligatorio ni permisos de dispositivos al empezar."
+      },
+      {
+        "id": "E02",
+        "kind": "world",
+        "title": "Exploración libre",
+        "next": "E03",
+        "note": "Actual · HUD oculto en reposo. Vida solo con daño o combate. Esc abre Pausa; Tab abre Diario."
+      },
+      {
+        "id": "E03",
+        "kind": "world",
+        "title": "Estación cercana",
+        "prompt": "E · Examinar Vasija del eco",
+        "target": "N01",
+        "note": "Actual · Prompt solo por proximidad. Tras una lección se vuelve a la plaza con el progreso conservado durante la visita."
+      },
+      {
+        "id": "E04",
+        "kind": "world",
+        "title": "Portal bloqueado",
+        "prompt": "Umbral inferior · Camino bloqueado\nCompleta las estaciones y el duelo",
+        "note": "Actual · Texto explica el bloqueo; no se comunica solo por color. No permite viajar todavía."
+      },
+      {
+        "id": "E05",
+        "kind": "world",
+        "title": "Entrenamiento disponible",
+        "prompt": "E · Comenzar entrenamiento",
+        "target": "B01",
+        "note": "Actual · El duelo y las tres inspecciones pueden completarse en cualquier orden."
+      },
+      {
+        "id": "E06",
+        "kind": "world",
+        "title": "Portales habilitados",
+        "notice": "Los portales están abiertos. Elige tu próximo camino.",
+        "prompt": "E · Viajar al umbral inferior",
+        "target": "E07",
+        "caption": "[El portal comienza a abrirse]",
+        "note": "Actual · Se requiere completar las tres lecciones y ganar el duelo. El acceso superior se representa en E08."
+      },
+      {
+        "id": "E07",
+        "kind": "world",
+        "title": "Umbral inferior",
+        "zone": "Umbral inferior",
+        "prompt": "E · Volver a Plaza Núñez",
+        "target": "E06",
+        "note": "Actual · Zona visitable con retorno, no un nivel completo. Conserva la misma ubicación de elementos UI."
+      },
+      {
+        "id": "E08",
+        "kind": "world",
+        "title": "Umbral superior",
+        "zone": "Umbral superior",
+        "prompt": "E · Volver a Plaza Núñez",
+        "target": "E06",
+        "note": "Actual · Zona visitable con retorno. Cambio de ambiente no cambia la navegación ni la jerarquía del HUD."
+      },
+      {
+        "id": "E09",
+        "kind": "world",
+        "title": "Daño y cámara activa",
+        "health": "60 / 100",
+        "camera": true,
+        "notice": "Objetivo actualizado",
+        "note": "Estado ilustrativo · La vida aparece al recibir daño. El indicador de cámara activa permite recordar cómo detenerla."
+      },
+      {
+        "id": "E10",
+        "kind": "help",
+        "title": "Controles y ayuda",
+        "body": "Una instrucción por momento:\n\n1. Muévete con WASD.\n2. Acércate a una estación y pulsa E.\n3. Sigue la instrucción junto al objeto. M cambia de entrada.\n4. Ve al círculo y pulsa E para comenzar el duelo.\n5. Portales abiertos. Tab consulta el mapa.",
+        "actions": [
+          [
+            "Repetir consejos",
+            "E01"
+          ],
+          [
+            "Calibrar micrófono",
+            "D01"
+          ],
+          [
+            "Calibrar manos",
+            "D05"
+          ],
+          [
+            "Volver",
+            "E02"
+          ]
+        ],
+        "note": "Actual · Ayuda accesible con H. Los consejos dependen del contexto y se pueden repetir o desactivar."
+      }
+    ]
+  },
+  {
+    "key": "inspeccion",
+    "title": "04 · Inspección de objetos",
+    "subtitle": "Tres lecciones, finalización y alternativas cuando se pierde el seguimiento.",
+    "screens": [
+      {
+        "id": "N01",
+        "kind": "inspect",
+        "title": "Vasija del eco",
+        "body": "Gira el objeto de lado a lado.\n\nArrastra con clic izquierdo hacia los lados.",
+        "progress": 0.35,
+        "progressText": "35 % · Giro horizontal",
+        "next": "N04",
+        "note": "Actual · Requisito: 28° de giro horizontal. Rueda acerca o aleja sin modificar el modelo."
+      },
+      {
+        "id": "N02",
+        "kind": "inspect",
+        "title": "Disco del alba",
+        "body": "Inclina el objeto arriba y abajo.\n\nArrastra con clic izquierdo hacia arriba o abajo.",
+        "progress": 0.6,
+        "progressText": "60 % · Giro vertical",
+        "next": "N04",
+        "note": "Actual · Requisito: 28° de giro vertical. Se conserva la pieza existente, sin alterar su geometría."
+      },
+      {
+        "id": "N03",
+        "kind": "inspect",
+        "title": "Guardián de jade",
+        "body": "Combina ambos giros y detén el objeto.\n\nArrastra en ambas direcciones y suelta el botón.",
+        "progress": 0.75,
+        "progressText": "75 % · Detén el objeto",
+        "next": "N04",
+        "note": "Actual · Ambos giros y congelación de 0,65 s. El progreso parcial se conserva al cerrar durante la visita."
+      },
+      {
+        "id": "N04",
+        "kind": "inspect",
+        "title": "Estación activada",
+        "body": "Descubrimiento guardado en el diario.",
+        "progress": 1,
+        "progressText": "✓ Estación activada",
+        "complete": true,
+        "note": "Actual · Volver · E regresa a exploración. El texto cultural completo se consulta en el archivo."
+      },
+      {
+        "id": "N05",
+        "kind": "inspect",
+        "title": "Inspección con manos",
+        "body": "Gira con ambas manos abiertas y cierra los puños.\n\nIzquierda abierta: giro horizontal.\nDerecha abierta: giro vertical.",
+        "progress": 0.45,
+        "progressText": "45 % · Mano detectada",
+        "camera": true,
+        "next": "N04",
+        "note": "Actual · Método opcional, activado por el jugador. Cursor/guía configurables y método alternativo siempre disponible."
+      },
+      {
+        "id": "N06",
+        "kind": "inspect",
+        "title": "Seguimiento perdido",
+        "body": "Se perdió el seguimiento.\n\nIlumina tus manos y acércalas a la cámara.\n\nM · Utilizar mouse",
+        "progress": 0.45,
+        "progressText": "45 % · Progreso conservado",
+        "actions": [
+          [
+            "Utilizar mouse · M",
+            "N03"
+          ]
+        ],
+        "note": "Actual · Cambiar de entrada no reinicia la lección. El mensaje incluye texto y una salida utilizable."
+      }
+    ]
+  },
+  {
+    "key": "combate",
+    "title": "05 · Combate por turnos",
+    "subtitle": "Ataque, preparación, reacción, resultado y voz opcional.",
+    "screens": [
+      {
+        "id": "B01",
+        "kind": "combat",
+        "title": "Tu turno",
+        "body": "Ataca cuando estés listo.",
+        "enemy": "Guardián · 3 / 3",
+        "phase": "attack",
+        "actions": [
+          [
+            "Atacar · E",
+            "B02"
+          ]
+        ],
+        "note": "Actual · La voz solo puede ejecutar ATACAR en esta fase. Vida del jugador visible; no hay escucha fuera del turno."
+      },
+      {
+        "id": "B02",
+        "kind": "combat",
+        "title": "Prepárate",
+        "body": "Espera la señal.\n\nEsquivar",
+        "enemy": "Guardián · 2 / 3",
+        "phase": "prepare",
+        "next": "B03",
+        "note": "Actual · Señal anticipada. No hay botones activos de defensa antes de la ventana válida."
+      },
+      {
+        "id": "B03",
+        "kind": "combat",
+        "title": "¡AHORA!",
+        "body": "Esquiva el ataque.",
+        "enemy": "Guardián · 2 / 3",
+        "phase": "react",
+        "seconds": "1,8 s",
+        "actions": [
+          [
+            "Esquivar · Espacio",
+            "B05"
+          ],
+          [
+            "Bloquear · F",
+            "B06"
+          ]
+        ],
+        "note": "Actual · Ambas defensas están visibles; se enfoca la esperada. Tiempo ajustable, barra y segundos."
+      },
+      {
+        "id": "B04",
+        "kind": "combat",
+        "title": "¡AHORA!",
+        "body": "Bloquea el ataque.",
+        "enemy": "Guardián · 1 / 3",
+        "phase": "react",
+        "seconds": "2,4 s",
+        "actions": [
+          [
+            "Esquivar · Espacio",
+            "B06"
+          ],
+          [
+            "Bloquear · F",
+            "B05"
+          ]
+        ],
+        "note": "Actual · Segunda variante de defensa esperada. Mismo lugar de acciones y de tiempo restante."
+      },
+      {
+        "id": "B05",
+        "kind": "combat",
+        "title": "Acción resuelta",
+        "body": "✓ Defensa correcta.",
+        "enemy": "Guardián · 2 / 3",
+        "phase": "feedback",
+        "next": "B01",
+        "note": "Actual · Resultado textual antes de devolver el turno. No depende de un destello o un cambio de color."
+      },
+      {
+        "id": "B06",
+        "kind": "combat",
+        "title": "Repite la defensa",
+        "body": "Espera la señal y repite la defensa.",
+        "enemy": "Guardián · 2 / 3",
+        "phase": "feedback",
+        "next": "B02",
+        "note": "Actual · Los errores repiten la práctica; no se da por perdido el entrenamiento ante un fallo técnico."
+      },
+      {
+        "id": "B07",
+        "kind": "combat",
+        "title": "Prueba superada",
+        "body": "Entrenamiento completado.\n\nCompleta las estaciones para abrir los portales.",
+        "enemy": "Guardián · 0 / 3",
+        "phase": "won",
+        "actions": [
+          [
+            "Volver a la plaza",
+            "E06"
+          ]
+        ],
+        "note": "Actual · Si las estaciones ya están completas se anuncia que los portales están abiertos. Sin recompensas ficticias."
+      },
+      {
+        "id": "B08",
+        "kind": "combat",
+        "title": "¡AHORA!",
+        "body": "Esquiva el ataque.",
+        "enemy": "Guardián · 2 / 3",
+        "phase": "react",
+        "seconds": "3,6 s",
+        "voice": "Escuchando… · Di ESQUIVAR",
+        "actions": [
+          [
+            "Esquivar · Espacio",
+            "B05"
+          ],
+          [
+            "Bloquear · F",
+            "B06"
+          ]
+        ],
+        "note": "Actual · Voz habilitada: muestra estado durante la acción. Botones y teclado permanecen disponibles."
+      },
+      {
+        "id": "B09",
+        "kind": "combat",
+        "title": "¡AHORA!",
+        "body": "Bloquea el ataque.",
+        "enemy": "Guardián · 1 / 3",
+        "phase": "react",
+        "seconds": "3,2 s",
+        "voice": "Sin señal de micrófono. Usa los botones.",
+        "actions": [
+          [
+            "Esquivar · Espacio",
+            "B06"
+          ],
+          [
+            "Bloquear · F",
+            "B05"
+          ]
+        ],
+        "note": "Actual · Error de voz con alternativa visible. Calibración disponible desde Configuración."
+      },
+      {
+        "id": "B10",
+        "kind": "states",
+        "title": "Estados de voz",
+        "states": [
+          "Micrófono inactivo",
+          "Ctrl · Hablar",
+          "Escuchando…",
+          "Procesando comando…",
+          "✓ Comando reconocido · ATACAR",
+          "No entendimos el comando. Puedes repetir.",
+          "Sin señal. Usa los botones.",
+          "Sin permiso. Revisa Windows o usa botones.",
+          "Voz no disponible. Revisa idioma y micrófono."
+        ],
+        "note": "Catálogo actual · Inactive, Preparing, Listening, Processing, Recognized, Unrecognized, NoSignal, PermissionDenied, Unavailable."
+      }
+    ]
+  },
+  {
+    "key": "diario",
+    "title": "06 · Pausa y diario",
+    "subtitle": "Pausa de cinco acciones; consultas sin revelar progreso no descubierto.",
+    "screens": [
+      {
+        "id": "J01",
+        "kind": "pause",
+        "title": "Pausa",
+        "actions": [
+          [
+            "Continuar",
+            "E02"
+          ],
+          [
+            "Diario",
+            "J02"
+          ],
+          [
+            "Configuración",
+            "A02"
+          ],
+          [
+            "Menú principal",
+            "C02"
+          ],
+          [
+            "Salir",
+            "C03"
+          ]
+        ],
+        "note": "Actual · Pausa real de la exploración. Reanudar vuelve al punto anterior y se restaura el foco."
+      },
+      {
+        "id": "J02",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Mapa",
+        "map": true,
+        "body": "Estás en Plaza Núñez\n\nEstaciones conocidas\nVasija del eco · Completado\nDisco del alba · Pendiente\n\nCírculo de entrenamiento · Pendiente\nAcceso al umbral inferior · Bloqueado",
+        "note": "Actual · Esquema ilustrativo de rutas conocidas, no plano exacto del nivel. Sin zonas sin explorar."
+      },
+      {
+        "id": "J03",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Mapa",
+        "map": true,
+        "body": "Estás en Umbral inferior\n\nPlaza Núñez · Explorado\nAcceso a Plaza Núñez · Desbloqueado",
+        "note": "Actual · El trazado se guarda por mundo durante la sesión. Estructura idéntica para el umbral superior."
+      },
+      {
+        "id": "J04",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Objetivos",
+        "body": "Estaciones activadas: 1 / 3\nEntrenamiento: Pendiente\nPortales: Bloqueados",
+        "actions": [
+          [
+            "Consultar mapa",
+            "J02"
+          ]
+        ],
+        "note": "Actual · Sin botón de finalizar hasta cumplir los requisitos. Datos de ejemplo para una visita parcial."
+      },
+      {
+        "id": "J05",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Objetivos",
+        "body": "Estaciones activadas: 3 / 3\nEntrenamiento: Completado\nPortales: Desbloqueados",
+        "actions": [
+          [
+            "Finalizar visita",
+            "C05"
+          ]
+        ],
+        "note": "Actual · El cierre se ofrece tras las tres estaciones y el duelo. No es el final de toda la historia."
+      },
+      {
+        "id": "J06",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Archivo",
+        "body": "Examina una estación para añadirla al archivo.",
+        "note": "Actual · Estado vacío honesto. No muestra nombres ni descripciones de piezas aún no completadas."
+      },
+      {
+        "id": "J07",
+        "kind": "journal",
+        "title": "Diario",
+        "tab": "Archivo",
+        "body": "Vasija del eco\nInterpretación artística\nSigue las líneas que rodean la vasija.\n\nDisco del alba\nInterpretación artística\nObserva su relieve desde otro ángulo.\n\nGuardián de jade\nInterpretación artística\nDos movimientos; un momento de quietud.\n\nPiezas originales de ficción creadas para enseñar interacción. No son reproducciones arqueológicas.",
+        "note": "Actual · Descripciones tomadas de Object_1, Object_2 y Object_3. Solo aparecen piezas completadas. Lista desplazable."
+      }
+    ]
+  },
+  {
+    "key": "dispositivos",
+    "title": "07 · Dispositivos y calibración",
+    "subtitle": "Flujos voluntarios. Vista previa solo en calibración; fallback siempre visible.",
+    "screens": [
+      {
+        "id": "D01",
+        "kind": "device",
+        "title": "Calibrar micrófono",
+        "body": "Micrófono del medidor: Predeterminado\n\nEl reconocimiento usa el micrófono y el idioma de voz de Windows. El selector solo cambia la entrada del medidor.",
+        "status": "Micrófono inactivo",
+        "actions": [
+          [
+            "Seleccionar siguiente dispositivo",
+            "D01"
+          ],
+          [
+            "Medir ruido ambiental",
+            "D02"
+          ],
+          [
+            "Probar ATACAR",
+            "D03"
+          ],
+          [
+            "Usar teclado y mouse",
+            "A08"
+          ]
+        ],
+        "note": "Actual · No inicia escucha hasta una prueba explícita. Selección del medidor y del reconocedor no son equivalentes."
+      },
+      {
+        "id": "D02",
+        "kind": "device",
+        "title": "Medir ruido ambiental",
+        "body": "Guarda silencio durante tres segundos…",
+        "status": "Nivel de entrada",
+        "progress": 0.3,
+        "actions": [
+          [
+            "Repetir medición",
+            "D02"
+          ],
+          [
+            "Probar comando",
+            "D03"
+          ],
+          [
+            "Volver",
+            "D01"
+          ]
+        ],
+        "note": "Actual · Resultado alternativo: «Ruido elevado · Acerca el micrófono y repite» o «Ruido medido»."
+      },
+      {
+        "id": "D03",
+        "kind": "device",
+        "title": "Di: ATACAR",
+        "body": "Prueba el comando cuando aparezca Escuchando…",
+        "status": "✓ Comando reconocido · ATACAR",
+        "actions": [
+          [
+            "Probar comando / repetir",
+            "D03"
+          ],
+          [
+            "Calibrar cámara",
+            "D05"
+          ],
+          [
+            "Usar teclado y mouse",
+            "A08"
+          ]
+        ],
+        "note": "Estado ilustrativo de éxito · La prueba real depende de Windows, micrófono e idioma."
+      },
+      {
+        "id": "D04",
+        "kind": "device",
+        "title": "Micrófono no disponible",
+        "body": "Sin señal de micrófono.\n\nReconéctalo y repite la prueba.\nSi faltan permisos, revísalos en Windows.",
+        "status": "! La entrada no está disponible",
+        "actions": [
+          [
+            "Repetir prueba",
+            "D01"
+          ],
+          [
+            "Usar teclado y mouse",
+            "A08"
+          ]
+        ],
+        "note": "Actual · Incluye falta de señal, desconexión, permisos e indisponibilidad del reconocedor. La alternativa no bloquea el juego."
+      },
+      {
+        "id": "D05",
+        "kind": "device",
+        "title": "Calibrar manos",
+        "body": "Cámara: Predeterminada\n\nColoca tu mano dentro del área.",
+        "status": "Cámara inactiva",
+        "preview": true,
+        "actions": [
+          [
+            "Seleccionar siguiente dispositivo",
+            "D05"
+          ],
+          [
+            "Activar cámara / repetir",
+            "D06"
+          ],
+          [
+            "Utilizar mouse",
+            "A09"
+          ]
+        ],
+        "note": "Actual · Vista previa opcional, solo aquí. Activar cámara es una decisión explícita del jugador."
+      },
+      {
+        "id": "D06",
+        "kind": "device",
+        "title": "Mueve la mano",
+        "body": "Mueve la mano para controlar el cursor.\n\nIlumina tus manos y deja espacio alrededor.",
+        "status": "Mano detectada",
+        "preview": true,
+        "progress": 0.33,
+        "actions": [
+          [
+            "Continuar demostración",
+            "D07"
+          ],
+          [
+            "Utilizar mouse",
+            "A09"
+          ]
+        ],
+        "note": "Actual · Paso 1: se detecta desplazamiento del cursor. El botón de demostración existe solo para recorrer el wireframe."
+      },
+      {
+        "id": "D07",
+        "kind": "device",
+        "title": "Mantén la mano abierta",
+        "body": "Mantén la mano abierta para confirmar.",
+        "status": "Mantén el gesto",
+        "preview": true,
+        "progress": 0.66,
+        "actions": [
+          [
+            "Confirmar gesto (demo)",
+            "D08"
+          ],
+          [
+            "Utilizar mouse",
+            "A09"
+          ]
+        ],
+        "note": "Actual · Paso 2: permanencia configurable. La demostración sustituye el gesto físico dentro de Figma."
+      },
+      {
+        "id": "D08",
+        "kind": "device",
+        "title": "Prueba completada",
+        "body": "Puedes continuar.",
+        "status": "✓ Gesto confirmado",
+        "preview": true,
+        "progress": 1,
+        "actions": [
+          [
+            "Terminar calibración",
+            "A09"
+          ],
+          [
+            "Utilizar mouse",
+            "A09"
+          ]
+        ],
+        "note": "Actual · Paso 3. Cerrar calibración libera los dispositivos que esa pantalla activó."
+      },
+      {
+        "id": "D09",
+        "kind": "device",
+        "title": "No se encontró una cámara",
+        "body": "Puedes utilizar el mouse.\n\nConecta una cámara y vuelve a intentarlo si quieres usar las manos.",
+        "status": "! Cámara no disponible",
+        "preview": true,
+        "actions": [
+          [
+            "Activar cámara / repetir",
+            "D05"
+          ],
+          [
+            "Utilizar mouse",
+            "A09"
+          ]
+        ],
+        "note": "Actual · No exige permisos, conexión o reconocimiento para continuar jugando."
+      },
+      {
+        "id": "D10",
+        "kind": "states",
+        "title": "Estados de manos",
+        "states": [
+          "Cámara inactiva",
+          "Buscando mano · Acércala a la cámara",
+          "Mano detectada",
+          "Mantén el gesto",
+          "✓ Gesto confirmado",
+          "Se perdió el seguimiento · M para mouse",
+          "Objeto seleccionado",
+          "Repite la calibración"
+        ],
+        "note": "Catálogo actual · Inactive, Searching, Detected, GestureStarted, Confirmed, Lost, Selected, CalibrationRequired."
+      }
+    ]
+  },
+  {
+    "key": "cierre",
+    "title": "08 · Recuperación y cierre",
+    "subtitle": "Acciones destructivas, derrota, fin de visita y fallos de carga.",
+    "screens": [
+      {
+        "id": "C01",
+        "kind": "modal",
+        "title": "¿Reiniciar el recorrido?",
+        "body": "Se perderá el progreso de esta visita.",
+        "actions": [
+          [
+            "Cancelar",
+            "A04"
+          ],
+          [
+            "Confirmar",
+            "I03"
+          ]
+        ],
+        "note": "Actual · R y Jugabilidad abren esta confirmación. Reinicia la visita, sin checkpoint."
+      },
+      {
+        "id": "C02",
+        "kind": "modal",
+        "title": "¿Volver al menú?",
+        "body": "El progreso de esta visita no se guarda.",
+        "actions": [
+          [
+            "Cancelar",
+            "J01"
+          ],
+          [
+            "Confirmar",
+            "C07"
+          ]
+        ],
+        "note": "Actual · Descarga la plaza y vuelve al inicio independiente. Cancelar conserva partida y foco."
+      },
+      {
+        "id": "C03",
+        "kind": "modal",
+        "title": "¿Salir del juego?",
+        "body": "El progreso de esta visita no se guarda.",
+        "actions": [
+          [
+            "Cancelar",
+            "J01"
+          ],
+          [
+            "Confirmar",
+            "C08"
+          ]
+        ],
+        "note": "Actual · Solicita confirmación desde la pausa. En Figma solo conduce a una lámina de fin."
+      },
+      {
+        "id": "C04",
+        "kind": "help",
+        "title": "Derrota",
+        "body": "Al reintentar, comenzarás el recorrido desde el principio.",
+        "actions": [
+          [
+            "Reiniciar recorrido",
+            "C01"
+          ],
+          [
+            "Configuración",
+            "A02"
+          ],
+          [
+            "Menú principal",
+            "C02"
+          ]
+        ],
+        "note": "Actual · Se abre por Health.Died. El entrenamiento repite defensas; no representa derrota automática por un error de voz."
+      },
+      {
+        "id": "C05",
+        "kind": "help",
+        "title": "Visita completada",
+        "body": "Estaciones activadas: 3 / 3\nZonas visitadas: 3",
+        "actions": [
+          [
+            "Créditos",
+            "C06"
+          ],
+          [
+            "Menú principal",
+            "I01"
+          ],
+          [
+            "Repetir experiencia",
+            "C01"
+          ]
+        ],
+        "note": "Actual · Resumen de la visita. Valores ilustrativos. No revela el final completo de la historia."
+      },
+      {
+        "id": "C06",
+        "kind": "help",
+        "title": "Créditos",
+        "body": "El asedio de Bacatá\nVertical slice · Plaza Núñez\n\nEquipo autoral y créditos culturales pendientes.\n\nNoto Sans y Noto Serif · SIL OFL\nMediaPipe Unity Plugin · homuler\nUnity\n\nLa plaza y las piezas son interpretaciones artísticas.",
+        "actions": [
+          [
+            "Volver",
+            "C05"
+          ]
+        ],
+        "note": "Actual · Vuelve a la pantalla de origen; el prototipo usa el cierre de visita como ejemplo."
+      },
+      {
+        "id": "C07",
+        "kind": "loading",
+        "title": "Menú principal",
+        "body": "Volviendo al menú principal…",
+        "progress": 0.65,
+        "next": "I01",
+        "note": "Actual · Se detienen voz y manos al cargar. La música propia comienza en la escena de inicio."
+      },
+      {
+        "id": "C08",
+        "kind": "terminal",
+        "title": "Juego cerrado",
+        "body": "Fin del recorrido de prototipo.",
+        "actions": [
+          [
+            "Volver al inicio del prototipo",
+            "I01"
+          ]
+        ],
+        "note": "Solo documentación · Esta lámina representa Application.Quit; no es una pantalla añadida al juego."
+      },
+      {
+        "id": "C09",
+        "kind": "help",
+        "title": "No fue posible cargar la escena",
+        "body": "Vuelve al menú e inténtalo de nuevo.",
+        "actions": [
+          [
+            "Menú principal",
+            "I01"
+          ]
+        ],
+        "note": "Actual · El botón de recuperación solo se muestra tras el error, no durante la carga."
+      },
+      {
+        "id": "C10",
+        "kind": "states",
+        "title": "Notificaciones y avisos",
+        "states": [
+          "✓ Objeto descubierto · Archivo actualizado",
+          "Mapa actualizado",
+          "Recurso obtenido (extensión pendiente)",
+          "Nuevo acceso encontrado",
+          "! Camino bloqueado · Completa estaciones y duelo",
+          "! Seguimiento perdido · M para mouse",
+          "! Ruido elevado · Repite la medición",
+          "× No fue posible cargar la escena"
+        ],
+        "note": "Catálogo · Estado, aviso y error tienen texto. Duración configurable; no cubrir información crítica ni repetir sonidos."
+      }
+    ]
+  },
+  {
+    "key": "extension",
+    "title": "09 · Extensiones y adaptación",
+    "subtitle": "Componentes preparados y propuestas del encargo, claramente fuera del recorrido actual.",
+    "screens": [
+      {
+        "id": "X01",
+        "kind": "help",
+        "title": "Poporo · No disponible",
+        "body": "El poporo no está disponible en este tramo.\n\nPuedes consultar tus descubrimientos en el archivo cultural y las rutas conocidas en el mapa.",
+        "actions": [
+          [
+            "Volver",
+            "J01"
+          ]
+        ],
+        "note": "Componente existente sin acceso en Pausa · No existe inventario consumible. No añadir una entrada vacía al recorrido actual."
+      },
+      {
+        "id": "X02",
+        "kind": "help",
+        "title": "Poporo · Recursos",
+        "body": "[Recurso desbloqueado]\nCantidad · [dato del sistema]\nDescripción y función · [contenido aprobado]\n\n[Recurso bloqueado]\nDisponible al cumplir [requisito aprobado]",
+        "actions": [
+          [
+            "Acción del recurso (pendiente)",
+            null
+          ],
+          [
+            "Volver",
+            "J01"
+          ]
+        ],
+        "note": "Propuesta pendiente · Estructura de lista, sin cuadrícula. Hojas de coca, yopo y recursos rituales requieren datos y mecánicas aprobados."
+      },
+      {
+        "id": "X03",
+        "kind": "dialogue",
+        "title": "Diálogo",
+        "body": "[Texto narrativo aprobado de la conversación. Ejemplo de composición; el proyecto no contiene una secuencia narrativa final.]",
+        "note": "Componente existente · Nombre, texto, Continuar y Omitir; sin retrato inventado. Texto instantáneo / velocidad / autoavance necesitan contenido autoral.",
+        "actions": [
+          [
+            "Continuar · Enter",
+            "X04"
+          ],
+          [
+            "Omitir diálogo",
+            "E02"
+          ]
+        ]
+      },
+      {
+        "id": "X04",
+        "kind": "world",
+        "title": "Subtítulo y sonido",
+        "caption": "[El portal comienza a abrirse]",
+        "note": "Componente existente · Tamaño, opacidad, identificación de hablante y descripción de sonidos configurables. Área inferior segura."
+      },
+      {
+        "id": "X05",
+        "kind": "help",
+        "title": "Tutorial recordado entre visitas",
+        "body": "¿Tutorial completado antes?\n\nNo → Tres inspecciones + duelo antes de abrir portales.\n\nSí → Lobby libre y prácticas opcionales.\n\nGuardar al completar por primera vez; reiniciar la visita no debe borrar ese registro.",
+        "actions": [
+          [
+            "Ver lobby libre propuesto",
+            "E06"
+          ]
+        ],
+        "note": "Propuesta pendiente de persistencia · Actualmente la recarga reinicia los requisitos. No equivale a añadir Continuar o un sistema de guardado completo."
+      },
+      {
+        "id": "X06",
+        "kind": "home",
+        "title": "Inicio · Texto 150 %",
+        "large": true,
+        "actions": [
+          [
+            "Nueva partida",
+            "I03"
+          ],
+          [
+            "Configuración",
+            "I02"
+          ],
+          [
+            "Salir",
+            "I04"
+          ]
+        ],
+        "note": "Variante de accesibilidad · Referencia 1280 × 720; texto ampliado, placas más anchas y foco visible sin usar solo color."
+      },
+      {
+        "id": "X07",
+        "kind": "settings",
+        "title": "Configuración",
+        "tab": "Accesibilidad",
+        "large": true,
+        "rows": [
+          [
+            "Tamaño de texto",
+            "150 %",
+            "Selector"
+          ],
+          [
+            "Alto contraste",
+            "Activado",
+            "Interruptor"
+          ],
+          [
+            "Reducir movimiento",
+            "Activado",
+            "Interruptor"
+          ]
+        ],
+        "more": "A03",
+        "note": "Variante de accesibilidad · Menos filas visibles, scroll estable y retorno accesible. El contenido no se reduce para caber."
+      },
+      {
+        "id": "X08",
+        "kind": "world",
+        "title": "Exploración · 16:10",
+        "format": "1610",
+        "zone": "Plaza Núñez",
+        "prompt": "E · Examinar Vasija del eco",
+        "target": "N01",
+        "note": "Adaptación · 1280 × 800. Anclajes mantienen márgenes y contexto; no se añade información por tener más altura."
+      }
+    ]
+  }
+]

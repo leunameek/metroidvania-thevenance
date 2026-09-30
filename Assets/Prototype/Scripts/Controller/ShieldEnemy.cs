@@ -1,3 +1,4 @@
+using Nemequene.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,8 +26,7 @@ public class ShieldEnemy : MonoBehaviour
     [SerializeField] private float patrolPauseDuration = 1.5f;
 
     [Header("Alert")]
-    [SerializeField] private Vector2 alertSize = new Vector2(28f, 90f);
-    [SerializeField] private Vector2 alertMargin = new Vector2(0f, 40f);
+    [SerializeField] private Vector2 alertMargin = new Vector2(0f, 150f);
 
     public bool IsShielded => _shield.IsShielded;
 
@@ -57,41 +57,7 @@ public class ShieldEnemy : MonoBehaviour
 
     private void BuildAlertIcon()
     {
-        GameObject canvasGo = new GameObject("ShieldChargeAlertCanvas", typeof(RectTransform));
-        _alertGo = canvasGo;
-
-        Canvas canvas = canvasGo.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 950;
-
-        CanvasScaler scaler = canvasGo.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-
-        RectTransform anchorRect = canvasGo.GetComponent<RectTransform>();
-        anchorRect.anchorMin = new Vector2(0.5f, 1f);
-        anchorRect.anchorMax = new Vector2(0.5f, 1f);
-        anchorRect.pivot = new Vector2(0.5f, 1f);
-        anchorRect.anchoredPosition = new Vector2(alertMargin.x, -alertMargin.y);
-        anchorRect.sizeDelta = new Vector2(60f, 120f);
-
-        Color alertColor = new Color(1f, 0.15f, 0.1f);
-
-        GameObject barGo = new GameObject("AlertBar", typeof(RectTransform));
-        RectTransform barRect = barGo.GetComponent<RectTransform>();
-        barRect.SetParent(anchorRect, false);
-        barRect.sizeDelta = new Vector2(alertSize.x, alertSize.y * 0.72f);
-        barRect.anchoredPosition = new Vector2(0f, -alertSize.y * 0.14f);
-        barGo.AddComponent<Image>().color = alertColor;
-
-        GameObject dotGo = new GameObject("AlertDot", typeof(RectTransform));
-        RectTransform dotRect = dotGo.GetComponent<RectTransform>();
-        dotRect.SetParent(anchorRect, false);
-        dotRect.sizeDelta = new Vector2(alertSize.x, alertSize.x);
-        dotRect.anchoredPosition = new Vector2(0f, -alertSize.y + alertSize.x * 0.5f);
-        dotGo.AddComponent<Image>().color = alertColor;
-
-        canvasGo.SetActive(false);
+        _alertGo = UIKit.Alert(null, "ShieldChargeAlertCanvas", 950, "¡Embestida!", alertMargin.y);
     }
 
     public void RegisterDashChainHit(int chainCount)

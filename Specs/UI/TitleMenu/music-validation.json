@@ -1,0 +1,11 @@
+{
+  "title": "Bruma del umbral",
+  "seconds": 60,
+  "sample_rate": 44100,
+  "channels": 2,
+  "peak_dbfs": -7.5350141920419915,
+  "rms_dbfs": -20.450281769105914,
+  "clipped_samples": 0,
+  "seam_sample_delta": 0.004519320458924517,
+  "source": "Original deterministic synthesis; no external samples"
+}

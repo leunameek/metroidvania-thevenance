@@ -11,6 +11,7 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+/tmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -108,3 +109,122 @@ InitTestScene*.unity*
 
 .claude
 .idea
+
+# Local editor and operating-system files
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python tooling caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local secrets (keep a shareable example file)
+.env
+.env.*
+!.env.example
+
+# Blender backup generations; keep the editable .blend sources
+*.blend[0-9]*
+*.blend[0-9]*.meta
+
+# Generated test reports
+/TestResults/
+/TestResults*.xml
+
+# Redundant delivery archives; extracted contents are versioned
+/Assets/Models/Nemequene.zip
+/Assets/Models/Nemequene.zip.meta
+/Specs/UI/Atlas-navegable-Bacata.zip
+
+# Lightweight upload: unused models stay on this computer
+# Keep the runtime FBX, animations and textures used by scenes and editor builders.
+/Assets/Models/Arbol/tripo_convert_8fdb6014-50ff-4417-ab9e-231af300aa4e.fbm/Arbol_rm.JPEG
+/Assets/Models/Arbol/tripo_convert_8fdb6014-50ff-4417-ab9e-231af300aa4e.fbm/Arbol_rm.JPEG.meta
+/Assets/Models/Arbol/tripo_convert_8fdb6014-50ff-4417-ab9e-231af300aa4e.fbx
+/Assets/Models/Arbol/tripo_convert_8fdb6014-50ff-4417-ab9e-231af300aa4e.fbx.meta
+/Assets/Models/Arbustos/tripo_convert_4209d049-f5a5-43a1-8667-277dfa500a71.fbm/Arbustos_rm.JPEG
+/Assets/Models/Arbustos/tripo_convert_4209d049-f5a5-43a1-8667-277dfa500a71.fbm/Arbustos_rm.JPEG.meta
+/Assets/Models/Arbustos/tripo_convert_4209d049-f5a5-43a1-8667-277dfa500a71.fbx
+/Assets/Models/Arbustos/tripo_convert_4209d049-f5a5-43a1-8667-277dfa500a71.fbx.meta
+/Assets/Models/Banca/tripo_convert_585a3e1e-a3f9-45ef-b494-97d416b64c12.fbm/Banca_rm.JPEG
+/Assets/Models/Banca/tripo_convert_585a3e1e-a3f9-45ef-b494-97d416b64c12.fbm/Banca_rm.JPEG.meta
+/Assets/Models/Base_entrenamiento/tripo_convert_a22d797d-3407-4a40-ae60-798e6e52d82a.fbm/Base_entrenamiento_rm.JPEG
+/Assets/Models/Base_entrenamiento/tripo_convert_a22d797d-3407-4a40-ae60-798e6e52d82a.fbm/Base_entrenamiento_rm.JPEG.meta
+/Assets/Models/Disco+del+alba/tripo_convert_1cdb8f8d-7198-412c-847a-60f858220f22.fbm/Disco_del_alba_rm.JPEG
+/Assets/Models/Disco+del+alba/tripo_convert_1cdb8f8d-7198-412c-847a-60f858220f22.fbm/Disco_del_alba_rm.JPEG.meta
+/Assets/Models/Disco+del+alba/tripo_convert_1cdb8f8d-7198-412c-847a-60f858220f22.fbx
+/Assets/Models/Disco+del+alba/tripo_convert_1cdb8f8d-7198-412c-847a-60f858220f22.fbx.meta
+/Assets/Models/Entrada+del+archivo/tripo_convert_1f4a74e7-da77-41e8-8e19-5c3bf81dc187.fbm/Entrada_del_archivo_rm.JPEG
+/Assets/Models/Entrada+del+archivo/tripo_convert_1f4a74e7-da77-41e8-8e19-5c3bf81dc187.fbm/Entrada_del_archivo_rm.JPEG.meta
+/Assets/Models/Escaleras/tripo_convert_cf071cfa-c9e3-4f65-97f8-1f99d3bc16e9.fbm/Escaleras_rm.JPEG
+/Assets/Models/Escaleras/tripo_convert_cf071cfa-c9e3-4f65-97f8-1f99d3bc16e9.fbm/Escaleras_rm.JPEG.meta
+/Assets/Models/Farol/tripo_convert_f2f9eb92-45c0-40d7-8c30-442b4ddc58a4.fbm/Farol_rm.JPEG
+/Assets/Models/Farol/tripo_convert_f2f9eb92-45c0-40d7-8c30-442b4ddc58a4.fbm/Farol_rm.JPEG.meta
+/Assets/Models/Fuente/tripo_convert_12445d25-41ff-4a8c-920e-68f882988110.fbm/Fuente_rm.PNG
+/Assets/Models/Fuente/tripo_convert_12445d25-41ff-4a8c-920e-68f882988110.fbm/Fuente_rm.PNG.meta
+/Assets/Models/Guardian+de+entrenamiento/tripo_convert_4d40c251-6ffc-4813-a701-a4ed6a33f78b.fbm/Guardian_de_entrenamiento_rm.PNG
+/Assets/Models/Guardian+de+entrenamiento/tripo_convert_4d40c251-6ffc-4813-a701-a4ed6a33f78b.fbm/Guardian_de_entrenamiento_rm.PNG.meta
+/Assets/Models/Guardián+de+Jade/tripo_convert_64d274c2-a1c6-4d46-be5f-cb250a922b6a.fbm/Guardián_de_Jade_rm.JPEG
+/Assets/Models/Guardián+de+Jade/tripo_convert_64d274c2-a1c6-4d46-be5f-cb250a922b6a.fbm/Guardián_de_Jade_rm.JPEG.meta
+/Assets/Models/Guardián+de+Jade/tripo_convert_64d274c2-a1c6-4d46-be5f-cb250a922b6a.fbx
+/Assets/Models/Guardián+de+Jade/tripo_convert_64d274c2-a1c6-4d46-be5f-cb250a922b6a.fbx.meta
+/Assets/Models/Heaven+Portal/tripo_convert_efbd0eb4-867e-467d-a8d3-a99194c72c7e.fbm/Heaven_Portal_rm.JPEG
+/Assets/Models/Heaven+Portal/tripo_convert_efbd0eb4-867e-467d-a8d3-a99194c72c7e.fbm/Heaven_Portal_rm.JPEG.meta
+/Assets/Models/Jardinera/tripo_convert_a8aad3f5-5eff-4d24-bdc0-4968a89b98cd.fbm/Jardinera_rm.JPEG
+/Assets/Models/Jardinera/tripo_convert_a8aad3f5-5eff-4d24-bdc0-4968a89b98cd.fbm/Jardinera_rm.JPEG.meta
+/Assets/Models/Jardinera/tripo_convert_a8aad3f5-5eff-4d24-bdc0-4968a89b98cd.fbx
+/Assets/Models/Jardinera/tripo_convert_a8aad3f5-5eff-4d24-bdc0-4968a89b98cd.fbx.meta
+/Assets/Models/Jarron/tripo_convert_997e715a-d46d-4f24-aa9f-72d4a96cbf51.fbm/Jarron_rm.JPEG
+/Assets/Models/Jarron/tripo_convert_997e715a-d46d-4f24-aa9f-72d4a96cbf51.fbm/Jarron_rm.JPEG.meta
+/Assets/Models/Marca+de+llegada/tripo_convert_769950f2-5b1b-4491-befd-3b8fad879b5f.fbm/Marca_de_llegada_rm.JPEG
+/Assets/Models/Marca+de+llegada/tripo_convert_769950f2-5b1b-4491-befd-3b8fad879b5f.fbm/Marca_de_llegada_rm.JPEG.meta
+/Assets/Models/Marca+de+llegada/tripo_convert_769950f2-5b1b-4491-befd-3b8fad879b5f.fbx
+/Assets/Models/Marca+de+llegada/tripo_convert_769950f2-5b1b-4491-befd-3b8fad879b5f.fbx.meta
+/Assets/Models/Modelo_1.zip
+/Assets/Models/Modelo_1.zip.meta
+/Assets/Models/Modelo_2.zip
+/Assets/Models/Modelo_2.zip.meta
+/Assets/Models/Mundo_Inferior.meta
+/Assets/Models/Mundo_Inferior/
+/Assets/Models/Muro/tripo_convert_7998d6b1-a112-43d6-aede-8f1b55816c4e.fbm/Muro_rm.JPEG
+/Assets/Models/Muro/tripo_convert_7998d6b1-a112-43d6-aede-8f1b55816c4e.fbm/Muro_rm.JPEG.meta
+/Assets/Models/Muro/tripo_convert_7998d6b1-a112-43d6-aede-8f1b55816c4e.fbx
+/Assets/Models/Muro/tripo_convert_7998d6b1-a112-43d6-aede-8f1b55816c4e.fbx.meta
+/Assets/Models/Muros/tripo_convert_5420b519-ad1a-475d-aa5c-82798de46760.fbm/Muros_rm.JPEG
+/Assets/Models/Muros/tripo_convert_5420b519-ad1a-475d-aa5c-82798de46760.fbm/Muros_rm.JPEG.meta
+/Assets/Models/Muros/tripo_convert_5420b519-ad1a-475d-aa5c-82798de46760.fbx
+/Assets/Models/Muros/tripo_convert_5420b519-ad1a-475d-aa5c-82798de46760.fbx.meta
+/Assets/Models/Nemequene/Animations/Running Backward.fbx
+/Assets/Models/Nemequene/Animations/Running Backward.fbx.meta
+/Assets/Models/Nemequene/tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbm/Nemequene_rm.JPEG
+/Assets/Models/Nemequene/tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbm/Nemequene_rm.JPEG.meta
+/Assets/Models/Pavimento/tripo_convert_4a5b784c-f581-4345-bb8f-c486eec4a5db.fbm/Pavimento_rm.JPEG
+/Assets/Models/Pavimento/tripo_convert_4a5b784c-f581-4345-bb8f-c486eec4a5db.fbm/Pavimento_rm.JPEG.meta
+/Assets/Models/Pavimento/tripo_convert_4a5b784c-f581-4345-bb8f-c486eec4a5db.fbx
+/Assets/Models/Pavimento/tripo_convert_4a5b784c-f581-4345-bb8f-c486eec4a5db.fbx.meta
+/Assets/Models/Pedestal/tripo_convert_e4627512-6016-4b5e-a9b5-0412c817419b.fbm/Pedestal_rm.JPEG
+/Assets/Models/Pedestal/tripo_convert_e4627512-6016-4b5e-a9b5-0412c817419b.fbm/Pedestal_rm.JPEG.meta
+/Assets/Models/Pedestal/tripo_convert_e4627512-6016-4b5e-a9b5-0412c817419b.fbx
+/Assets/Models/Pedestal/tripo_convert_e4627512-6016-4b5e-a9b5-0412c817419b.fbx.meta
+/Assets/Models/Portal1/tripo_convert_afa86bd5-fcb2-4655-8cc6-122dcb1d434c.fbm/Portal1_rm.JPEG
+/Assets/Models/Portal1/tripo_convert_afa86bd5-fcb2-4655-8cc6-122dcb1d434c.fbm/Portal1_rm.JPEG.meta
+/Assets/Models/Portal_Underworld/tripo_convert_7387b93b-424b-4537-b199-b980ada6a5a5.fbm/Portal_Underworld_rm.JPEG
+/Assets/Models/Portal_Underworld/tripo_convert_7387b93b-424b-4537-b199-b980ada6a5a5.fbm/Portal_Underworld_rm.JPEG.meta
+/Assets/Models/ThevenanceHero.meta
+/Assets/Models/ThevenanceHero/
+/Assets/Models/Umbral+mundo+inferior/tripo_convert_e71eb375-08ea-4382-a6a8-c4157ea28a91.fbm/Umbral_mundo_inferior_rm.JPEG
+/Assets/Models/Umbral+mundo+inferior/tripo_convert_e71eb375-08ea-4382-a6a8-c4157ea28a91.fbm/Umbral_mundo_inferior_rm.JPEG.meta
+/Assets/Models/Umbral+mundo+inferior/tripo_convert_e71eb375-08ea-4382-a6a8-c4157ea28a91.fbx
+/Assets/Models/Umbral+mundo+inferior/tripo_convert_e71eb375-08ea-4382-a6a8-c4157ea28a91.fbx.meta
+/Assets/Models/Umbral+mundo+superior/tripo_convert_dfb117db-2040-4d8f-bce2-ae781838b70e.fbm/Umbral_mundo_superior_rm.JPEG
+/Assets/Models/Umbral+mundo+superior/tripo_convert_dfb117db-2040-4d8f-bce2-ae781838b70e.fbm/Umbral_mundo_superior_rm.JPEG.meta
+/Assets/Models/Umbral+mundo+superior/tripo_convert_dfb117db-2040-4d8f-bce2-ae781838b70e.fbx
+/Assets/Models/Umbral+mundo+superior/tripo_convert_dfb117db-2040-4d8f-bce2-ae781838b70e.fbx.meta
+
+# Editable source art is local; runtime exports are under Assets/.
+/ArtSource/

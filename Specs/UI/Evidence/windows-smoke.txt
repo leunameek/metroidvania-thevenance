@@ -1,0 +1,5 @@
+UI root, TMP fonts, opt-in devices, main menu, exploration and pause
+Exploration: True
+Pause: True
+Errors: 0
+Passed: True

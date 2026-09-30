@@ -33,10 +33,12 @@ public class PlayerAbilityModelTests
     }
 
     [Test]
-    public void TryPressDash_Tier3_ChainsUpToThreeWithinWindow()
+    public void TryPressDash_AfterThreeUpgrades_ChainsUpToThreeWithinWindow()
     {
         PlayerAbilityModel model = NewModel(chainWindow: 0.2f);
-        model.GrantDash(3);
+        model.GrantDashUpgrade();
+        model.GrantDashUpgrade();
+        model.GrantDashUpgrade();
 
         DashPressResult first = model.TryPressDash(Vector3.forward, Vector3.forward, isOnLadder: false, time: 0f);
         DashPressResult second = model.TryPressDash(Vector3.forward, Vector3.forward, isOnLadder: false, time: 0.1f);
@@ -59,6 +61,25 @@ public class PlayerAbilityModelTests
         DashPressResult lateChain = model.TryPressDash(Vector3.forward, Vector3.forward, isOnLadder: false, time: 0.5f);
 
         Assert.AreEqual(DashPressResult.Ignored, lateChain);
+    }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    public void GrantDashUpgrade_UnlocksExactlyOneAdditionalChainLink(int existingTier)
+    {
+        PlayerAbilityModel model = NewModel();
+        model.GrantDash(existingTier);
+
+        model.GrantDashUpgrade();
+
+        Assert.AreEqual(existingTier + 1, model.DashTier);
+        Assert.AreEqual(DashPressResult.Started, model.TryPressDash(Vector3.forward, Vector3.forward, false, 0f));
+        for (int link = 1; link <= existingTier; link++)
+            Assert.AreEqual(DashPressResult.Chained, model.TryPressDash(Vector3.forward, Vector3.forward, false, link * .025f));
+        Assert.AreEqual(DashPressResult.Ignored,
+            model.TryPressDash(Vector3.forward, Vector3.forward, false, (existingTier + 1) * .025f),
+            "A pickup must unlock only one extra dash, not its former fixed tier.");
     }
 
     [Test]

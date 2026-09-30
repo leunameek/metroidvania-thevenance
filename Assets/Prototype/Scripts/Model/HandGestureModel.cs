@@ -16,6 +16,7 @@ public class HandGestureModel
     private readonly List<Vector2> _points = new List<Vector2>(21);
 
     public bool IsPresent { get; private set; }
+    public bool IsOpen { get; private set; }
     public IReadOnlyList<Vector2> Points => _points;
 
     public HandGestureModel(float openFingerMargin)
@@ -35,13 +36,14 @@ public class HandGestureModel
         Vector2 palm = landmarks[9];
         bool open = IsHandOpen(landmarks);
 
-        if (_hasReference && open)
+        if (_hasReference && open && IsOpen)
         {
             _deltaXAccum += palm.x - _lastPosition.x;
             _deltaYAccum += palm.y - _lastPosition.y;
         }
         _lastPosition = palm;
         _hasReference = true;
+        IsOpen = open;
 
         _points.Clear();
         _points.AddRange(landmarks);
@@ -50,7 +52,9 @@ public class HandGestureModel
     public void MarkAbsent()
     {
         IsPresent = false;
+        IsOpen = false;
         _hasReference = false;
+        _deltaXAccum = _deltaYAccum = 0f;
         _points.Clear();
     }
 

@@ -246,6 +246,9 @@ MonoBehaviour:
   inspectDistance: 1.5
   rotationSensitivity: 0.3
   transitionDuration: 0.4
+  handRotationSensitivity: 400
+  invertVertical: 0
+  invertHorizontal: 1
 --- !u!114 &8745229264964719616
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using Nemequene.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,8 +8,8 @@ public class EnemyHealthBarUI : MonoBehaviour
     [SerializeField] private Vector3 worldOffset = new Vector3(0f, 1.6f, 0f);
     [SerializeField] private Vector2 barSize = new Vector2(120f, 14f);
     [SerializeField] private float worldScale = 0.01f;
-    [SerializeField] private Color backgroundColor = new Color(0f, 0f, 0f, 0.5f);
-    [SerializeField] private Color fillColor = new Color(0.85f, 0.2f, 0.2f);
+    // Renamed from fillColor so the prefabs' old bright red is dropped for the ceremonial palette.
+    [SerializeField] private Color barColor = new Color(0.64f, 0.2f, 0.16f);
 
     private Health _health;
     private ShieldEnemy _shieldEnemy;
@@ -79,7 +80,7 @@ public class EnemyHealthBarUI : MonoBehaviour
         canvasRect.sizeDelta = barSize;
         canvasGo.transform.localScale = Vector3.one * worldScale;
 
-        _fill = HealthBarBuilder.Build(canvasRect, barSize, backgroundColor, fillColor);
+        _fill = UIKit.Bar(canvasRect, barSize, barColor);
         canvasGo.SetActive(false);
     }
 }

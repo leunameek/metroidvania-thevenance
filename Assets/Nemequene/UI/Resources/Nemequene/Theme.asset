@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59d355813ada532592daf3e91fe23241, type: 3}
+  m_Name: Theme
+  m_EditorClassIdentifier: Prototype.Runtime::Nemequene.UI.UITheme
+  bodyFont: {fileID: 11400000, guid: 7339f434938d57847a3d09e0e0499cc9, type: 2}
+  titleFont: {fileID: 11400000, guid: 0aa27a67a8c25534c94c786fc5e22ba0, type: 2}
+  displayFont: {fileID: 11400000, guid: 66779e56a7969a14a90b436861569e03, type: 2}
+  stonePanel: {fileID: 0}
+  parchmentPanel: {fileID: 0}
+  stoneButton: {fileID: 0}
+  background: {r: 0.08627451, g: 0.0745098, b: 0.05882353, a: 1}
+  panel: {r: 0.172549, g: 0.1215686, b: 0.09019608, a: 1}
+  forest: {r: 0.2901961, g: 0.2078431, b: 0.1372549, a: 1}
+  gold: {r: 0.8313725, g: 0.6392157, b: 0.2588235, a: 1}
+  paleGold: {r: 0.9568627, g: 0.8196078, b: 0.5490196, a: 1}
+  ivory: {r: 0.9372549, g: 0.8901961, b: 0.7843137, a: 1}
+  stone: {r: 0.6627451, g: 0.6235294, b: 0.5568627, a: 1}
+  terracotta: {r: 0.545098, g: 0.1647059, b: 0.1647059, a: 1}
+  ochre: {r: 0.7607843, g: 0.5411765, b: 0.2431373, a: 1}
+  success: {r: 0.2941176, g: 0.4784314, b: 0.227451, a: 1}
+  warning: {r: 0.7607843, g: 0.5411765, b: 0.2431373, a: 1}
+  error: {r: 0.545098, g: 0.1647059, b: 0.1647059, a: 1}
+  information: {r: 0.7882353, g: 0.7215686, b: 0.6039216, a: 1}
+  disabled: {r: 0.6627451, g: 0.6235294, b: 0.5568627, a: 1}
+  selected: {r: 0.9568627, g: 0.8196078, b: 0.5490196, a: 1}
+  parchment: {r: 0.8627451, g: 0.7607843, b: 0.6039216, a: 1}
+  ink: {r: 0.1647059, g: 0.1137255, b: 0.07058824, a: 1}

@@ -65,7 +65,7 @@ public class InspectionModel
         return Quaternion.Euler(Pitch, Yaw, 0f);
     }
 
-    // rightHandDeltaY drives pitch, leftHandDeltaX drives yaw - mirrors the mouse-drag convention.
+    // rightHandDeltaY drives pitch and leftHandDeltaX drives yaw; each axis can be inverted independently.
     public Quaternion ApplyHandRotation(float rightHandDeltaY, float leftHandDeltaX)
     {
         Pitch += rightHandDeltaY * _handRotationSensitivity * (_invertVertical ? -1f : 1f);

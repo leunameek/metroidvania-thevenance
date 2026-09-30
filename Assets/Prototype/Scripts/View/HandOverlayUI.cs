@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Nemequene.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,8 @@ using UnityEngine.UI;
 public class HandOverlayUI : MonoBehaviour
 {
     [SerializeField] private Vector2 viewportSize = new Vector2(260f, 200f);
-    [SerializeField] private Vector2 viewportMargin = new Vector2(24f, 24f);
+    // Renamed from viewportMargin: the scene's 24 px broke the 5 % / 4 % safe margins.
+    [SerializeField] private Vector2 screenMargin = new Vector2(96f, 44f);
     [SerializeField] private Color leftHandColor = new Color(0.3f, 0.6f, 1f);
     [SerializeField] private Color rightHandColor = new Color(1f, 0.55f, 0.15f);
     [SerializeField] private float dotSize = 8f;
@@ -73,10 +75,16 @@ public class HandOverlayUI : MonoBehaviour
         _viewport.anchorMax = new Vector2(1f, 0f);
         _viewport.pivot = new Vector2(1f, 0f);
         _viewport.sizeDelta = viewportSize;
-        _viewport.anchoredPosition = -viewportMargin;
+        _viewport.anchoredPosition = new Vector2(-screenMargin.x, screenMargin.y);
 
+        // Dark HUD plate with the compact stone frame; the blue/orange landmark dots stay as they were.
         Image background = panelGo.AddComponent<Image>();
-        background.color = new Color(0f, 0f, 0f, 0.35f);
+        Color plate = UIPalette.Deep; plate.a = .72f;
+        background.color = plate;
+        RectTransform frame = new GameObject("Stonework", typeof(RectTransform)).GetComponent<RectTransform>();
+        frame.SetParent(_viewport, false); frame.anchorMin = Vector2.zero; frame.anchorMax = Vector2.one;
+        frame.offsetMin = frame.offsetMax = Vector2.zero;
+        UIFrameGraphic stonework = frame.gameObject.AddComponent<UIFrameGraphic>(); stonework.compact = true; stonework.raycastTarget = false;
 
         _leftDots = CreateDots(21, leftHandColor, "LeftDot");
         _rightDots = CreateDots(21, rightHandColor, "RightDot");

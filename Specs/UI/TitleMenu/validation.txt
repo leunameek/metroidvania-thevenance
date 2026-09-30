@@ -1,0 +1,80 @@
+Checks: 76
+Runtime errors: 0
+Editor search diagnostics: 1
+Exit: 0
+application opens directly on the isolated title
+tutorial and its devices are not loaded behind the menu
+exactly three primary actions in the correct order
+new game has initial keyboard focus
+independent menu music loops with gentle startup
+initial focused action has readable contrast
+home at 1280x720: Nemequene
+home at 1280x720: Entre la piedra y la memoria
+home at 1280x720: Nueva partida
+home at 1280x720: Configuración
+home at 1280x720: Salir
+home at 1280x720: Comienza tu viaje en la Plaza Núñez.
+home at 1280x720: Flechas o Tab · Elegir     Enter · Confirmar
+home at 1280x720: M · Silenciar música
+home at 1920x1080: Nemequene
+home at 1920x1080: Entre la piedra y la memoria
+home at 1920x1080: Nueva partida
+home at 1920x1080: Configuración
+home at 1920x1080: Salir
+home at 1920x1080: Comienza tu viaje en la Plaza Núñez.
+home at 1920x1080: Flechas o Tab · Elegir     Enter · Confirmar
+home at 1920x1080: M · Silenciar música
+home at 2560x1440: Nemequene
+home at 2560x1440: Entre la piedra y la memoria
+home at 2560x1440: Nueva partida
+home at 2560x1440: Configuración
+home at 2560x1440: Salir
+home at 2560x1440: Comienza tu viaje en la Plaza Núñez.
+home at 2560x1440: Flechas o Tab · Elegir     Enter · Confirmar
+home at 2560x1440: M · Silenciar música
+home at 1920x1200: Nemequene
+home at 1920x1200: Entre la piedra y la memoria
+home at 1920x1200: Nueva partida
+home at 1920x1200: Configuración
+home at 1920x1200: Salir
+home at 1920x1200: Comienza tu viaje en la Plaza Núñez.
+home at 1920x1200: Flechas o Tab · Elegir     Enter · Confirmar
+home at 1920x1200: M · Silenciar música
+arrow key selects configuration
+keyboard selected configuration has readable contrast
+only the selected primary action is highlighted
+Enter opens configuration without starting the tutorial
+accessibility is the first configuration section
+home at 150 percent text and 720p: Nemequene
+home at 150 percent text and 720p: Entre la piedra y la memoria
+home at 150 percent text and 720p: Nueva partida
+home at 150 percent text and 720p: Configuración
+home at 150 percent text and 720p: Salir
+home at 150 percent text and 720p: Comienza tu viaje en la Plaza Núñez.
+home at 150 percent text and 720p: Flechas o Tab · Elegir     Enter · Confirmar
+home at 150 percent text and 720p: M · Silenciar música
+high contrast focus remains readable at 150 percent
+home at 150 percent text and 16:10: Nemequene
+home at 150 percent text and 16:10: Entre la piedra y la memoria
+home at 150 percent text and 16:10: Nueva partida
+home at 150 percent text and 16:10: Configuración
+home at 150 percent text and 16:10: Salir
+home at 150 percent text and 16:10: Comienza tu viaje en la Plaza Núñez.
+home at 150 percent text and 16:10: Flechas o Tab · Elegir     Enter · Confirmar
+home at 150 percent text and 16:10: M · Silenciar música
+accessibility settings persist
+M mutes menu music
+M restores menu music
+Tab follows the primary action order
+Escape returns and restores configuration focus
+exit requires confirmation with cancel selected
+cancel exit restores the prior action
+screen mode change offers reversible confirmation
+cancel display change returns to configuration
+mouse new game loads directly into the playable tutorial
+title scene and menu music unload on new game
+new game requires neither camera nor microphone
+menu settings reach the game
+pause returns to the independent title and unloads the tutorial
+return creates one menu and one playing music source
+no runtime errors in the complete title flow

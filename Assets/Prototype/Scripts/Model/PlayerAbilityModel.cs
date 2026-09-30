@@ -45,6 +45,12 @@ public class PlayerAbilityModel
         if (tier > DashTier) DashTier = tier;
     }
 
+    // Collectible rewards add one chain link regardless of which pickup was found first.
+    public void GrantDashUpgrade()
+    {
+        DashTier++;
+    }
+
     public void GrantDoubleJump()
     {
         HasDoubleJump = true;

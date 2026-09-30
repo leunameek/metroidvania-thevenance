@@ -246,6 +246,9 @@ MonoBehaviour:
   inspectDistance: 1.5
   rotationSensitivity: 0.3
   transitionDuration: 0.4
+  handRotationSensitivity: 400
+  invertVertical: 0
+  invertHorizontal: 1
 --- !u!114 &109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,7 +261,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63728acb5d7742608e147ca1bb0cc9d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dashTier: 1
 --- !u!1 &110
 GameObject:
   m_ObjectHideFlags: 0

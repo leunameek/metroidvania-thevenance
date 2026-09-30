@@ -1,0 +1,7 @@
+EL ASEDIO DE BACATÁ - ATLAS NAVEGABLE
+
+Extrae todo el ZIP y abre index.html en Chrome, Edge o Firefox.
+Las 22 pantallas se recorren desde la barra superior o lateral.
+Las vistas marcadas DISEÑO describen sistemas futuros.
+El atlas funciona sin red ni archivos adicionales del proyecto.
+La imagen conceptual se usa como referencia visual; el atlas muestra contenido del vertical slice.

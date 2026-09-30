@@ -1,0 +1,65 @@
+Checks: 61
+Runtime errors: 0
+Editor search diagnostics: 1
+Exit: 0
+application opens directly on the isolated title
+tutorial and its devices are not loaded behind the menu
+exactly three primary actions in the correct order
+new game has initial keyboard focus
+independent menu music loops with gentle startup
+initial focused action has readable contrast
+ambient motion runs on the home screen
+lagoon shader is supported and compiles without errors
+separate title emblem and painting leave menu input unobstructed
+title emblem has real source transparency
+ambient clock advances without moving the title or actions
+rendered mist and water change visibly between frames
+ambient loop stops when the application loses focus
+title-1280x720: emblem fits above all actions
+title-1280x720: Nueva partida
+title-1280x720: Configuración
+title-1280x720: Salir
+title-1920x1080: emblem fits above all actions
+title-1920x1080: Nueva partida
+title-1920x1080: Configuración
+title-1920x1080: Salir
+title-2560x1440: emblem fits above all actions
+title-2560x1440: Nueva partida
+title-2560x1440: Configuración
+title-2560x1440: Salir
+title-1920x1200: emblem fits above all actions
+title-1920x1200: Nueva partida
+title-1920x1200: Configuración
+title-1920x1200: Salir
+arrow key selects configuration
+keyboard selected configuration has readable contrast
+only the selected primary action is highlighted
+Enter opens configuration without starting the tutorial
+ambient loop stops behind configuration
+accessibility is the first configuration section
+reduced motion freezes the entire ambient effect
+title-150-720p: emblem fits above all actions
+title-150-720p: Nueva partida
+title-150-720p: Configuración
+title-150-720p: Salir
+high contrast focus remains readable at 150 percent
+title-150-1610: emblem fits above all actions
+title-150-1610: Nueva partida
+title-150-1610: Configuración
+title-150-1610: Salir
+accessibility settings persist
+M mutes menu music
+M restores menu music
+Tab follows the primary action order
+Escape returns and restores configuration focus
+exit requires confirmation with cancel selected
+cancel exit restores the prior action
+screen mode change offers reversible confirmation
+cancel display change returns to configuration
+mouse new game loads directly into the playable tutorial
+title scene and menu music unload on new game
+new game requires neither camera nor microphone
+menu settings reach the game
+pause returns to the independent title and unloads the tutorial
+return creates one menu and one playing music source
+no runtime errors in the complete title flow

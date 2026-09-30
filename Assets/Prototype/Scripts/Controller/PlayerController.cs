@@ -5,6 +5,11 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
+    [Header("Optional exploration controls")]
+    [SerializeField] private bool enableSprint;
+    [SerializeField] private bool enableExplorationDash;
+    [SerializeField, Min(1f)] private float sprintMultiplier = 1.6f;
+    [SerializeField] private Transform movementReference;
     [SerializeField] private float jumpHeight = 1.5f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float climbSpeed = 4f;
@@ -37,8 +42,12 @@ public class PlayerController : MonoBehaviour
     public bool IsDashing => _abilities.IsDashing;
     public bool IsGrounded => _controller.isGrounded;
     public bool HasDoubleJump => _abilities.HasDoubleJump;
+    public bool InputLocked => _inputLocked;
+    public float VerticalVelocity => _verticalVelocity.y;
+    public bool IsOnLadder => _laddersTouching > 0;
 
-    private bool IsOnLadder => _laddersTouching > 0;
+    // Fired when a jump starts; the argument is true for the air (double) jump.
+    public event System.Action<bool> Jumped;
 
     private void Awake()
     {
@@ -47,6 +56,8 @@ public class PlayerController : MonoBehaviour
     }
 
     public void GrantDash(int tier) => _abilities.GrantDash(tier);
+
+    public void GrantDashUpgrade() => _abilities.GrantDashUpgrade();
 
     public void GrantDoubleJump() => _abilities.GrantDoubleJump();
 
@@ -105,7 +116,9 @@ public class PlayerController : MonoBehaviour
         if (keyboard.wKey.isPressed) z += 1f;
         if (keyboard.sKey.isPressed) z -= 1f;
 
-        if (keyboard.leftShiftKey.wasPressedThisFrame)
+        if (!enableSprint && keyboard.leftShiftKey.wasPressedThisFrame)
+            HandleDashPress(x, z);
+        else if (enableSprint && enableExplorationDash && keyboard.qKey.wasPressedThisFrame)
             HandleDashPress(x, z);
 
         if (IsDashing)
@@ -123,6 +136,12 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector3 move = new Vector3(x, 0f, z);
+        if (movementReference != null)
+        {
+            Vector3 forward = Vector3.ProjectOnPlane(movementReference.forward, Vector3.up).normalized;
+            Vector3 right = Vector3.Cross(Vector3.up, forward);
+            move = right * x + forward * z;
+        }
         if (move.sqrMagnitude > 1f) move.Normalize();
 
         if (move.sqrMagnitude > 0.0001f)
@@ -137,22 +156,32 @@ public class PlayerController : MonoBehaviour
             _abilities.OnGrounded();
 
             if (keyboard.spaceKey.wasPressedThisFrame)
+            {
                 _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                Jumped?.Invoke(false);
+            }
         }
         else if (keyboard.spaceKey.wasPressedThisFrame && _abilities.TryConsumeAirJump())
         {
             _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            Jumped?.Invoke(true);
         }
 
         _verticalVelocity.y += gravity * Time.deltaTime;
 
-        Vector3 motion = move * moveSpeed + Vector3.up * _verticalVelocity.y;
+        float speed = moveSpeed * (enableSprint && keyboard.leftShiftKey.isPressed ? sprintMultiplier : 1f);
+        Vector3 motion = move * speed + Vector3.up * _verticalVelocity.y;
         _controller.Move(motion * Time.deltaTime);
     }
 
     private void HandleDashPress(float x, float z)
     {
         Vector3 inputDirection = new Vector3(x, 0f, z);
+        if (movementReference != null)
+        {
+            Vector3 forward = Vector3.ProjectOnPlane(movementReference.forward, Vector3.up).normalized;
+            inputDirection = Vector3.Cross(Vector3.up, forward) * x + forward * z;
+        }
         DashPressResult result = _abilities.TryPressDash(inputDirection, transform.forward, IsOnLadder, Time.time);
 
         if (result == DashPressResult.Started)

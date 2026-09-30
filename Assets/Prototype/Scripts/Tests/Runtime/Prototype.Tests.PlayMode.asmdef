@@ -1,0 +1,6 @@
+{
+    "name": "Prototype.Tests.PlayMode",
+    "references": ["Prototype.Model", "Prototype.Runtime", "Nemequene.UI.Runtime", "UnityEngine.UI"],
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "optionalUnityReferences": ["TestAssemblies"]
+}

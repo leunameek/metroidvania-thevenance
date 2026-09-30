@@ -40,6 +40,8 @@ public class PlayerRespawn : MonoBehaviour
 
     private void HandleFall()
     {
+        // Only a death caused by this fall should suppress the safe-ground teleport.
+        _justDied = false;
         _health.TakeDamage(fallDamage);
 
         if (_justDied)
