@@ -16,7 +16,7 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class MundoInferiorBlockoutBuilder
 {
-    public const string ScenePath = "Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity";
+    public const string ScenePath = WorldTravel.LowerWorldScene;
     private const string KitRoot = "Assets/Models/Mundo_Inferior";
     private const string MaterialFolder = "Assets/Worlds/MundoInferior/Materials";
     private const string KitMaterialFolder = MaterialFolder + "/Kit";
@@ -136,6 +136,9 @@ public static class MundoInferiorBlockoutBuilder
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AssetDatabase.SaveAssets();
+        // The plaza portal loads it by path (WorldTravel), which needs it in the build list.
+        if (!EditorBuildSettings.scenes.Any(entry => entry.path == ScenePath))
+            EditorBuildSettings.scenes = EditorBuildSettings.scenes.Concat(new[] { new EditorBuildSettingsScene(ScenePath, true) }).ToArray();
     }
 
     // ---------------------------------------------------------------- rooms (guide section 4)
@@ -149,7 +152,7 @@ public static class MundoInferiorBlockoutBuilder
         Wall(t, "A06 Murete der", 6, 6.6f, 0, 10, 1);
         Wall(t, "A06 Murete izq", -6.6f, -6, 0, 4.6f, 1);
         Wall(t, "A06 Murete izq fondo", -6.6f, -6, 7.4f, 10, 1);
-        Portal(t, "A04 Portal de llegada y retorno", new Vector3(0, 0, 0.7f), 0, true, "A04 · volver a Plaza Núñez (E, pendiente)");
+        Portal(t, "A04 Portal de llegada y retorno", new Vector3(0, 0, 0.7f), 0, true, "A04 · volver a Plaza Núñez (E)");
         Gate(t, "A02 Puerta del atajo", new Vector3(-5, 0, 6), 90, "atajo_03_01", false);
         Crystal(t, new Vector3(-3, 0, 2)); Crystal(t, new Vector3(3, 0, 7));
         Label(t, "Salida a 02 →", new Vector3(0, 2.2f, 9.5f));
@@ -298,7 +301,7 @@ public static class MundoInferiorBlockoutBuilder
         Floor(t, "T01 Apoyo lateral izq", -7, -5, 7, 9, 0.8f, _trial, 0.8f);
         Floor(t, "T01 Apoyo lateral der", 5, 7, 7, 9, 0.8f, _trial, 0.8f);
         Bot(t, "C05 Guardián del fondo", new Vector3(0, 0, 11), 180, 4.2f);
-        Portal(t, "A04 Portal de victoria", new Vector3(7, 0, 13), -90, false, "A04 · regreso tras la victoria");
+        Portal(t, "A04 Portal de victoria", new Vector3(7, 0, 13), -90, false, "A04 · regreso tras la victoria (inactivo)");
         foreach (var (x, z) in new[] { (-4f, 7f), (4f, 9f) })
             Kit("H04", t, "H04 Ataque del jefe", new Vector3(x, 6, z), 0, new Vector3(0, 2, 0), Anchor.Top);
     }
@@ -381,9 +384,11 @@ public static class MundoInferiorBlockoutBuilder
         veil.transform.localPosition = new Vector3(0, 1.75f, 0); veil.transform.localScale = new Vector3(2.5f, 3.3f, 1);
         UnityEngine.Object.DestroyImmediate(veil.GetComponent<Collider>());
         veil.GetComponent<Renderer>().sharedMaterial = _veil;
-        veil.SetActive(active);
-        var trigger = new GameObject("Volumen de activación (pendiente)", typeof(BoxCollider)).GetComponent<BoxCollider>();
-        trigger.transform.SetParent(root, false); trigger.isTrigger = true; trigger.center = new Vector3(0, 1.5f, 0); trigger.size = new Vector3(2.4f, 3, 1.2f);
+        var portal = root.gameObject.AddComponent<MIPortal>();
+        var so = new SerializedObject(portal);
+        so.FindProperty("active").boolValue = active; so.FindProperty("effect").objectReferenceValue = veil;
+        so.FindProperty("range").floatValue = 1.8f; // the arrival spawn (2.3 m away) stays out of range
+        so.ApplyModifiedPropertiesWithoutUndo();
         Label(root, label, new Vector3(0, 4.6f, 0), Quaternion.Euler(0, -yaw, 0));
     }
 

@@ -91,8 +91,32 @@ public sealed class TechnicalDemoController : MonoBehaviour
         _skyAmbient = RenderSettings.ambientSkyColor;
         _equatorAmbient = RenderSettings.ambientEquatorColor;
         _groundAmbient = RenderSettings.ambientGroundColor;
+        // Before the UI starts its session (sceneLoaded) so its first save keeps this progress.
+        if (WorldTravel.ReturningFrom != 0) RestoreProgress(WorldTravel.CompletedObjectIds, WorldTravel.CombatCompleted);
     }
-    private void Start() { player.GrantDash(1); }
+
+    // Back from a world scene: standing in front of its portal (the player is ready in Start).
+    private void ArriveFromWorld(int world)
+    {
+        foreach (var portal in portals)
+        {
+            if (portal == null || portal.world != world) continue;
+            Vector3 away = _worldSpawn - portal.transform.position; away.y = 0;
+            away = away.sqrMagnitude > 0.01f ? away.normalized : -portal.transform.forward;
+            // Teleport moves the capsule centre: 1 m above the feet on the 2 m plaza capsule.
+            player.Teleport(portal.transform.position + away * 4.5f + Vector3.up * 1.1f);
+            player.transform.rotation = Quaternion.LookRotation(away);
+            orbitCamera.SnapAfterTeleport();
+            break;
+        }
+        Status = "De vuelta en Plaza Núñez. Tu progreso se conserva.";
+    }
+    private void Start()
+    {
+        player.GrantDash(1);
+        if (WorldTravel.ReturningFrom != 0) ArriveFromWorld(WorldTravel.ReturningFrom);
+        WorldTravel.ClearReturn();
+    }
 
     private void Update()
     {
@@ -321,6 +345,12 @@ public sealed class TechnicalDemoController : MonoBehaviour
         float fadeOut = _reducedMotion ? .01f : .4f;
         for (float t = 0; t < fadeOut; t += Time.deltaTime) { Fade = t / fadeOut; yield return null; }
         Fade = 1;
+        // Worlds with their own level scene leave the plaza instead of using the in-scene threshold.
+        if (portal.world != 0 && WorldTravel.SceneFor(portal.world) != null)
+        {
+            WorldTravel.LeavePlaza(portal.world, CompletedObjectIds, combat != null && combat.Completed);
+            yield break;
+        }
         World = portal.world;
         ViewChanged?.Invoke();
         _worldSpawn = portal.destination.position;

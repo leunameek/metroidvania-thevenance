@@ -140,6 +140,13 @@ namespace Nemequene.UI
                 _previousPlaySeconds = loaded.playSeconds;
                 _lastSavedProgress = ProgressSignature();
             }
+            else if (WorldTravel.ReturningFrom != 0)
+            {
+                // Back from a world scene: the demo restored lessons and training already.
+                Map.RestoreVisitedMask(WorldTravel.VisitedMask);
+                _previousPlaySeconds = WorldTravel.PlaySeconds;
+            }
+            WorldTravel.Leaving += OnLeavingPlaza;
             GameSaveStore.ClearPendingLoad();
             _sessionStartedAt = Time.time;
             SaveCurrent();
@@ -147,6 +154,11 @@ namespace Nemequene.UI
             _subscriptions.Add(_hud); _subscriptions.Add(_combat); _subscriptions.Add(_inspection);
             _subscriptions.Add(Map); _subscriptions.Add(Voice); _subscriptions.Add(Hands); _subscriptions.Add(Notifications);
             _subscriptions.Add(Poporo); _subscriptions.Add(_inventory); _subscriptions.Add(_saveLoad);
+        }
+        private void OnLeavingPlaza()
+        {
+            WorldTravel.VisitedMask = Map.VisitedMask | 1; // the lower world is about to be visited
+            WorldTravel.PlaySeconds = PlaySeconds;
         }
         public void StartSession()
         {
@@ -303,6 +315,7 @@ namespace Nemequene.UI
         private void OnDestroy()
         {
             if (!_ready) return;
+            WorldTravel.Leaving -= OnLeavingPlaza;
             Screens.Changed -= OnScreen; _accessibility.Dispose();
             _calibration.Dispose(); Loading.Dispose(); Settings.Flush();
             foreach (var subscription in _subscriptions) subscription.Dispose();

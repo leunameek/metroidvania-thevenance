@@ -44,8 +44,17 @@ acceso 07→08 antes de la reja del cuerno (en vez de una entrada lateral propia
   péndulos que oscilan (35°, 3 s, desfase de media oscilación) y cuyo golpe devuelve al ancla, rejas
   `MIGate` con bisagra.
 - Pendiente (etapas 4+): recompensas reales e idempotentes, palancas y soporte del cuerno con E, losas que
-  ceden, estalactitas, IA de enemigos, jefe, portales conectados con la plaza y guardado.
+  ceden, estalactitas, IA de enemigos, jefe, portal de victoria de 09 y guardado del progreso propio del mundo inferior.
 - Pendiente de cámara: en la llegada a 01 el marco A04 queda entre la cámara y el jugador.
+
+## Viaje desde y hacia la plaza
+
+`WorldTravel` (Prototype.Runtime) conecta las escenas: el portal del mundo inferior de Plaza Núñez (world −1),
+una vez superado el tutorial, carga esta escena en lugar del umbral de demostración del hub; el jugador llega
+al Spawn 01. En 01, el A04 se usa con E (sin teletransporte por contacto) y vuelve a la plaza: se restauran
+lecciones, entrenamiento, mundos visitados y tiempo de juego, y el jugador aparece 4,5 m delante del portal,
+fuera de su radio. El constructor añade la escena a Build Settings. El A04 de 09 queda inactivo hasta el jefe.
+El mundo superior sigue usando su umbral dentro del hub.
 
 ## Teclas de prueba
 
