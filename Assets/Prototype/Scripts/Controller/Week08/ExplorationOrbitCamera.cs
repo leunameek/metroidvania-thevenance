@@ -16,6 +16,8 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
     // The player cannot turn the camera: it keeps a fixed angle behind the character.
     [SerializeField] private bool allowPlayerOrbit;
     private float _yaw;
+    // Fixed-angle levels that turn between rooms ease the yaw towards this (camera zones set it).
+    private float _targetYaw, _yawVelocity;
     private float _pitch = 30f;
     private float _currentDistance;
     private float _distanceVelocity;
@@ -43,7 +45,10 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
             Vector2 delta = mouse.delta.ReadValue();
             _yaw += delta.x * sensitivity * _uiSensitivity;
             _pitch = Mathf.Clamp(_pitch - delta.y * sensitivity * _uiSensitivity * (_invertY ? -1 : 1), minPitch, maxPitch);
+            _targetYaw = _yaw;
         }
+        else if (!Mathf.Approximately(_yaw, _targetYaw))
+            _yaw = Mathf.SmoothDampAngle(_yaw, _targetYaw, ref _yawVelocity, Mathf.Max(.001f, 0.45f * _motionScale));
 
         Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0f);
         Vector3 pivot = target.position + Vector3.up * pivotHeight;
@@ -63,6 +68,14 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
         else _currentDistance = Mathf.SmoothDamp(_currentDistance, desiredDistance,
             ref _distanceVelocity, Mathf.Max(.001f, smoothTime * _motionScale));
         transform.SetPositionAndRotation(pivot + direction * _currentDistance, rotation);
+    }
+
+    public float Yaw => _yaw;
+
+    public void SetYaw(float yaw, bool instant = false)
+    {
+        _targetYaw = yaw;
+        if (instant) { _yaw = yaw; _yawVelocity = 0f; }
     }
 
     public void SnapAfterTeleport()
