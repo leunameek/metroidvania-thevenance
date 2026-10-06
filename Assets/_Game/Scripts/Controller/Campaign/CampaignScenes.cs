@@ -34,10 +34,10 @@ public static class CampaignEpilogue
         {
             Debug.LogWarning("[Campaign] Falta la escena de Bacatá en Build Settings; el epílogo se marca como visto.");
             foreach (var id in new[] { "H19", "H20", "H21" }) CampaignProgress.CompleteSequence(id);
-            SceneManager.LoadScene(CampaignScenes.Title);
+            SceneLoader.Load(CampaignScenes.Title);
             return;
         }
         CampaignScenes.NextBacataMode = CampaignScenes.BacataMode.Epilogue;
-        SceneManager.LoadScene(CampaignScenes.Bacata);
+        SceneLoader.Load(CampaignScenes.Bacata);
     }
 }

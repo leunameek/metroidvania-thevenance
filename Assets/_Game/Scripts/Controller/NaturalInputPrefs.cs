@@ -20,6 +20,8 @@ public sealed class NaturalInputPrefs
         try { prefs = JsonUtility.FromJson<NaturalInputPrefs>(PlayerPrefs.GetString(StorageKey, "")); }
         catch (Exception) { prefs = null; }
         prefs ??= new NaturalInputPrefs();
+        // Settings stored before the voice became the default (2026-10-06) count as voice on.
+        if (!PlayerPrefs.GetString(StorageKey, "").Contains("\"voiceDefaults\"")) prefs.voiceEnabled = true;
         prefs.confidence = Mathf.Clamp(prefs.confidence, 0, 2);
         prefs.dwellSeconds = Mathf.Clamp(prefs.dwellSeconds, .5f, 3);
         prefs.handSensitivity = Mathf.Clamp(prefs.handSensitivity, .5f, 2);

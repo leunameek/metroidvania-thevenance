@@ -32,6 +32,8 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     private Transform _quimue;
     private Light _quimueLight;
     private bool _c16Queued, _finalRunning;
+    private System.Collections.Generic.List<Renderer> _guardianRenderers;
+    private bool _guardianHidden;
 
     private void BuildQuimue()
     {
@@ -59,12 +61,20 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         if (_quimue == null) return;
         var c = CampaignProgress.Model;
         bool present = c.Has(CampaignFlags.SueReleased) && !c.Has(CampaignFlags.MasksInCustody);
-        if (_quimue.gameObject.activeSelf != present)
+        if (_quimue.gameObject.activeSelf != present) _quimue.gameObject.SetActive(present);
+        if (_guardianRenderers == null || _guardianHidden != present)
         {
-            _quimue.gameObject.SetActive(present);
+            _guardianHidden = present;
             // Quimue takes the circle: the training guardian steps out of sight meanwhile.
-            var guardian = _demo.Combat != null ? _demo.Combat.Guardian : null;
-            if (guardian != null) foreach (var r in guardian.GetComponentsInChildren<Renderer>(true)) r.enabled = !present;
+            // Only the renderers that were visible (the Tripo model): the hidden graybox stays hidden.
+            if (_guardianRenderers == null)
+            {
+                _guardianRenderers = new System.Collections.Generic.List<Renderer>();
+                var guardian = _demo.Combat != null ? _demo.Combat.Guardian : null;
+                if (guardian != null)
+                    foreach (var r in guardian.GetComponentsInChildren<Renderer>(true)) if (r.enabled) _guardianRenderers.Add(r);
+            }
+            foreach (var r in _guardianRenderers) if (r != null) r.enabled = !present;
         }
         // Defeated: on his knees, the two bonds dark.
         bool defeated = c.Has(CampaignFlags.QuimueDefeated);
@@ -193,8 +203,19 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             var urn = StoryProps.Build(index == EmptyUrn ? "UrnaVacia" : "UrnaMemoria", transform, at);
             urn.rotation = Quaternion.LookRotation(toSpawn);
             PlazaStoryPoint.Create("Urna " + (i + 1), transform, at, 1.4f,
-                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Mirar dentro de la urna " + (index + 1), () => UseUrn(index));
+                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, urn));
         }
+    }
+
+    // O-N06: each urn is taken in the hands and turned to look inside; only then it can be used.
+    private void InspectUrn(int index, Transform urn)
+    {
+        bool empty = index == EmptyUrn;
+        PlazaPieceInspection.Open(_demo, urn, "Urna " + (index + 1),
+            "Una urna de barro de las que guardan a los antepasados, junto al portal superior.",
+            () => empty ? "Está vacía y liviana: no guarda restos. El soporte de su interior tiene la forma del cuerno."
+                : "Dentro reposan restos y ofrendas de alguien querido. Esta memoria debe quedarse aquí.",
+            empty ? "Usar el poporo" : "Devolverla", () => UseUrn(index));
     }
 
     private void UseUrn(int index)

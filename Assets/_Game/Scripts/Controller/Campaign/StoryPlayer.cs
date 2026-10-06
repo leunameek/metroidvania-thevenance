@@ -203,7 +203,7 @@ public sealed class StoryPlayer : MonoBehaviour
         }
         Hook();
         _view.SetTitle(request.Title);
-        _view.SetHint("E / Espacio · Siguiente     Mantén Esc · Saltar");
+        _view.SetHint(VoicePrompt.Enabled ? "Di «siguiente» (o E)     Mantén Esc · Saltar" : "E / Espacio · Siguiente     Mantén Esc · Saltar");
         _view.Show(true);
         ShowLine();
     }

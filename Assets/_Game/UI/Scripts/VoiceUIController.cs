@@ -76,6 +76,14 @@ namespace Nemequene.UI
         private void Explore(TechnicalDemoController d, VoiceCommand command)
         {
             bool done = false;
+            // An urn in the hands: «tomar» uses it once seen inside, «salir» puts it back.
+            var piece = PlazaPieceInspection.Active;
+            if (piece != null)
+            {
+                if (command == VoiceCommand.Back) { Accept(); piece.Back(); return; }
+                if (command == VoiceCommand.Confirm && PlazaPieceInspection.Seen) { Accept(); piece.Confirm(); return; }
+                Set(VoiceState.Unrecognized); _until = Time.unscaledTime + 2; return;
+            }
             if (d.State == TechnicalDemoState.Exploration && command == VoiceCommand.Interact && HasTarget(d)) { Accept(); d.Interact(); done = true; }
             else if (d.State == TechnicalDemoState.Analyzing && command == VoiceCommand.Back) { Accept(); d.EndAnalysis(); done = true; }
             else if (d.State == TechnicalDemoState.Analyzing && command == VoiceCommand.Confirm && d.Lesson != null && d.Lesson.Complete) { Accept(); d.EndAnalysis(); done = true; }
@@ -85,7 +93,9 @@ namespace Nemequene.UI
         private void Accept()
         {
             _lastAcceptedFrame = Time.frameCount;
-            _recognizer.StopListening(); Set(VoiceState.Recognized); _until = Time.unscaledTime + 2;
+            _recognizer.StopListening(); Set(VoiceState.Recognized);
+            // A dialogue or a duel goes on at once: listen again almost immediately.
+            _until = Time.unscaledTime + (StoryPlayer.Active || TurnDuelController.Running ? .35f : 2);
             _ui.Sound(PlazaSound.Inspect);
         }
         public void Tick()
@@ -103,11 +113,13 @@ namespace Nemequene.UI
                 return;
             }
             var d = _ui.Demo; var s = _ui.Settings.Values;
+            VoicePrompt.Enabled = s.voiceEnabled && !HasError;
             var phase = d.Combat.Model.Phase;
             bool free = !d.HelpOpen && _ui.Screens.Current == UIScreen.None;
-            bool turn = free && (d.State == TechnicalDemoState.Combat
+            // Dialogue («siguiente») and the turn duels listen too, not only the training.
+            bool turn = free && (StoryPlayer.Active || TurnDuelController.Running || d.State == TechnicalDemoState.Combat
                     && (phase == PlazaCombatPhase.Attack || phase == PlazaCombatPhase.React || phase == PlazaCombatPhase.Won)
-                || d.State == TechnicalDemoState.Exploration && HasTarget(d)
+                || d.State == TechnicalDemoState.Exploration && (HasTarget(d) || PlazaPieceInspection.Active != null)
                 || d.State == TechnicalDemoState.Analyzing);
             var k = Keyboard.current;
             if (k != null && k.leftCtrlKey.wasPressedThisFrame && turn) _talkToggle = !_talkToggle;

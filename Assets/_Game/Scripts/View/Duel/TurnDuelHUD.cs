@@ -104,14 +104,16 @@ public sealed class TurnDuelHUD
             for (int i = 0; i < targets.Length; i++)
             {
                 int index = i; bool chosen = m.Target == targets[i];
-                entries.Add(((i == 0 ? "Z" : "X") + " · " + TurnDuelModel.TargetName(targets[i]) + (chosen ? " (elegida)" : ""), () => _target(index), chosen));
+                entries.Add((Choice(TargetWord(targets[i]), i == 0 ? "Z" : "X", TurnDuelModel.TargetName(targets[i])) + (chosen ? " (elegida)" : ""), () => _target(index), chosen));
             }
             foreach (var action in m.LegalActions())
             {
                 var a = action;
-                entries.Add((Key(a) + " · " + TurnDuelModel.ActionName(a), () => _act(a), a == DuelAction.Attack));
+                entries.Add((Choice(TurnDuelModel.ActionName(a).ToLowerInvariant(), Key(a), TurnDuelModel.ActionName(a)), () => _act(a), a == DuelAction.Attack));
             }
-            hint = "Di la acción en español o inglés: «atacar» / «attack»" + (targets.Length > 0 ? ", y elige con «izquierda» / «derecha», «luna» / «sol»" : "") + ".";
+            hint = VoicePrompt.Enabled
+                ? "Di en voz alta la palabra de un botón (también en inglés: «attack», «block»…). Entre paréntesis, su tecla."
+                : "Elige con las teclas o los botones. Activa la voz en la pausa para decir las acciones.";
         }
         else if (m.Phase == DuelPhase.Telegraph || m.Phase == DuelPhase.Respond)
         {
@@ -119,9 +121,10 @@ public sealed class TurnDuelHUD
             {
                 if (d == DuelDefense.Parry && !m.ParryOffered) continue;
                 var defense = d;
-                entries.Add((Key(d) + " · " + TurnDuelModel.DefenseName(d), () => _defend(defense), false));
+                entries.Add((Choice(TurnDuelModel.DefenseName(d).ToLowerInvariant(), Key(d), TurnDuelModel.DefenseName(d)), () => _defend(defense), false));
             }
-            hint = m.Phase == DuelPhase.Telegraph ? "Espera la señal: responder antes no cuenta." : "Responde ahora: tecla, botón o palabra.";
+            hint = m.Phase == DuelPhase.Telegraph ? "Espera la señal: responder antes no cuenta."
+                : VoicePrompt.Enabled ? "¡Dilo ahora! O pulsa la tecla entre paréntesis." : "Responde ahora con la tecla o el botón.";
         }
         _hint.text = hint;
         var signature = m.Phase + "|" + string.Join(",", entries.ConvertAll(e => e.label));
@@ -134,6 +137,12 @@ public sealed class TurnDuelHUD
             var size = button.GetComponent<LayoutElement>(); size.preferredWidth = entries.Count > 4 ? 210 : 250;
         }
     }
+
+    // Voice first: «atacar» (1); with the voice off, the key and the name: 1 · Atacar.
+    private static string Choice(string word, string key, string name) =>
+        VoicePrompt.Enabled ? VoicePrompt.Word(word) + " (" + key + ")" + (word == name.ToLowerInvariant() ? "" : " · " + name) : key + " · " + name;
+    private static string TargetWord(DuelTarget t) =>
+        t == DuelTarget.HeadA ? "izquierda" : t == DuelTarget.HeadB ? "derecha" : t == DuelTarget.Moon ? "luna" : "sol";
 
     private static string Key(DuelAction a)
     {

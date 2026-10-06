@@ -289,7 +289,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         bool fight = InFight;
         if (target != null)
         {
-            UIWorldPrompt.Show(this, "E", target.Prompt);
+            UIWorldPrompt.Show(this, VoicePrompt.Cap(VoicePrompt.InteractWord(target.Prompt), "E"), target.Prompt);
             Natural.SetContext(NaturalContext.Interact, target.Prompt);
             if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
         }
@@ -375,7 +375,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         Time.timeScale = 1; _paused = false;
         player.SetInputLocked(true);
         if (toPlaza) WorldTravel.ReturnToPlaza(-1);
-        else SceneManager.LoadScene(TitleScene);
+        else SceneLoader.Load(TitleScene);
     }
 
     // Test keys of the blockout on a light plate under the vitality (F12).

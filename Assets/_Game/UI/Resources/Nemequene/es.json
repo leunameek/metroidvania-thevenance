@@ -146,7 +146,7 @@
     },
     {
       "key": "controls.body",
-      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nPalma abierta quieta o EXAMINAR · Interactuar\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\nE, puño o ATACAR · Atacar en tu turno\nEspacio, barrido lateral o ESQUIVAR · Esquivar\nF, dos palmas arriba o BLOQUEAR · Bloquear\nCtrl izquierdo · Pulsar para hablar\nEsc · Pausa\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica. En los mundos, C activa la cámara y la voz se cambia desde la pausa."
+      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nVOZ (español o inglés)\nEXAMINAR, HABLAR, ENTRAR, USAR · Interactuar\nSIGUIENTE · Avanzar un diálogo\nTOMAR / SALIR · Tomar o devolver una pieza\nPalma abierta quieta · Interactuar con las manos\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\nE, puño o ATACAR · Atacar en tu turno\nEspacio, barrido lateral o ESQUIVAR · Esquivar\nF, dos palmas arriba o BLOQUEAR · Bloquear\nEsc · Pausa\n\nDUELOS POR TURNOS\nATACAR, CONTRAATACAR, JAGUAR, CUERNO, ANCLAR, INTERRUMPIR, VINCULAR · Acción (o 1-7)\nBLOQUEAR, ESQUIVAR, CUBRIR, PARAR · Defensa (o F, Espacio, G, R)\nIZQUIERDA / DERECHA, LUNA / SOL · Objetivo (o Z / X)\nLa voz escucha sola; en Ajustes puedes pedir Ctrl para hablar\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica. En los mundos, C activa la cámara y la voz se cambia desde la pausa."
     },
     {
       "key": "tutorial.repeat",
@@ -154,7 +154,7 @@
     },
     {
       "key": "tutorial.move",
-      "value": "Muévete con WASD. Acércate a una estación y pulsa E para examinarla."
+      "value": "Muévete con WASD. Acércate a una estación y di «examinar» (o pulsa E)."
     },
     {
       "key": "credits.body",
@@ -222,11 +222,11 @@
     },
     {
       "key": "hud.inspect",
-      "value": "E · Examinar {0}"
+      "value": "{1} · Examinar {0}"
     },
     {
       "key": "hud.travel",
-      "value": "E · Viajar a {0}"
+      "value": "{1} · Viajar a {0}"
     },
     {
       "key": "hud.blocked",
@@ -238,7 +238,7 @@
     },
     {
       "key": "hud.startCombat",
-      "value": "E · Comenzar entrenamiento"
+      "value": "{0} · Comenzar entrenamiento"
     },
     {
       "key": "hud.controls",
@@ -258,7 +258,7 @@
     },
     {
       "key": "inspection.close",
-      "value": "Cerrar · Esc"
+      "value": "Cerrar · {0}"
     },
     {
       "key": "inspection.mouse",
@@ -302,19 +302,19 @@
     },
     {
       "key": "combat.attack",
-      "value": "Atacar · E"
+      "value": "Atacar · {0}"
     },
     {
       "key": "combat.dodge",
-      "value": "Esquivar · Espacio"
+      "value": "Esquivar · {0}"
     },
     {
       "key": "combat.block",
-      "value": "Bloquear · F"
+      "value": "Bloquear · {0}"
     },
     {
       "key": "combat.return",
-      "value": "Volver a la plaza · E"
+      "value": "Volver a la plaza · {0}"
     },
     {
       "key": "combat.phase.Idle",
@@ -838,23 +838,23 @@
     },
     {
       "key": "tutorial.step.0",
-      "value": "Muévete con WASD. H abre la ayuda."
+      "value": "Muévete con WASD. Con la voz activa, di la palabra que aparece en cada aviso."
     },
     {
       "key": "tutorial.step.1",
-      "value": "Acércate a una estación y pulsa E para examinarla."
+      "value": "Acércate a una estación y di «examinar» (o pulsa E)."
     },
     {
       "key": "tutorial.step.2",
-      "value": "Sigue la instrucción junto al objeto. M cambia entre manos y mouse."
+      "value": "Sigue la instrucción junto al objeto: con la cámara (C), la mano izquierda gira y la derecha inclina."
     },
     {
       "key": "tutorial.step.3",
-      "value": "Ve al círculo de entrenamiento y pulsa E para comenzar el duelo."
+      "value": "Ve al círculo de entrenamiento y di «enfrentar» (o pulsa E) para comenzar el duelo."
     },
     {
       "key": "tutorial.step.4",
-      "value": "Los portales están abiertos. Tab permite consultar el mapa."
+      "value": "Los portales están abiertos. Di «entrar» junto a uno para viajar."
     },
     {
       "key": "component.action",
@@ -951,7 +951,7 @@
     {"key": "journal", "value": "Diario"},
     {"key": "hud.cameraActive", "value": "Cámara activa · C para pausar"},
     {"key": "inspection.archived", "value": "Descubrimiento guardado en el diario."},
-    {"key": "inspection.return", "value": "Volver · E"},
+    {"key": "inspection.return", "value": "Volver · {0}"},
     {"key": "inspection.fallback", "value": "M · Utilizar mouse"},
     {"key": "inspection.mouse.0", "value": "Arrastra con clic izquierdo hacia los lados."},
     {"key": "inspection.mouse.1", "value": "Arrastra con clic izquierdo hacia arriba o abajo."},

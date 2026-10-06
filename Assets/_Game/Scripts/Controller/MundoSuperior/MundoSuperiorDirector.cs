@@ -272,7 +272,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         var target = canInteract ? MIInteractable.Nearest(player.transform.position) : null;
         if (target != null)
         {
-            UIWorldPrompt.Show(this, "E", target.Prompt);
+            UIWorldPrompt.Show(this, VoicePrompt.Cap(VoicePrompt.InteractWord(target.Prompt), "E"), target.Prompt);
             Natural.SetContext(NaturalContext.Interact, target.Prompt);
             if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
         }
@@ -427,7 +427,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         Time.timeScale = 1; _paused = false;
         player.SetInputLocked(true);
         if (toPlaza) WorldTravel.ReturnToPlaza(1);
-        else SceneManager.LoadScene(TitleScene);
+        else SceneLoader.Load(TitleScene);
     }
 
     // ------------------------------------------------------------------ blockout test keys (F12)

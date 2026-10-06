@@ -217,7 +217,8 @@ namespace Nemequene.UI
             if (!_ready) return;
             var k = Keyboard.current;
             // A story line owns Esc (hold to skip) and the keys while it plays.
-            if (StoryPlayer.Active) { _hud.Tick(); return; }
+            // The microphone keeps listening for «siguiente».
+            if (StoryPlayer.Active) { _hud.Tick(); Voice.Tick(); return; }
             bool back = k != null && k.escapeKey.wasPressedThisFrame
                 || Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
             if (back && _backFrame != Time.frameCount)
@@ -225,9 +226,11 @@ namespace Nemequene.UI
                 if (ModalOpen) CloseConfirmation();
                 else if (Screens.Current == UIScreen.Loading) { }
                 else if (Screens.Current != UIScreen.None) Screens.Back();
-                else if (Demo.State != TechnicalDemoState.Analyzing) Screens.Show(UIScreen.Pause);
+                // An urn in the hands takes Esc to put it back (PlazaPieceInspection).
+                else if (Demo.State != TechnicalDemoState.Analyzing && PlazaPieceInspection.Active == null) Screens.Show(UIScreen.Pause);
             }
-            if (k != null && !ModalOpen && !Dialogue.Active && Screens.Current == UIScreen.None && Demo.State == TechnicalDemoState.Exploration)
+            if (k != null && !ModalOpen && !Dialogue.Active && Screens.Current == UIScreen.None && Demo.State == TechnicalDemoState.Exploration
+                && PlazaPieceInspection.Active == null)
             {
                 if (k.tabKey.wasPressedThisFrame) Screens.Show(UIScreen.Map);
                 else if (k.hKey.wasPressedThisFrame) Screens.Show(UIScreen.Controls);

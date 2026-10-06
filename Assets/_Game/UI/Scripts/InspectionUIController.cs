@@ -39,7 +39,7 @@ namespace Nemequene.UI
             _progress = f.Bar(_panel, "LessonProgress", Vector2.zero, Vector2.one);
             ((RectTransform)_progress.transform.parent.parent).Band(132, 18, 64);
             var bottom = f.Column(_panel, "Close"); bottom.Band(48, 60, 60);
-            _close = f.Button(bottom, UIStrings.Get("inspection.close"), () => ui.Demo.EndAnalysis());
+            _close = f.Button(bottom, UIStrings.Get("inspection.close", VoicePrompt.Cap("salir", "Esc")), () => ui.Demo.EndAnalysis());
             ui.Demo.ViewChanged += Refresh; ui.Screens.Changed += OnScreen; Refresh();
         }
         private void OnScreen(UIScreen screen) { Refresh(); }
@@ -77,7 +77,8 @@ namespace Nemequene.UI
             if (!_ui.Demo.MouseMode && !lesson.Complete && _ui.Hands != null && _ui.Hands.State != HandState.Detected)
                 _instruction.text += "\n\n" + _ui.Hands.StatusText + "\n" + UIStrings.Get("inspection.fallback");
             _progressText.text = lesson.Complete ? UIStrings.Get("inspection.complete") : UIStrings.Get("inspection.progress", Mathf.RoundToInt(lesson.Progress * 100));
-            _close.GetComponentInChildren<TMP_Text>().text = UIStrings.Get(lesson.Complete ? "inspection.return" : "inspection.close");
+            _close.GetComponentInChildren<TMP_Text>().text = lesson.Complete ? UIStrings.Get("inspection.return", VoicePrompt.Cap("volver", "E"))
+                : UIStrings.Get("inspection.close", VoicePrompt.Cap("salir", "Esc"));
             UIFactory.Fill(_progress, lesson.Progress);
         }
         public static string CulturalDescription(AnalyzableObjectData data)

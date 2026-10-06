@@ -106,7 +106,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
                 if (Time.time - _lastBlockedNotice > 6f)
                 {
                     _lastBlockedNotice = Time.time;
-                    hud?.Notify("La defensa resiste", "Encadena tres impulsos seguidos (Q Q Q) para quebrarla.", UIIcon.Shield, UIPalette.Danger);
+                    hud?.Notify("La defensa resiste", VoicePrompt.Enabled ? "Encadena tres impulsos seguidos (di «impulso» tres veces, o Q Q Q) para quebrarla." : "Encadena tres impulsos seguidos (Q Q Q) para quebrarla.", UIIcon.Shield, UIPalette.Danger);
                 }
             }
             return;

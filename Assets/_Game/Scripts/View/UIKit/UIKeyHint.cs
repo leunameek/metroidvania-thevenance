@@ -5,7 +5,8 @@ using UnityEngine;
 namespace Nemequene.UI
 {
     // Shows the key of an "Acción · Tecla" label inside a carved key cap (reference: interaction
-    // prompt and combat actions). The label keeps the action; the cap keeps the key.
+    // prompt and combat actions). The label keeps the action; the cap keeps the key, or the word
+    // to say when the voice is on ("«examinar» · Vasija").
     public sealed class UIKeyHint : MonoBehaviour
     {
         private static readonly string[] Named = { "Esc", "Enter", "Espacio", "Tab", "Ctrl", "Shift", "Supr" };
@@ -15,6 +16,8 @@ namespace Nemequene.UI
         private static bool IsKey(string candidate)
         {
             candidate = candidate.Trim();
+            // A spoken word («examinar», see VoicePrompt) takes the cap like a key.
+            if (candidate.Length > 2 && candidate[0] == '«' && candidate[candidate.Length - 1] == '»') return true;
             return candidate.Length == 1 && char.IsLetterOrDigit(candidate[0]) || Array.IndexOf(Named, candidate) >= 0;
         }
         // Accepts both "E · Examinar" (HUD prompts) and "Atacar · E" (buttons).

@@ -29,6 +29,29 @@ sustituyen sin tocar la lógica.
 El portal superior permanece cerrado hasta la urna. Al abrir una escena directamente desde el
 editor (sin ranura de guardado) todo está abierto y la afinidad del jaguar disponible, para probar.
 
+## Pruebas: saltar a un capítulo (temporal)
+
+En el editor y en builds de desarrollo aparece a la izquierda el botón **Capítulos · F9**. Cada
+entrada borra la historia y los dos mundos de la ranura actual, deja la partida justo al inicio
+de ese capítulo (los diálogos anteriores cuentan como escuchados) y carga su escena. Código:
+`Controller/Campaign/CampaignJump.cs` y `View/Campaign/ChapterSkipMenu.cs`; quitar ambos antes de
+la versión final. Nota: el registro propio de la plaza (estaciones y entrenamiento) no se borra,
+así que «Continuar» desde el menú tras saltar hacia atrás puede reabrir el portal inferior.
+
+## Voz, manos y carga
+
+- La voz viene **activada** y escucha sin mantener Ctrl (los ajustes guardados antes se migraron
+  una vez; en Ajustes se puede volver a pedir Ctrl para hablar). Con la voz activa, cada aviso
+  muestra la palabra que hay que decir en lugar de la tecla («examinar», «entrar», «hablar»,
+  «tomar», «salir», «impulso»…); sin voz vuelve a mostrar la tecla (`Controller/VoicePrompt.cs`).
+- Inspección con manos como en el prototipo inicial (`Controller/HandInspection.cs`): mano izquierda
+  abierta gira, mano derecha abierta inclina, dos puños detienen, puño sostenido toma. La usan las
+  estaciones de la plaza, los hallazgos de ambos mundos (coca, máscaras, runas…) y las **urnas**,
+  que ahora se toman y hay que girar/inclinar para ver dentro antes de usarlas
+  (`PlazaNunez/PlazaPieceInspection.cs`).
+- Cada cambio de escena pasa por una pantalla de carga con la ilustración y el nombre del destino
+  (`Controller/SceneLoader.cs`).
+
 ## Controles de diálogo y duelo
 
 - Diálogo: E / Espacio / Enter / clic o decir «siguiente» («next») avanza; **mantener Esc 1 s** salta
@@ -70,6 +93,4 @@ editor (sin ranura de guardado) todo está abierto y la afinidad del jaguar disp
 
 - Animaciones y modelos (lista en `Personajes-y-animaciones.md`); transformación en jaguar y
   guacamaya como cinemática con los modelos.
-- Inspección con manos de las piezas nuevas (coca, máscaras, urnas usan la inspección de mouse/E o
-  una interacción directa en la plaza).
 - Cinemáticas C04-C17 más elaboradas (hoy: líneas con encuadre del hablante y fundidos).

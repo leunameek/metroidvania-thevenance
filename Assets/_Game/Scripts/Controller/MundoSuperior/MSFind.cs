@@ -86,6 +86,7 @@ public sealed class MSFind : MIInteractable
         _itemPosition = item.position; _itemRotation = item.rotation;
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
+        WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
         MSAudio.Play("hallazgo_abrir", .8f);
         MundoSuperiorDirector.Instance?.Hud?.ShowInspection(displayName, kindLabel, description);
     }
@@ -115,16 +116,18 @@ public sealed class MSFind : MIInteractable
             if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
             if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
         }
-        // Hands: an open hand turns the piece like a drag, a held fist takes it; words too.
+        // Hands as in the first prototype: the open left hand turns the piece, the open right hand
+        // tilts it, two fists hold it still and a held fist takes it; words too.
         var natural = WorldNaturalInput.Instance;
+        float handYaw = 0, handPitch = 0;
         if (natural != null)
         {
             natural.SetContext(NaturalContext.Inspect);
-            turn += natural.ConsumeRotate() * .35f;
+            natural.ConsumeHandTurn(out handYaw, out handPitch);
             MundoSuperiorDirector.Instance?.Hud?.SetInspectionGuide(natural.InspectionGuide);
         }
-        item.Rotate(Vector3.up, -turn.x, Space.World);
-        item.Rotate(_camera.transform.right, turn.y, Space.World);
+        item.Rotate(Vector3.up, -turn.x + handYaw, Space.World);
+        item.Rotate(_camera.transform.right, turn.y + handPitch, Space.World);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
         if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();

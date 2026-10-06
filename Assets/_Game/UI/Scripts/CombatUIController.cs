@@ -75,6 +75,11 @@ namespace Nemequene.UI
             text.fontSizeMax = text.fontSize; text.fontSizeMin = 14; return text;
         }
         private void OnScreen(UIScreen s) { Refresh(); }
+        private static void Label(Button button, string key, string word, string keyName)
+        {
+            // UIKeyHint splits it again into the label and the cap on its next LateUpdate.
+            button.GetComponentInChildren<TMP_Text>().text = UIStrings.Get(key, VoicePrompt.Cap(word, keyName));
+        }
         private void Refresh()
         {
             var model = _ui.Demo.Combat.Model;
@@ -83,9 +88,13 @@ namespace Nemequene.UI
             _turn.text = UIStrings.Get("combat.phase." + model.Phase);
             int resistance = Mathf.Clamp(3 - model.Hits, 0, 3);
             _enemy.text = resistance + " / 3"; UIFactory.Fill(_guardian, resistance / 3f);
+            // Voice first: each action names its word («atacar»), or its key with the voice off.
+            Label(_attack, "combat.attack", "atacar", "E"); Label(_dodge, "combat.dodge", "esquivar", "Espacio");
+            Label(_block, "combat.block", "bloquear", "F"); Label(_return, "combat.return", "volver", "E");
             _body.text = UIStrings.Get("combat.body." + model.Phase);
             if (model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React)
-                _body.text += "\n\n" + UIStrings.Get(model.Expected == PlazaDefense.Dodge ? "combat.dodge" : "combat.block");
+                _body.text += "\n\n" + (model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", "Espacio"))
+                    : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", "F")));
             if (model.Phase == PlazaCombatPhase.Feedback) _body.text = UIStrings.Get(model.LastDefenseSucceeded ? "combat.success" : "combat.retry");
             _attack.gameObject.SetActive(model.Phase == PlazaCombatPhase.Attack);
             _dodge.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);

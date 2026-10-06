@@ -120,7 +120,7 @@ public sealed class MIHud : MonoBehaviour
 
         _hints = UIKit.Rect("Hints", canvas).gameObject;
         UIKit.Hint(_hints.transform, "Esc", "Pausa", Vector2.zero);
-        UIKit.Hint(_hints.transform, "Q", "Impulso", Vector2.right);
+        UIKit.Hint(_hints.transform, VoicePrompt.Cap("impulso", "Q"), "Impulso", Vector2.right);
 
         var fade = UIKit.Rect("Fade", canvas); _fade = fade.gameObject.AddComponent<Image>();
         _fade.color = new Color(.031f, .039f, .043f, 0); _fade.raycastTarget = false;
@@ -169,11 +169,11 @@ public sealed class MIHud : MonoBehaviour
     }
     public void HideInspection() => _inspect.SetActive(false);
 
-    private const string InspectionKeys = "E · Confirmar        Esc · Devolver al altar\nArrastra con el ratón o usa A / D para girar";
-    // Hands or voice on: the panel names the gesture and the words next to the keys.
+    private const string InspectionKeys = "E · Tomar        Esc · Devolver al altar        Ratón o A / D · Girar";
+    // Hands or voice on: the words and gestures come first, the keys after them.
     public void SetInspectionGuide(string guide)
     {
-        string text = string.IsNullOrEmpty(guide) ? InspectionKeys : InspectionKeys + "\n" + guide;
+        string text = string.IsNullOrEmpty(guide) ? InspectionKeys : guide + "\n" + InspectionKeys;
         if (_inspectKeys != null && _inspectKeys.text != text) _inspectKeys.text = text;
     }
 

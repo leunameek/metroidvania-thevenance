@@ -7,7 +7,7 @@ namespace Nemequene.UI
     public sealed class UISettings
     {
         public int version = 1;
-        public bool configured, highContrast, reducedMotion, readableFont, invertY, voiceEnabled, pushToTalk = true;
+        public bool configured, highContrast, reducedMotion, readableFont, invertY, voiceEnabled = true, pushToTalk;
         public bool showObjectives = true, tutorials = true, subtitles = true, speakerNames = true, soundCaptions = true;
         public bool handCursor = true, handGuide = true, leftHand, toggleTalk;
         public bool dialogueAuto, dialogueInstant = true;
@@ -17,6 +17,8 @@ namespace Nemequene.UI
         public float cameraSensitivity = 1, cameraMotion = 1, flashIntensity = .3f, noticeSeconds = 6;
         public float reactionScale = 1, handSensitivity = 1, handSmoothing = .12f, dwellSeconds = 1, handDeadZone = .015f, inputGain = 1;
         public int confidence = 1, quality = -1, frameLimit = 60, aa = 2;
+        // 1 once the voice-first defaults (voice on, always listening) were applied.
+        public int voiceDefaults = 1;
         public int screenWidth, screenHeight;
         public bool fullscreen;
         public bool vSync = true, shadows = true;
@@ -48,6 +50,13 @@ namespace Nemequene.UI
             catch (Exception) { Values = null; }
             if (Values == null || Values.version != 1) Values = new UISettings();
             else if (!json.Contains("\"menuMusic\"")) Values.menuMusic=.3f;
+            // 2026-10-06: the game is voice-first. Older settings switch the voice on once and
+            // listen without holding Ctrl; the player can change both again in Ajustes.
+            if (!string.IsNullOrEmpty(json) && !json.Contains("\"voiceDefaults\""))
+            {
+                Values.voiceEnabled = true; Values.pushToTalk = false; Values.voiceDefaults = 1;
+                PlayerPrefs.SetString(StorageKey, JsonUtility.ToJson(Values));
+            }
             Values.Clamp();
         }
         public void Apply(bool save = true)

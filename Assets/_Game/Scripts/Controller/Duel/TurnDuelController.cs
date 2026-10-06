@@ -52,7 +52,8 @@ public sealed class TurnDuelController : MonoBehaviour
         // Scenes opened from the editor (no save) test the duels with every affinity.
         bool jaguar = CampaignProgress.Has(CampaignFlags.CocaAffinity) || CampaignProgress.FreeTravel;
         duel._model = new TurnDuelModel(rules, damageBase, jaguar, health);
-        bool voice = natural != null && natural.VoiceOn;
+        // The plaza has no world input: its voice setting decides the longer window there.
+        bool voice = natural != null ? natural.VoiceOn : VoicePrompt.Enabled;
         duel._model.ResponseSeconds = (voice ? TurnDuelModel.VoiceWindow : TurnDuelModel.KeyboardWindow) * Mathf.Clamp(reactionScale, 1f, 3f);
         duel._stage = stage; duel._health = playerHealth; duel._natural = natural; duel._ended = ended;
         duel._hud = new TurnDuelHUD(go.transform, rules.Name, duel.Act, duel.Target, duel.Defend);

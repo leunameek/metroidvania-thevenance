@@ -130,6 +130,16 @@ public sealed class WorldNaturalInput : MonoBehaviour
         return true;
     }
 
+    // Inspection as in the first prototype (HandInspection): left hand turns, right hand tilts,
+    // two fists freeze. Degrees for this frame; zero without the camera.
+    public bool ConsumeHandTurn(out float yaw, out float pitch)
+    {
+        yaw = pitch = 0;
+        if (!HandsLive) { HandInspection.Reset(_hands != null ? _hands.Tracker : null); return false; }
+        HandInspection.Read(_hands.Tracker, _prefs.handSensitivity, out yaw, out pitch);
+        return yaw != 0 || pitch != 0;
+    }
+
     // Open-hand movement as a mouse drag: x to the player's right, y up (pixels-like units).
     public Vector2 ConsumeRotate()
     {
@@ -193,6 +203,7 @@ public sealed class WorldNaturalInput : MonoBehaviour
             _voice.StartListening();
         }
         else if (!want && _voice.IsListening) _voice.StopListening();
+        VoicePrompt.Enabled = want && !_voiceFailed;
     }
 
     // Pause menu entry: the plaza setting and this one are the same stored value.
@@ -201,8 +212,10 @@ public sealed class WorldNaturalInput : MonoBehaviour
         _prefs.voiceEnabled = enabled; _voiceFailed = false;
         string json = PlayerPrefs.GetString(NaturalInputPrefs.StorageKey, "");
         // Keep every other plaza setting: only the voice flag changes in the stored entry.
-        json = string.IsNullOrEmpty(json) ? "{\"version\":1,\"voiceEnabled\":" + (enabled ? "true" : "false") + "}"
+        json = string.IsNullOrEmpty(json) ? "{\"version\":1,\"voiceDefaults\":1,\"voiceEnabled\":" + (enabled ? "true" : "false") + "}"
             : System.Text.RegularExpressions.Regex.Replace(json, "\"voiceEnabled\":(true|false)", "\"voiceEnabled\":" + (enabled ? "true" : "false"));
+        // The choice is the player's from now on (see NaturalInputPrefs.Load).
+        if (!json.Contains("\"voiceDefaults\"")) json = json.Insert(json.IndexOf('{') + 1, "\"voiceDefaults\":1,");
         PlayerPrefs.SetString(NaturalInputPrefs.StorageKey, json); PlayerPrefs.Save();
         UpdateVoice();
     }
@@ -263,12 +276,13 @@ public sealed class WorldNaturalInput : MonoBehaviour
         switch (context)
         {
             case NaturalContext.Interact: h = "Palma abierta quieta: " + action.ToLowerInvariant(); v = "«examinar» o «usar»"; break;
-            case NaturalContext.Inspect: h = "Mano abierta gira · puño sostenido toma"; v = "«tomar» · «salir»"; break;
+            case NaturalContext.Inspect: h = HandInspection.Guide + " · puño sostenido: tomar"; v = "«tomar» para quedártela · «salir» para devolverla"; break;
             case NaturalContext.Duel: h = "Cierra el puño: atacar"; v = "«atacar»"; break;
             case NaturalContext.Defend: h = "Dos palmas arriba: bloquear · barrido: esquivar"; v = "«bloquea» · «esquiva»"; break;
             case NaturalContext.Fight: h = "Cierra el puño: impulso"; v = "«impulso»"; break;
             default: return "";
         }
-        return (hands ? h : "") + (hands && voice ? "\n" : "") + (voice ? "Di " + v : "");
+        // Voice first, then the gesture.
+        return (voice ? "Di " + v : "") + (hands && voice ? "\n" : "") + (hands ? h : "");
     }
 }

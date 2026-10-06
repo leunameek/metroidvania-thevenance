@@ -42,13 +42,13 @@ public static class WorldTravel
         CombatCompleted = combatCompleted;
         ReturningFrom = 0;
         Leaving?.Invoke();
-        SceneManager.LoadScene(SceneFor(world));
+        SceneLoader.Load(SceneFor(world));
     }
 
     public static void ReturnToPlaza(int fromWorld)
     {
         ReturningFrom = fromWorld == 0 ? -1 : fromWorld;
-        SceneManager.LoadScene(PlazaScene);
+        SceneLoader.Load(PlazaScene);
     }
 
     public static void ClearReturn() => ReturningFrom = 0;

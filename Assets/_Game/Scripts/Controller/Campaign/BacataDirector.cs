@@ -244,13 +244,13 @@ public sealed class BacataDirector : MonoBehaviour
             if (Time.time > until - 6f && k != null && (k.eKey.wasPressedThisFrame || k.escapeKey.wasPressedThisFrame || k.enterKey.wasPressedThisFrame)) break;
             yield return null;
         }
-        SceneManager.LoadScene(CampaignScenes.Title);
+        SceneLoader.Load(CampaignScenes.Title);
     }
 
     private static void LoadPlaza()
     {
         WorldTravel.ClearReturn();
-        SceneManager.LoadScene(CampaignScenes.Plaza);
+        SceneLoader.Load(CampaignScenes.Plaza);
     }
 
     // ------------------------------------------------------------------ places

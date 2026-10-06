@@ -98,6 +98,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
         _groundAmbient = RenderSettings.ambientGroundColor;
         // Before the UI starts its session (sceneLoaded) so its first save keeps this progress.
         if (WorldTravel.ReturningFrom != 0) RestoreProgress(WorldTravel.CompletedObjectIds, WorldTravel.CombatCompleted);
+        // The story is already past the tutorial (a later chapter loaded or jumped to): the
+        // stations and the training show as done and the lower portal stays open.
+        if (CampaignProgress.Has(CampaignFlags.MiUnlocked) && !PortalsUnlocked) RestoreProgress(ids.ToArray(), true);
     }
 
     // Back from a world scene: standing in front of its portal (the player is ready in Start).
@@ -121,7 +124,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         player.GrantDash(1);
         // Story: lines play only while exploring with no menu open (the UI adds its own gate).
         StoryPlayer.Listen();
-        StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting);
+        StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting && PlazaPieceInspection.Active == null);
         Campaign = PlazaCampaign.Create(this);
         if (combat != null && combat.Guardian != null) StoryActor.Ensure(combat.Guardian.gameObject, "Guardián de entrenamiento", 1.9f);
         SyncCampaign();
@@ -133,7 +136,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Update()
     {
         if (_restarting) return;
-        if (StoryPlayer.Active || TurnDuelController.Running) return;
+        if (StoryPlayer.Active || TurnDuelController.Running || PlazaPieceInspection.Active != null) return;
         if (ManagedUI && HelpOpen) return;
         Keyboard k = Keyboard.current;
         if (k != null && k.vKey.wasPressedThisFrame) _audio.ToggleMute();
@@ -425,7 +428,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         _restarting = true;
         EndAnalysis();
         if (combat != null) combat.Cancel();
-        SceneManager.LoadScene(gameObject.scene.path);
+        SceneLoader.Load(gameObject.scene.path);
     }
     private void OnDestroy()
     {
