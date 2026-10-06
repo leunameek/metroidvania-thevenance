@@ -414,8 +414,8 @@ namespace Nemequene.UI
         {
             if(IsLoading)return;
             if(!Application.CanStreamedLevelBeLoaded(TutorialPath)) {ShowLoadError();return;}
-            // A new game in a slot also starts both worlds over (their own keys per slot).
-            if(!load) { MIProgress.Erase(slot); MSProgress.Erase(slot); }
+            // A new game in a slot also starts both worlds and the story over (their own keys per slot).
+            if(!load) { MIProgress.Erase(slot); MSProgress.Erase(slot); CampaignProgress.Erase(slot); }
             GameSaveStore.Begin(slot,load);
             _loadingBack.gameObject.SetActive(false);
             Settings.Values.configured=true;Settings.Apply();Settings.Flush();

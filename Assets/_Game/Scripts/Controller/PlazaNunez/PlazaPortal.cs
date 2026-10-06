@@ -11,7 +11,13 @@ public sealed class PlazaPortal : MonoBehaviour
     public Color color = Color.cyan;
     private TechnicalDemoController _demo;
     private MaterialPropertyBlock _properties;
-    public bool Available => !requiresTraining || (_demo != null && _demo.PortalsUnlocked);
+    // The lower world opens with the training; the upper one waits for the story (Chía freed and
+    // the empty urn answered). Scenes opened straight from the editor travel freely.
+    public bool Available => (!requiresTraining || (_demo != null && _demo.PortalsUnlocked))
+        && (world <= 0 || CampaignProgress.FreeTravel || CampaignProgress.Model.UpperWorldOpen);
+    public string LockedReason => world > 0 && (!requiresTraining || (_demo != null && _demo.PortalsUnlocked))
+        ? "El portal superior sigue apagado: espera la respuesta de Chía."
+        : "Activa las tres estaciones y supera el entrenamiento para abrir los portales.";
     private void Start()
     {
         _demo = FindFirstObjectByType<TechnicalDemoController>();

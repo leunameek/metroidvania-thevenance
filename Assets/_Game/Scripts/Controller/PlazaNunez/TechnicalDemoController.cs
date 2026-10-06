@@ -116,6 +116,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Start()
     {
         player.GrantDash(1);
+        SyncCampaign();
         if (WorldTravel.ReturningFrom != 0) ArriveFromWorld(WorldTravel.ReturningFrom);
         WorldTravel.ClearReturn();
     }
@@ -154,8 +155,19 @@ public sealed class TechnicalDemoController : MonoBehaviour
             UpdateAnalysis();
             return;
         }
+        SyncCampaign();
         FindNearby();
         if (Time.frameCount > _ignoreInteractionFrame && k != null && k.eKey.wasPressedThisFrame) Interact();
+    }
+
+    // Being in the plaza means the prologue is behind; lessons and training feed the story.
+    private bool _campaignSynced, _lessonsSynced, _trainingSynced;
+    private void SyncCampaign()
+    {
+        bool lessons = Objectives.IsComplete, training = combat != null && combat.Completed;
+        if (_campaignSynced && _lessonsSynced == lessons && _trainingSynced == training) return;
+        _campaignSynced = true; _lessonsSynced = lessons; _trainingSynced = training;
+        CampaignProgress.ImportPlaza(lessons, training);
     }
 
     private void SyncInputMode()
@@ -217,7 +229,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (NearbyPortal != null)
         {
             if (!NearbyPortal.Available)
-                Status = "Activa las tres estaciones y supera el entrenamiento para abrir los portales.";
+                Status = NearbyPortal.LockedReason;
             else Travel(NearbyPortal);
             return;
         }

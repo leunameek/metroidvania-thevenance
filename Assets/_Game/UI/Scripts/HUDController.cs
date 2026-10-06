@@ -93,7 +93,10 @@ namespace Nemequene.UI
             var d = _ui.Demo; bool exploration = d.State == TechnicalDemoState.Exploration;
             _ui.Map?.Discover();
             _healthPanel.SetActive(d.State == TechnicalDemoState.Combat || exploration && _healthTarget < 1);
-            string objective = d.PortalsUnlocked ? UIStrings.Get("hud.portals") : d.Objectives.IsComplete ? UIStrings.Get("hud.duel")
+            // After the tutorial the story names the next step (CampaignModel.Objective).
+            var campaign = CampaignProgress.Model;
+            string objective = campaign.Chapter > CampaignChapter.PlazaTutorial ? campaign.Objective.Text
+                : d.PortalsUnlocked ? UIStrings.Get("hud.portals") : d.Objectives.IsComplete ? UIStrings.Get("hud.duel")
                 : UIStrings.Get("hud.objective", d.Objectives.AnalyzedCount, d.Objectives.RequiredCount);
             if (exploration && objective != _previousObjective)
             { _previousObjective = objective; _objective.text = objective; _objectiveUntil = Time.unscaledTime + 8; }
@@ -109,7 +112,7 @@ namespace Nemequene.UI
             _hints.SetActive(exploration);
             _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName)
-                : d.NearbyPortal != null ? UIStrings.Get(d.NearbyPortal.Available ? "hud.travel" : "hud.blocked", d.NearbyPortal.destinationName)
+                : d.NearbyPortal != null ? UIStrings.Get(d.NearbyPortal.Available ? "hud.travel" : "hud.blocked", d.NearbyPortal.destinationName, d.NearbyPortal.LockedReason)
                 : d.NearCombat ? UIStrings.Get("hud.startCombat") : "";
             _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false)); if (_prompt.text != prompt) _prompt.text = prompt;
             // Camera, the open-palm hint while something can be used, and the microphone.

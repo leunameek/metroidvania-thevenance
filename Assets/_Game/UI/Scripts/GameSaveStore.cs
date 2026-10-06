@@ -74,6 +74,7 @@ namespace Nemequene.UI
             PlayerPrefs.DeleteKey(Prefix + slot);
             MIProgress.Erase(slot);
             MSProgress.Erase(slot);
+            CampaignProgress.Erase(slot);
             PlayerPrefs.Save();
             if (slot == ActiveSlot) { ActiveSlot = -1; LoadOnNextScene = false; WorldTravel.SaveSlot = -1; }
         }

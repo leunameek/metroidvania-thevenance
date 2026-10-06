@@ -3,30 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
-// Combat verbs plus the words that drive objects: approach and examine, take or confirm, leave.
-public enum VoiceCommand
-{
-    Dodge, Attack, Guard, Interact, Confirm, Back
-}
-
+// Listens for the words of VoiceVocabulary (Spanish and English) through Windows speech.
 public class VoiceCommandRecognizer : MonoBehaviour
 {
-    private static readonly Dictionary<string, VoiceCommand> Phrases = new Dictionary<string, VoiceCommand>
-    {
-        { "esquiva", VoiceCommand.Dodge }, { "esquivar", VoiceCommand.Dodge }, { "dodge", VoiceCommand.Dodge },
-        { "atacar", VoiceCommand.Attack }, { "ataca", VoiceCommand.Attack }, { "golpe", VoiceCommand.Attack },
-        { "impulso", VoiceCommand.Attack },
-        { "bloquear", VoiceCommand.Guard }, { "bloquea", VoiceCommand.Guard }, { "escudo", VoiceCommand.Guard },
-        { "examinar", VoiceCommand.Interact }, { "examina", VoiceCommand.Interact }, { "usar", VoiceCommand.Interact },
-        { "activar", VoiceCommand.Interact }, { "entrar", VoiceCommand.Interact }, { "enfrentar", VoiceCommand.Interact },
-        { "tomar", VoiceCommand.Confirm }, { "recoger", VoiceCommand.Confirm }, { "confirmar", VoiceCommand.Confirm },
-        { "salir", VoiceCommand.Back }, { "volver", VoiceCommand.Back }, { "cerrar", VoiceCommand.Back }
-    };
+    private static Dictionary<string, VoiceCommand> Phrases => VoiceVocabulary.Phrases;
 
-    public static IEnumerable<string> PhrasesFor(VoiceCommand command)
-    {
-        foreach (var pair in Phrases) if (pair.Value == command) yield return pair.Key;
-    }
+    public static IEnumerable<string> PhrasesFor(VoiceCommand command) => VoiceVocabulary.PhrasesFor(command);
 
     public event Action<VoiceCommand, string> CommandRecognized;
     public event Action<string> Unavailable;
@@ -80,7 +62,7 @@ public class VoiceCommandRecognizer : MonoBehaviour
     // Lets tests and the keyboard-free validation drive the same path as a heard phrase.
     public void Simulate(string phrase)
     {
-        if (Phrases.TryGetValue(phrase, out VoiceCommand command)) CommandRecognized?.Invoke(command, phrase);
+        if (VoiceVocabulary.TryParse(phrase, out VoiceCommand command)) CommandRecognized?.Invoke(command, phrase);
     }
 
     private void OnDestroy()

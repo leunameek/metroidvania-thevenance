@@ -230,7 +230,11 @@
     },
     {
       "key": "hud.blocked",
-      "value": "{0} · Camino bloqueado\nCompleta las estaciones y el duelo"
+      "value": "{0} · Camino bloqueado\n{1}"
+    },
+    {
+      "key": "objectives.story",
+      "value": "{0}\n{1}"
     },
     {
       "key": "hud.startCombat",

@@ -206,7 +206,8 @@ namespace Nemequene.UI
                 _pauseZone.text = UIStrings.Get(_ui.Demo.World < 0 ? "world.lower" : _ui.Demo.World > 0 ? "world.upper" : "world.plaza");
             if (screen == UIScreen.Objectives)
             {
-                _objectives.text = UIStrings.Get("objectives.body", _ui.Demo.Objectives.AnalyzedCount, _ui.Demo.Objectives.RequiredCount,
+                var story = CampaignProgress.Objective;
+                _objectives.text = UIStrings.Get("objectives.story", story.Title.ToUpperInvariant(), story.Text) + "\n\n" + UIStrings.Get("objectives.body", _ui.Demo.Objectives.AnalyzedCount, _ui.Demo.Objectives.RequiredCount,
                     UIStrings.Get(_ui.Demo.Combat.Completed ? "done" : "pending"), UIStrings.Get(_ui.Demo.PortalsUnlocked ? "unlocked" : "locked"));
                 _finish.gameObject.SetActive(_ui.Demo.PortalsUnlocked);
             }
