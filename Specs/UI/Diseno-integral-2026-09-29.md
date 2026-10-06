@@ -8,7 +8,7 @@ El documento `Interfaces_El_Asedio_de_Bacata.docx` y los paquetes `Pantallas_4K`
 
 ### Recursos y cómo se regeneran
 
-- `tools/ui/build_bacata_ui_sprites.py <carpeta con Bacata_UI_Premium>` escribe `Assets/Nemequene/UI/Resources/Nemequene/Bacata/` y sus `.meta` (200 ppu para componentes pintados al doble, cortes 9-slice incluidos).
+- `tools/ui/build_bacata_ui_sprites.py <carpeta con Bacata_UI_Premium>` escribe `Assets/_Game/UI/Resources/Nemequene/Bacata/` y sus `.meta` (200 ppu para componentes pintados al doble, cortes 9-slice incluidos).
 - El marco de panel se entrega **limpio**: el ave y la pluma se separaron en `Frame_Emblem` y `Frame_Feather` para que el corte de nueve sectores no los deforme (sección 8, «Importación de PNG»).
 - Iconos: los 32 del paquete, convertidos a blanco para teñirlos en oro, hueso o carmesí.
 - Arte: portada, título, plaza, mundos, piezas y un retrato recortado en disco para el anillo de `Marco_HUD`.
@@ -48,7 +48,7 @@ Las cuatro láminas «Referencia de UI» entregadas por el usuario (UI base, HUD
 
 ### Paleta y roles de texto
 
-Definida en `UITheme` / `UIPalette` (`Assets/Prototype/Scripts/View/UIKit/UITheme.cs`) y en `Resources/Nemequene/Theme.asset`. Cada par texto/superficie se midió con la fórmula WCAG; la superficie de piedra es el color medio real del centro de `StonePanel-v2.png` (`#2C1F17`) y el HUD se mide sobre el peor caso (velo al 86 % sobre blanco, `#373431`).
+Definida en `UITheme` / `UIPalette` (`Assets/_Game/Scripts/View/UIKit/UITheme.cs`) y en `Resources/Nemequene/Theme.asset`. Cada par texto/superficie se midió con la fórmula WCAG; la superficie de piedra es el color medio real del centro de `StonePanel-v2.png` (`#2C1F17`) y el HUD se mide sobre el peor caso (velo al 86 % sobre blanco, `#373431`).
 
 | Rol | Color | Superficie | Contraste |
 |---|---|---|---|

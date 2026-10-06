@@ -1,7 +1,7 @@
 """Synthesises the sound bank of the Mundo Inferior (original material, no samples).
 
 Usage: python tools/audio/generate_mundo_inferior_audio.py
-Writes 16-bit mono WAV files to Assets/Worlds/MundoInferior/Resources/MIAudio, read at runtime by
+Writes 16-bit mono WAV files to Assets/_Game/Resources/MIAudio, read at runtime by
 MIAudio (Prototype.Runtime). Re-running regenerates every clip deterministically (fixed seed).
 """
 import os

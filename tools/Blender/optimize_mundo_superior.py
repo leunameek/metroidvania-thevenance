@@ -1,4 +1,4 @@
-# Decimates the Tripo models of "Assets/Models/Mundo Superior" (~2M tris each) into
+# Decimates the Tripo models of "Assets/_Game/Art/Environments/MundoSuperior/Models" (~2M tris each) into
 # <folder>/MS_<ID>[_<variant>]_Optimizado.fbx next to the originals, as done for the lower world.
 # The Mundo Superior builder picks these files up by name (MS_<ID>...).
 # Run: blender -b --python tools/Blender/optimize_mundo_superior.py [-- <models dir>] [IDs...]

@@ -1,7 +1,7 @@
 """Procedural, seamlessly tiling textures of the Mundo Inferior graybox (guide 5.1 palette).
 
 Usage: python tools/textures/generate_mundo_inferior_textures.py
-Writes albedo + normal PNGs to Assets/Worlds/MundoInferior/Materials/Textures:
+Writes albedo + normal PNGs to Assets/_Game/Art/Environments/MundoInferior/Materials/Textures:
   MI_Piedra  cliffs and walls, blue-grey stone #666A7D with strata and cracks (2 m tile)
   MI_Suelo   walkable tops, blue-green flagstones #6B97A4 with dark joints (2 m tile)
   MI_Fondo   pit floors and depth, #252630 rubble

@@ -1,6 +1,6 @@
 # Plaza Núñez: lobby y tutorial
 
-Escena: `Assets/Prototype/Scenes/Week08/TechnicalDemo_Week08.unity`.
+Escena: `Assets/_Game/Scenes/PlazaNunez.unity`.
 Actualización de presentación del 12 de septiembre de 2026. Sustituye el alcance del graybox
 descrito en los documentos iniciales de Week08; estos conservan su valor como diagnóstico histórico.
 
@@ -88,7 +88,7 @@ desplazamiento real en suelo y cambian de cadencia al correr; no suenan al estar
 inspeccionando o teletransportándose. El sonido de giro tiene limitación de frecuencia.
 H abre ayuda y controles independientes de efectos/ambiente. V silencia ambos.
 
-Recursos en `Assets/Art/Environments/PlazaNunez` y `Assets/Art/Audio/PlazaNunez`.
+Recursos en `Assets/_Game/Art/Environments/PlazaNunez` y `Assets/_Game/Audio/PlazaNunez`.
 Generador explícito: `Nemequene > Plaza Núñez > Upgrade lobby and tutorial`.
 Si la plaza ya está generada, no sobrescribe ediciones manuales. Antes de migrar se guarda
 una copia estructural del graybox en `Scenes/Week08/Archive/PlazaNunez_Graybox.unity`.

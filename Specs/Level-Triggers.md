@@ -1,6 +1,6 @@
 # Level triggers
 
-Two reusable trigger prefabs live in `Assets/Prototype/Prefabs`.
+Two reusable trigger prefabs live in `Assets/_Game/Prefabs`.
 
 ## CameraZoomTrigger
 

@@ -1,18 +1,18 @@
 # Technical Summary — Prototype
 
-High-level, current-state overview of `Assets/Prototype`: what mechanics exist and what
+High-level, current-state overview of `Assets/_Game`: what mechanics exist and what
 tech/libraries they're built on. This is a rollup, not a replacement — for implementation
 detail, gotchas, and balance history, see `Movement-Pickup-Inspection.md` and
 `Combat-Damage-Enemies.md`. This doc adds the one system neither of those covers yet: the
 boss encounter (`BossFightController`/`BossFightTrigger`) and voice-command input
 (`VoiceCommandRecognizer`/`CommandFeedbackUI`), added in the most recent commit.
 
-Scene: `Assets/Prototype/Scenes/Movement.unity` · Scripts: `Assets/Prototype/Scripts/{Model,
-View,Controller}/` · Prefabs: `Assets/Prototype/Prefabs/` · Materials: `Assets/Prototype/Materials/`
+Scene: `Assets/_Game/Scenes/Dev/Movement.unity` · Scripts: `Assets/_Game/Scripts/{Model,
+View,Controller}/` · Prefabs: `Assets/_Game/Prefabs/` · Materials: `Assets/_Game/Materials/`
 
 ## Architecture (MVC)
 
-The course requires an MVC architecture. `Assets/Prototype/Scripts/` is split into three
+The course requires an MVC architecture. `Assets/_Game/Scripts/` is split into three
 folders; every existing MonoBehaviour kept its filename and `.meta` GUID (scene/prefab
 references are keyed by GUID, not path — moving files between folders is safe, deleting and
 recreating one is not), so this was a structural refactor, not a rewrite.
@@ -56,7 +56,7 @@ collider/transform mutation, and MediaPipe's thread-safety lock/buffer plumbing 
 `HandGestureTracker` — these are inherently Unity-engine-coupled, not game rules, so pulling
 them into a Model would just relocate the coupling instead of removing it.
 
-**Verification**: `Assets/Prototype/Scripts/Tests/EditMode/` has NUnit tests for the branchiest
+**Verification**: `Assets/_Game/Scripts/Tests/EditMode/` has NUnit tests for the branchiest
 extracted Models (dash tier/chain-window gating, the shield enemy's `minChargeRange` safe
 window, boss-fight miss-vs-dodge timing, hand-gesture freeze-on-close). These were written and
 never run — no Unity Editor access this session — so treat them as unverified until run once

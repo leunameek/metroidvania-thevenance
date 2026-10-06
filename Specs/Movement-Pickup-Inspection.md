@@ -1,18 +1,18 @@
 # Movement, Pickup, Inspection, Hand Tracking & Combat
 
-Spec of everything built in the `Assets/Prototype` sandbox so far: 3D movement, camera,
+Spec of everything built in the `Assets/_Game` sandbox so far: 3D movement, camera,
 ladders, ramps, the reusable pickup/inspection flow, the dash ability, MediaPipe-based
 hand-gesture control of the inspection camera, and the health/combat system (dash damage,
 3 enemy types, player/enemy health bars, respawn). Written for a future session to pick up
 context quickly — check the scene/scripts against this if anything drifted.
 
-Scene: `Assets/Prototype/Scenes/Movement.unity`
-Scripts: `Assets/Prototype/Scripts/{Model,View,Controller}/` — the flat script folder was split
+Scene: `Assets/_Game/Scenes/Dev/Movement.unity`
+Scripts: `Assets/_Game/Scripts/{Model,View,Controller}/` — the flat script folder was split
 into an MVC layout after this doc was written; a script named below now lives in whichever of
 those three subfolders matches its role (same filename/GUID, just moved, plus a few were split
 into a `*Model.cs` counterpart). See "Architecture (MVC)" in `Technical-Summary.md` for the map.
-Prefabs: `Assets/Prototype/Prefabs/`
-Materials: `Assets/Prototype/Materials/`
+Prefabs: `Assets/_Game/Prefabs/`
+Materials: `Assets/_Game/Materials/`
 Setup/run instructions for teammates (Spanish): `README.md` at repo root.
 
 Unity 6000.3.21f1, URP, new Input System only (`activeInputHandler: 1` in ProjectSettings —
@@ -481,7 +481,7 @@ Died`: calls `PlayerController.Teleport(...)` back there, then `Health.Revive()`
 
 ### Enemy prefabs & scene placement
 
-`Assets/Prototype/Prefabs/`: `ArcherEnemy.prefab`, `MeleeEnemy.prefab`, `ShieldEnemy.prefab`,
+`Assets/_Game/Prefabs/`: `ArcherEnemy.prefab`, `MeleeEnemy.prefab`, `ShieldEnemy.prefab`,
 `Arrow.prefab` — hand-authored YAML, same fileID/GUID workflow used for `DashPickup.prefab`.
 Materials: `ArcherEnemyBody.mat` (green), `MeleeEnemyBody.mat` (dark red), `ShieldEnemyBody.mat`
 (steel grey), `ShieldVisual.mat` (glowing cyan), `Arrow.mat` (dark brown). One instance of each

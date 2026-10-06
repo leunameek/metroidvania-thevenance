@@ -1,4 +1,4 @@
-# Decimates the Tripo models of Assets/Models/Mundo_Inferior (~2M tris each) into
+# Decimates the Tripo models of Assets/_Game/Art/Environments/MundoInferior/Models (~2M tris each) into
 # <folder>/<ID>_Optimizado.fbx next to the originals, as done for the Plaza Núñez props.
 # Run: blender -b --python tools/Blender/optimize_mundo_inferior.py [-- <models dir>] [IDs...]
 # Already optimized folders are skipped; delete an *_Optimizado.fbx to redo it.

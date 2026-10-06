@@ -4,7 +4,7 @@ Estado: implementación por módulos; **semana 8 todavía no aprobada**.
 
 ## Diagnóstico previo
 Unity 6000.3.21f1, URP 17.3.0, Input System 1.20.0, Unity Test Framework 1.6.0.
-Arquitectura MVC bajo Assets/Prototype/Scripts. Prototype.Model es una asamblea independiente:
+Arquitectura MVC bajo Assets/_Game/Scripts. Prototype.Model es una asamblea independiente:
 no puede referenciar Controller/View. Git configurado; hay cambios locales de manos/triggers que
 se conservan. No se encontraron AGENTS.md en el repositorio ni GDD o estudios de usuarios entre
 los documentos inspeccionados (README y Specs). Assets contiene escenas de recuperación y samples;
@@ -47,7 +47,7 @@ pero **no se incorpora a la demo Week08**. Sus habilidades avanzadas no se ampl�
 | W08-08 | P1 | QA/build | Pruebas con hardware, regresión, build Windows | Pendiente |
 
 ## Escenas
-- Creada: Assets/Prototype/Scenes/Week08/TechnicalDemo_Week08.unity.
+- Creada: Assets/_Game/Scenes/PlazaNunez.unity.
 - Planificadas, aún no creadas: CombatVoice_Week08, HandObjects_Week08,
   UnderworldAccess_Week08, UpperWorldAccess_Week08.
 - Movement y escenas de MediaPipe se conservan.

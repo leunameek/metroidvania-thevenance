@@ -537,7 +537,7 @@ Los avisos esenciales también se ven. Los subtítulos de custodio no se superpo
 
 ### 8.1 Organización de archivos y escena
 
-Mantener las referencias en ArtSource/Worlds/MundoInferior. Crear los recursos jugables en Assets/Worlds/MundoInferior con subcarpetas Scenes, Prefabs, Meshes, Materials, Textures, Audio y VFX. Los archivos de referencia PNG no son todavía prefabs ni modelos 3D.
+Mantener las referencias en ArtSource/Worlds/MundoInferior. Crear los recursos jugables en Assets/_Game/Art/Environments/MundoInferior con subcarpetas Scenes, Prefabs, Meshes, Materials, Textures, Audio y VFX. Los archivos de referencia PNG no son todavía prefabs ni modelos 3D.
 
 Jerarquía recomendada: MI_WorldRoot contiene Geometry con Room_01_Umbral a Room_09_Guardian; Traversal con rampas, pruebas y atajos; Interactables con mejoras, cuerno, puertas y descansos; Hazards con pinchos, péndulos, losas y piedras; Actors con enemigos, custodio y jefe; Atmosphere con fondos, niebla, luces y audio; CameraZones con límites de cámara; Runtime con estado de progreso, checkpoints y controlador de nivel.
 
@@ -631,7 +631,7 @@ Comprobar que las nueve salas existen y se pueden recorrer; los tres hallazgos d
 
 El diseño se apoya en el chat Diseña el mundo inferior, donde se definió la ruta y se generaron las referencias; en el chat Completar diseño y flujo de usuario y su diseño integral de interfaz; y en las conversaciones de referencias visuales para conservar el lenguaje de formas claras y piezas separadas. La organización específica del nivel se conserva de Specs/Worlds/Mundo-inferior.md.
 
-Fuentes del proyecto: ArtSource/Worlds/MundoInferior/01-estructura-nivel.png; ArtSource/Worlds/MundoInferior/Recursos/prompts-recursos.json; ArtSource/Worlds/MundoInferior/ModelosIndividuales; Specs/Movement-Pickup-Inspection.md; Specs/Combat-Damage-Enemies.md; Specs/Level-Triggers.md; Specs/Week08/05-Plaza-Lobby-Tutorial.md; Specs/UI/Diseno-integral-2026-09-29.md; PRODUCT.md; scripts y escenas de Assets/Prototype.
+Fuentes del proyecto: ArtSource/Worlds/MundoInferior/01-estructura-nivel.png; ArtSource/Worlds/MundoInferior/Recursos/prompts-recursos.json; ArtSource/Worlds/MundoInferior/ModelosIndividuales; Specs/Movement-Pickup-Inspection.md; Specs/Combat-Damage-Enemies.md; Specs/Level-Triggers.md; Specs/Week08/05-Plaza-Lobby-Tutorial.md; Specs/UI/Diseno-integral-2026-09-29.md; PRODUCT.md; scripts y escenas de Assets/_Game.
 
 Las dimensiones del kit provienen del inventario anterior. Las coordenadas locales, daños, tiempos y reglas detalladas de guardado de esta guía son parámetros propuestos para montar y comprobar el nivel. El catálogo siguiente conserva los IDs de las referencias para que el modelado, la escena y las interacciones utilicen el mismo nombre de pieza.
 

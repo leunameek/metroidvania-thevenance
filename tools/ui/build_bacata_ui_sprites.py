@@ -6,8 +6,8 @@ The package ships illustrated frames whose bird emblem and dark feather would st
 9-slice scaling. This script separates them (as the design document asks): it writes a clean
 frame for slicing plus the emblem and the feather as independent overlays. Icons are turned
 white so Unity can tint them gold or bone. Output goes to
-Assets/Nemequene/UI/Resources/Nemequene/Bacata; the import settings live in
-Assets/Nemequene/UI/Editor/BacataSpriteImporter.cs.
+Assets/_Game/UI/Resources/Nemequene/Bacata; the import settings live in
+Assets/_Game/UI/Editor/BacataSpriteImporter.cs.
 """
 import os
 import shutil

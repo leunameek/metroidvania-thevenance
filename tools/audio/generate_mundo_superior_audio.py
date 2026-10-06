@@ -1,7 +1,7 @@
 """Synthesises the sound bank of the Mundo Superior (original material, no samples).
 
 Usage: python tools/audio/generate_mundo_superior_audio.py [output dir]
-Writes 16-bit mono WAV files to Assets/Worlds/MundoSuperior/Resources/MSAudio, read at runtime by
+Writes 16-bit mono WAV files to Assets/_Game/Resources/MSAudio, read at runtime by
 MSAudio (Prototype.Runtime). Re-running regenerates every clip deterministically (fixed seed).
 
 Palette of the guide (section 16): open air instead of the lower world's cavern, light stone,

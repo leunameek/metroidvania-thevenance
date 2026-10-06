@@ -8,7 +8,7 @@ El fondo usa un único material: bruma lenta sobre el valle y ondulación leve s
 
 ## Arte
 
-- Archivo integrado: `Assets/Nemequene/UI/Resources/Nemequene/Title_Bacata.png`, PNG RGBA de 1672 × 941, con transparencia real.
+- Archivo integrado: `Assets/_Game/UI/Resources/Nemequene/Title_Bacata.png`, PNG RGBA de 1672 × 941, con transparencia real.
 - Herramienta: generación/edición de imágenes integrada (`image_gen`), a partir de la referencia adjunta del usuario.
 - El paisaje `Menu_Lagoon.png` se conserva. La animación se calcula en Unity; no requiere vídeo ni servicios externos durante el juego.
 

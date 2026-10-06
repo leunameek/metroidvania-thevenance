@@ -117,7 +117,7 @@ Total: **33 piezas base**, con variantes por reutilización. El arco doble reuti
 
 Referencias y prompts: `ArtSource/Worlds/MundoInferior/`. Mantenerlos fuera de `Assets` hasta elegir y modelar las piezas.
 
-Al implementar: `Assets/Worlds/MundoInferior/{Scenes,Prefabs,Meshes,Materials,Textures,Audio,VFX}`. Prefijos de objetos: `MI_T01_`, `MI_A01_`, etc., conservando el ID de esta tabla.
+Al implementar: `Assets/_Game/Art/Environments/MundoInferior/{Scenes,Prefabs,Meshes,Materials,Textures,Audio,VFX}`. Prefijos de objetos: `MI_T01_`, `MI_A01_`, etc., conservando el ID de esta tabla.
 
 Jerarquía de escena propuesta:
 

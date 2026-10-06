@@ -1080,7 +1080,7 @@ Las bandas T06 se cortan según entradas; las variantes de corte no cambian el t
 Rutas de producción previstas, **todavía no creadas por esta entrega**:
 
 ```text
-Assets/Worlds/MundoSuperior/
+Assets/_Game/Art/Environments/MundoSuperior/
   Scenes/MundoSuperior_Blockout.unity
   Models/{Terreno,Arquitectura,Objetos,Entorno,Guardian}/
   Prefabs/{Zonas,Hallazgos,Portales,Mecanismos,Entorno,Guardian}/
@@ -1089,9 +1089,9 @@ Assets/Worlds/MundoSuperior/
   Audio/
   Animations/
   Data/
-Assets/Prototype/Scripts/Controller/MundoSuperior/
-Assets/Prototype/Scripts/Model/MundoSuperior/
-Assets/Prototype/Scripts/View/MundoSuperior/
+Assets/_Game/Scripts/Controller/MundoSuperior/
+Assets/_Game/Scripts/Model/MundoSuperior/
+Assets/_Game/Scripts/View/MundoSuperior/
 ```
 
 Conservar archivos .meta al mover recursos. Reutilizar los recursos compartidos del jugador y UI por referencia; no duplicar todo el mundo inferior para cambiar nombres.
@@ -1528,7 +1528,7 @@ Los componentes de presentación no escriben progreso por su cuenta. Los motores
 
 ### 18.3. Viaje desde y hacia la plaza
 
-Agregar una constante de escena superior prevista: Assets/Worlds/MundoSuperior/Scenes/MundoSuperior_Blockout.unity. SceneFor debe distinguir world < 0 para inferior y world > 0 para superior. La escena tiene que existir y estar en Build Settings antes de devolver su ruta válida.
+Agregar una constante de escena superior prevista: Assets/_Game/Scenes/MundoSuperior.unity. SceneFor debe distinguir world < 0 para inferior y world > 0 para superior. La escena tiene que existir y estar en Build Settings antes de devolver su ruta válida.
 
 Al salir de la plaza, conservar lecciones, resultado del entrenamiento, máscara de visitas, tiempo y ranura con WorldTravel. Al volver, ReturnToPlaza(+1) identifica el portal superior. No usar -1 por copiar el retorno del mundo inferior.
 
@@ -1681,18 +1681,18 @@ Son las referencias de la propuesta inicial. El documento desarrolla un mundo fi
 
 Rutas del repositorio revisadas para distinguir reutilización de desarrollo pendiente:
 
-- Assets/Prototype/Scripts/Controller/PlayerController.cs.
-- Assets/Prototype/Scripts/Model/PlayerAbilityModel.cs.
-- Assets/Prototype/Scripts/Controller/PlayerRespawn.cs.
-- Assets/Prototype/Scripts/Controller/Week08/ExplorationOrbitCamera.cs.
-- Assets/Prototype/Scripts/Controller/Week08/WorldTravel.cs.
-- Assets/Prototype/Scripts/Model/Week08/PlazaCombatModel.cs.
-- Assets/Prototype/Scripts/Controller/Week08/PlazaCombatController.cs.
-- Assets/Prototype/Scripts/Controller/MundoInferior/MIProgress.cs.
-- Assets/Prototype/Scripts/Controller/MundoInferior/MIFind.cs.
-- Assets/Prototype/Scripts/Controller/MundoInferior/MIInteractable.cs.
-- Assets/Prototype/Scripts/Controller/MundoInferior/MIPortal.cs.
-- Assets/Prototype/Scripts/Controller/MundoInferior/MundoInferiorBlockout.cs.
+- Assets/_Game/Scripts/Controller/PlayerController.cs.
+- Assets/_Game/Scripts/Model/PlayerAbilityModel.cs.
+- Assets/_Game/Scripts/Controller/PlayerRespawn.cs.
+- Assets/_Game/Scripts/Controller/PlazaNunez/ExplorationOrbitCamera.cs.
+- Assets/_Game/Scripts/Controller/PlazaNunez/WorldTravel.cs.
+- Assets/_Game/Scripts/Model/PlazaNunez/PlazaCombatModel.cs.
+- Assets/_Game/Scripts/Controller/PlazaNunez/PlazaCombatController.cs.
+- Assets/_Game/Scripts/Controller/MundoInferior/MIProgress.cs.
+- Assets/_Game/Scripts/Controller/MundoInferior/MIFind.cs.
+- Assets/_Game/Scripts/Controller/MundoInferior/MIInteractable.cs.
+- Assets/_Game/Scripts/Controller/MundoInferior/MIPortal.cs.
+- Assets/_Game/Scripts/Controller/MundoInferior/MundoInferiorBlockout.cs.
 
 ### 21.4. Qué falta verificar jugando
 

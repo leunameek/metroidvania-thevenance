@@ -1,4 +1,4 @@
-:root{--stone:url('../../Assets/Nemequene/UI/Resources/Nemequene/StonePanel-v2.png');--parchment:url('../../Assets/Nemequene/UI/Resources/Nemequene/ParchmentPanel-v2.png');--button:url('../../Assets/Nemequene/UI/Resources/Nemequene/Menu_StoneButton.png')}
+:root{--stone:url('../../Assets/_Game/UI/Resources/Nemequene/StonePanel-v2.png');--parchment:url('../../Assets/_Game/UI/Resources/Nemequene/ParchmentPanel-v2.png');--button:url('../../Assets/_Game/UI/Resources/Nemequene/Menu_StoneButton.png')}
 body{background:#0d0b09;color:var(--bone)}
 ::selection{background:var(--sun);color:var(--obs)}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:var(--obs)}::-webkit-scrollbar-thumb{background:var(--gold);border:2px solid var(--obs)}
@@ -15,7 +15,7 @@ main{padding:clamp(20px,3vw,54px);background:radial-gradient(circle at 55% 25%,#
 .topline p{color:#d3b67f;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
 .preview{border:7px solid #261a12;outline:1px solid #9b723d;box-shadow:0 20px 50px #000c,0 2px 0 #a27946;max-width:1480px}
 .game{background:linear-gradient(90deg,#0e0c09bd,#0e0c0933),url('Evidence/exploration.png') center/cover}
-.game.title{background:linear-gradient(90deg,#0e0c096e,#0e0c0907),url('../../Assets/Nemequene/UI/Resources/Nemequene/Menu_BacataDawn-v2.png') center/cover}
+.game.title{background:linear-gradient(90deg,#0e0c096e,#0e0c0907),url('../../Assets/_Game/UI/Resources/Nemequene/Menu_BacataDawn-v2.png') center/cover}
 .shade{background:linear-gradient(90deg,#0c0a08bc,#0c0a0870)}
 .panel{border:2.2cqw solid transparent;border-image:var(--stone) 180 180 130 180 fill / 2.2cqw stretch;background:transparent;outline:0;box-shadow:0 1.3cqw 3.8cqw #000b;padding:2.1cqw;color:var(--bone)}
 .panel.left{left:4%;top:5%;width:46%;max-height:90%}.panel.right{right:4%;top:8%;width:35%;max-height:84%}.panel.center{left:20%;top:12%;width:60%;max-height:78%}.panel.full{inset:2.5% 3%;padding:2.2cqw}

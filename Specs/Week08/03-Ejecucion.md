@@ -1,7 +1,7 @@
 # Ejecutar Plaza Núñez
 
 1. Abrir el proyecto con Unity 6000.3.21f1 y esperar la importación.
-2. Abrir `Assets/Prototype/Scenes/Week08/TechnicalDemo_Week08.unity` y pulsar Play.
+2. Abrir `Assets/_Game/Scenes/PlazaNunez.unity` y pulsar Play.
 3. WASD camina, Shift corre, Espacio salta, Q hace dash y botón derecho + mouse gira la cámara.
 4. C activa la cámara. Acercarse a la estación 01 y pulsar E.
 5. Mano izquierda abierta: mover horizontalmente. Derecha abierta: mover verticalmente.

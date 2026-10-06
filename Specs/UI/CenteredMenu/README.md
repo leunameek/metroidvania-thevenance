@@ -10,9 +10,9 @@ El fondo completo ocupa la pantalla sin recortar sus extremos, también en 3:2 y
 
 ## Archivos integrados
 
-- `Assets/Nemequene/UI/Resources/Nemequene/Menu_BacataValley.png`: fondo sin textos ni botones.
-- `Assets/Nemequene/UI/Resources/Nemequene/Title_BacataMountains.png`: título con transparencia real.
-- `Assets/Nemequene/UI/Resources/Nemequene/Menu_StoneButton.png`: placa sin texto, importada como sprite con bordes para adaptar su tamaño.
+- `Assets/_Game/UI/Resources/Nemequene/Menu_BacataValley.png`: fondo sin textos ni botones.
+- `Assets/_Game/UI/Resources/Nemequene/Title_BacataMountains.png`: título con transparencia real.
+- `Assets/_Game/UI/Resources/Nemequene/Menu_StoneButton.png`: placa sin texto, importada como sprite con bordes para adaptar su tamaño.
 
 Las piezas se prepararon mediante la herramienta integrada `image_gen` a partir de la referencia. Los prompts completos están en `art-prompts.md`. El importador delimita el sprite dentro del PNG original sin modificar sus píxeles. El efecto ambiental se ejecuta localmente mediante un material de Unity.
 
@@ -33,4 +33,4 @@ La revisión visual independiente señaló letras por encima del centro y recort
 
 ## Ejecutar
 
-Abre `Assets/Nemequene/UI/Scenes/Nemequene_MainMenu.unity`, o usa `Builds/Nemequene/Nemequene.exe` conservando toda la carpeta de la compilación.
+Abre `Assets/_Game/Scenes/MainMenu.unity`, o usa `Builds/Nemequene/Nemequene.exe` conservando toda la carpeta de la compilación.

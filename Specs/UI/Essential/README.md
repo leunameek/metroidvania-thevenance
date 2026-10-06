@@ -23,4 +23,4 @@ Los diagnósticos internos del buscador del editor se registran aparte de los er
 
 ## Ejecución
 
-Abre `Assets/Nemequene/UI/Scenes/Nemequene_MainMenu.unity` en Unity, o ejecuta `Builds/Nemequene/Nemequene.exe` con su carpeta completa.
+Abre `Assets/_Game/Scenes/MainMenu.unity` en Unity, o ejecuta `Builds/Nemequene/Nemequene.exe` con su carpeta completa.

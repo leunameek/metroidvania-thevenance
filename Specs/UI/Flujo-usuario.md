@@ -128,6 +128,6 @@ Para que el requisito se aplique únicamente hasta la primera finalización, fal
 
 - [Diseño de la interfaz](../../DESIGN.md).
 - [Lobby y tutorial](../Week08/05-Plaza-Lobby-Tutorial.md).
-- [Menú de inicio](../../Assets/Nemequene/UI/Documentation/04-Menu-inicio.md).
-- [Navegación de pausa y diario](../../Assets/Nemequene/UI/Scripts/MenuController.cs).
-- [Requisitos y transición entre mundos](../../Assets/Prototype/Scripts/Controller/Week08/TechnicalDemoController.cs).
+- [Menú de inicio](../../Assets/_Game/UI/Documentation/04-Menu-inicio.md).
+- [Navegación de pausa y diario](../../Assets/_Game/UI/Scripts/MenuController.cs).
+- [Requisitos y transición entre mundos](../../Assets/_Game/Scripts/Controller/PlazaNunez/TechnicalDemoController.cs).

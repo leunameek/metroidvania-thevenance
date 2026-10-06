@@ -75,7 +75,7 @@ mix[:, 1] += np.roll(air, 971)
 # Conservative headroom before the player's independently adjustable music gain.
 peak = float(np.max(np.abs(mix)))
 mix *= .42 / max(peak, 1e-9)
-output = Path(__file__).resolve().parents[1] / "Assets/Nemequene/UI/Resources/Nemequene/Menu_Bruma.wav"
+output = Path(__file__).resolve().parents[1] / "Assets/_Game/UI/Resources/Nemequene/Menu_Bruma.wav"
 output.parent.mkdir(parents=True, exist_ok=True)
 pcm = (np.clip(mix, -1, 1) * 32767).astype('<i2')
 with wave.open(str(output), 'wb') as audio:

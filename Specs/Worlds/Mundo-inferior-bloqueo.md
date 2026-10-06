@@ -1,7 +1,7 @@
 # Mundo inferior · nivel jugable (etapas 4–8 de la guía, sin personajes)
 
-Escena: `Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity`, generada por
-`Assets/Prototype/Editor/MundoInferior/MundoInferiorBlockoutBuilder.cs` (menú **Nemequene › Mundo Inferior ›
+Escena: `Assets/_Game/Scenes/MundoInferior.unity`, generada por
+`Assets/_Game/Editor/MundoInferior/MundoInferiorBlockoutBuilder.cs` (menú **Nemequene › Mundo Inferior ›
 Construir nivel**; se ejecuta sola una vez por versión, clave `MundoInferior.Experience.v2`). La escena se regenera
 completa en cada ejecución: no editarla a mano, cambiar el constructor.
 
@@ -54,15 +54,15 @@ entrar a la arena, y derrota que regresa al descanso conservando los hallazgos. 
 
 # Mundo inferior · bloqueo jugable (etapas 1–3 de la guía)
 
-Escena: `Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity`, generada por
-`Assets/Prototype/Editor/MundoInferior/MundoInferiorBlockoutBuilder.cs` (menú **Nemequene › Mundo Inferior ›
+Escena: `Assets/_Game/Scenes/MundoInferior.unity`, generada por
+`Assets/_Game/Editor/MundoInferior/MundoInferiorBlockoutBuilder.cs` (menú **Nemequene › Mundo Inferior ›
 Construir bloqueo**; se ejecuta sola una vez, clave `MundoInferior.Blockout.v1`). La escena se regenera
 completa en cada ejecución: no editarla a mano, cambiar el constructor.
 
 ## Kit optimizado
 
 `tools/Blender/optimize_mundo_inferior.py` (Blender 5.2, `blender -b --python tools/Blender/optimize_mundo_inferior.py [-- <carpeta> IDs]`)
-reduce los Tripo de `Assets/Models/Mundo_Inferior` (~2 M triángulos, 55–65 MB cada uno) a
+reduce los Tripo de `Assets/_Game/Art/Environments/MundoInferior/Models` (~2 M triángulos, 55–65 MB cada uno) a
 `<carpeta>/<ID>_Optimizado.fbx` (15–60 k triángulos; 44 modelos, 47 MB en total). La tabla carpeta → ID
 está en el script. `Mundo_Inferior` está en `.gitignore`: los modelos y sus `.fbm` no viajan con git.
 No se optimizaron `stone+arch+3d+model` (A01a, exportación dañada de 464 triángulos) ni

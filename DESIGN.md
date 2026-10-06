@@ -18,7 +18,7 @@ La fuente ceremonial es **Noto Serif Regular**; la funcional es **Noto Sans Regu
 
 El flujo se simplifica a menú → partida, o menú → configuración → menú. No hay pantalla «presiona cualquier tecla», asistente obligatorio de dispositivos ni Continuar inactivo. Accesibilidad es la primera sección de Configuración. Los créditos, audio, pantalla y controles se consultan allí. Los ajustes persisten y se comparten con el juego.
 
-La música original «Bruma del umbral» pertenece solo a esta escena, tiene volumen independiente y atajo M para silenciar. El paisaje tiene bruma en movimiento y una ondulación leve en el agua, mediante un único material. El emblema y los controles permanecen fijos. El efecto se congela con movimiento reducido, al abrir otra vista y al perder el foco de la aplicación. La salida musical conserva un fundido breve. Detalle en `Assets/Nemequene/UI/Documentation/04-Menu-inicio.md`.
+La música original «Bruma del umbral» pertenece solo a esta escena, tiene volumen independiente y atajo M para silenciar. El paisaje tiene bruma en movimiento y una ondulación leve en el agua, mediante un único material. El emblema y los controles permanecen fijos. El efecto se congela con movimiento reducido, al abrir otra vista y al perder el foco de la aplicación. La salida musical conserva un fundido breve. Detalle en `Assets/_Game/UI/Documentation/04-Menu-inicio.md`.
 
 ### Título y paisaje vivo
 
