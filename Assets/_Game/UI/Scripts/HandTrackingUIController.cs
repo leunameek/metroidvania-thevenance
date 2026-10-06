@@ -46,7 +46,7 @@ namespace Nemequene.UI
             IReadOnlyList<Vector2> points = tracker == null ? null : s.leftHand ? tracker.LeftHandPoints : tracker.RightHandPoints;
             bool present = tracker != null && d.Hands.Live && (s.leftHand ? tracker.LeftHandPresent : tracker.RightHandPresent) && points != null && points.Count > 8;
             // Something to use nearby: a station, an open or closed portal, or the training circle.
-            bool interactable = d.State == TechnicalDemoState.Exploration && (d.Nearby != null || d.NearbyPortal != null || d.NearCombat);
+            bool interactable = d.State == TechnicalDemoState.Exploration && d.HasInteraction;
             bool visible = canTrack && present && s.handCursor && (calibration || interactable);
             _cursor.gameObject.SetActive(visible);
             if (!d.Hands.Requested) { _held = 0; Set(HandState.Inactive); return; }

@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 // and the altar light dims. Offerings are optional pieces for the cultural archive.
 public sealed class MIFind : MIInteractable
 {
-    public enum Kind { Seed, Bracelets, Horn, Offering }
+    public enum Kind { Seed, Bracelets, Horn, Offering, Story }
 
     [SerializeField] private string findId;
     [SerializeField] private Kind kind;
@@ -18,12 +18,13 @@ public sealed class MIFind : MIInteractable
     [SerializeField, TextArea] private string description = "";
     [SerializeField] private string rewardTitle = "";
     [SerializeField, TextArea] private string rewardText = "";
+    [SerializeField] private string[] requires = new string[0];
 
     public static MIFind Inspecting { get; private set; }
     public string FindId => findId;
     public Kind FindKind => kind;
     public bool Collected => MIProgress.Has(findId);
-    public override bool Available => base.Available && !Collected && Inspecting == null;
+    public override bool Available => base.Available && !Collected && Inspecting == null && RequirementsMet;
     public override string Prompt => "Examinar " + displayName.ToLowerInvariant();
 
     private Vector3 _itemPosition, _cameraPosition;
@@ -40,10 +41,32 @@ public sealed class MIFind : MIInteractable
         Refresh();
     }
 
+    // Story pieces of the campaign (coca, Chía) are built at runtime next to an existing altar:
+    // same inspection, shown and offered only once their requirements are met.
+    public static MIFind CreateStory(Transform parent, Vector3 position, string id, string name, string description,
+        string rewardTitle, string rewardText, Transform item, params string[] requires)
+    {
+        var go = new GameObject("Hallazgo_" + id);
+        go.SetActive(false);
+        go.transform.SetParent(parent, true);
+        go.transform.position = position;
+        var find = go.AddComponent<MIFind>();
+        find.findId = id; find.kind = Kind.Story; find.displayName = name; find.description = description;
+        find.rewardTitle = rewardTitle; find.rewardText = rewardText; find.item = item; find.requires = requires;
+        find.range = 2.4f;
+        item.SetParent(go.transform, true);
+        go.SetActive(true);
+        return find;
+    }
+    private bool RequirementsMet
+    {
+        get { foreach (var r in requires) if (!MIProgress.Has(r)) return false; return true; }
+    }
+
     private void Refresh()
     {
         bool collected = Collected;
-        if (item != null) item.gameObject.SetActive(!collected);
+        if (item != null) item.gameObject.SetActive(!collected && RequirementsMet);
         float intensity = collected ? _haloIntensity * .18f : _haloIntensity;
         if (halo != null) { halo.intensity = intensity; var glow = halo.GetComponent<MIGlow>(); if (glow != null) glow.SetBase(intensity); }
         if (sparks != null) sparks.gameObject.SetActive(!collected);
@@ -68,6 +91,8 @@ public sealed class MIFind : MIInteractable
 
     private void Update()
     {
+        // A story piece appears on its altar as soon as its requirements are met.
+        if (requires.Length > 0 && item != null && item.gameObject.activeSelf != (!Collected && RequirementsMet)) Refresh();
         if (Inspecting != this) return;
         _blend = Mathf.MoveTowards(_blend, 1, Time.unscaledDeltaTime / .35f);
         // Frame the piece from the player's side, a little above, the panel on the right.
@@ -123,7 +148,7 @@ public sealed class MIFind : MIInteractable
             if (kind == Kind.Offering)
                 director.Hud.Notify("Ofrenda · " + MIProgress.OfferingsCount + " / " + MIProgress.OfferingTotal, displayName + " pasa al archivo cultural.", UIIcon.Journal, UIPalette.Jade);
             else
-                director.Hud.Notify(rewardTitle, rewardText, kind == Kind.Horn ? UIIcon.Objective : kind == Kind.Seed ? UIIcon.Bird : UIIcon.Dodge, UIPalette.GoldLight);
+                director.Hud.Notify(rewardTitle, rewardText, kind == Kind.Horn || kind == Kind.Story ? UIIcon.Objective : kind == Kind.Seed ? UIIcon.Bird : UIIcon.Dodge, UIPalette.GoldLight);
             director.RefreshObjective();
         }
     }

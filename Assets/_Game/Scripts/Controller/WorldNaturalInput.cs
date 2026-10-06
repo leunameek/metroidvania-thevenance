@@ -94,6 +94,18 @@ public sealed class WorldNaturalInput : MonoBehaviour
 
     public bool ConsumeBack(string action) => TakeVoice(VoiceCommand.Back, action);
 
+    // Any recent word the caller accepts (duel verbs and targets), consumed once.
+    public bool ConsumeVoice(System.Func<VoiceCommand, bool> accept, out VoiceCommand command, out string phrase)
+    {
+        command = _heard; phrase = _heardPhrase;
+        if (Time.unscaledTime - _heardAt > VoiceLifetime || !accept(_heard)) return false;
+        _heardAt = -99;
+        _view.Flash("«" + _heardPhrase + "»");
+        return true;
+    }
+    public bool ConsumeGesture(HandGesture gesture, string feedback) => TakeGesture(gesture, feedback);
+    public bool GuardPoseHeld => HandsLive && _hands.Tracker.Gestures.GuardHeld;
+
     public bool ConsumeAttack(string action, bool gestures = true)
     {
         if (TakeVoice(VoiceCommand.Attack, action)) return true;

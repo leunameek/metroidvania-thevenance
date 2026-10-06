@@ -1,45 +1,37 @@
-using System.Collections;
 using Nemequene.UI;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-// Guardián de la cima (guide 7): a reactive turn duel started with an explicit E on its mark.
-// Player turn: E attacks once (20, 25 or 30 by yopos). Guardian turn: 1.8 s warning with the
-// verb, then a 2.4 s window for one answer (F blocks, Space dodges); right = 0 damage, wrong or
-// late = 20. Phase 2 at 120 adds the fragment rain and the core pulse in a fixed cycle that
-// restarts on every attempt. The fragments and rings are presentation: damage is applied once,
-// here. Victory writes ms_jefe_vencido before presenting it.
-public sealed class MSGuardian : MIInteractable
+// E08, the two-headed serpent of the summit (guion H16), on the provisional guardian model until
+// the serpent exists: its left arm stands for head A and its right arm for head B. E on the mark
+// starts it (checkpoint 07), C14 plays on the first attempt, then the turn duel of SerpentRules:
+// a correct defense makes the announcing head vulnerable; hitting it cuts its bond. The arms, the
+// fragments and the core only present what the model decided. Victory writes ms_jefe_vencido first.
+public sealed class MSGuardian : MIInteractable, IDuelStage
 {
-    private enum Attack { Frontal, Sweep, Fragments, Pulse }
-
-    [SerializeField] private float maxHealth = 240f, phaseTwoAt = 120f, failDamage = 20f;
-    [SerializeField] private float warning = 1.8f, window = 2.4f, feedback = 1.2f;
     [SerializeField] private Transform body, leftArm, rightArm, playerMark;
     [SerializeField] private Renderer core;
     [SerializeField] private Transform[] fragments = new Transform[0];
     // Provisional model (hub training guardian): Hit, Attack, Die and Reset triggers.
     [SerializeField] private Animator animator;
 
-    private static readonly Attack[] PhaseOne = { Attack.Frontal, Attack.Sweep };
-    private static readonly Attack[] PhaseTwo = { Attack.Frontal, Attack.Fragments, Attack.Sweep, Attack.Pulse };
-
-    private float _health;
-    private int _step;
     private bool _fighting;
-    private Coroutine _routine;
-    private Color _coreBase = new Color(1f, .7f, .3f);
+    private TurnDuelController _duel;
+    private DuelMove _move;
+    private float _moveTime;
+    private readonly Color _coreBase = new Color(1f, .7f, .3f);
     private PlayerController _player;
 
     public bool Fighting => _fighting;
     public bool Defeated => MSProgress.Has(MSProgress.Guardian);
-    public float Health01 => maxHealth > 0 ? _health / maxHealth : 0;
+    public float Health01 => _duel != null ? (float)_duel.Model.EnemyHealth / _duel.Model.EnemyMaxHealth : 1f;
     public override bool Available => base.Available && !_fighting && !Defeated;
-    public override string Prompt => "Enfrentar al guardián";
+    public override string Prompt => "Enfrentar a la serpiente";
+    public Transform Focus => body != null ? body : transform;
+    public Transform PlayerMark => playerMark;
 
     private void Start()
     {
-        _health = maxHealth;
+        StoryActor.Ensure(gameObject, "Serpiente", 5f);
         if (Defeated) ShowDefeated();
     }
 
@@ -47,142 +39,97 @@ public sealed class MSGuardian : MIInteractable
     {
         if (!Available) return;
         _player = player;
-        _routine = StartCoroutine(Duel());
+        _fighting = true;
+        MundoSuperiorDirector.Instance?.BeginCombat(this, playerMark);
+        MSAudio.Play("jefe_despierta", .9f);
+        // C14 only on the first attempt.
+        if (!StoryPlayer.Trigger(StoryTriggers.Duel("E08", "intro"), StartDuel)) StartDuel();
     }
 
-    // Defeat or abandon: full health again, first phase, the cycle from its start.
+    private void StartDuel()
+    {
+        if (!_fighting) return;
+        var director = MundoSuperiorDirector.Instance;
+        _duel = TurnDuelController.Run(new SerpentRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), _player.GetComponent<Health>(),
+            director != null ? director.Natural : null, director != null ? director.ReactionMultiplier : 1f, OnDuelEnded);
+    }
+
+    // Defeat or abandon: no duel, model at rest; the next attempt starts over.
     public void ResetEncounter()
     {
-        if (_routine != null) StopCoroutine(_routine);
-        _routine = null;
-        _fighting = false;
-        _health = maxHealth; _step = 0;
-        Pose(0, 0);
+        if (_duel != null) { var d = _duel; _duel = null; d.Abort(); }
+        _fighting = false; _move = null;
+        Pose(0, 0, 0);
         SetCore(_coreBase, 1);
         foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
         if (!Defeated) Trigger("Reset");
         UIWorldPrompt.Hide(this);
     }
 
-    private void Trigger(string name)
+    private void OnDuelEnded(bool victory)
     {
-        if (animator == null || animator.runtimeAnimatorController == null) return;
-        foreach (var t in new[] { "Hit", "Attack", "Die", "Reset" }) animator.ResetTrigger(t);
-        animator.SetTrigger(name);
+        _duel = null;
+        if (!victory) return; // the director's defeat flow resets the encounter
+        MSProgress.Set(MSProgress.Guardian);
+        MSAudio.Play("victoria", 1f);
+        ShowDefeated();
+        _fighting = false;
+        MundoSuperiorDirector.Instance?.EndCombat(true);
+        StoryPlayer.Trigger(StoryTriggers.Duel("E08", "won"));
     }
 
-    private IEnumerator Duel()
+    // ---------- IDuelStage ----------
+    public void OnTelegraph(DuelMove move)
     {
-        var director = MundoSuperiorDirector.Instance;
-        _fighting = true; _health = maxHealth; _step = 0;
-        director?.BeginCombat(this, playerMark);
-        MSAudio.Play("jefe_despierta", .9f);
-        yield return new WaitForSeconds(1f);
-        var health = _player.GetComponent<Health>();
-        while (_health > 0 && health != null && !health.IsDead)
+        _move = move; _moveTime = 0;
+        Trigger("Attack");
+        MSAudio.Play("jefe_aviso", .85f, move.Id == "barrido" ? 1.1f : move.Id == "pulso" ? 1.25f : 1f);
+    }
+
+    public void OnResolved(DuelMove move, bool correct)
+    {
+        if (move.Id == "fragmentos")
+            for (int i = 0; i < fragments.Length && i < 2; i++)
+                if (fragments[i] != null && playerMark != null) fragments[i].position = playerMark.position + new Vector3(i == 0 ? -1.4f : 1.4f, .4f, i == 0 ? .6f : -.6f);
+        MSAudio.Play("jefe_golpe", .85f);
+        if (correct) MSAudio.Play(move.Id == "barrido" ? "defensa_esquiva" : "defensa_bloqueo", .9f);
+        else MSAudio.Play("defensa_fallida", .8f);
+        if (correct && move.Id == "barrido" && _player != null) _player.PerformDodge(move.Origin == DuelTarget.HeadA ? 1 : -1);
+        _move = null;
+    }
+
+    public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
+    {
+        MSAudio.Play("golpe_nucleo", .9f);
+        Vector3 at = target == DuelTarget.HeadA && leftArm != null ? leftArm.position
+            : target == DuelTarget.HeadB && rightArm != null ? rightArm.position
+            : core != null ? core.transform.position : transform.position + Vector3.up * 4;
+        MIBurst.Spawn(at, action == DuelAction.Jaguar ? new Color(1f, .78f, .3f) : new Color(1f, .8f, .4f));
+        SetCore(Color.white, 3f);
+        Trigger("Hit");
+    }
+
+    public void OnDecide()
+    {
+        foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
+        SetCore(_coreBase, 1);
+    }
+
+    // Readable silhouettes: head A (left arm) rises for the frontal press and shakes fragments;
+    // head B (right arm) opens for the sweep and swells the core for the pulse.
+    private void Update()
+    {
+        if (!_fighting) return;
+        if (_move == null) { Pose(0, 0, 0); return; }
+        _moveTime += Time.deltaTime;
+        float k = Mathf.Clamp01(_moveTime / TurnDuelModel.TelegraphSeconds);
+        switch (_move.Id)
         {
-            // 2. Player turn: E without a time limit; the E that started the duel does not count.
-            UIWorldPrompt.Show(this, "E", "Atacar al núcleo");
-            yield return null;
-            // Fist or «atacar» do the same as E; the context names them on the hands panel.
-            while (!Pressed(Keyboard.current?.eKey) && !Natural(n => n.ConsumeAttack("Atacar al núcleo")))
-            {
-                Context(NaturalContext.Duel);
-                yield return null;
-            }
-            UIWorldPrompt.Hide(this);
-            float damage = MSProgress.AttackDamage;
-            _health = Mathf.Max(0, _health - damage);
-            MSAudio.Play("golpe_nucleo", .9f);
-            MIBurst.Spawn(core != null ? core.transform.position : transform.position + Vector3.up * 4, new Color(1f, .8f, .4f));
-            SetCore(Color.white, 3f);
-            if (_health > 0) Trigger("Hit");
-            director?.Hud?.Notify("Golpe al núcleo", "−" + damage.ToString("0") + " · vida del guardián " + _health.ToString("0") + " / " + maxHealth.ToString("0"), UIIcon.Objective, UIPalette.GoldLight);
-            yield return new WaitForSeconds(.6f);
-            SetCore(_coreBase, 1);
-            // 3. Immediate victory: no final retaliation.
-            if (_health <= 0) break;
-
-            // 4. Warning: silhouette and verb; presses now are ignored.
-            var cycle = _health <= phaseTwoAt ? PhaseTwo : PhaseOne;
-            var attack = cycle[_step % cycle.Length]; _step++;
-            bool block = attack == Attack.Frontal || attack == Attack.Pulse;
-            string verb = block ? "Bloquea" : "Esquiva";
-            UIWorldPrompt.Show(this, block ? "F" : "Espacio", verb + " · " + Name(attack));
-            Trigger("Attack");
-            MSAudio.Play("jefe_aviso", .85f, attack == Attack.Sweep ? 1.1f : attack == Attack.Pulse ? 1.25f : 1f);
-            for (float t = 0; t < warning; t += Time.deltaTime) { Context(NaturalContext.Defend); Telegraph(attack, t / warning); SetCore(Color.Lerp(_coreBase, new Color(1f, .3f, .2f), t / warning), 1 + t); yield return null; }
-            // Gestures and words made during the warning are ignored, like the keys.
-            director?.Natural?.ClearPending();
-
-            // 5. Reactive window: one accepted answer.
-            bool? answer = null;
-            float limit = window * (director != null ? director.ReactionMultiplier : 1f);
-            for (float t = 0; t < limit && answer == null; t += Time.deltaTime)
-            {
-                Context(NaturalContext.Defend);
-                yield return null;
-                var k = Keyboard.current;
-                if (Pressed(k?.fKey)) answer = block;
-                else if (Pressed(k?.spaceKey)) answer = !block;
-                else if (Natural(n => n.ConsumeGuard("Bloquear"))) answer = block;
-                else if (Natural(n => n.ConsumeDodge("Esquivar", out _))) answer = !block;
-            }
-            UIWorldPrompt.Hide(this);
-
-            // 6. Resolution, then 7. feedback.
-            bool right = answer == true;
-            Strike(attack);
-            if (!block && answer != null) _player.PerformDodge(_step % 2 == 0 ? 1 : -1);
-            if (right) { MSAudio.Play(block ? "defensa_bloqueo" : "defensa_esquiva", .9f); director?.Hud?.Notify(block ? "Bloqueo" : "Esquiva", "Sin daño.", UIIcon.Dodge, UIPalette.Jade); }
-            else { MSAudio.Play("defensa_fallida", .8f); director?.Damage(failDamage); director?.Hud?.Notify(answer == null ? "Demasiado tarde" : "Respuesta equivocada", "−" + failDamage.ToString("0") + " de vida. Era «" + verb + "».", UIIcon.Info, UIPalette.Danger); }
-            for (float t = 0; t < feedback; t += Time.deltaTime) { Recover(t / feedback); yield return null; }
-            SetCore(_coreBase, 1);
-        }
-        UIWorldPrompt.Hide(this);
-        if (_health <= 0)
-        {
-            // 9. Victory: flag first, then the presentation.
-            MSProgress.Set(MSProgress.Guardian);
-            MSAudio.Play("victoria", 1f);
-            ShowDefeated();
-            _fighting = false;
-            director?.EndCombat(true);
-        }
-        _routine = null;
-    }
-
-    private static bool Pressed(UnityEngine.InputSystem.Controls.KeyControl key)
-    {
-        var director = MundoSuperiorDirector.Instance;
-        return key != null && key.wasPressedThisFrame && (director == null || !director.Paused);
-    }
-
-    private static bool Natural(System.Func<WorldNaturalInput, bool> query)
-    {
-        var director = MundoSuperiorDirector.Instance;
-        var natural = director != null ? director.Natural : null;
-        return natural != null && !director.Paused && query(natural);
-    }
-
-    private static void Context(NaturalContext context) => MundoSuperiorDirector.Instance?.Natural?.SetContext(context);
-
-    private static string Name(Attack attack) => attack switch
-    {
-        Attack.Frontal => "golpe frontal", Attack.Sweep => "barrido lateral",
-        Attack.Fragments => "lluvia de fragmentos", _ => "pulso del núcleo",
-    };
-
-    // Readable silhouettes: the arm rises for the frontal blow, opens for the sweep; the rain shows
-    // two shadows at the player's mark; the pulse grows a ring on the core.
-    private void Telegraph(Attack attack, float k)
-    {
-        switch (attack)
-        {
-            case Attack.Frontal: Pose(-110f * k, 0); break;
-            case Attack.Sweep: Pose(0, 80f * k); break;
-            case Attack.Pulse: SetCore(new Color(1f, .45f, .2f), 1 + 3 * k); break;
-            case Attack.Fragments:
+            case "presion": Pose(-110f * k, 0, 0); break;
+            case "barrido": Pose(0, 0, 80f * k); break;
+            case "pulso": SetCore(new Color(1f, .45f, .2f), 1 + 3 * k); break;
+            case "fragmentos":
+                Pose(-50f * k, 0, 0);
                 for (int i = 0; i < fragments.Length && i < 2; i++)
                 {
                     var f = fragments[i]; if (f == null || playerMark == null) continue;
@@ -193,24 +140,17 @@ public sealed class MSGuardian : MIInteractable
         }
     }
 
-    private void Strike(Attack attack)
+    private void Pose(float raiseA, float raiseB, float openB)
     {
-        if (attack == Attack.Fragments)
-            for (int i = 0; i < fragments.Length && i < 2; i++)
-                if (fragments[i] != null && playerMark != null) fragments[i].position = playerMark.position + new Vector3(i == 0 ? -1.4f : 1.4f, .4f, i == 0 ? .6f : -.6f);
-        MSAudio.Play("jefe_golpe", .85f);
+        if (leftArm != null) leftArm.localRotation = Quaternion.Euler(raiseA, 0, 0);
+        if (rightArm != null) rightArm.localRotation = Quaternion.Euler(raiseB, 0, openB);
     }
 
-    private void Recover(float k)
+    private void Trigger(string name)
     {
-        Pose(Mathf.Lerp(-60f, 0, k), 0);
-        if (k > .9f) foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
-    }
-
-    private void Pose(float raise, float open)
-    {
-        if (rightArm != null) rightArm.localRotation = Quaternion.Euler(raise, 0, open);
-        if (leftArm != null) leftArm.localRotation = Quaternion.Euler(raise * .3f, 0, -open * .3f);
+        if (animator == null || animator.runtimeAnimatorController == null) return;
+        foreach (var t in new[] { "Hit", "Attack", "Die", "Reset" }) animator.ResetTrigger(t);
+        animator.SetTrigger(name);
     }
 
     private void SetCore(Color color, float intensity)
@@ -221,12 +161,12 @@ public sealed class MSGuardian : MIInteractable
         if (m.HasProperty("_EmissionColor")) m.SetColor("_EmissionColor", color * intensity);
     }
 
-    // The defeated guardian kneels, its core dark: no hostile logic remains.
+    // The freed serpent rests, its core dark: no hostile logic remains.
     private void ShowDefeated()
     {
         Trigger("Die");
         if (body != null) body.localRotation = Quaternion.Euler(18f, 0, 0);
-        Pose(30f, 0);
+        Pose(30f, 30f, 0);
         SetCore(new Color(.25f, .22f, .2f), 0);
     }
 }

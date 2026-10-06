@@ -68,9 +68,10 @@ public sealed class TurnDuelModel
     public event Action Changed;
 
     // damageBase: 20 + 5 per optional yopo, up to 30 (guion 07 "Recursos de combate").
-    public TurnDuelModel(DuelRules rules, int damageBase = 20, bool jaguar = false)
+    public TurnDuelModel(DuelRules rules, int damageBase = 20, bool jaguar = false, int playerHealth = PlayerMaxHealth)
     {
         Rules = rules ?? throw new ArgumentNullException(nameof(rules));
+        PlayerHealth = Math.Max(1, Math.Min(PlayerMaxHealth, playerHealth));
         DamageBase = Math.Max(1, Math.Min(30, damageBase));
         JaguarAvailable = jaguar;
         EnemyHealth = rules.MaxHealth;
@@ -272,6 +273,8 @@ public abstract class DuelRules
     public virtual string Opening => "Tu turno. Decide sin prisa.";
     public virtual string Victory => "Prueba superada.";
     public virtual DuelTarget[] Targets => new DuelTarget[0];
+    // One line for the HUD under the enemy name (bonds, exposed core, posture...).
+    public virtual string Status(TurnDuelModel duel) => "";
 
     public virtual void Begin(TurnDuelModel duel) { }
     public virtual bool IsLegal(TurnDuelModel duel, DuelAction action, ref string reason)

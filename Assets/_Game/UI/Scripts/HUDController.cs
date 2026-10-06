@@ -83,7 +83,7 @@ namespace Nemequene.UI
         }
         public void Tick()
         {
-            _root.SetActive(_ui.Screens.Current == UIScreen.None && !_ui.ModalOpen && !(_ui.Dialogue?.Active ?? false));
+            _root.SetActive(_ui.Screens.Current == UIScreen.None && !_ui.ModalOpen && !(_ui.Dialogue?.Active ?? false) && !StoryPlayer.Active && !TurnDuelController.Running);
             if (!_root.activeSelf) return;
             _healthShown = _ui.Settings.Values.reducedMotion ? _healthTarget : Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
             UIFactory.Fill(_healthFill, _healthShown);
@@ -112,6 +112,7 @@ namespace Nemequene.UI
             _hints.SetActive(exploration);
             _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName)
+                : d.NearbyStory != null ? "E · " + d.NearbyStory.Prompt
                 : d.NearbyPortal != null ? UIStrings.Get(d.NearbyPortal.Available ? "hud.travel" : "hud.blocked", d.NearbyPortal.destinationName, d.NearbyPortal.LockedReason)
                 : d.NearCombat ? UIStrings.Get("hud.startCombat") : "";
             _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false)); if (_prompt.text != prompt) _prompt.text = prompt;

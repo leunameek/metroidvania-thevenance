@@ -19,6 +19,8 @@ public sealed class PlazaCombatController : MonoBehaviour
     public bool Completed { get; private set; }
     public float FlashIntensity { get; set; } = 1;
     public Vector3 EntryPosition => entry.position;
+    public Transform Guardian => guardian;
+    public Transform PlayerMark => playerMark;
     public bool Active => demo.State == TechnicalDemoState.Combat;
 
     public void RestoreCompleted() { Completed = true; }

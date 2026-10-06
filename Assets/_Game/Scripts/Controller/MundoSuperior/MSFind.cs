@@ -16,11 +16,14 @@ public sealed class MSFind : MIInteractable
     [SerializeField, TextArea] private string description = "";
     [SerializeField] private string rewardTitle = "";
     [SerializeField, TextArea] private string rewardText = "";
+    [SerializeField] private string[] requires = new string[0];
 
     public static MSFind Inspecting { get; private set; }
     public string FindId => findId;
     public bool Collected => MSProgress.Has(findId);
-    public override bool Available => base.Available && !Collected && Inspecting == null;
+    // Guion O-S06: the key plate is offered once the eagle has recognised the visitor.
+    public override bool Available => base.Available && !Collected && Inspecting == null && RequirementsMet
+        && (findId != MSProgress.Key || MSProgress.Has(MSProgress.Eagle) || CampaignProgress.FreeTravel);
     public override string Prompt => "Examinar " + displayName.ToLowerInvariant();
 
     private Vector3 _itemPosition, _cameraPosition;
@@ -40,10 +43,32 @@ public sealed class MSFind : MIInteractable
         Refresh();
     }
 
+    // Story pieces of the campaign (Sué) are built at runtime next to an existing altar: same
+    // inspection, shown and offered only once their requirements are met.
+    public static MSFind CreateStory(Transform parent, Vector3 position, string id, string name, string description,
+        string rewardTitle, string rewardText, Transform item, params string[] requires)
+    {
+        var go = new GameObject("Hallazgo_" + id);
+        go.SetActive(false);
+        go.transform.SetParent(parent, true);
+        go.transform.position = position;
+        var find = go.AddComponent<MSFind>();
+        find.findId = id; find.kindLabel = "Máscara"; find.displayName = name; find.description = description;
+        find.rewardTitle = rewardTitle; find.rewardText = rewardText; find.item = item; find.requires = requires;
+        find.range = 2.6f;
+        item.SetParent(go.transform, true);
+        go.SetActive(true);
+        return find;
+    }
+    private bool RequirementsMet
+    {
+        get { foreach (var r in requires) if (!MSProgress.Has(r)) return false; return true; }
+    }
+
     private void Refresh()
     {
         bool collected = Collected;
-        if (item != null) item.gameObject.SetActive(!collected);
+        if (item != null) item.gameObject.SetActive(!collected && RequirementsMet);
         float intensity = collected ? 0f : _haloIntensity;
         if (halo != null) { halo.intensity = intensity; var glow = halo.GetComponent<MIGlow>(); if (glow != null) glow.SetBase(intensity); }
         if (sparks != null) sparks.gameObject.SetActive(!collected);
@@ -67,6 +92,8 @@ public sealed class MSFind : MIInteractable
 
     private void Update()
     {
+        // A story piece appears on its altar as soon as its requirements are met.
+        if (requires.Length > 0 && item != null && item.gameObject.activeSelf != (!Collected && RequirementsMet)) Refresh();
         if (Inspecting != this) return;
         _blend = Mathf.MoveTowards(_blend, 1, Time.unscaledDeltaTime / .35f);
         // Frame the piece from the player's side, a little above, the panel on the right.

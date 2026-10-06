@@ -11,6 +11,8 @@ public static class MIProgress
     public const string Seed = "semilla", Bracelets1 = "brazaletes1", Bracelets2 = "brazaletes2", Bracelets3 = "brazaletes3";
     public const string Horn = "cuerno", Shortcut03 = "atajo_03_01", Corridor06 = "corredor_06", Shield04 = "salida_04";
     public const string HornGate = "reja_cuerno", Guardian = "guardian";
+    // Story pieces of the campaign (guion O-N03, O-N04, C09).
+    public const string Coca = "coca", ChiaSealed = "chia_sellada", ChiaReleased = "chia_libre";
     public const string OfferingPrefix = "ofrenda_";
     public const int OfferingTotal = 6;
     // Optional pieces of the lower world, in route order, for the plaza's cultural archive.

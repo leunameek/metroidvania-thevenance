@@ -40,7 +40,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     public MIHud Hud { get; private set; }
     // Hands and voice next to the keys: interaction, finds and the dash in combat.
     public WorldNaturalInput Natural { get; private set; }
-    public bool Busy => _paused || _dead || MIFind.Inspecting != null;
+    public bool Busy => _paused || _dead || MIFind.Inspecting != null || StoryPlayer.Active;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics() { AttemptReset = null; Instance = null; }
@@ -73,6 +73,9 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         Natural = WorldNaturalInput.Create(transform);
         Natural.AddPauseEntries(Hud);
         ApplyAbilities();
+        SpawnStoryPieces();
+        StoryPlayer.Listen();
+        StoryPlayer.AddGate(this, () => !_paused && !_dead && MIFind.Inspecting == null && (!InFight || (_guardian != null && _guardian.Fighting)));
         EnterRoom(0);
         MIAudio.Loop(gameObject, "ambiente_caverna", .45f, false);
         MIProgress.Changed += OnProgress;
@@ -88,6 +91,58 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     }
 
     private void OnProgress(string id) { RefreshObjective(); }
+
+    // Custodio de Raíces (guion E02): anchored beside the seed altar, it never fights; it answers
+    // the contextual questions of the route (D04 seed, D05 shield, D06 sealed Chía).
+    private void SpawnCustodio()
+    {
+        foreach (var find in FindObjectsByType<MIFind>(FindObjectsSortMode.None))
+        {
+            if (find.FindId != MIProgress.Seed) continue;
+            Vector3 at = find.transform.position - find.transform.right * 2.6f;
+            if (Physics.Raycast(at + Vector3.up * 3f, Vector3.down, out var hit, 8f, ~0, QueryTriggerInteraction.Ignore)) at = hit.point;
+            var custodio = StoryProps.Figure("Custodio de Raices", transform, at, new Color(.36f, .27f, .18f), new Color(.45f, .6f, .3f), 2.1f);
+            custodio.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(find.transform.position - at, Vector3.up));
+            StoryActor.Ensure(custodio.gameObject, "Custodio de Raíces", 1.9f);
+            MIStoryPoint.Create("Custodio", transform, at, 2.6f, () => "Hablar con el Custodio de Raíces", () =>
+            {
+                string hint = !MIProgress.Has(MIProgress.Seed) ? "D04"
+                    : !MIProgress.Has(MIProgress.Shield04) ? "D05"
+                    : MIProgress.Has(MIProgress.ChiaSealed) && !MIProgress.Has(MIProgress.ChiaReleased) ? "D06" : "D04";
+                StoryPlayer.PlayHint(CampaignProgress.Script.Hint(hint), "Custodio de Raíces");
+            });
+            break;
+        }
+    }
+
+    // Story pieces of the script that the blockout lacks (guion O-N03, O-N04), placed on existing
+    // supports: the coca on the third pair's altar once the three analyses are done, the sealed
+    // Chía mask beside the horn socket once the gate has opened.
+    private void SpawnStoryPieces()
+    {
+        SpawnCustodio();
+        foreach (var find in FindObjectsByType<MIFind>(FindObjectsSortMode.None))
+        {
+            if (find.FindId != MIProgress.Bracelets3) continue;
+            Vector3 at = find.transform.position;
+            MIFind.CreateStory(find.transform.parent, at, MIProgress.Coca, "Coca",
+                "Hojas de coca de fantasía, ligadas al extremo jaguar del bastón. El poporo las guarda: no se agotan ni se preparan.",
+                "Afinidad del jaguar", "El jaguar del bastón responde al poporo. En el duelo final del inframundo podrás decir «Jaguar».",
+                StoryProps.Build("Coca", transform, at + Vector3.up * 1.15f),
+                MIProgress.Seed, MIProgress.Bracelets1, MIProgress.Bracelets2, MIProgress.Bracelets3);
+            break;
+        }
+        var socket = FindFirstObjectByType<MIHornSocket>();
+        if (socket != null)
+        {
+            Vector3 at = socket.transform.position + socket.transform.right * 1.8f;
+            MIFind.CreateStory(socket.transform.parent, at, MIProgress.ChiaSealed, "Máscara de Chía",
+                "Máscara lunar en su nicho. Por el reverso corre un lazo oscuro que conduce a la cámara del guardián.",
+                "Máscara sellada", "Tienes su forma, pero el guardián conserva el lazo. Libéralo para que Chía responda.",
+                StoryProps.Build("MascaraChia", transform, at + Vector3.up * 1.3f),
+                MIProgress.HornGate);
+        }
+    }
 
     // Abilities come from the found pieces only (guide 3.3): no inherited training dash.
     public void ApplyAbilities()
@@ -105,6 +160,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         string name = RoomTitle(_room);
         Hud?.SetZone(name);
         if (first && _room > 0) Hud?.Notify("Zona descubierta", name, UIIcon.Map, UIPalette.GoldLight);
+        StoryPlayer.Trigger(StoryTriggers.Room(_room));
         RefreshObjective();
     }
 
@@ -128,6 +184,11 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
             !MIProgress.Has(MIProgress.HornGate) ? "Lleva el cuerno al soporte de la antesala" :
             !MIProgress.Has(MIProgress.Guardian) ? "Vence al guardián de la cámara del fondo" :
             "Vuelve a Plaza Núñez por el portal de la cámara";
+        // In a campaign the story names the step (coca, Chía...); editor tests keep the guide.
+        var campaign = CampaignProgress.Model;
+        if (!CampaignProgress.FreeTravel)
+            objective = campaign.Chapter == CampaignChapter.LowerWorld ? campaign.Objective.Text
+                : campaign.Chapter > CampaignChapter.LowerWorld ? "Vuelve a Plaza Núñez y lleva Chía a Bachué" : objective;
         Hud.SetObjective(objective);
         Hud.SetCounters("Hallazgos " + MIProgress.FindsCount + " / 5   ·   Ofrendas " + MIProgress.OfferingsCount + " / " + MIProgress.OfferingTotal
             + "   ·   Zonas " + MIProgress.DiscoveredCount + " / 9");
@@ -213,10 +274,11 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         if (player == null) return;
         if (player.transform.position.y < fallbackLimitY) Recover(roomSpawns[_room], 10);
         var keyboard = Keyboard.current;
-        Hud?.SetHintsVisible(!Busy);
+        Hud?.SetHintsVisible(!Busy && !TurnDuelController.Running);
+        Hud?.SetHeaderVisible(!TurnDuelController.Running);
         UpdateBars();
         UpdateAmbience();
-        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && _escapeSuppressedFrame != Time.frameCount && MIFind.Inspecting == null && !_dead)
+        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && _escapeSuppressedFrame != Time.frameCount && MIFind.Inspecting == null && !_dead && !StoryPlayer.Active)
         {
             if (_paused) Resume(); else Pause();
             return;
@@ -274,7 +336,8 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     private void UpdateBars()
     {
         if (Hud == null) return;
-        if (_guardian != null && _guardian.Fighting) Hud.SetBoss(_guardian.DisplayName, _guardian.Health01, true);
+        if (TurnDuelController.Running) Hud.SetBoss("", 0, false); // the duel screen shows it
+        else if (_guardian != null && _guardian.Fighting) Hud.SetBoss(_guardian.DisplayName, _guardian.Health01, true);
         else if (_sentinel != null && _sentinel.isActiveAndEnabled && !_sentinel.Defeated && _room == 3)
             Hud.SetBoss(_sentinel.ShieldUp ? "Centinela de escudo · defensa intacta" : "Centinela de escudo · defensa rota", _sentinel.Health01, Vector3.Distance(player.transform.position, _sentinel.transform.position) < 16f);
         else Hud.SetBoss("", 0, false);

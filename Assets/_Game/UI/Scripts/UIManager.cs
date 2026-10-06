@@ -83,6 +83,8 @@ namespace Nemequene.UI
         }
         public void Initialize(TechnicalDemoController demo)
         {
+            // Story lines wait for the session to start and for menus, modals and dialogues to close.
+            StoryPlayer.AddGate(this, () => SessionStarted && Screens != null && Screens.Current == UIScreen.None && !ModalOpen && !(Dialogue?.Active ?? false));
             Instance = this; Demo = demo; Demo.ManagedUI = true;
             Settings = new SettingsManager(); Screens = new ScreenManager();
             Theme = Resources.Load<UITheme>("Nemequene/Theme");
@@ -214,6 +216,8 @@ namespace Nemequene.UI
         {
             if (!_ready) return;
             var k = Keyboard.current;
+            // A story line owns Esc (hold to skip) and the keys while it plays.
+            if (StoryPlayer.Active) { _hud.Tick(); return; }
             bool back = k != null && k.escapeKey.wasPressedThisFrame
                 || Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
             if (back && _backFrame != Time.frameCount)

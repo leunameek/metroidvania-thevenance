@@ -420,13 +420,14 @@ namespace Nemequene.UI
             _loadingBack.gameObject.SetActive(false);
             Settings.Values.configured=true;Settings.Apply();Settings.Flush();
             SetView(TitleView.Loading,null);
-            StartCoroutine(LoadTutorial());
+            // The story decides the first scene: the prologue in Bacatá until the plaza is reached.
+            StartCoroutine(LoadTutorial(CampaignScenes.EntryScene()));
         }
-        private IEnumerator LoadTutorial()
+        private IEnumerator LoadTutorial(string path)
         {
             IsLoading=true; yield return null;
             AsyncOperation operation=null;
-            try {operation=SceneManager.LoadSceneAsync(TutorialPath,LoadSceneMode.Single);}
+            try {operation=SceneManager.LoadSceneAsync(path,LoadSceneMode.Single);}
             catch(Exception exception) {Debug.LogWarning("Could not load tutorial: "+exception.Message);}
             if(operation==null) {ShowLoadError();yield break;}
             operation.allowSceneActivation=false;

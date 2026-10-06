@@ -150,6 +150,12 @@ public sealed class MIHud : MonoBehaviour
     public void SetObjective(string objective) => _objective.text = objective;
     public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "\n"); }
     public void SetHintsVisible(bool visible) { if (_hints.activeSelf != visible) _hints.SetActive(visible); }
+    // Zone, objective and counters step aside while the turn duel screen uses the top band.
+    public void SetHeaderVisible(bool visible)
+    {
+        foreach (var t in new[] { _zone, _objective, _counters })
+            if (t != null && t.gameObject.activeSelf != visible) t.gameObject.SetActive(visible);
+    }
 
     public void Notify(string title, string text, UIIcon icon, Color color)
     {

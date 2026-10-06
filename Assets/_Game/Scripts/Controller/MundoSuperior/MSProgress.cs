@@ -11,6 +11,8 @@ public static class MSProgress
     public const string RunePortals = "ms_runa_portales", RuneClimb = "ms_runa_escalada", Wings = "ms_alas";
     public const string Yopo1 = "ms_yopo_1", Yopo2 = "ms_yopo_2", Key = "ms_llave";
     public const string LockOpen = "ms_cierre_abierto", Guardian = "ms_jefe_vencido", Branch = "ms_ramal_yopo2";
+    // Story pieces of the campaign (guion E09, E10, C13, O-N07).
+    public const string Condor = "ms_condor", Eagle = "ms_aguila", QuimueEcho = "ms_eco_quimue", Sue = "ms_sue";
     // Rest checkpoints by zone index: D01, D04 and D07.
     public const int Rest01 = 0, Rest04 = 3, Rest07 = 6;
     public static readonly string[] Finds = { RunePortals, RuneClimb, Wings, Yopo1, Yopo2, Key };

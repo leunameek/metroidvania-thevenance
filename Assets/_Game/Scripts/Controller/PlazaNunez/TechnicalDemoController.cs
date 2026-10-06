@@ -58,6 +58,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
         }
     }
     public PlazaPortal NearbyPortal { get; private set; }
+    public PlazaStoryPoint NearbyStory { get; private set; }
+    public bool HasInteraction => Nearby != null || NearbyStory != null || NearbyPortal != null || NearCombat;
+    public PlazaCampaign Campaign { get; private set; }
     public bool NearCombat => combat != null && Vector3.Distance(player.transform.position, combat.EntryPosition) < 3.2f;
     public float Fade { get; private set; }
     public int World { get; private set; }
@@ -116,7 +119,13 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Start()
     {
         player.GrantDash(1);
+        // Story: lines play only while exploring with no menu open (the UI adds its own gate).
+        StoryPlayer.Listen();
+        StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting);
+        Campaign = PlazaCampaign.Create(this);
+        if (combat != null && combat.Guardian != null) StoryActor.Ensure(combat.Guardian.gameObject, "Guardián de entrenamiento", 1.9f);
         SyncCampaign();
+        StoryPlayer.Trigger(StoryTriggers.PlazaArrival);
         if (WorldTravel.ReturningFrom != 0) ArriveFromWorld(WorldTravel.ReturningFrom);
         WorldTravel.ClearReturn();
     }
@@ -124,6 +133,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Update()
     {
         if (_restarting) return;
+        if (StoryPlayer.Active || TurnDuelController.Running) return;
         if (ManagedUI && HelpOpen) return;
         Keyboard k = Keyboard.current;
         if (k != null && k.vKey.wasPressedThisFrame) _audio.ToggleMute();
@@ -206,6 +216,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
             if (_nearby != null) _nearby.SetHighlighted(true);
             ViewChanged?.Invoke();
         }
+        NearbyStory = _nearby == null ? PlazaStoryPoint.Nearest(player.transform.position) : null;
         NearbyPortal = null;
         float portalDistance = 3f;
         foreach (var portal in portals)
@@ -224,8 +235,15 @@ public sealed class TechnicalDemoController : MonoBehaviour
 
     public void Interact()
     {
-        if (State != TechnicalDemoState.Exploration) return;
-        if (_nearby != null) { BeginAnalysis(_nearby); return; }
+        if (State != TechnicalDemoState.Exploration || StoryPlayer.Pending) return;
+        if (_nearby != null)
+        {
+            // First time at a station Bachue names its lesson (H05), then the analysis opens.
+            var item = _nearby;
+            if (!StoryPlayer.Trigger(StoryTriggers.PlazaStation(System.Array.IndexOf(objects, item)), () => BeginAnalysis(item))) BeginAnalysis(item);
+            return;
+        }
+        if (NearbyStory != null) { NearbyStory.use?.Invoke(); return; }
         if (NearbyPortal != null)
         {
             if (!NearbyPortal.Available)
@@ -233,7 +251,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
             else Travel(NearbyPortal);
             return;
         }
-        if (NearCombat) combat.Begin();
+        if (NearCombat && !StoryPlayer.Trigger(StoryTriggers.PlazaTraining, () => combat.Begin())) combat.Begin();
     }
 
     public void BeginAnalysis(AnalyzableObject item)

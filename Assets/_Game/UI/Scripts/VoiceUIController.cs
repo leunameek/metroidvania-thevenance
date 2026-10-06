@@ -58,6 +58,8 @@ namespace Nemequene.UI
                 _until = Time.unscaledTime + 3; return;
             }
             var d = _ui.Demo;
+            // A story line or the turn duel take the word themselves (StoryPlayer, TurnDuelController).
+            if (StoryPlayer.Active || TurnDuelController.Running) { Accept(); return; }
             if (d.HelpOpen) { Set(VoiceState.Inactive); return; }
             if (d.State != TechnicalDemoState.Combat) { Explore(d, command); return; }
             var phase = d.Combat.Model.Phase;
@@ -79,7 +81,7 @@ namespace Nemequene.UI
             else if (d.State == TechnicalDemoState.Analyzing && command == VoiceCommand.Confirm && d.Lesson != null && d.Lesson.Complete) { Accept(); d.EndAnalysis(); done = true; }
             if (!done) { Set(VoiceState.Unrecognized); _until = Time.unscaledTime + 2; }
         }
-        private static bool HasTarget(TechnicalDemoController d) => d.Nearby != null || d.NearbyPortal != null || d.NearCombat;
+        private static bool HasTarget(TechnicalDemoController d) => d.HasInteraction;
         private void Accept()
         {
             _lastAcceptedFrame = Time.frameCount;

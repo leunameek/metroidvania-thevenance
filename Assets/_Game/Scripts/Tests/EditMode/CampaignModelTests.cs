@@ -195,6 +195,29 @@ public class StoryScriptTests
     }
 
     [Test]
+    public void EveryTriggerPointsAtLinesOfTheScript()
+    {
+        var script = Load();
+        var keys = new HashSet<string>();
+        foreach (var trigger in StoryTriggers.All)
+        {
+            Assert.IsTrue(keys.Add(trigger.Key), "duplicate " + trigger.Key);
+            var sequence = script.Get(trigger.Sequence);
+            Assert.IsNotNull(sequence, trigger.Key);
+            foreach (var cue in trigger.Cues) Assert.IsNotEmpty(sequence.Cue(cue), trigger.Key + " cue " + cue);
+        }
+        // Every cued line of a sequence is said by some trigger.
+        var duelCues = new HashSet<string>();
+        foreach (var s in script.sequences)
+            foreach (var line in s.lines)
+            {
+                if (string.IsNullOrEmpty(line.cue) || duelCues.Contains(s.id + "/" + line.cue)) continue;
+                Assert.IsTrue(System.Array.Exists(StoryTriggers.All, t => t.Sequence == s.id && System.Array.IndexOf(t.Cues, line.cue) >= 0),
+                    s.id + " cue " + line.cue + " is never played");
+            }
+    }
+
+    [Test]
     public void CanonIsTheHistoryText()
     {
         var h17 = Load().Get("H17");

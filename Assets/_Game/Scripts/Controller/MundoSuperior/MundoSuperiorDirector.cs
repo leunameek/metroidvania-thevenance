@@ -46,7 +46,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
     public WorldNaturalInput Natural { get; private set; }
     public bool Paused => _paused;
     public bool InCombat => _inCombat;
-    public bool Busy => _paused || _dead || _moving || MSFind.Inspecting != null;
+    public bool Busy => _paused || _dead || _moving || MSFind.Inspecting != null || StoryPlayer.Active;
     // Accessibility multiplier of the reaction window (1-3, guide 7.5).
     public float ReactionMultiplier { get; set; } = 1f;
 
@@ -88,6 +88,14 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         // Every visit from the plaza enters at 01 (guide 3.2); the rests matter for defeat.
         _safe = entrySpawn;
         var first = entrySpawn != null ? entrySpawn.GetComponentInParent<MSZone>() : null;
+        SpawnStoryPieces();
+        StoryPlayer.Listen();
+        // Trials of the script built beside their terraces (E09 after Runa 2, E10 before the key).
+        MSDuelEncounter.Spawn("MS03_RunaEscalada", CondorRules.EncounterId, MSProgress.Condor, "Mujer-cóndor", "Characters/MujerCondor",
+            new Color(.16f, .15f, .17f), new Vector3(2.5f, 0, -4.5f), new Vector3(2.5f, .5f, -12f));
+        MSDuelEncounter.Spawn("TerrazaLlave", EagleRules.EncounterId, MSProgress.Eagle, "Mujer-águila", "Characters/MujerAguila",
+            new Color(.45f, .3f, .16f), new Vector3(0, 0, -3.5f), new Vector3(0, 1f, -11f));
+        StoryPlayer.AddGate(this, () => !_paused && !_dead && !_moving && MSFind.Inspecting == null);
         if (first != null) EnterZone(first, true);
         MSProgress.Changed += OnProgress;
         RefreshObjective();
@@ -105,6 +113,17 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
 
     private void OnProgress(string id) => RefreshObjective();
 
+    // Sué rests on the summit altar once the serpent is free (guion O-N07).
+    private void SpawnStoryPieces()
+    {
+        if (_guardian == null || _guardian.PlayerMark == null) return;
+        Vector3 at = Vector3.Lerp(_guardian.PlayerMark.position, _guardian.transform.position, .4f);
+        MSFind.CreateStory(_guardian.transform.parent, at, MSProgress.Sue, "Máscara de Sué",
+            "Máscara solar sobre el altar de la cima. Sus marcas completan las de Chía: dos respuestas, no dos órdenes.",
+            "Sué devuelve la dirección", "Las dos máscaras responden juntas. Regresa a Plaza Núñez: algo sigue el paso.",
+            StoryProps.Build("MascaraSue", transform, at + Vector3.up * 1.3f), MSProgress.Guardian);
+    }
+
     // ------------------------------------------------------------------ zones and camera
 
     public void EnterZone(MSZone zone, bool instant = false)
@@ -119,6 +138,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
             if (first && zone.Index > 0) Hud?.Notify("Zona descubierta", zone.Title, UIIcon.Map, UIPalette.GoldLight);
         }
         Hud?.SetZone(zone.Title);
+        StoryPlayer.Trigger(StoryTriggers.Zone(zone.Index));
         // In flight the preset of the stretch stays: no 90-degree turn over a small trigger.
         if (instant || wings == null || !wings.Flying) ApplyCamera(zone, instant);
         RefreshObjective();
@@ -161,6 +181,11 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
             !MSProgress.Has(MSProgress.LockOpen) ? "Toma el transporte y coloca el medallón en el cierre" :
             !MSProgress.Has(MSProgress.Guardian) ? "Sube a la cima y enfrenta al guardián" :
             "Usa el portal de la cima para volver a Plaza Núñez";
+        // In a campaign the story names the step (trials, Sué...); editor tests keep the guide.
+        var campaign = CampaignProgress.Model;
+        if (!CampaignProgress.FreeTravel)
+            objective = campaign.Chapter == CampaignChapter.UpperWorld ? campaign.Objective.Text
+                : campaign.Chapter > CampaignChapter.UpperWorld ? "Regresa a Plaza Núñez con Sué" : objective;
         Hud.SetObjective(objective);
         Hud.SetCounters("Hallazgos " + MSProgress.FindsCount + " / 6   ·   Zonas " + MSProgress.DiscoveredCount + " / 8   ·   Ataque " + MSProgress.AttackDamage.ToString("0"));
     }
@@ -230,9 +255,10 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         UpdateMusic();
         var keyboard = Keyboard.current;
         Hud?.SetHintsVisible(!Busy && !_inCombat);
-        if (_guardian != null && _inCombat) Hud?.SetBoss("Guardián de la cima", _guardian.Health01, true);
+        Hud?.SetHeaderVisible(!TurnDuelController.Running);
+        if (_guardian != null && _inCombat && !TurnDuelController.Running) Hud?.SetBoss("Guardián de la cima", _guardian.Health01, true);
         else Hud?.SetBoss("", 0, false);
-        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && _escapeSuppressedFrame != Time.frameCount && MSFind.Inspecting == null && !_dead)
+        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && _escapeSuppressedFrame != Time.frameCount && MSFind.Inspecting == null && !_dead && !StoryPlayer.Active)
         {
             if (_paused) Resume(); else Pause();
             return;
@@ -296,14 +322,20 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
 
     // ------------------------------------------------------------------ combat (guide 7.3)
 
-    public void BeginCombat(MSGuardian guardian, Transform mark)
+    public void BeginCombat(Component encounter, Transform mark)
     {
         _inCombat = true;
         CancelMotors();
-        MSProgress.SetCheckpoint(MSProgress.Rest07); // retry from 07 even without using its disc
+        // The summit retries from 07 even without using its disc; the trials keep the last rest.
+        bool summit = encounter is MSGuardian;
+        if (summit) MSProgress.SetCheckpoint(MSProgress.Rest07);
         player.SetInputLocked(true);
         if (mark != null) Teleport(mark);
-        if (orbitCamera != null) { orbitCamera.SetYaw(0); orbitCamera.SetFraming(13, 24); }
+        if (orbitCamera != null)
+        {
+            orbitCamera.SetYaw(summit || mark == null ? 0 : mark.eulerAngles.y);
+            orbitCamera.SetFraming(summit ? 13 : 9, 24);
+        }
         UIWorldPrompt.Hide(this);
     }
 
@@ -342,6 +374,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         Hud.SetFade(1);
         yield return new WaitForSecondsRealtime(.35f);
         if (_guardian != null) _guardian.ResetEncounter();
+        foreach (var trial in FindObjectsByType<MSDuelEncounter>(FindObjectsSortMode.None)) trial.ResetEncounter();
         _inCombat = false;
         CancelMotors();
         _health.Revive();

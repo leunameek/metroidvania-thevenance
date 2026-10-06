@@ -39,6 +39,8 @@ public sealed class HybridGuardianRules : DuelRules
     private static readonly DuelMove Wave = M("onda", "Onda en el suelo", false, 20, DuelDefense.Block);
     private static readonly DuelMove Stones = M("piedras", "Caen piedras", false, 20, DuelDefense.Cover);
 
+    public override string Status(TurnDuelModel duel) =>
+        $"Ataduras {BondsLeft} / 2   ·   Núcleo {(CoreOpen ? "expuesto" : "cerrado")}";
     public bool JaguarBreaksBond(TurnDuelModel duel) =>
         CoreOpen && (BondsLeft == 2 || (BondsLeft == 1 && duel.EnemyHealth <= 80));
 
@@ -108,6 +110,8 @@ public sealed class SerpentRules : DuelRules
     private static DuelMove Head(DuelMove m, DuelTarget t) { m.Origin = t; return m; }
 
     public override bool NeedsTarget(DuelAction action) => action != DuelAction.Horn;
+    public override string Status(TurnDuelModel duel) =>
+        $"Vulnerable: {TurnDuelModel.TargetName(Vulnerable)}   ·   Vínculo A {BondA}   ·   Vínculo B {BondB}";
     public override void Apply(TurnDuelModel duel, ref DuelHit hit)
     {
         string head = TurnDuelModel.TargetName(hit.Target);
@@ -151,6 +155,7 @@ public sealed class CondorRules : DuelRules
     public override string Victory => "La mujer-cóndor pliega las alas: te reconoce.";
 
     private bool _anchored;
+    public override string Status(TurnDuelModel duel) => _anchored ? "Anclado contra el viento" : "";
     private int _step;
     private static DuelMove Wing => M("ala", "Golpe de ala frontal", true, 15, DuelDefense.Block, DuelDefense.Parry);
     private static DuelMove Wind
@@ -192,6 +197,7 @@ public sealed class EagleRules : DuelRules
     public override string Victory => "La mujer-águila baja las alas. Arriba, mira cuál cabeza anuncia.";
 
     public bool Elevated { get; private set; } = true;
+    public override string Status(TurnDuelModel duel) => Elevated ? "En lo alto: recibe la mitad del daño" : "En el suelo";
     private bool _chargeCancelled;
     private int _step;
     private static DuelMove ChargeMove
@@ -252,6 +258,8 @@ public sealed class QuimueRules : DuelRules
     public int MoonAnchor { get; private set; } = 40;
     public int SunAnchor { get; private set; } = 40;
     public bool AnchorsCut => MoonAnchor == 0 && SunAnchor == 0;
+    public override string Status(TurnDuelModel duel) =>
+        $"Origen activo: {TurnDuelModel.TargetName(ActiveOrigin)}   ·   Luna {MoonAnchor}   ·   Sol {SunAnchor}";
     private int _step;
     private bool _unionPending;
 
