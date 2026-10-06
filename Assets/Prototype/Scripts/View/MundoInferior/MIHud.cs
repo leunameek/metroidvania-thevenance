@@ -1,0 +1,201 @@
+using System;
+using Nemequene.UI;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
+
+// Interface of the Mundo Inferior with the Bacatá kit (same composition as the plaza):
+// vitality upper left, zone, objective and counters upper right, notifications under them,
+// lesson-style inspection panel on the right, pause column, guardian bar, defeat and fades.
+public sealed class MIHud : MonoBehaviour
+{
+    private TMP_Text _zone, _objective, _counters, _toastTitle, _toastText, _inspectName, _inspectKind, _inspectBody, _pauseZone, _pauseStats;
+    private TMP_Text _bossName, _healthValue, _deathBody;
+    private Image _healthFill, _bossFill, _fade;
+    private UIIconGraphic _toastIcon;
+    private GameObject _toast, _inspect, _pause, _boss, _death, _hints;
+    private CanvasGroup _toastGroup;
+    private Button _resume;
+    private float _toastUntil, _healthShown = 1, _healthTarget = 1, _fadeTarget, _fadeValue;
+    private Health _health;
+    private readonly System.Collections.Generic.Queue<(string, string, UIIcon, Color)> _queue = new System.Collections.Generic.Queue<(string, string, UIIcon, Color)>();
+
+    public bool PauseOpen => _pause != null && _pause.activeSelf;
+
+    public void Build(Health health, Action resume, Action toPlaza, Action toMenu)
+    {
+        _health = health;
+        if (EventSystem.current == null)
+        {
+            var events = new GameObject("MI_EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
+            events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
+        }
+        var canvas = UIKit.ScreenCanvas(transform, "MundoInferiorHUD", 905);
+        canvas.gameObject.AddComponent<GraphicRaycaster>();
+
+        // Soft top veil so the header reads over bright crystals and fog.
+        var veil = UIKit.Rect("TopVeil", canvas); veil.anchorMin = new Vector2(0, .74f);
+        var veilImage = veil.gameObject.AddComponent<RawImage>(); veilImage.texture = Gradient(); veilImage.raycastTarget = false;
+
+        _healthFill = UIKit.HealthFrame(canvas, "Vida", out _healthValue);
+        if (_health != null) { _health.HealthChanged += OnHealth; OnHealth(_health.CurrentHealth, _health.MaxHealth); }
+
+        _zone = UIKit.Shadow(UIKit.Label(canvas, "Mundo inferior", 42f, UIPalette.GoldText, true));
+        UIKit.Place(_zone.rectTransform, Vector2.one, new Vector2(-76f, -40f), new Vector2(900f, 60f)); _zone.alignment = TextAlignmentOptions.BottomRight;
+        _objective = UIKit.Shadow(UIKit.Label(canvas, "", 24f, UIPalette.Ivory));
+        UIKit.Place(_objective.rectTransform, Vector2.one, new Vector2(-76f, -102f), new Vector2(900f, 64f)); _objective.alignment = TextAlignmentOptions.TopRight;
+        _counters = UIKit.Shadow(UIKit.Label(canvas, "", 20f, UIPalette.Muted));
+        UIKit.Place(_counters.rectTransform, Vector2.one, new Vector2(-76f, -160f), new Vector2(900f, 30f)); _counters.alignment = TextAlignmentOptions.TopRight;
+
+        // Notification plate (INPUT_notification): icon, name and text, never colour alone.
+        _toast = UIKit.Place(UIKit.HudPanel(canvas, "Toast"), Vector2.one, new Vector2(-64f, -210f), new Vector2(580f, 112f)).gameObject;
+        _toastGroup = _toast.AddComponent<CanvasGroup>();
+        _toastIcon = UIKit.Icon(_toast.transform, UIIcon.Info, UIPalette.GoldLight);
+        UIKit.Place(_toastIcon.rectTransform, new Vector2(0, .5f), new Vector2(28, 0), new Vector2(44, 44));
+        _toastTitle = UIKit.Label(_toast.transform, "", 22, UIPalette.GoldText, true); _toastTitle.alignment = TextAlignmentOptions.BottomLeft;
+        _toastTitle.rectTransform.anchorMin = new Vector2(0, .5f); _toastTitle.rectTransform.offsetMin = new Vector2(92, 0); _toastTitle.rectTransform.offsetMax = new Vector2(-24, -14);
+        _toastText = UIKit.Label(_toast.transform, "", 20, UIPalette.Ivory); _toastText.alignment = TextAlignmentOptions.TopLeft;
+        _toastText.rectTransform.anchorMax = new Vector2(1, .5f); _toastText.rectTransform.offsetMin = new Vector2(92, 12); _toastText.rectTransform.offsetMax = new Vector2(-24, -2);
+        _toast.SetActive(false);
+
+        // Inspection of a find (screens 10-12): the piece keeps the left, the panel the right.
+        _inspect = UIKit.Rect("Inspection", canvas).gameObject;
+        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .16f); panel.anchorMax = new Vector2(.94f, .74f);
+        var bg = panel.gameObject.AddComponent<Image>(); bg.color = UIPalette.Stone; bg.raycastTarget = false;
+        if (UIBacata.Available) UIBacata.Frame(panel.gameObject, .6f, true, true);
+        _inspectName = UIKit.Label(panel, "", 44, UIPalette.GoldText, true); _inspectName.alignment = TextAlignmentOptions.TopLeft;
+        Inset(_inspectName.rectTransform, 60, 60, 84, -1, 64);
+        _inspectKind = UIKit.Label(panel, "", 20, UIPalette.Jade); _inspectKind.alignment = TextAlignmentOptions.TopLeft; _inspectKind.characterSpacing = 2;
+        _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 150, -1, 30);
+        _inspectBody = UIKit.Label(panel, "", 24, UIPalette.Ivory); _inspectBody.alignment = TextAlignmentOptions.TopLeft;
+        _inspectBody.rectTransform.offsetMin = new Vector2(60, 110); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
+        var keys = UIKit.Label(panel, "E · Confirmar        Esc · Devolver al altar\nArrastra con el ratón o usa A / D para girar", 20, UIPalette.Muted);
+        keys.alignment = TextAlignmentOptions.BottomLeft; keys.rectTransform.offsetMin = new Vector2(60, 56); keys.rectTransform.offsetMax = new Vector2(-60, -10);
+        keys.textWrappingMode = TextWrappingModes.Normal;
+        _inspect.SetActive(false);
+
+        // Guardian bar: name in the serif and a crimson bar at the top centre.
+        _boss = UIKit.Rect("GuardianBar", canvas).gameObject;
+        var bossRect = (RectTransform)_boss.transform; bossRect.anchorMin = new Vector2(.32f, .86f); bossRect.anchorMax = new Vector2(.68f, .955f);
+        _bossName = UIKit.Shadow(UIKit.Label(_boss.transform, "", 30, UIPalette.GoldText, true));
+        _bossName.rectTransform.anchorMin = new Vector2(0, .5f);
+        _bossFill = UIKit.Bar((RectTransform)_boss.transform, new Vector2(640, 26), UIPalette.Crimson);
+        var rail = (RectTransform)_bossFill.transform.parent.parent; rail.anchorMin = rail.anchorMax = new Vector2(.5f, .22f);
+        _boss.SetActive(false);
+
+        // Pause (screen 19): one framed column over the dimmed cavern.
+        _pause = UIKit.Rect("Pause", canvas).gameObject;
+        var shade = _pause.AddComponent<Image>(); shade.color = new Color(.031f, .039f, .043f, .82f);
+        var column = UIKit.Rect("Column", _pause.transform); column.anchorMin = new Vector2(.355f, .10f); column.anchorMax = new Vector2(.645f, .88f);
+        var columnBg = column.gameObject.AddComponent<Image>(); columnBg.color = UIPalette.Stone;
+        if (UIBacata.Available) UIBacata.Frame(column.gameObject, .6f, true, true);
+        var title = UIKit.Label(column, "Pausa", 60, UIPalette.Danger, true); title.rectTransform.anchorMin = new Vector2(.08f, .82f); title.rectTransform.anchorMax = new Vector2(.92f, .92f);
+        _pauseZone = UIKit.Label(column, "", 22, UIPalette.Muted); _pauseZone.rectTransform.anchorMin = new Vector2(.08f, .76f); _pauseZone.rectTransform.anchorMax = new Vector2(.92f, .82f);
+        var rule = UIKit.Icon(column, UIIcon.Divider, UIPalette.Gold); rule.rectTransform.anchorMin = new Vector2(.16f, .735f); rule.rectTransform.anchorMax = new Vector2(.84f, .765f);
+        var list = UIKit.Rect("Actions", column); list.anchorMin = new Vector2(.08f, .30f); list.anchorMax = new Vector2(.92f, .72f);
+        var layout = list.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.childAlignment = TextAnchor.UpperCenter;
+        layout.childControlWidth = layout.childControlHeight = true; layout.childForceExpandHeight = false; layout.childForceExpandWidth = true;
+        _resume = UIKitButton.Create(list, "Continuar", resume, true);
+        UIKitButton.Create(list, "Volver a Plaza Núñez", toPlaza);
+        UIKitButton.Create(list, "Volver al menú principal", toMenu);
+        _pauseStats = UIKit.Label(column, "", 20, UIPalette.Muted); _pauseStats.rectTransform.anchorMin = new Vector2(.08f, .07f); _pauseStats.rectTransform.anchorMax = new Vector2(.92f, .27f);
+        UIKit.Hint(_pause.transform, "Esc", "Continuar", Vector2.zero);
+        UIKit.Hint(_pause.transform, "Enter", "Seleccionar", Vector2.right);
+        _pause.SetActive(false);
+
+        // Defeat (screen 28): no frame, crimson title, what is kept.
+        _death = UIKit.Rect("Defeat", canvas).gameObject;
+        var deathShade = _death.AddComponent<Image>(); deathShade.color = new Color(.07f, .02f, .03f, .86f); deathShade.raycastTarget = false;
+        var deathTitle = UIKit.Label(_death.transform, "Has caído", 72, UIPalette.Danger, true);
+        deathTitle.rectTransform.anchorMin = new Vector2(.2f, .52f); deathTitle.rectTransform.anchorMax = new Vector2(.8f, .66f);
+        _deathBody = UIKit.Label(_death.transform, "", 24, UIPalette.Muted);
+        _deathBody.rectTransform.anchorMin = new Vector2(.25f, .40f); _deathBody.rectTransform.anchorMax = new Vector2(.75f, .52f);
+        _death.SetActive(false);
+
+        _hints = UIKit.Rect("Hints", canvas).gameObject;
+        UIKit.Hint(_hints.transform, "Esc", "Pausa", Vector2.zero);
+        UIKit.Hint(_hints.transform, "Q", "Impulso", Vector2.right);
+
+        var fade = UIKit.Rect("Fade", canvas); _fade = fade.gameObject.AddComponent<Image>();
+        _fade.color = new Color(.031f, .039f, .043f, 0); _fade.raycastTarget = false;
+    }
+
+    private static void Inset(RectTransform rect, float left, float right, float top, float bottom, float height)
+    {
+        rect.anchorMin = new Vector2(0, 1); rect.anchorMax = Vector2.one; rect.pivot = new Vector2(.5f, 1);
+        rect.offsetMin = new Vector2(left, -top - height); rect.offsetMax = new Vector2(-right, -top);
+    }
+
+    private static Texture2D Gradient()
+    {
+        var texture = new Texture2D(1, 64, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+        for (int y = 0; y < 64; y++) texture.SetPixel(0, y, new Color(.031f, .039f, .043f, Mathf.SmoothStep(0, .7f, y / 63f)));
+        texture.Apply();
+        return texture;
+    }
+
+    private void OnHealth(float value, float max)
+    {
+        _healthTarget = max > 0 ? value / max : 0;
+        _healthValue.text = value.ToString("0") + " / " + max.ToString("0");
+    }
+
+    public void SetZone(string zone) { _zone.text = zone; _pauseZone.text = zone; }
+    public void SetObjective(string objective) => _objective.text = objective;
+    public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "\n"); }
+    public void SetHintsVisible(bool visible) { if (_hints.activeSelf != visible) _hints.SetActive(visible); }
+
+    public void Notify(string title, string text, UIIcon icon, Color color)
+    {
+        _queue.Enqueue((title, text, icon, color));
+    }
+
+    public void ShowInspection(string name, string kind, string body)
+    {
+        _inspectName.text = name; _inspectKind.text = kind; _inspectBody.text = body;
+        _inspect.SetActive(true);
+    }
+    public void HideInspection() => _inspect.SetActive(false);
+
+    public void ShowPause(bool open)
+    {
+        _pause.SetActive(open);
+        if (open && EventSystem.current != null) { EventSystem.current.SetSelectedGameObject(null); EventSystem.current.SetSelectedGameObject(_resume.gameObject); }
+    }
+
+    public void SetBoss(string name, float fraction, bool visible)
+    {
+        if (_boss.activeSelf != visible) _boss.SetActive(visible);
+        _bossName.text = name; _bossFill.fillAmount = Mathf.Clamp01(fraction);
+    }
+
+    public void ShowDeath(bool visible, string body = "")
+    {
+        _death.SetActive(visible); _deathBody.text = body;
+    }
+
+    public void SetFade(float target) => _fadeTarget = target;
+
+    private void Update()
+    {
+        _healthShown = Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
+        if (_healthFill != null) _healthFill.fillAmount = _healthShown;
+        _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);
+        _fade.color = new Color(.031f, .039f, .043f, _fadeValue);
+        if (Time.unscaledTime >= _toastUntil)
+        {
+            if (_queue.Count > 0)
+            {
+                var (title, text, icon, color) = _queue.Dequeue();
+                _toastTitle.text = title; _toastText.text = text; _toastIcon.SetIcon(icon); _toastIcon.color = color;
+                _toast.SetActive(true); _toastUntil = Time.unscaledTime + 4.5f;
+            }
+            else if (_toast.activeSelf) _toast.SetActive(false);
+        }
+        if (_toast.activeSelf) _toastGroup.alpha = Mathf.Clamp01((_toastUntil - Time.unscaledTime) / .3f);
+    }
+
+    private void OnDestroy() { if (_health != null) _health.HealthChanged -= OnHealth; }
+}

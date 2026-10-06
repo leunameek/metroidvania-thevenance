@@ -14,6 +14,7 @@ namespace Nemequene.UI
         private readonly TMP_Text _map;
         private readonly TMP_Text[] _archive;
         private readonly TMP_Text[] _archiveTitles;
+        private readonly TMP_Text _offerings;
         private readonly UIMapGraphic _graphic;
         private readonly Dictionary<int,List<Vector2>> _trails = new Dictionary<int,List<Vector2>>();
         private bool _combatKnown;
@@ -43,6 +44,10 @@ namespace Nemequene.UI
                 _archiveTitles[i] = ui.Factory.Text(entry, "", 32, true);
                 _archive[i] = ui.Factory.Text(entry, "", 24);
             }
+            // Optional offerings found in the lower world (fantasy pieces of the game).
+            var lower = ui.Factory.Column(archive, "LowerWorldOfferings", 12);
+            ui.Factory.Text(lower, "Ofrendas del mundo inferior", 32, true);
+            _offerings = UIFactory.Tone(ui.Factory.Text(lower, "", 24), UITone.Muted);
             ui.Screens.Changed += Screen; ui.Demo.ViewChanged += Discover; ui.Demo.Objectives.Changed += Discover;
             ui.Settings.Changed += ApplyStyle; ApplyStyle();
             Discover();
@@ -84,6 +89,15 @@ namespace Nemequene.UI
                 foreach(var portal in _knownPortals)
                     if(Vector3.Distance(portal.transform.position,player)<65) markers.Add(new Vector2(portal.transform.position.x,portal.transform.position.z));
                 _graphic.SetMap(_trails.TryGetValue(_ui.Demo.World,out var route)?route:new List<Vector2>(),markers,new Vector2(player.x,player.z));
+            }
+            if (screen == UIScreen.Archive)
+            {
+                MIProgress.Load();
+                var lines = new System.Text.StringBuilder();
+                lines.Append(MIProgress.OfferingsCount).Append(" de ").Append(MIProgress.OfferingTotal).Append(" encontradas. Son piezas de fantasía del juego, no reconstrucciones arqueológicas.");
+                for (int k = 0; k < MIProgress.Offerings.GetLength(0); k++)
+                    lines.Append('\n').Append(MIProgress.Has(MIProgress.Offerings[k, 0]) ? "◆ " + MIProgress.Offerings[k, 1] + " · " + MIProgress.Offerings[k, 2] : "◇ Pieza sin encontrar · " + MIProgress.Offerings[k, 2]);
+                _offerings.text = lines.ToString();
             }
             if (screen == UIScreen.Archive)
                 for (int i = 0; i < _archive.Length; i++)

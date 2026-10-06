@@ -30,7 +30,7 @@ namespace Nemequene.UI
             f.Button(voice, UIStrings.Get("voice.measure"), StartMeter, true);
             var meterHost = f.Rect("InputMeter", voice, Vector2.zero, Vector2.one);
             meterHost.gameObject.AddComponent<LayoutElement>().preferredHeight = 24;
-            _meter = f.Bar(meterHost, "Meter", Vector2.zero, Vector2.one);
+            _meter = f.Bar(meterHost, "Meter", Vector2.zero, Vector2.one, UIPalette.Jade);
             _noise = f.Text(voice, "", 20); _micStatus = f.Text(voice, "", 24);
             f.Text(voice, UIStrings.Get("voice.say"), 32, true);
             f.Button(voice, UIStrings.Get("voice.test"), () => ui.Voice.Test());
@@ -50,10 +50,10 @@ namespace Nemequene.UI
             _handProgress = f.Bar(hp, "Progress", Vector2.zero, Vector2.one);
             f.Button(hands, UIStrings.Get("calibration.finish"), () => { StopDevices(); if (!ui.Settings.Values.configured) menu.FinishSetup(); else ui.Screens.Back(); }, true);
             f.Button(hands, UIStrings.Get("hands.fallback"), () => { if (!ui.Demo.MouseMode) ui.Demo.ToggleInputMode(); StopDevices(); if (!ui.Settings.Values.configured) menu.FinishSetup(); else ui.Screens.Back(); });
-            _previewRoot = f.Panel("UI_Camera_CalibrationOnly", ui.Root, new Vector2(.69f,.34f), new Vector2(.95f,.73f)).gameObject;
-            var preview = f.Rect("Preview", _previewRoot.transform, new Vector2(.03f,.2f), new Vector2(.97f,.95f));
+            _previewRoot = f.Panel("UI_Camera_CalibrationOnly", ui.Root, new Vector2(.63f,.22f), new Vector2(.94f,.72f), false, true, false).gameObject;
+            var preview = f.Rect("Preview", _previewRoot.transform, new Vector2(.07f,.22f), new Vector2(.93f,.88f));
             _preview = preview.gameObject.AddComponent<RawImage>(); _preview.raycastTarget = false;
-            f.Label(_previewRoot.transform, UIStrings.Get("hands.light"), new Vector2(.04f,.02f), new Vector2(.96f,.19f), 20);
+            UIFactory.Tone(f.Label(_previewRoot.transform, UIStrings.Get("hands.light"), new Vector2(.07f,.06f), new Vector2(.93f,.2f), 20), UITone.Muted);
             _previewRoot.SetActive(false); RefreshDevices();
             ui.Hands.Changed += HandChanged;
         }

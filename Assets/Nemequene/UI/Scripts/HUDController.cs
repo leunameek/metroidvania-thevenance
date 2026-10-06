@@ -9,7 +9,7 @@ namespace Nemequene.UI
     {
         private readonly UIManager _ui;
         private readonly Health _healthSource;
-        private readonly GameObject _root, _healthPanel, _objectivePanel, _promptPanel, _zonePanel, _devicesPanel;
+        private readonly GameObject _root, _healthPanel, _objectivePanel, _promptPanel, _zonePanel, _devicesPanel, _hints;
         private readonly TMP_Text _health, _objective, _zone, _prompt, _devices;
         private readonly Image _healthFill, _fade;
         private float _healthTarget = 1, _healthShown = 1, _next, _zoneUntil, _objectiveUntil;
@@ -22,32 +22,45 @@ namespace Nemequene.UI
             // Layout on the 1920 x 1080 reference: 5 % side and 4 % vertical safe margins, and no two
             // exploration surfaces share screen space (reference block 2, HUD).
             _root = f.Rect("UI_HUD_Exploration", ui.Root, Vector2.zero, Vector2.one).gameObject;
-            var health = f.HudPanel("Vitality", _root.transform, new Vector2(.05f,.865f), new Vector2(.27f,.955f));
+            var veil = _root.AddComponent<TitleMenuBackdrop>(); veil.raycastTarget = false; veil.fromTop = true; veil.readingEdge = .22f; veil.strength = .55f;
+            // Screen 08: persistent information near the edges, the centre free for the scene.
+            // Upper left: portrait ring and health (Marco_HUD). Upper right: zone and objective.
+            // Lower centre: the contextual interaction on the crimson ribbon. Corners: key hints.
+            var health = f.Rect("Vitality", _root.transform, new Vector2(0, 1), new Vector2(0, 1));
+            health.pivot = new Vector2(0, 1); health.anchoredPosition = new Vector2(64, -40); health.sizeDelta = new Vector2(452, 138);
             _healthPanel = health.gameObject;
-            var heart = f.Icon(health, UIIcon.Heart, new Vector2(0,.5f), new Vector2(0,.5f), UITheme.Hex("C8352C"));
-            heart.rectTransform.sizeDelta = new Vector2(44,44); heart.rectTransform.anchoredPosition = new Vector2(46,0);
-            Fit(f.Caption(health, UIStrings.Get("hud.health"), 20)).rectTransform.SetAnchors(new Vector2(.24f,.56f), new Vector2(.94f,.9f));
-            _healthFill = f.Bar(health, "Life", new Vector2(.24f,.16f), new Vector2(.94f,.52f), UITheme.Hex("A3322A"));
-            // Ivory on the red fill is 5.4:1; on the empty rail it is higher.
-            _health = f.Label(_healthFill.transform.parent.parent, "", Vector2.zero, Vector2.one, 20);
-            _health.alignment = TextAlignmentOptions.MidlineRight; _health.margin = new Vector4(0,0,12,0); Fit(_health);
-            _objectivePanel = f.HudPanel("Objective", _root.transform, new Vector2(.05f,.80f), new Vector2(.34f,.955f)).gameObject;
-            var mark = f.Icon(_objectivePanel.transform, UIIcon.Diamond, new Vector2(0,1), new Vector2(0,1), f.Theme.gold);
-            mark.rectTransform.sizeDelta = new Vector2(30,30); mark.rectTransform.anchoredPosition = new Vector2(44,-40);
-            f.Caption(_objectivePanel.transform, UIStrings.Get("hud.objectiveTitle"), 20).rectTransform.SetAnchors(new Vector2(.16f,.62f), new Vector2(.94f,.9f));
-            _objective = f.Label(_objectivePanel.transform, "", new Vector2(.16f,.1f), new Vector2(.94f,.62f), 22);
-            _zonePanel = f.HudPanel("ZoneBanner", _root.transform, new Vector2(.33f,.845f), new Vector2(.67f,.955f)).gameObject;
-            _zone = f.Heading(_zonePanel.transform, "", new Vector2(.04f,.32f), new Vector2(.96f,.94f), 44);
-            f.Divider(_zonePanel.transform, new Vector2(.22f,.1f), new Vector2(.78f,.3f));
-            _promptPanel = f.HudPanel("UI_Indicator_Interaction", _root.transform, new Vector2(.33f,.05f), new Vector2(.67f,.15f)).gameObject;
-            var promptRow = f.Row(_promptPanel.transform, "PromptRow", 20);
-            promptRow.offsetMin = new Vector2(32,12); promptRow.offsetMax = new Vector2(-32,-12);
+            var ring = f.Rect("Portrait", health, new Vector2(.151f, .5f), new Vector2(.151f, .5f)); ring.sizeDelta = new Vector2(104, 104);
+            var portrait = ring.gameObject.AddComponent<RawImage>(); portrait.texture = UIBacata.Art("Retrato_HUD"); portrait.raycastTarget = false;
+            var frame = health.gameObject.AddComponent<Image>(); frame.sprite = UIBacata.Get("Frames/Frame_HUD"); frame.raycastTarget = false;
+            frame.preserveAspect = true; if (frame.sprite == null) frame.color = Color.clear;
+            var channel = f.Rect("Inner", health, new Vector2(.336f, .35f), new Vector2(.904f, .60f));
+            var fill = f.Rect("Fill", channel, Vector2.zero, Vector2.one);
+            _healthFill = fill.gameObject.AddComponent<Image>(); _healthFill.sprite = UIBacata.Get("Controls/Bar_Fill");
+            _healthFill.type = Image.Type.Sliced; _healthFill.color = UIPalette.Crimson; _healthFill.raycastTarget = false;
+            var name = UIFactory.Shadow(Fit(f.Label(health, UIStrings.Get("hud.health"), new Vector2(.34f, .64f), new Vector2(.70f, .98f), 22)));
+            name.alignment = TextAlignmentOptions.BottomLeft; name.fontStyle = FontStyles.Bold;
+            _health = UIFactory.Shadow(Fit(UIFactory.Tone(f.Label(health, "", new Vector2(.62f, .64f), new Vector2(.90f, .98f), 20), UITone.Muted)));
+            _health.alignment = TextAlignmentOptions.BottomRight;
+            _zonePanel = f.Rect("Zone", _root.transform, new Vector2(.50f, .885f), new Vector2(.96f, .955f)).gameObject;
+            _zone = UIFactory.Shadow(f.Heading(_zonePanel.transform, "", Vector2.zero, Vector2.one, 42));
+            _zone.alignment = TextAlignmentOptions.BottomRight;
+            _objectivePanel = f.Rect("Objective", _root.transform, new Vector2(.50f, .835f), new Vector2(.96f, .885f)).gameObject;
+            _objective = UIFactory.Shadow(f.Label(_objectivePanel.transform, "", Vector2.zero, Vector2.one, 24));
+            _objective.alignment = TextAlignmentOptions.TopRight;
+            _promptPanel = f.Rect("UI_Indicator_Interaction", _root.transform, new Vector2(.32f, .17f), new Vector2(.68f, .235f)).gameObject;
+            UIBacata.Skin(_promptPanel.transform, "Controls/Ribbon");
+            var promptRow = f.Row(_promptPanel.transform, "PromptRow", 14);
+            promptRow.offsetMin = new Vector2(80, 4); promptRow.offsetMax = new Vector2(-80, -4);
             var promptLayout = promptRow.GetComponent<HorizontalLayoutGroup>(); promptLayout.childForceExpandWidth = false;
-            _prompt = f.Text(promptRow, "", 24); _prompt.alignment = TextAlignmentOptions.MidlineLeft;
-            _prompt.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            _prompt = f.Text(promptRow, "", 26); _prompt.alignment = TextAlignmentOptions.Midline; _prompt.fontStyle = FontStyles.Bold;
+            _prompt.textWrappingMode = TextWrappingModes.NoWrap;
             f.KeyHint(_prompt, promptRow, true);
-            _devicesPanel = f.HudPanel("DeviceStatus", _root.transform, new Vector2(.74f,.895f), new Vector2(.95f,.955f)).gameObject;
-            _devices = f.Label(_devicesPanel.transform, "", new Vector2(.06f,.1f), new Vector2(.94f,.9f), 18); _devices.alignment = TextAlignmentOptions.Center;
+            _devicesPanel = f.Rect("DeviceStatus", _root.transform, new Vector2(.50f, .80f), new Vector2(.96f, .835f)).gameObject;
+            _devices = UIFactory.Shadow(UIFactory.Tone(f.Label(_devicesPanel.transform, "", Vector2.zero, Vector2.one, 20), UITone.Success));
+            _devices.alignment = TextAlignmentOptions.TopRight;
+            _hints = f.Rect("Hints", _root.transform, Vector2.zero, Vector2.one).gameObject;
+            f.Hint(_hints.transform, UIStrings.Get("footer.pause"), Vector2.zero);
+            f.Hint(_hints.transform, UIStrings.Get("footer.journal"), Vector2.right);
             var fade = f.Rect("PortalFade", _root.transform, Vector2.zero, Vector2.one);
             _fade = fade.gameObject.AddComponent<Image>(); _fade.raycastTarget = false; _fade.color = Color.clear;
             ui.Demo.ViewChanged += MarkDirty; ui.Demo.Objectives.Changed += MarkDirty;
@@ -74,7 +87,7 @@ namespace Nemequene.UI
             if (!_root.activeSelf) return;
             _healthShown = _ui.Settings.Values.reducedMotion ? _healthTarget : Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
             UIFactory.Fill(_healthFill, _healthShown);
-            _fade.color = new Color(.086f,.075f,.059f,_ui.Demo.Fade);
+            _fade.color = new Color(.031f,.039f,.043f,_ui.Demo.Fade);
             if (Time.unscaledTime < _next && !_dirty) return;
             _next = Time.unscaledTime + .15f; _dirty = false;
             var d = _ui.Demo; bool exploration = d.State == TechnicalDemoState.Exploration;
@@ -90,9 +103,11 @@ namespace Nemequene.UI
                 if (d.State == TechnicalDemoState.Transition) _ui.Subtitles?.Show("", UIStrings.Get("caption.portal"), 4, true);
                 _zone.text = UIStrings.Get(d.World < 0 ? "world.lower" : d.World > 0 ? "world.upper" : "world.plaza");
             }
-            _zonePanel.SetActive(exploration && Time.unscaledTime < _zoneUntil);
-            _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives && !_healthPanel.activeSelf
-                && Time.unscaledTime >= _zoneUntil && Time.unscaledTime < _objectiveUntil);
+            // Zone and objective share the upper-right corner, so both can stay on screen; only
+            // one main objective occupies the header.
+            _zonePanel.SetActive(exploration);
+            _hints.SetActive(exploration);
+            _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName)
                 : d.NearbyPortal != null ? UIStrings.Get(d.NearbyPortal.Available ? "hud.travel" : "hud.blocked", d.NearbyPortal.destinationName)
                 : d.NearCombat ? UIStrings.Get("hud.startCombat") : "";

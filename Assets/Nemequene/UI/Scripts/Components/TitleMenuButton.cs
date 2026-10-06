@@ -13,6 +13,10 @@ namespace Nemequene.UI
         public bool tabSelected;
         public bool danger;
         public bool primary;
+        // Footer actions: plain text that only shows the ribbon on focus.
+        public bool bare;
+        // Grid slots: a small framed tile instead of a line or ribbon.
+        public bool slot;
         private Button _button;
         private Image _surface;
         private TMP_Text _label;
@@ -20,10 +24,21 @@ namespace Nemequene.UI
         private UIFrameGraphic _frame;
         private UIPlateGraphic _plate;
         private GameObject _mark;
+        private Image _skin;
         private bool _hover, _focused, _pressed;
         private Sprite _stone;
+        // Large centred menu entries (title screen): text over the gold line, crimson ribbon on focus.
+        public void UseMenuStyle(bool wide=false)
+        {
+            if(_skin==null)return;
+            _label.alignment=TextAlignmentOptions.Center;
+            var layout=GetComponent<HorizontalLayoutGroup>();layout.padding=new RectOffset(wide?96:76,wide?96:76,8,8);
+            layout.childAlignment=TextAnchor.MiddleCenter;layout.childForceExpandHeight=true;
+            Refresh();
+        }
         public void UseStoneSkin(Sprite sprite,TMP_FontAsset font,bool wide=false)
         {
+            if(_skin!=null){UseMenuStyle(wide);return;}
             if(sprite==null)return;
             _stone=sprite;_surface.sprite=sprite;_surface.type=Image.Type.Sliced;_surface.pixelsPerUnitMultiplier=3.5f;
             _label.font=font;_label.fontStyle=FontStyles.UpperCase|FontStyles.Bold;_label.alignment=TextAlignmentOptions.Center;
@@ -43,6 +58,7 @@ namespace Nemequene.UI
             _outline=GetComponent<Outline>(); _outline.effectDistance=new Vector2(2,-2);
             _frame=GetComponentInChildren<UIFrameGraphic>(true);
             _plate=GetComponentInChildren<UIPlateGraphic>(true);
+            var skin=transform.Find("Skin"); _skin=skin!=null?skin.GetComponent<Image>():null;
             _outline.effectColor=UIPalette.GoldLight;
             var existing=transform.Find("FocusMarker");
             var mark=existing!=null?existing.gameObject:new GameObject("FocusMarker",typeof(RectTransform),typeof(Image));
@@ -63,6 +79,25 @@ namespace Nemequene.UI
             bool contrast=TitleMenuController.Instance!=null && TitleMenuController.Instance.Settings!=null
                 ? TitleMenuController.Instance.Settings.Values.highContrast
                 : UIManager.Instance!=null && UIManager.Instance.Settings!=null && UIManager.Instance.Settings.Values.highContrast;
+            if(_skin!=null)
+            {
+                // States of the painted kit: line, crimson ribbon with a gold marker on focus,
+                // dimmed when disabled. The label keeps its width; only weight and colour change.
+                bool ribbon=enabled&&(selected||_pressed||tabSelected);
+                string sprite=slot?"Frames/Frame_Key":!enabled?(primary?"Controls/Ribbon_Disabled":"Controls/Line_Disabled")
+                    :ribbon?"Controls/Ribbon_Focus":primary?"Controls/Ribbon":"Controls/Line";
+                var next=UIBacata.Get(sprite); if(_skin.sprite!=next){_skin.sprite=next;_skin.GetComponent<UISpriteFit>()?.Fit();}
+                _skin.enabled=!bare||ribbon;
+                _skin.color=slot?(!enabled?new Color(1,1,1,.45f):ribbon?UIPalette.GoldLight:Color.white):_pressed&&enabled?new Color(.82f,.82f,.82f):Color.white;
+                _surface.color=Color.clear; _surface.CrossFadeColor(Color.white,0,true,true); _surface.canvasRenderer.SetColor(Color.white);
+                _label.color=!enabled?UIPalette.Disabled:contrast?Color.white:danger&&!ribbon?UIPalette.Danger:UIPalette.Ivory;
+                _label.fontStyle=ribbon||primary?FontStyles.Bold:FontStyles.Normal;
+                _outline.enabled=(contrast||slot)&&focus; _outline.effectColor=UIPalette.GoldLight;
+                if (_plate != null) _plate.gameObject.SetActive(false);
+                if (_frame != null) _frame.gameObject.SetActive(false);
+                _mark.SetActive(false);
+                return;
+            }
             if(_stone!=null)
             {
                 _surface.sprite=contrast?null:_stone;

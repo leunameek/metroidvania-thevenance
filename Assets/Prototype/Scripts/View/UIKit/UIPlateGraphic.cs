@@ -24,30 +24,31 @@ namespace Nemequene.UI
             if (highContrast)
             {
                 bool gold = kind == UIPlateKind.Primary;
-                top = bottom = gold ? UIPalette.GoldLight : kind == UIPlateKind.Danger ? UITheme.Hex("5A1414") : UIPalette.Charcoal;
+                top = bottom = gold ? UIPalette.GoldLight : kind == UIPlateKind.Danger ? UITheme.Hex("4A111C") : UIPalette.Charcoal;
                 border = selected ? UIPalette.GoldLight : kind == UIPlateKind.Disabled ? UIPalette.Disabled : Color.white;
                 if (gold) border = selected ? Color.white : UIPalette.Charcoal;
                 return;
             }
             switch (kind)
             {
+                // Fallback colours of the painted kit: crimson ribbon, smoked panel, aged gold rims.
                 case UIPlateKind.Primary:
-                    top = UITheme.Hex(selected ? "FFD989" : "F2C96E"); bottom = UITheme.Hex(selected ? "C8943A" : "B8862F");
-                    border = UITheme.Hex(selected ? "FFF1C4" : "F4D18C"); break;
+                    top = UITheme.Hex(selected ? "6A2030" : "561A27"); bottom = UITheme.Hex(selected ? "3A1219" : "2C0E15");
+                    border = selected ? UIPalette.GoldLight : UIPalette.Gold; break;
                 case UIPlateKind.Danger:
-                    top = UITheme.Hex(selected ? "B8463A" : "A63A30"); bottom = UITheme.Hex(selected ? "7C2520" : "6E1F1B");
-                    border = UITheme.Hex(selected ? "F29A86" : "D9645A"); break;
+                    top = UITheme.Hex(selected ? "8A2235" : "6E1B2A"); bottom = UITheme.Hex(selected ? "4A111C" : "3A0D16");
+                    border = selected ? UIPalette.Danger : UIPalette.Crimson; break;
                 case UIPlateKind.Disabled:
-                    top = UITheme.Hex("2A241E"); bottom = UITheme.Hex("1E1A16"); border = UITheme.Hex("6B6258"); break;
+                    top = UITheme.Hex("17191B"); bottom = UITheme.Hex("0F1112"); border = UITheme.Hex("4A463F"); break;
                 case UIPlateKind.Rail:
-                    top = UITheme.Hex("0E0B08"); bottom = UITheme.Hex("1E1712"); border = UITheme.Hex("8A6A3A"); break;
+                    top = UITheme.Hex("060708"); bottom = UITheme.Hex("111516"); border = UIPalette.GoldDeep; break;
                 case UIPlateKind.Key:
-                    top = UITheme.Hex("2E231B"); bottom = UITheme.Hex("15100C"); border = UIPalette.GoldLight; break;
+                    top = UITheme.Hex("1B1E20"); bottom = UITheme.Hex("0E1011"); border = UIPalette.Gold; break;
                 case UIPlateKind.Border:
                     top = bottom = Color.clear; border = UIPalette.Gold; break;
                 default:
-                    top = UITheme.Hex(selected ? "5A4029" : "3E2D20"); bottom = UITheme.Hex(selected ? "2E2016" : "21170F");
-                    border = UITheme.Hex(selected ? "F4D18C" : "B88A47"); break;
+                    top = UITheme.Hex(selected ? "32171F" : "181B1D"); bottom = UITheme.Hex(selected ? "1E0E13" : "0E1011");
+                    border = selected ? UIPalette.GoldLight : UIPalette.GoldDeep; break;
             }
             if (pressed) { var swap = top; top = bottom; bottom = swap; }
         }

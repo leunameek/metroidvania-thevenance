@@ -21,9 +21,10 @@ namespace Nemequene.UI
             {
                 int slot = i;
                 var card = ui.Factory.Column(body, "SaveSlot_" + (i+1), 8);
+                // Slot card of screen 03: framed tile, slot details, then the actions.
                 card.gameObject.AddComponent<Image>().color=ui.Theme.panel;
-                ui.Factory.Frame(card,false);
-                card.GetComponent<VerticalLayoutGroup>().padding=new RectOffset(28,28,24,24);
+                if (UIBacata.Available) UIBacata.Frame(card.gameObject,.4f,false,false); else ui.Factory.Frame(card,false);
+                card.GetComponent<VerticalLayoutGroup>().padding=new RectOffset(44,44,30,26);
                 var element = card.gameObject.AddComponent<LayoutElement>(); element.preferredHeight = 216;
                 _labels[i] = ui.Factory.Text(card, "", 22);
                 var actions = ui.Factory.Rect("Actions", card, Vector2.zero, Vector2.one);

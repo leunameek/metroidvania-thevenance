@@ -18,41 +18,53 @@ namespace Nemequene.UI
         {
             _ui = ui; var f = ui.Factory;
             _root = f.Rect("UI_HUD_Combat", ui.Root, Vector2.zero, Vector2.one).gameObject;
-            // Turn banner with the guardian's resistance drawn like the reference boss bar:
-            // three carved segments, one per hit, with the written count inside.
-            var title = f.HudPanel("Turn", _root.transform, new Vector2(.33f,.80f), new Vector2(.67f,.955f));
-            _turn = f.Heading(title, "", new Vector2(.05f,.50f), new Vector2(.95f,.92f), 36);
-            Fit(f.Caption(title, UIStrings.Get("combat.guardian"), 20)).rectTransform.SetAnchors(new Vector2(.06f,.10f), new Vector2(.30f,.44f));
-            _guardian = f.Bar(title, "GuardianResistance", new Vector2(.31f,.15f), new Vector2(.94f,.40f), UITheme.Hex("A3322A"));
+            // Screens 14 and 15: the turn on a short crimson ribbon at the top, the guardian's
+            // name and resistance in the upper right, the actions in one row near the bottom
+            // edge, with instruction and reaction time together in the same panel.
+            var banner = f.Rect("Turn", _root.transform, new Vector2(.35f, .80f), new Vector2(.65f, .865f));
+            UIBacata.Skin(banner, "Controls/Ribbon_Focus");
+            _turn = f.Label(banner, "", new Vector2(.12f, 0), new Vector2(.88f, 1), 28);
+            _turn.alignment = TextAlignmentOptions.Center; _turn.fontStyle = FontStyles.Bold | FontStyles.UpperCase; Fit(_turn);
+            var enemy = f.Rect("Guardian", _root.transform, new Vector2(.62f, .86f), new Vector2(.96f, .955f));
+            var enemyName = UIFactory.Shadow(Fit(f.Label(enemy, UIStrings.Get("combat.guardian"), new Vector2(0, .55f), new Vector2(1, 1), 22)));
+            enemyName.alignment = TextAlignmentOptions.BottomRight;
+            _guardian = f.Bar(enemy, "GuardianResistance", new Vector2(.12f, .22f), new Vector2(1, .52f), UIPalette.Crimson);
             var inner = _guardian.transform.parent;
             for (int i = 1; i < 3; i++)
             {
                 var notch = f.Rect("Segment", inner, new Vector2(i / 3f, 0), new Vector2(i / 3f, 1));
                 notch.sizeDelta = new Vector2(3, 0); notch.gameObject.AddComponent<Image>().color = UIPalette.Charcoal;
             }
-            _enemy = f.Label(inner.parent, "", Vector2.zero, Vector2.one, 20);
-            _enemy.alignment = TextAlignmentOptions.MidlineRight; _enemy.margin = new Vector4(0,0,12,0); Fit(_enemy);
-            var commands = f.Panel("Commands", _root.transform, new Vector2(.66f,.12f), new Vector2(.95f,.68f), true);
+            _enemy = UIFactory.Shadow(UIFactory.Tone(f.Label(enemy, "", new Vector2(.12f, -.12f), new Vector2(1, .22f), 18), UITone.Muted));
+            _enemy.alignment = TextAlignmentOptions.TopRight; Fit(_enemy);
+            var commands = f.Panel("Commands", _root.transform, new Vector2(.24f, .04f), new Vector2(.76f, .31f), true, true, false);
             _commands = commands;
-            // Pixel insets keep reading text clear of the carved corners and the top crest.
+            // Pixel insets keep reading text clear of the rim and the emblem.
             var body = f.Scroll(commands, Vector2.zero, Vector2.one);
-            ((RectTransform)body.parent.parent).Inset(60, 88, 60, 76);
-            _body = f.Text(body, "", 24); _timer = UIFactory.Tone(f.Text(body, "", 22), UITone.Gold);
-            _attack = Action(f, body, "combat.attack", UIIcon.Sword, () => ui.Demo.Combat.Attack(), true);
-            _dodge = Action(f, body, "combat.dodge", UIIcon.Dodge, () => ui.Demo.Combat.Defend(PlazaDefense.Dodge));
-            _block = Action(f, body, "combat.block", UIIcon.Shield, () => ui.Demo.Combat.Defend(PlazaDefense.Guard));
-            _return = f.Button(body, UIStrings.Get("combat.return"), () => ui.Demo.Combat.Cancel());
-            _voice = UIFactory.Tone(f.Text(body, "", 20), UITone.Muted);
-            _progress = f.Bar(commands, "ReactionWindow", Vector2.zero, Vector2.one);
-            ((RectTransform)_progress.transform.parent.parent).Band(60, 16, 64);
+            ((RectTransform)body.parent.parent).Inset(56, 66, 56, 60);
+            body.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperCenter;
+            _body = f.Text(body, "", 24); _body.alignment = TextAlignmentOptions.Center;
+            _timer = UIFactory.Tone(f.Text(body, "", 22), UITone.Gold); _timer.alignment = TextAlignmentOptions.Center;
+            var actions = f.Row(body, "Actions", 16); actions.gameObject.AddComponent<LayoutElement>().minHeight = 60;
+            _attack = Action(f, actions, "combat.attack", UIIcon.Sword, () => ui.Demo.Combat.Attack(), true);
+            _dodge = Action(f, actions, "combat.dodge", UIIcon.Dodge, () => ui.Demo.Combat.Defend(PlazaDefense.Dodge));
+            _block = Action(f, actions, "combat.block", UIIcon.Shield, () => ui.Demo.Combat.Defend(PlazaDefense.Guard));
+            _return = f.Button(actions, UIStrings.Get("combat.return"), () => ui.Demo.Combat.Cancel(), true);
+            UIFactory.CenterAll(actions);
+            _voice = UIFactory.Tone(f.Text(body, "", 20), UITone.Success); _voice.alignment = TextAlignmentOptions.Center;
+            _progress = f.Bar(commands, "ReactionWindow", Vector2.zero, Vector2.one, UIPalette.GoldLight);
+            ((RectTransform)_progress.transform.parent.parent).Band(36, 14, 72);
+            f.Hint(_root.transform, UIStrings.Get("footer.pause"), Vector2.zero);
             ui.Demo.Combat.Model.Changed += Refresh; ui.Demo.ViewChanged += Refresh; ui.Screens.Changed += OnScreen;
             Refresh();
         }
         private static Button Action(UIFactory f, Transform parent, string key, UIIcon icon, UnityEngine.Events.UnityAction action, bool primary = false)
         {
             var button = f.Button(parent, UIStrings.Get(key), action, primary);
-            var glyph = f.Icon(button.transform, icon, 30, primary ? UIPalette.OnGold : UIPalette.GoldLight);
+            var glyph = f.Icon(button.transform, icon, 30, primary ? UIPalette.Ivory : UIPalette.GoldLight);
             glyph.transform.SetSiblingIndex(1);
+            var h = button.GetComponent<HorizontalLayoutGroup>(); h.padding.left = 56; h.padding.right = 44; h.spacing = 10;
+            UIFactory.Fit(button.GetComponentInChildren<TMP_Text>());
             return button;
         }
         // Fixed HUD boxes shrink their text at 150 % instead of wrapping or spilling.
@@ -90,8 +102,8 @@ namespace Nemequene.UI
             if (!_root.activeSelf || Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + .05f;
             var m = _ui.Demo.Combat.Model;
-            _commands.anchorMin = new Vector2(.64f, .68f - (m.Phase == PlazaCombatPhase.React ? .36f : .27f) * _ui.Settings.Values.textScale
-                - (_ui.Settings.Values.voiceEnabled ? .10f : 0));
+            _commands.anchorMax = new Vector2(.76f, .31f + (_ui.Settings.Values.textScale - 1) * .22f
+                + (_ui.Settings.Values.voiceEnabled ? .04f : 0));
             _timer.gameObject.SetActive(m.Phase == PlazaCombatPhase.React);
             _voice.text = _ui.Settings.Values.voiceEnabled && _ui.Voice != null ? _ui.Voice.StatusText : "";
             _voice.gameObject.SetActive(_voice.text.Length > 0 && _ui.Voice.State != VoiceState.Inactive);

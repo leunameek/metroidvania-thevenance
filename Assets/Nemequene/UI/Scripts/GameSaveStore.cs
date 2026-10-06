@@ -32,6 +32,7 @@ namespace Nemequene.UI
         public static void Begin(int slot, bool load)
         {
             ActiveSlot = Mathf.Clamp(slot, 0, SlotCount - 1);
+            WorldTravel.SaveSlot = ActiveSlot;
             LoadOnNextScene = load;
         }
         public static void ClearPendingLoad() { LoadOnNextScene = false; }
@@ -71,8 +72,10 @@ namespace Nemequene.UI
         {
             if (slot < 0 || slot >= SlotCount) return;
             PlayerPrefs.DeleteKey(Prefix + slot);
+            MIProgress.Erase(slot);
+            MSProgress.Erase(slot);
             PlayerPrefs.Save();
-            if (slot == ActiveSlot) { ActiveSlot = -1; LoadOnNextScene = false; }
+            if (slot == ActiveSlot) { ActiveSlot = -1; LoadOnNextScene = false; WorldTravel.SaveSlot = -1; }
         }
     }
 }

@@ -81,7 +81,7 @@ namespace Nemequene.UI.Editor
             ui.Settings.Values.tutorials = false;
             yield return new WaitForSecondsRealtime(8.5f);
             Check(!ui.transform.Find("UI_HUD_Exploration/Vitality").gameObject.activeSelf, "full health is hidden outside combat");
-            Check(!ui.transform.Find("UI_HUD_Exploration/Objective").gameObject.activeSelf, "objective reminder expires");
+            Check(ui.transform.Find("UI_HUD_Exploration/Objective").gameObject.activeSelf, "one main objective stays in the upper-right header");
             Check(!ui.GetComponentsInChildren<TMP_Text>().Any(t => t.text.Contains("WASD")), "exploration has no permanent control legend");
             Check(!Object.FindObjectsByType<PlazaWorldLabel>(FindObjectsSortMode.None).Any(t=>t.GetComponent<Renderer>().enabled), "floating world labels are hidden in managed UI");
             foreach (var size in new[]{new Vector2Int(1280,720),new Vector2Int(1920,1080),new Vector2Int(1920,1200),new Vector2Int(2560,1440)})

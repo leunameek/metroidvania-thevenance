@@ -3,9 +3,15 @@ using UnityEngine.UI;
 
 namespace Nemequene.UI
 {
-    public enum UIIcon { Diamond, Sun, Heart, Sword, Shield, Dodge, Close, Check, Portal, Divider, Hourglass, Mask, Radiant }
+    public enum UIIcon
+    {
+        Diamond, Sun, Heart, Sword, Shield, Dodge, Close, Check, Portal, Divider, Hourglass, Mask, Radiant,
+        Settings, Alert, Bird, Bag, Lock, Journal, Disc, Rotate, Save, Guardian, Info, Player, Moon, Hand,
+        Map, Objective, Eye, Pause, Poporo, Serpent, Vessel, Back, Voice, Freeze
+    }
 
-    // Small original vector icons in the reference's gold-on-stone language. They label states
+    // Line icons of the Bacatá kit (Resources/Nemequene/Bacata/Icons, white so the colour tints
+    // them gold, bone or crimson). Diamond and Divider stay vector ornaments. Icons label states
     // alongside written text; no icon is the only carrier of meaning.
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class UIIconGraphic : MaskableGraphic
@@ -13,7 +19,59 @@ namespace Nemequene.UI
         public UIIcon icon;
         private Vector2 _center;
         private float _scale, _angle;
-        public void SetIcon(UIIcon value) { if (icon == value) return; icon = value; SetVerticesDirty(); }
+        private Sprite _sprite;
+        private UIIcon _spriteFor = (UIIcon)(-1);
+        public void SetIcon(UIIcon value) { if (icon == value) return; icon = value; SetVerticesDirty(); SetMaterialDirty(); }
+        public static string SpriteName(UIIcon icon)
+        {
+            switch (icon)
+            {
+                case UIIcon.Sun: case UIIcon.Radiant: return "sol";
+                case UIIcon.Heart: return "vida";
+                case UIIcon.Sword: return "atacar";
+                case UIIcon.Shield: return "bloquear";
+                case UIIcon.Dodge: return "esquivar";
+                case UIIcon.Close: return "cerrar";
+                case UIIcon.Check: return "check";
+                case UIIcon.Portal: return "portal";
+                case UIIcon.Hourglass: return "girar";
+                case UIIcon.Mask: return "alerta";
+                case UIIcon.Settings: return "ajustes";
+                case UIIcon.Alert: return "alerta";
+                case UIIcon.Bird: return "ave";
+                case UIIcon.Bag: return "bolsa";
+                case UIIcon.Lock: return "candado";
+                case UIIcon.Journal: return "diario";
+                case UIIcon.Disc: return "disco";
+                case UIIcon.Rotate: return "girar";
+                case UIIcon.Save: return "guardar";
+                case UIIcon.Guardian: return "guardian";
+                case UIIcon.Info: return "info";
+                case UIIcon.Player: return "jugador";
+                case UIIcon.Moon: return "luna";
+                case UIIcon.Hand: return "mano";
+                case UIIcon.Map: return "mapa";
+                case UIIcon.Objective: return "objetivo";
+                case UIIcon.Eye: return "ojo";
+                case UIIcon.Pause: return "pausa";
+                case UIIcon.Poporo: return "poporo";
+                case UIIcon.Serpent: return "serpiente";
+                case UIIcon.Vessel: return "vasija";
+                case UIIcon.Back: return "volver";
+                case UIIcon.Voice: return "voz";
+                case UIIcon.Freeze: return "congelar";
+                default: return null;
+            }
+        }
+        private Sprite IconSprite
+        {
+            get
+            {
+                if (_spriteFor != icon) { _spriteFor = icon; var name = SpriteName(icon); _sprite = name == null ? null : UIBacata.Get("Icons/" + name); }
+                return _sprite;
+            }
+        }
+        public override Texture mainTexture => IconSprite != null ? IconSprite.texture : base.mainTexture;
         private Vector2 P(float x, float y)
         {
             float cos = Mathf.Cos(_angle), sin = Mathf.Sin(_angle);
@@ -26,6 +84,19 @@ namespace Nemequene.UI
             if (r.width < 2 || r.height < 2) return;
             var tone = color; var dark = UIPalette.Charcoal; dark.a = tone.a;
             _center = r.center; _scale = Mathf.Min(r.width, r.height) * .5f; _angle = 0;
+            var sprite = IconSprite;
+            if (sprite != null)
+            {
+                // Square line icon centred in the rect; UVs come from the sprite (single, full texture).
+                var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+                float half = _scale; int i = mesh.currentVertCount;
+                mesh.AddVert(_center + new Vector2(-half, -half), tone, new Vector2(uv.x, uv.y));
+                mesh.AddVert(_center + new Vector2(-half, half), tone, new Vector2(uv.x, uv.w));
+                mesh.AddVert(_center + new Vector2(half, half), tone, new Vector2(uv.z, uv.w));
+                mesh.AddVert(_center + new Vector2(half, -half), tone, new Vector2(uv.z, uv.y));
+                mesh.AddTriangle(i, i + 1, i + 2); mesh.AddTriangle(i, i + 2, i + 3);
+                return;
+            }
             switch (icon)
             {
                 case UIIcon.Divider:

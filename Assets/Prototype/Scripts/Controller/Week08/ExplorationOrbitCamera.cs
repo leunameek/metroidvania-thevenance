@@ -24,6 +24,8 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
     private bool _initialized;
     private float _uiSensitivity = 1, _motionScale = 1;
     private bool _invertY;
+    // Per-room framing (Mundo Inferior camera zones); 0 keeps the serialized distance and pitch.
+    private float _framingDistance, _framingPitch;
 
     public void ConfigurePresentation(float multiplier, bool invert, float motion)
     {
@@ -50,11 +52,13 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
         else if (!Mathf.Approximately(_yaw, _targetYaw))
             _yaw = Mathf.SmoothDampAngle(_yaw, _targetYaw, ref _yawVelocity, Mathf.Max(.001f, 0.45f * _motionScale));
 
+        if (_framingPitch > 0 && !orbiting) _pitch = Mathf.MoveTowards(_pitch, _framingPitch, Time.unscaledDeltaTime * 40f);
+        float framedDistance = _framingDistance > 0 ? _framingDistance : distance;
         Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0f);
         Vector3 pivot = target.position + Vector3.up * pivotHeight;
         Vector3 direction = rotation * Vector3.back;
-        float desiredDistance = distance;
-        if (Physics.SphereCast(pivot, 0.25f, direction, out RaycastHit hit, distance,
+        float desiredDistance = framedDistance;
+        if (Physics.SphereCast(pivot, 0.25f, direction, out RaycastHit hit, framedDistance,
             obstructionMask, QueryTriggerInteraction.Ignore))
             desiredDistance = Mathf.Max(0.1f, hit.distance - 0.15f);
 
@@ -76,6 +80,14 @@ public sealed class ExplorationOrbitCamera : MonoBehaviour
     {
         _targetYaw = yaw;
         if (instant) { _yaw = yaw; _yawVelocity = 0f; }
+    }
+
+    // Distance and pitch for the current room; 0 returns to the default framing.
+    public void SetFraming(float framingDistance, float pitch, bool instant = false)
+    {
+        _framingDistance = framingDistance; _framingPitch = pitch;
+        if (instant && pitch > 0) _pitch = pitch;
+        if (instant && pitch <= 0) _pitch = 30f;
     }
 
     public void SnapAfterTeleport()

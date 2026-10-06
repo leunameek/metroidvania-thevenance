@@ -12,7 +12,7 @@ public class NemequeneImportSettings : AssetPostprocessor
 
     private static readonly string[] LoopingClips =
     {
-        "Orc Idle", "Walking", "Running", "Running Backward", "Falling Idle", "Climbing Ladder"
+        "Orc Idle", "Walking", "Running", "Running Backward", "Falling Idle", "Climbing Ladder", "Flying", "Hanging Idle"
     };
 
     private static bool IsNemequeneAsset(string path) => path.Replace('\\', '/').StartsWith(ModelFolder + "/");
@@ -53,6 +53,9 @@ public class NemequeneImportSettings : AssetPostprocessor
             clip.lockRootHeightY = false;
             clip.keepOriginalPositionY = true;
             clip.lockRootPositionXZ = false;
+            // "Hanging Idle" and "Climbing To Top" face the opposite way from "Climbing Ladder";
+            // turning their root keeps the body facing the wall in the whole climb.
+            clip.rotationOffset = clipName == "Hanging Idle" || clipName == "Climbing To Top" ? 180f : 0f;
         }
         importer.clipAnimations = clips;
     }

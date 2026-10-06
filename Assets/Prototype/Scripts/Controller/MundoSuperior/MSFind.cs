@@ -1,0 +1,128 @@
+using Nemequene.UI;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+// A find of the upper world (guide 4.3): from firm ground E opens the inspection, the piece turns
+// with the mouse or WASD, a new E or Enter confirms once (flag written before the reward),
+// Escape gives it back untouched. The piece is an independent child: the pedestal and support
+// stay when it is collected, and a collected find never shows again after loading.
+public sealed class MSFind : MIInteractable
+{
+    [SerializeField] private string findId;
+    [SerializeField] private Transform item;
+    [SerializeField] private Light halo;
+    [SerializeField] private ParticleSystem sparks;
+    [SerializeField] private string kindLabel = "Hallazgo";
+    [SerializeField, TextArea] private string description = "";
+    [SerializeField] private string rewardTitle = "";
+    [SerializeField, TextArea] private string rewardText = "";
+
+    public static MSFind Inspecting { get; private set; }
+    public string FindId => findId;
+    public bool Collected => MSProgress.Has(findId);
+    public override bool Available => base.Available && !Collected && Inspecting == null;
+    public override string Prompt => "Examinar " + displayName.ToLowerInvariant();
+
+    private Vector3 _itemPosition, _cameraPosition;
+    private Quaternion _itemRotation, _cameraRotation;
+    private Camera _camera;
+    private ExplorationOrbitCamera _orbit;
+    private PlayerController _player;
+    private float _blend, _haloIntensity;
+    private bool _confirmFrame;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => Inspecting = null;
+
+    private void Start()
+    {
+        if (halo != null) _haloIntensity = halo.intensity;
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        bool collected = Collected;
+        if (item != null) item.gameObject.SetActive(!collected);
+        float intensity = collected ? 0f : _haloIntensity;
+        if (halo != null) { halo.intensity = intensity; var glow = halo.GetComponent<MIGlow>(); if (glow != null) glow.SetBase(intensity); }
+        if (sparks != null) sparks.gameObject.SetActive(!collected);
+    }
+
+    public override void Interact(PlayerController player)
+    {
+        if (!Available || item == null) return;
+        _camera = Camera.main;
+        if (_camera == null) return;
+        Inspecting = this; _player = player; _blend = 0; _confirmFrame = true;
+        _orbit = _camera.GetComponent<ExplorationOrbitCamera>();
+        if (_orbit != null) _orbit.enabled = false;
+        _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
+        _itemPosition = item.position; _itemRotation = item.rotation;
+        var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
+        player.SetInputLocked(true);
+        MSAudio.Play("hallazgo_abrir", .8f);
+        MundoSuperiorDirector.Instance?.Hud?.ShowInspection(displayName, kindLabel, description);
+    }
+
+    private void Update()
+    {
+        if (Inspecting != this) return;
+        _blend = Mathf.MoveTowards(_blend, 1, Time.unscaledDeltaTime / .35f);
+        // Frame the piece from the player's side, a little above, the panel on the right.
+        Vector3 toCamera = _cameraPosition - _itemPosition; toCamera.y = 0;
+        if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
+        Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
+        Vector3 framed = _itemPosition + toCamera.normalized * 1.5f + Vector3.up * .2f - side * .5f;
+        Quaternion look = Quaternion.LookRotation(_itemPosition - side * .5f - framed);
+        float t = Mathf.SmoothStep(0, 1, _blend);
+        _camera.transform.SetPositionAndRotation(Vector3.Lerp(_cameraPosition, framed, t), Quaternion.Slerp(_cameraRotation, look, t));
+
+        var mouse = Mouse.current; var keyboard = Keyboard.current;
+        Vector2 turn = Vector2.zero;
+        if (mouse != null && mouse.leftButton.isPressed) turn += mouse.delta.ReadValue() * .35f;
+        if (keyboard != null)
+        {
+            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) turn.x -= 140 * Time.unscaledDeltaTime;
+            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) turn.x += 140 * Time.unscaledDeltaTime;
+            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
+            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
+        }
+        item.Rotate(Vector3.up, -turn.x, Space.World);
+        item.Rotate(_camera.transform.right, turn.y, Space.World);
+
+        if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
+        if (keyboard == null) return;
+        if (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame) Confirm();
+        else if (keyboard.escapeKey.wasPressedThisFrame) Close();
+    }
+
+    private void Confirm()
+    {
+        bool first = MSProgress.Set(findId);
+        Close();
+        Refresh();
+        if (!first) return;
+        MSAudio.Play("hallazgo_confirmar", .9f);
+        MIBurst.Spawn(_itemPosition, new Color(1f, .82f, .45f));
+        MundoSuperiorDirector.Instance?.OnFound(this, rewardTitle, rewardText);
+    }
+
+    private void Close()
+    {
+        if (Inspecting != this) return;
+        Inspecting = null;
+        if (item != null)
+        {
+            item.SetPositionAndRotation(_itemPosition, _itemRotation);
+            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = true;
+        }
+        if (_camera != null) _camera.transform.SetPositionAndRotation(_cameraPosition, _cameraRotation);
+        if (_orbit != null) { _orbit.enabled = true; _orbit.SnapAfterTeleport(); }
+        if (_player != null) _player.SetInputLocked(false);
+        MundoSuperiorDirector.Instance?.Hud?.HideInspection();
+        MundoSuperiorDirector.Instance?.SuppressEscapeThisFrame();
+    }
+
+    protected override void OnDisable() { base.OnDisable(); Close(); }
+}

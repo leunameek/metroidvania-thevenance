@@ -9,6 +9,7 @@ public static class WorldTravel
 {
     public const string PlazaScene = "Assets/Prototype/Scenes/Week08/TechnicalDemo_Week08.unity";
     public const string LowerWorldScene = "Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity";
+    public const string UpperWorldScene = "Assets/Worlds/MundoSuperior/Scenes/MundoSuperior_Blockout.unity";
 
     public static string[] CompletedObjectIds { get; private set; } = Array.Empty<string>();
     public static bool CombatCompleted { get; private set; }
@@ -17,19 +18,21 @@ public static class WorldTravel
     public static float PlaySeconds { get; set; }
     // World the player is coming back from (0 = not returning).
     public static int ReturningFrom { get; private set; }
+    // Save slot chosen in the title menu (-1: none); worlds keep their own state per slot.
+    public static int SaveSlot { get; set; } = -1;
     public static event Action Leaving;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Reset()
     {
         CompletedObjectIds = Array.Empty<string>(); CombatCompleted = false;
-        VisitedMask = 0; PlaySeconds = 0; ReturningFrom = 0; Leaving = null;
+        VisitedMask = 0; PlaySeconds = 0; ReturningFrom = 0; Leaving = null; SaveSlot = -1;
     }
 
     // Scene of a world reached through a plaza portal; null keeps the in-scene threshold.
     public static string SceneFor(int world)
     {
-        string scene = world < 0 ? LowerWorldScene : null;
+        string scene = world < 0 ? LowerWorldScene : world > 0 ? UpperWorldScene : null;
         return scene != null && Application.CanStreamedLevelBeLoaded(scene) ? scene : null;
     }
 

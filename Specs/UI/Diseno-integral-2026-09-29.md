@@ -2,6 +2,46 @@
 
 Este documento convierte el sistema entregado por el usuario en un mapa de pantallas y decisiones para el juego real. El archivo de origen es `El_Asedio_de_Bacata_UI_Design_System.md`; la composición y materialidad toman como referencia la imagen `Referencia-visual-proporcionada.png` facilitada después. Esa imagen es una referencia estética, no una lista de sistemas implementados ni evidencia histórica. Los ejemplos de contenido de jefe, sigilo y narrativa son patrones de diseño, no contenido ya presente en el vertical slice.
 
+## Revisión · «Interfaces de El Asedio de Bacatá» y kit PNG (1 de octubre de 2026)
+
+El documento `Interfaces_El_Asedio_de_Bacata.docx` y los paquetes `Pantallas_4K` y `Recursos_PNG` sustituyen la estética anterior (piedra tallada y pergamino claro). Esta sección manda sobre la de los bloques 1–4 cuando entren en conflicto. Se rehízo la **estética** de todas las interfaces existentes; no se añadieron mecánicas (los módulos E1–E7, la reasignación de teclas y las ranuras de guardado nuevas siguen dependiendo de su sistema real).
+
+### Recursos y cómo se regeneran
+
+- `tools/ui/build_bacata_ui_sprites.py <carpeta con Bacata_UI_Premium>` escribe `Assets/Nemequene/UI/Resources/Nemequene/Bacata/` y sus `.meta` (200 ppu para componentes pintados al doble, cortes 9-slice incluidos).
+- El marco de panel se entrega **limpio**: el ave y la pluma se separaron en `Frame_Emblem` y `Frame_Feather` para que el corte de nueve sectores no los deforme (sección 8, «Importación de PNG»).
+- Iconos: los 32 del paquete, convertidos a blanco para teñirlos en oro, hueso o carmesí.
+- Arte: portada, título, plaza, mundos, piezas y un retrato recortado en disco para el anillo de `Marco_HUD`.
+
+### Sistema visual aplicado
+
+| Token | Color | Uso |
+|---|---|---|
+| Fondo profundo | `#080A0B` | velos de menú, fondo de lectura |
+| Panel | `#151719` | superficie de medición de contraste |
+| Elevado | `#32171F` | selección |
+| Oro envejecido | `#B79557` | bordes, rellenos de progreso (6,4:1) |
+| Oro solar | `#E0BD74` | títulos, valores, foco (10,0:1) |
+| Hueso | `#F1E5CF` | texto principal (14,4:1) |
+| Pergamino | `#BCB4A6` | texto secundario (8,7:1) |
+| Carmesí | `#B32940` | cinta de selección, vida, peligro (solo superficie) |
+| Carmesí de texto | `#E86A7C` | títulos de pausa y derrota, acciones destructivas (5,8:1) |
+| Jade | `#70B2A1` | voz, pasos aprobados, guardado confirmado (7,3:1) |
+
+Tipografía: Cinzel para títulos (sin forzar mayúsculas), Noto Sans para todo el texto funcional, Noto Serif solo para lectura cultural larga. El modo de fuente legible pasa todo a Noto Sans.
+
+Botones: la acción principal es la cinta carmesí; las secundarias son texto sobre la línea dorada fina y reciben la cinta con el rombo dorado al tener foco. El ancho nunca cambia con el foco.
+
+### Composición por familia de pantallas
+
+- **Hoja** (configuración, diario, controles, créditos, guardado, inventario, calibración): título y subtítulo arriba a la izquierda, fila de pestañas cuando hay secciones, panel enmarcado debajo, «Esc Volver» y «Enter Seleccionar» en las esquinas del área segura (76 × 46 px).
+- **Columna** (pausa): una columna enmarcada sobre la escena atenuada al 55 %, título carmesí y zona actual.
+- **Modal** (confirmación, fin del recorrido): panel centrado con emblema, icono de alerta, acción segura primero y con foco.
+- **Sin marco** (carga, derrota): la ilustración o la escena sostienen la página.
+- **HUD** (08, 13–15, 18): retrato y vida arriba a la izquierda; zona y objetivo arriba a la derecha con sombra suave; interacción en la cinta carmesí del borde inferior; turnos en una cinta corta arriba al centro; acciones de combate en fila dentro de un panel inferior.
+
+El Mundo Inferior ya no usa `OnGUI`: el portal de regreso usa `UIWorldPrompt` y la zona y las teclas de prueba usan el mismo kit.
+
 ## Revisión · referencias de UI, bloques 1–4 (29 de septiembre de 2026)
 
 Las cuatro láminas «Referencia de UI» entregadas por el usuario (UI base, HUD, gameplay y narrativa, pantallas especiales) se integran como **estética**, no como lista de sistemas. Consumibles, sigilo, minimapa, maná, jefe con retrato y elecciones de diálogo siguen sin mecánica y no se simulan; sus contratos visuales están más abajo. Esta sección sustituye la tabla de tokens anterior cuando entren en conflicto.

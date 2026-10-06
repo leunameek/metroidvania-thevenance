@@ -14,6 +14,9 @@ public class PlayerAnimator : MonoBehaviour
     private static readonly int JumpHash = Animator.StringToHash("Jump");
     private static readonly int AirJumpHash = Animator.StringToHash("AirJump");
     private static readonly int HardLandHash = Animator.StringToHash("HardLand");
+    private static readonly int FlyingHash = Animator.StringToHash("Flying");
+    private static readonly int ClimbTopHash = Animator.StringToHash("ClimbTop");
+    private static readonly int ClimbStillHash = Animator.StringToHash("ClimbStill");
 
     [SerializeField] private PlayerController player;
     [Tooltip("Seconds the controller may report not-grounded before the Fall state kicks in (steps, ramps).")]
@@ -28,12 +31,19 @@ public class PlayerAnimator : MonoBehaviour
     private float _airTime;
     private float _minAirVelocity;
     private bool _wasGrounded = true;
+    private bool _hasFlying, _hasClimbExtras;
+    private float _climbStillTime;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _animator.applyRootMotion = false;
         if (player == null) player = GetComponentInParent<PlayerController>();
+        foreach (var parameter in _animator.parameters)
+        {
+            if (parameter.nameHash == FlyingHash) _hasFlying = true;
+            if (parameter.nameHash == ClimbStillHash) _hasClimbExtras = true;
+        }
     }
 
     private void OnEnable()
@@ -71,7 +81,18 @@ public class PlayerAnimator : MonoBehaviour
         float horizontalSpeed = new Vector2(delta.x, delta.z).magnitude;
         _animator.SetFloat(SpeedHash, horizontalSpeed, speedDamping, dt);
 
-        bool onLadder = player.IsOnLadder;
+        // Climbing and flight motors (Mundo Superior) reuse the ladder clip and the Flying state.
+        var pose = player.Motor is IPlayerMotorPose motorPose ? motorPose.Pose : (PlayerMotorPose?)null;
+        bool flying = pose == PlayerMotorPose.Fly;
+        bool onLadder = player.IsOnLadder || pose == PlayerMotorPose.Climb;
+        if (_hasFlying) _animator.SetBool(FlyingHash, flying);
+        if (_hasClimbExtras)
+        {
+            // Hanging Idle after a short pause on the wall (hysteresis avoids flicker between clips).
+            _climbStillTime = onLadder && Mathf.Abs(delta.y) < .15f ? _climbStillTime + dt : 0f;
+            _animator.SetBool(ClimbStillHash, onLadder && _climbStillTime > .12f);
+            _animator.SetBool(ClimbTopHash, pose == PlayerMotorPose.ClimbTop);
+        }
         _animator.SetBool(OnLadderHash, onLadder);
         _animator.SetFloat(ClimbSpeedHash, onLadder ? delta.y / climbReferenceSpeed : 1f);
         _animator.SetBool(DashingHash, player.IsDashing);
@@ -81,7 +102,7 @@ public class PlayerAnimator : MonoBehaviour
 
         _airTime = player.IsGrounded || onLadder ? 0f : _airTime + dt;
         bool grounded = _airTime < groundedGrace;
-        if (!grounded) _minAirVelocity = Mathf.Min(_minAirVelocity, verticalVelocity);
+        if (!grounded) _minAirVelocity = flying ? 0f : Mathf.Min(_minAirVelocity, verticalVelocity);
 
         if (grounded && !_wasGrounded)
         {

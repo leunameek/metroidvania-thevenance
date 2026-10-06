@@ -9,7 +9,8 @@ namespace Nemequene.UI
     {
         private readonly UIManager _ui;
         private readonly GameObject _root;
-        private readonly TMP_Text _name, _instruction, _progressText;
+        private readonly TMP_Text _name, _instruction, _progressText, _heading;
+        private readonly RectTransform _panel;
         private readonly Button _close;
         private readonly Image _progress;
         private AnalyzableObject _selected;
@@ -18,16 +19,26 @@ namespace Nemequene.UI
         public InspectionUIController(UIManager ui)
         {
             _ui = ui; var f = ui.Factory;
-            _root = f.Panel("UI_Panel_ObjectInspection", ui.Root, new Vector2(.65f,.18f), new Vector2(.95f,.78f), true).gameObject;
-            // Pixel insets from the panel edges: the stone frame's corners and crest stay clear of text.
-            var body = f.Scroll(_root.transform, Vector2.zero, Vector2.one);
-            ((RectTransform)body.parent.parent).Inset(60, 170, 60, 80);
-            _name = f.Caption(body, "", 34); _instruction = f.Text(body, "", 24);
-            _progressText = UIFactory.Tone(f.Text(_root.transform, "", 20), UITone.Gold);
-            _progressText.rectTransform.Band(128, 30, 64);
-            _progress = f.Bar(_root.transform, "LessonProgress", Vector2.zero, Vector2.one);
-            ((RectTransform)_progress.transform.parent.parent).Band(108, 16, 64);
-            var bottom = f.Column(_root.transform, "Close"); bottom.Band(40, 58, 60);
+            // Screens 10–12: lesson title in the upper left, the 3D piece keeps the left of the view,
+            // the lesson panel sits on the right with name, step, instruction, progress and actions.
+            _root = f.Rect("UI_ObjectInspection", ui.Root, Vector2.zero, Vector2.one).gameObject;
+            var veil = _root.AddComponent<TitleMenuBackdrop>(); veil.raycastTarget = false; veil.fromTop = true; veil.readingEdge = .30f; veil.strength = .80f;
+            _heading = UIFactory.Shadow(f.Heading(_root.transform, "", new Vector2(.04f, .865f), new Vector2(.62f, .95f), 56));
+            _heading.alignment = TextAlignmentOptions.BottomLeft;
+            var subtitle = UIFactory.Shadow(UIFactory.Tone(f.Label(_root.transform, UIStrings.Get("inspection.subtitle"), new Vector2(.04f, .825f), new Vector2(.62f, .865f), 22), UITone.Muted));
+            subtitle.alignment = TextAlignmentOptions.TopLeft;
+            f.Hint(_root.transform, UIStrings.Get("footer.lesson"), Vector2.zero);
+            _panel = f.Panel("UI_Panel_ObjectInspection", _root.transform, new Vector2(.60f,.13f), new Vector2(.94f,.78f), true);
+            // Pixel insets from the panel edges: the rim, the emblem and the feather stay clear of text.
+            var body = f.Scroll(_panel, Vector2.zero, Vector2.one);
+            ((RectTransform)body.parent.parent).Inset(60, 196, 60, 76);
+            _name = f.Caption(body, "", 44);
+            _progressText = UIFactory.Tone(f.Text(body, "", 20), UITone.Success); _progressText.fontStyle = FontStyles.UpperCase;
+            _progressText.characterSpacing = 2;
+            _instruction = f.Text(body, "", 26);
+            _progress = f.Bar(_panel, "LessonProgress", Vector2.zero, Vector2.one);
+            ((RectTransform)_progress.transform.parent.parent).Band(132, 18, 64);
+            var bottom = f.Column(_panel, "Close"); bottom.Band(48, 60, 60);
             _close = f.Button(bottom, UIStrings.Get("inspection.close"), () => ui.Demo.EndAnalysis());
             ui.Demo.ViewChanged += Refresh; ui.Screens.Changed += OnScreen; Refresh();
         }
@@ -45,6 +56,7 @@ namespace Nemequene.UI
             {
                 _selected = item; _zoom = 1;
                 _name.text = item.Data.displayName;
+                _heading.text = UIStrings.Get("inspection.heading", item.Data.displayName);
                 _cameraAnchor = Vector3.zero;
             }
             // Zoom operates on the existing inspection camera and never changes the cultural model.
@@ -57,7 +69,7 @@ namespace Nemequene.UI
             if (Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + .1f;
             var lesson = _ui.Demo.Lesson;
-            ((RectTransform)_root.transform).anchorMin = new Vector2(.65f,.78f - (lesson.Complete ? .31f : .40f) * _ui.Settings.Values.textScale);
+            _panel.anchorMin = new Vector2(.60f, Mathf.Max(.06f, .78f - (lesson.Complete ? .40f : .52f) * _ui.Settings.Values.textScale));
             _instruction.text = lesson.Complete ? UIStrings.Get("inspection.archived") : UIStrings.Get("lesson." + lesson.Lesson) + "\n\n"
                 + UIStrings.Get((_ui.Demo.MouseMode ? "inspection.mouse." : "inspection.hands.") + lesson.Lesson);
             if (!_ui.Demo.MouseMode && !lesson.Complete && _ui.Hands != null && _ui.Hands.State != HandState.Detected)

@@ -11,8 +11,9 @@ namespace Nemequene.UI
     {
         public float baseSize = 24;
         public bool title, surface, subtitle, parchment, hud, ink;
-        // Carved display face (Cinzel) for headings; readable-font mode falls back to Noto.
-        public bool display;
+        // Cinzel for titles, Noto Serif for long cultural reading, Noto Sans for everything else;
+        // readable-font mode turns every face into Noto Sans.
+        public bool display, serif, shadow;
         public UITone tone;
         public Color tint = Color.white;
         private Sprite _sourceSprite;
@@ -30,17 +31,27 @@ namespace Nemequene.UI
                 default: return UIPalette.Ivory;
             }
         }
+        public static void ApplyShadow(TMP_Text text) { UIKit.Shadow(text); }
         public void Apply(UITheme theme, UISettings settings)
         {
             var text = GetComponent<TMP_Text>();
             if (text != null)
             {
-                text.font = display && !settings.readableFont ? theme.Display : title || !settings.readableFont ? theme.titleFont : theme.bodyFont;
+                text.font = settings.readableFont ? theme.bodyFont : display || title ? theme.Display : serif ? theme.titleFont : theme.bodyFont;
                 float size = baseSize * (subtitle ? settings.subtitleScale : settings.textScale);
                 text.fontSize = size;
-                if (text.enableAutoSizing) { text.fontSizeMax = size; text.fontSizeMin = Mathf.Max(16, size * .6f); }
+                if (text.enableAutoSizing) { text.fontSizeMax = size; text.fontSizeMin = Mathf.Min(text.fontSizeMin > 0 ? text.fontSizeMin : 16, Mathf.Max(14, size * .6f)); }
                 var role = ink && tone == UITone.Default ? UITone.Ink : tone;
                 text.color = settings.highContrast ? Color.white : ToneColor(role);
+                if (shadow) ApplyShadow(text);
+            }
+            var painted = surface ? GetComponent<UIBacataFrame>() : null;
+            if (painted != null)
+            {
+                painted.SetContrast(settings.highContrast);
+                var outline = GetComponentInChildren<UIFrameGraphic>(true);
+                if (outline != null) { outline.gameObject.SetActive(settings.highContrast); outline.SetState(false, false, true); }
+                return;
             }
             if (surface)
             {

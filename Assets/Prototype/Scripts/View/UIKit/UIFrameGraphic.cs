@@ -24,8 +24,8 @@ namespace Nemequene.UI
             var r = rectTransform.rect;
             if (r.width < 24 || r.height < 24) return;
             Color dark = UIPalette.Charcoal;
-            Color gold = danger ? UITheme.Hex("D9645A") : selected ? UIPalette.GoldLight : UIPalette.Gold;
-            Color muted = highContrast ? UIPalette.Ivory : UITheme.Hex("8A6A3A");
+            Color gold = danger ? UIPalette.Danger : selected ? UIPalette.GoldLight : UIPalette.Gold;
+            Color muted = highContrast ? UIPalette.Ivory : UIPalette.GoldDeep;
             float edge = compact ? 4 : 8;
             float corner = Mathf.Min(compact ? 20 : 32, Mathf.Min(r.width, r.height) * .24f);
             Outline(mesh, r, 1, 3, dark);

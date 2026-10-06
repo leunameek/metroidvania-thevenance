@@ -22,12 +22,12 @@ namespace Nemequene.UI
         public DialogueUIController(UIManager ui)
         {
             _ui = ui;
-            _panel = ui.Factory.Parchment("UI_Dialogue", ui.Root, new Vector2(.12f,.06f), new Vector2(.88f,.50f), true).gameObject;
-            // Reference block 3 «Caja de diálogo»: the speaker's name sits on a carved plate across the
-            // parchment's top edge; the text keeps clear of the torn border.
+            _panel = ui.Factory.Panel("UI_Dialogue", ui.Root, new Vector2(.14f,.04f), new Vector2(.86f,.34f), true, true, false).gameObject;
+            // Screen 23 «Diálogo»: the speaker's name on a short crimson ribbon across the top rim;
+            // two lines per segment, the scene stays visible above.
             var plate = ui.Factory.Rect("SpeakerPlate", _panel.transform, new Vector2(0,1), new Vector2(0,1));
             plate.pivot = new Vector2(0,.5f); plate.sizeDelta = new Vector2(380,60); plate.anchoredPosition = new Vector2(72,-6);
-            ui.Factory.Plate(plate, UIPlateKind.Secondary, 12);
+            UIBacata.Skin(plate, "Controls/Ribbon");
             _speakerPlate = plate.gameObject;
             _speaker = ui.Factory.Heading(plate, "", Vector2.zero, Vector2.one, 26, UITone.GoldLight);
             _speaker.margin = new Vector4(20,4,20,4);

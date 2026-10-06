@@ -76,53 +76,33 @@ namespace Nemequene.UI.Editor
             var title=TitleMenuController.Instance;
             Check(title!=null&&title.CurrentView==TitleView.Home,"application opens directly on the isolated title");
             Check(Object.FindObjectsByType<TechnicalDemoController>(FindObjectsSortMode.None).Length==0&&UIManager.Instance==null,"tutorial and its devices are not loaded behind the menu");
-            var buttons=title.GetComponentsInChildren<Button>();
-            Check(buttons.Length==6&&buttons.Select(b=>b.GetComponentInChildren<TMP_Text>().text).SequenceEqual(new[]{"Nueva partida","Continuar","Cargar partida","Configuración","Créditos","Salir"}),"six primary actions follow the save and settings flow");
-            Check(!buttons[1].interactable,"continue is unavailable without a save");
-            Check(EventSystem.current.currentSelectedGameObject==buttons[0].gameObject,"new game has initial keyboard focus");
+            var buttons=title.transform.Find("Title_Home/PrimaryActions").GetComponentsInChildren<Button>();
+            Check(buttons.Length==7&&buttons.Select(b=>b.GetComponentInChildren<TMP_Text>().text).SequenceEqual(new[]{"Continuar","Nueva partida","Cargar partida","Configuración","Accesibilidad","Créditos","Salir"}),"seven actions of screen 01 in the documented order");
+            Check(!buttons[0].interactable,"continue is unavailable without a save");
+            Check(EventSystem.current.currentSelectedGameObject==buttons[1].gameObject,"new game has initial keyboard focus without a save");
             Check(title.Music.clip!=null&&title.Music.loop&&title.Music.volume>0,"independent menu music loops with gentle startup");
-            CheckContrast(buttons[0],"initial focused action has readable contrast");
-            var atmosphere=title.GetComponentInChildren<TitleMenuAtmosphere>();
+            CheckContrast(buttons[1],"initial focused action has readable contrast");
             var painting=title.transform.Find("Menu_Artwork").GetComponent<RawImage>();
-            // The hidden batch editor has no focused Game view; simulate focus explicitly.
-            atmosphere.SendMessage("OnApplicationFocus",true);yield return new WaitForSecondsRealtime(.3f);
-            Check(atmosphere!=null&&atmosphere.IsAnimating&&atmosphere.Elapsed>0,"ambient motion runs on the home screen");
-            Check(painting.material.shader.name=="Nemequene/UI/Living Lagoon"&&painting.material.shader.isSupported&&!ShaderUtil.ShaderHasError(painting.material.shader),"lagoon shader is supported and compiles without errors");
+            Check(painting.texture!=null&&painting.texture.name=="Portada_Bacata","the project's own cover fills the title screen");
             var emblem=title.transform.Find("Title_Home/Title_EmblemFrame").GetComponentInChildren<RawImage>();
-            Check(emblem.texture!=null&&!emblem.raycastTarget&&!painting.raycastTarget,"separate title emblem and painting leave menu input unobstructed");
-            Check(((TextureImporter)AssetImporter.GetAtPath("Assets/Nemequene/UI/Resources/Nemequene/Title_BacataMountains.png")).DoesSourceTextureHaveAlpha(),"title emblem has real source transparency");
-            Check(buttons.All(b=>b.GetComponent<Image>().sprite!=null&&b.GetComponent<Image>().type==Image.Type.Sliced),"all primary actions use the reference's stone plaques");
-            Check(buttons.All(b=>b.GetComponentInChildren<TMP_Text>().alignment==TextAlignmentOptions.Center),"primary actions retain live centered text");
-            Capture(title.Canvas,"ambient-before",1920,1080);
-            float before=atmosphere.Elapsed;
-            yield return new WaitForSecondsRealtime(8);
-            Capture(title.Canvas,"ambient-after",1920,1080);
-            Check(atmosphere.Elapsed>before,"ambient clock advances without moving the title or actions");
-            Check(ChangedBackgroundPixels()>256,"rendered mist and water change visibly between frames");
-            atmosphere.SendMessage("OnApplicationFocus",false);yield return null;before=atmosphere.Elapsed;
-            yield return new WaitForSecondsRealtime(.3f);
-            Check(!atmosphere.IsAnimating&&atmosphere.Elapsed==before,"ambient loop stops when the application loses focus");
-            atmosphere.SendMessage("OnApplicationFocus",true);
+            Check(emblem.texture!=null&&!emblem.raycastTarget&&!painting.raycastTarget,"separate title art and cover leave menu input unobstructed");
+            Check(buttons.All(b=>b.transform.Find("Skin")!=null&&b.transform.Find("Skin").GetComponent<Image>().type==Image.Type.Sliced),"all actions use the painted line and ribbon");
+            Check(buttons.All(b=>b.GetComponentInChildren<TMP_Text>().alignment==TextAlignmentOptions.Center),"actions retain live centered text");
             foreach(var size in new[]{new Vector2Int(1536,1024),new Vector2Int(1280,720),new Vector2Int(1920,1080),new Vector2Int(2560,1440),new Vector2Int(1920,1200)})
             {
                 Capture(title.Canvas,"title-"+size.x+"x"+size.y,size.x,size.y);
             }
             yield return Press(Key.DownArrow);
-            Check(EventSystem.current.currentSelectedGameObject!=buttons[0].gameObject,"arrow key moves away from new game");
+            Check(EventSystem.current.currentSelectedGameObject!=buttons[1].gameObject,"arrow key moves away from new game");
             CheckContrast(EventSystem.current.currentSelectedGameObject.GetComponent<Button>(),"keyboard selected action has readable contrast");
-            Check(buttons[0].GetComponent<Image>().color!=EventSystem.current.currentSelectedGameObject.GetComponent<Image>().color,"only the selected primary action is highlighted");
+            Check(buttons[1].transform.Find("Skin").GetComponent<Image>().sprite!=EventSystem.current.currentSelectedGameObject.transform.Find("Skin").GetComponent<Image>().sprite,"only the focused action wears the crimson ribbon");
             EventSystem.current.SetSelectedGameObject(FindButton(title,"Configuración").gameObject);
             yield return Press(Key.Enter);
             Check(title.CurrentView==TitleView.Settings,"Enter opens configuration without starting the tutorial");
-            yield return null; before=atmosphere.Elapsed;
-            yield return new WaitForSecondsRealtime(.3f);
-            Check(!atmosphere.IsAnimating&&atmosphere.Elapsed==before,"ambient loop stops behind configuration");
             Check(title.transform.Find("Title_Settings").GetComponentsInChildren<TMP_Text>().Any(t=>t.text=="Accesibilidad"),"accessibility is the first configuration section");
             title.Settings.Values.textScale=1.5f;title.Settings.Values.highContrast=true;title.Settings.Values.reducedMotion=true;title.Settings.Apply();
             yield return null;Capture(title.Canvas,"settings-150-720p",1280,720);Capture(title.Canvas,"settings-150-1610",1920,1200);
             title.ShowHome();yield return null;
-            before=atmosphere.Elapsed;yield return new WaitForSecondsRealtime(.3f);
-            Check(!atmosphere.IsAnimating&&atmosphere.Elapsed==before,"reduced motion freezes the entire ambient effect");
             Capture(title.Canvas,"title-150-720p",1280,720);
             CheckContrast(FindButton(title,"Nueva partida"),"high contrast focus remains readable at 150 percent");
             Capture(title.Canvas,"title-150-1610",1920,1200);
@@ -150,7 +130,7 @@ namespace Nemequene.UI.Editor
             _mouseState=new MouseState{position=RectTransformUtility.WorldToScreenPoint(null,point)};
             yield return new WaitForSecondsRealtime(.1f);_mouseState.buttons=1;yield return new WaitForSecondsRealtime(.1f);_mouseState.buttons=0;
             Check(title.CurrentView==TitleView.Saves,"new game opens save slots");
-            title.transform.Find("Title_Saves/SaveSlots/Slot_1").GetComponentInChildren<Button>().onClick.Invoke();
+            title.transform.Find("Title_Saves/SaveStone/SaveSlots/Slot_1").GetComponentInChildren<Button>().onClick.Invoke();
             float deadline=Time.unscaledTime+25;
             while(UIManager.Instance==null&&Time.unscaledTime<deadline)yield return null;
             var ui=UIManager.Instance;
@@ -175,8 +155,8 @@ namespace Nemequene.UI.Editor
             var logoMin=root.InverseTransformPoint(corners[0]);var logoMax=root.InverseTransformPoint(corners[2]);
             var actions=home.Find("PrimaryActions").GetComponent<RectTransform>();actions.GetWorldCorners(corners);
             float actionTop=root.InverseTransformPoint(corners[2]).y;
-            float actionCenter=root.InverseTransformPoint(actions.TransformPoint(actions.rect.center)).x;
-            Check(Mathf.Abs(actionCenter-root.rect.center.x)<2,label+": actions centered on screen");
+            float actionRight=root.InverseTransformPoint(corners[2]).x;
+            Check(actionRight<root.rect.center.x,label+": actions stay in the left field, clear of the cover's figures");
             Check(root.rect.Contains(new Vector2(logoMin.x,logoMin.y))&&root.rect.Contains(new Vector2(logoMax.x,logoMax.y))
                 &&logoMin.y>actionTop,label+": emblem fits above all actions");
             foreach(var text in home.GetComponentsInChildren<TMP_Text>())
@@ -189,7 +169,9 @@ namespace Nemequene.UI.Editor
         }
         private static void CheckContrast(Button button,string label)
         {
-            var image=button.GetComponent<Image>();var text=button.GetComponentInChildren<TMP_Text>();
+            var skin=button.transform.Find("Skin");
+            var image=skin!=null&&skin.GetComponent<Image>().enabled?skin.GetComponent<Image>():button.GetComponent<Image>();
+            var text=button.GetComponentInChildren<TMP_Text>();
             Color background=image.color*image.canvasRenderer.GetColor();Color foreground=text.color;
             float b=Luminance(background),f=Luminance(foreground);
             if(image.sprite!=null)
@@ -216,20 +198,6 @@ namespace Nemequene.UI.Editor
         }
         public static void Capture(Canvas canvas,string name,int width,int height)
         { UIValidation.CaptureCanvas(canvas,Evidence,name,width,height,name.StartsWith("title-")?()=>CheckTextBounds(TitleMenuController.Instance,name):null); }
-        private static int ChangedBackgroundPixels()
-        {
-            var before=new Texture2D(2,2);var after=new Texture2D(2,2);
-            try
-            {
-                before.LoadImage(File.ReadAllBytes(Evidence+"/ambient-before.png"));
-                after.LoadImage(File.ReadAllBytes(Evidence+"/ambient-after.png"));
-                var a=before.GetPixels32();var b=after.GetPixels32();int changed=0;
-                for(int y=380;y<700;y+=4)for(int x=1080;x<1760;x+=4)
-                { int p=y*before.width+x;if(Mathf.Abs(a[p].r-b[p].r)+Mathf.Abs(a[p].g-b[p].g)+Mathf.Abs(a[p].b-b[p].b)>=3)changed++; }
-                return changed;
-            }
-            finally {Object.Destroy(before);Object.Destroy(after);}
-        }
         private static void Finish(int code)
         {
             SessionState.SetBool(Pending,false);InputSystem.onBeforeUpdate-=QueueInput;Application.logMessageReceived-=Log;

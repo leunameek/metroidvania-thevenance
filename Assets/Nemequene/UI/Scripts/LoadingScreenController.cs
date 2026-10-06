@@ -19,14 +19,30 @@ namespace Nemequene.UI
         private float _deadline;
         public LoadingScreenController(UIManager ui, MenuController menu)
         {
-            _ui = ui; var body = menu.Page(UIScreen.Loading, UIStrings.Get("world.plaza"), false);
-            // Reference block 4 «Pantalla de carga»: status in carved capitals, gold progress rail, tip.
-            _status = ui.Factory.Caption(body, UIStrings.Get("loading"), 28);
-            var host = ui.Factory.Rect("Progress", body, Vector2.zero, Vector2.one); host.gameObject.AddComponent<LayoutElement>().preferredHeight = 22;
-            _progress = ui.Factory.Bar(host, "SceneProgress", Vector2.zero, Vector2.one);
-            ui.Factory.Caption(body, UIStrings.Get("loading.tipTitle"), 20);
-            UIFactory.Tone(ui.Factory.Text(body, UIStrings.Get("loading.tip"), 22), UITone.Muted);
-            _return = ui.Factory.Button(body, UIStrings.Get("mainMenu"), () => { if (!_loading) ui.ReturnToMenu(); });
+            _ui = ui; var f = ui.Factory;
+            var body = menu.Page(UIScreen.Loading, UIStrings.Get("world.plaza"), false, PageKind.Bare);
+            // Screen 07 «Carga»: the destination's own illustration, its name in the monumental
+            // serif, a short tip and a thin progress rail. No percentage: progress is the real
+            // scene operation only.
+            var screen = body.GetComponentInParent<TitleMenuBackdrop>(true).transform;
+            var texture = UIBacata.Art("Plaza_Nunez");
+            if (texture != null)
+            {
+                var art = f.Rect("Illustration", screen, Vector2.zero, Vector2.one); art.SetAsFirstSibling();
+                var raw = art.gameObject.AddComponent<RawImage>(); raw.texture = texture; raw.raycastTarget = false;
+                var fit = art.gameObject.AddComponent<AspectRatioFitter>(); fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                fit.aspectRatio = (float)texture.width / texture.height;
+                var veil = f.Rect("Veil", screen, Vector2.zero, Vector2.one); veil.SetSiblingIndex(1);
+                var shade = veil.gameObject.AddComponent<TitleMenuBackdrop>(); shade.raycastTarget = false; shade.readingEdge = .42f;
+                screen.GetComponent<TitleMenuBackdrop>().strength = 0;
+            }
+            menu.Title(UIScreen.Loading).GetComponent<UIStyleBinding>().baseSize = 64;
+            UIFactory.Tone(f.Text(body, UIStrings.Get("loading.tip"), 24), UITone.Muted);
+            var host = f.Rect("Progress", body, Vector2.zero, Vector2.one); host.gameObject.AddComponent<LayoutElement>().preferredHeight = 18;
+            _progress = f.Bar(host, "SceneProgress", Vector2.zero, Vector2.one);
+            _status = UIFactory.Tone(f.Text(body, UIStrings.Get("loading"), 22), UITone.GoldLight);
+            _status.alignment = TextAlignmentOptions.MidlineRight;
+            _return = f.Button(body, UIStrings.Get("mainMenu"), () => { if (!_loading) ui.ReturnToMenu(); });
             _return.gameObject.SetActive(false);
         }
         public void Restart() { RestartInternal(true); }

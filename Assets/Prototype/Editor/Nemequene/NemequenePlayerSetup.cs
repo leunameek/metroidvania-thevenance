@@ -229,9 +229,86 @@ public static class NemequenePlayerSetup
         t.AddCondition(AnimatorConditionMode.IfNot, 0, "OnLadder");
         t.AddCondition(AnimatorConditionMode.IfNot, 0, "Grounded");
 
+        AddFlight(controller);
+        AddClimbExtras(controller);
         EditorUtility.SetDirty(controller);
         AssetDatabase.SaveAssets();
         return controller;
+    }
+
+    // Flight of the Mundo Superior wings: the looping "Flying" clip while the Flying bool is on,
+    // back to locomotion or fall when the wings close. Safe to call on an existing controller.
+    public static void AddFlight(AnimatorController controller)
+    {
+        if (controller.parameters.Any(p => p.name == "Flying")) return;
+        var clip = AssetDatabase.LoadAllAssetsAtPath(AnimFolder + "/Flying.fbx").OfType<AnimationClip>()
+            .FirstOrDefault(c => !c.name.StartsWith("__preview__"));
+        if (clip == null) return;
+        controller.AddParameter("Flying", AnimatorControllerParameterType.Bool);
+        var sm = controller.layers[0].stateMachine;
+        var locomotion = sm.states.First(s => s.state.name == "Locomotion").state;
+        var fall = sm.states.First(s => s.state.name == "Fall").state;
+        var fly = sm.AddState("Fly", new Vector3(800, 200));
+        fly.motion = clip;
+        var t = sm.AddAnyStateTransition(fly); Setup(t, 0.2f);
+        t.canTransitionToSelf = false;
+        t.AddCondition(AnimatorConditionMode.If, 0, "Flying");
+        t = fly.AddTransition(locomotion); Setup(t, 0.2f);
+        t.AddCondition(AnimatorConditionMode.IfNot, 0, "Flying");
+        t.AddCondition(AnimatorConditionMode.If, 0, "Grounded");
+        t = fly.AddTransition(fall); Setup(t, 0.25f);
+        t.AddCondition(AnimatorConditionMode.IfNot, 0, "Flying");
+        t.AddCondition(AnimatorConditionMode.IfNot, 0, "Grounded");
+        EditorUtility.SetDirty(controller);
+    }
+
+    // Climbing extras: "Hanging Idle" while still on a wall or ladder, "Climbing To Top" (4 s at
+    // 2.5x) for the exit over the top. Safe to call on an existing controller.
+    public static void AddClimbExtras(AnimatorController controller)
+    {
+        if (controller.parameters.Any(p => p.name == "ClimbStill")) return;
+        AnimationClip Load(string name) => AssetDatabase.LoadAllAssetsAtPath(AnimFolder + "/" + name + ".fbx").OfType<AnimationClip>()
+            .FirstOrDefault(c => !c.name.StartsWith("__preview__"));
+        var hangClip = Load("Hanging Idle");
+        var topClip = Load("Climbing To Top");
+        if (hangClip == null || topClip == null) return;
+        controller.AddParameter("ClimbStill", AnimatorControllerParameterType.Bool);
+        controller.AddParameter("ClimbTop", AnimatorControllerParameterType.Bool);
+        var sm = controller.layers[0].stateMachine;
+        var locomotion = sm.states.First(s => s.state.name == "Locomotion").state;
+        var fall = sm.states.First(s => s.state.name == "Fall").state;
+        var climb = sm.states.First(s => s.state.name == "Climb").state;
+        var hang = sm.AddState("Hang", new Vector3(50, -260));
+        hang.motion = hangClip;
+        var top = sm.AddState("ClimbTop", new Vector3(300, -260));
+        top.motion = topClip;
+        top.speed = 2.5f;
+
+        // The ladder transition yields to the still and top-exit states.
+        foreach (var any in sm.anyStateTransitions.Where(t => t.destinationState == climb))
+        {
+            any.AddCondition(AnimatorConditionMode.IfNot, 0, "ClimbStill");
+            any.AddCondition(AnimatorConditionMode.IfNot, 0, "ClimbTop");
+        }
+        var t = sm.AddAnyStateTransition(top); Setup(t, 0.1f);
+        t.canTransitionToSelf = false;
+        t.AddCondition(AnimatorConditionMode.If, 0, "ClimbTop");
+        t = sm.AddAnyStateTransition(hang); Setup(t, 0.2f);
+        t.canTransitionToSelf = false;
+        t.AddCondition(AnimatorConditionMode.If, 0, "OnLadder");
+        t.AddCondition(AnimatorConditionMode.If, 0, "ClimbStill");
+        t.AddCondition(AnimatorConditionMode.IfNot, 0, "ClimbTop");
+        foreach (var state in new[] { hang, top })
+        {
+            string hold = state == top ? "ClimbTop" : "OnLadder";
+            t = state.AddTransition(locomotion); Setup(t, 0.2f);
+            t.AddCondition(AnimatorConditionMode.IfNot, 0, hold);
+            t.AddCondition(AnimatorConditionMode.If, 0, "Grounded");
+            t = state.AddTransition(fall); Setup(t, 0.2f);
+            t.AddCondition(AnimatorConditionMode.IfNot, 0, hold);
+            t.AddCondition(AnimatorConditionMode.IfNot, 0, "Grounded");
+        }
+        EditorUtility.SetDirty(controller);
     }
 
     private static void Setup(AnimatorStateTransition t, float duration, float exitTime = -1f)

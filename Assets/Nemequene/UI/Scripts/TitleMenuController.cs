@@ -33,7 +33,7 @@ namespace Nemequene.UI
         private readonly Button[] _slotButtons = new Button[GameSaveStore.SlotCount];
         private readonly Button[] _deleteButtons = new Button[GameSaveStore.SlotCount];
         private bool _newSaveMode;
-        private TMP_Text _loadStatus, _resolutionLabel;
+        private TMP_Text _loadStatus, _resolutionLabel, _savesTitle, _savesSubtitle;
         private TMP_Text _continueHint;
         private Image _progress;
         private TitleMenuBackdrop _shade;
@@ -86,70 +86,99 @@ namespace Nemequene.UI
         private void BuildBackdrop()
         {
             var image=_factory.Rect("Menu_Artwork",_root,Vector2.zero,Vector2.one);
-            var raw=image.gameObject.AddComponent<RawImage>(); raw.texture=Resources.Load<Texture2D>("Nemequene/Menu_BacataRuins"); raw.raycastTarget=false;
-            _atmosphere=image.gameObject.AddComponent<TitleMenuAtmosphere>();
-            // Fit the complete reference composition to the viewport: keep both foreground edges and the sun.
+            var raw=image.gameObject.AddComponent<RawImage>(); raw.raycastTarget=false;
+            var cover=UIBacata.Art("Portada_Bacata");
+            if(cover!=null)
+            {
+                // Screen 01: the project's own cover, the protagonist to the right and a near-black
+                // field on the left for the actions. Envelope keeps it full-bleed at any aspect.
+                raw.texture=cover;
+                var fit=image.gameObject.AddComponent<AspectRatioFitter>(); fit.aspectMode=AspectRatioFitter.AspectMode.EnvelopeParent;
+                fit.aspectRatio=(float)cover.width/cover.height;
+            }
+            else
+            {
+                raw.texture=Resources.Load<Texture2D>("Nemequene/Menu_BacataRuins");
+                _atmosphere=image.gameObject.AddComponent<TitleMenuAtmosphere>();
+            }
             _shade=_factory.Rect("ReadingShade",_root,Vector2.zero,Vector2.one).gameObject.AddComponent<TitleMenuBackdrop>(); _shade.raycastTarget=false;
-            _shade.readingEdge=.31f;
+            _shade.even=true; _shade.strength=.92f;
         }
         private void BuildHome()
         {
             _home=_factory.Rect("Title_Home",_root,Vector2.zero,Vector2.one).gameObject;
             _homeFade=_home.AddComponent<CanvasGroup>();
-            var emblem=Resources.Load<Texture2D>("Nemequene/Title_BacataMountains");
+            var emblem=UIBacata.Art("Titulo_Bacata");
             if(emblem!=null)
             {
-                // Title on the right, over the sky; the stone actions stay on the left.
-                var frame=_factory.Rect("Title_EmblemFrame",_home.transform,new Vector2(.50f,.55f),new Vector2(.95f,.99f));
+                // Painted title in the upper left, above the column of actions.
+                var frame=_factory.Rect("Title_EmblemFrame",_home.transform,new Vector2(.045f,.70f),new Vector2(.315f,.95f));
                 var art=_factory.Rect("El asedio de Bacatá",frame,Vector2.zero,Vector2.one);
                 var image=art.gameObject.AddComponent<RawImage>(); image.texture=emblem; image.raycastTarget=false;
                 var aspect=art.gameObject.AddComponent<AspectRatioFitter>();
                 aspect.aspectMode=AspectRatioFitter.AspectMode.FitInParent; aspect.aspectRatio=(float)emblem.width/emblem.height;
             }
-            else _factory.Label(_home.transform,UIStrings.Get("game.title"),new Vector2(.50f,.55f),new Vector2(.95f,.93f),64,true);
-            var actions=_factory.Column(_home.transform,"PrimaryActions",8); _primaryActions=actions;
-            actions.anchorMin=new Vector2(.065f,.09f); actions.anchorMax=new Vector2(.455f,.57f);
+            else _factory.Heading(_home.transform,UIStrings.Get("game.title"),new Vector2(.045f,.72f),new Vector2(.40f,.93f),64);
+            // Actions as text over a soft gold line; the focused one wears the crimson ribbon.
+            var actions=_factory.Column(_home.transform,"PrimaryActions",4); _primaryActions=actions;
+            actions.anchorMin=new Vector2(.06f,.17f); actions.anchorMax=new Vector2(.29f,.67f);
             actions.GetComponent<VerticalLayoutGroup>().childForceExpandHeight=true;
-            _newGame=Button(actions,"newGame",NewGame,true,30);
-            _continue=Button(actions,"save.continue",ContinueGame,true,30);
-            var load=Button(actions,"save.load",()=>OpenSaves(false),true,30);
-            _configuration=Button(actions,"settings",OpenSettings,true,30);
-            var credits=Button(actions,"credits",()=>{OpenSettings();SelectSection(4);},true,30);
-            var exit=Button(actions,"title.exit",RequestQuit,true,30);
+            _continue=Button(actions,"save.continue",ContinueGame,false,28);
+            _newGame=Button(actions,"newGame",NewGame,false,28);
+            var load=Button(actions,"save.load",()=>OpenSaves(false),false,28);
+            _configuration=Button(actions,"settings",OpenSettings,false,28);
+            var access=Button(actions,"accessibility",()=>{OpenSettings();SelectSection(0);},false,28);
+            var credits=Button(actions,"credits",()=>{OpenSettings();SelectSection(4);},false,28);
+            var exit=Button(actions,"title.exit",RequestQuit,false,28);
             exit.GetComponent<TitleMenuButton>().danger=true;
-            var skins=Resources.LoadAll<Sprite>("Nemequene/Menu_StoneButton");
-            var stone=skins.Length>0?skins[0]:null;
-            foreach(var button in new[]{_newGame,_continue,load,_configuration,credits,exit})
+            foreach(var button in new[]{_continue,_newGame,load,_configuration,access,credits,exit})
             {
-                var layout=button.GetComponent<LayoutElement>();layout.minHeight=64;layout.preferredHeight=78;layout.flexibleHeight=1;
-                button.GetComponent<TitleMenuButton>().UseStoneSkin(stone,_theme.titleFont,true);
+                var layout=button.GetComponent<LayoutElement>();layout.minHeight=52;layout.preferredHeight=64;layout.flexibleHeight=1;
+                button.GetComponent<TitleMenuButton>().UseMenuStyle();
             }
-            _continueHint=_factory.Label(_home.transform,UIStrings.Get("continue.unavailable"),new Vector2(.065f,.035f),new Vector2(.455f,.08f),20);
+            _continueHint=UIFactory.Tone(_factory.Label(_home.transform,UIStrings.Get("continue.unavailable"),new Vector2(.06f,.11f),new Vector2(.29f,.16f),20),UITone.Muted);
             _continueHint.alignment=TextAlignmentOptions.Center;
+            var version=UIFactory.Tone(_factory.Label(_home.transform,UIStrings.Get("title.version",Application.version),Vector2.zero,Vector2.zero,20),UITone.Muted);
+            version.rectTransform.pivot=Vector2.zero; version.rectTransform.anchoredPosition=new Vector2(76,46); version.rectTransform.sizeDelta=new Vector2(600,40);
+            version.alignment=TextAlignmentOptions.MidlineLeft;
+            _factory.Hint(_home.transform,UIStrings.Get("footer.select"),Vector2.right);
         }
+        // Upper-left title and subtitle shared by every full-screen menu page.
+        private void Header(Transform parent,string title,string subtitle,out TMP_Text heading,out TMP_Text caption)
+        {
+            heading=_factory.Heading(parent,title,new Vector2(.04f,.865f),new Vector2(.70f,.95f),56); heading.alignment=TextAlignmentOptions.BottomLeft;
+            caption=UIFactory.Fit(UIFactory.Tone(_factory.Label(parent,subtitle,new Vector2(.04f,.825f),new Vector2(.70f,.865f),22),UITone.Muted));
+            caption.alignment=TextAlignmentOptions.TopLeft;
+        }
+        // Screens 02 and 03: slot list in a framed panel, the input mode explained on the right.
         private void BuildSaves()
         {
             _saves=_factory.Rect("Title_Saves",_root,Vector2.zero,Vector2.one).gameObject;
-            var sheet=_factory.Panel("SaveStone",_saves.transform,new Vector2(.14f,.08f),new Vector2(.86f,.92f),true);
-            _factory.Heading(sheet,UIStrings.Get("save.title"),new Vector2(.10f,.84f),new Vector2(.90f,.935f),48);
-            _factory.Divider(sheet,new Vector2(.30f,.81f),new Vector2(.70f,.835f));
-            var list=_factory.Column(sheet,"SaveSlots",16); list.anchorMin=new Vector2(.09f,.18f); list.anchorMax=new Vector2(.91f,.80f);
+            Header(_saves.transform,UIStrings.Get("save.title"),"",out _savesTitle,out _savesSubtitle);
+            var sheet=_factory.Panel("SaveStone",_saves.transform,new Vector2(.06f,.12f),new Vector2(.64f,.79f),true);
+            var list=_factory.Column(sheet,"SaveSlots",18); list.Inset(64,56,64,80);
             for(int i=0;i<GameSaveStore.SlotCount;i++)
             {
                 int slot=i;
                 var row=_factory.Rect("Slot_"+(i+1),list,Vector2.zero,Vector2.one);
-                row.gameObject.AddComponent<LayoutElement>().preferredHeight=156;
-                row.gameObject.AddComponent<Image>().color=_theme.panel;
-                _factory.Frame(row,false);
+                row.gameObject.AddComponent<LayoutElement>().preferredHeight=120;
                 var layout=row.gameObject.AddComponent<HorizontalLayoutGroup>(); layout.spacing=16;
-                layout.padding=new RectOffset(24,24,24,24);
+                layout.padding=new RectOffset(0,0,8,8);
                 layout.childControlWidth=layout.childControlHeight=true; layout.childForceExpandWidth=true; layout.childForceExpandHeight=true;
                 _slotButtons[i]=Button(row,"save.empty",()=>SelectSlot(slot),false,24);
                 _deleteButtons[i]=Button(row,"save.delete",()=>Confirm("save.deleteConfirm",()=>{GameSaveStore.Delete(slot);RefreshSaves();}),false,22);
-                _deleteButtons[i].GetComponent<LayoutElement>().preferredWidth=180;
+                _deleteButtons[i].GetComponent<LayoutElement>().preferredWidth=220;
+                _deleteButtons[i].GetComponent<LayoutElement>().flexibleWidth=0;
+                _deleteButtons[i].GetComponent<TitleMenuButton>().danger=true;
+                UIFactory.Center(_deleteButtons[i]);
             }
-            var back=_factory.Column(sheet,"Back"); back.anchorMin=new Vector2(.09f,.055f);back.anchorMax=new Vector2(.35f,.14f);
-            Button(back,"title.back",ShowHome);
+            var side=_factory.Column(_saves.transform,"InputMode",12); side.anchorMin=new Vector2(.68f,.30f); side.anchorMax=new Vector2(.94f,.74f);
+            side.GetComponent<VerticalLayoutGroup>().childAlignment=TextAnchor.UpperLeft;
+            _factory.Caption(side,UIStrings.Get("title.inputMode"),28).alignment=TextAlignmentOptions.MidlineLeft;
+            UIFactory.Tone(_factory.Text(side,UIStrings.Get("title.controlsIntro"),22),UITone.Muted);
+            var back=_factory.FooterButton(_saves.transform,UIStrings.Get("footer.back"),ShowHome,Vector2.zero);
+            back.transform.parent.name="Back";
+            _factory.Hint(_saves.transform,UIStrings.Get("footer.select"),Vector2.right);
         }
         private void RefreshSaves()
         {
@@ -177,6 +206,8 @@ namespace Nemequene.UI
         private void OpenSaves(bool create)
         {
             _newSaveMode=create; RefreshSaves();
+            _savesTitle.text=UIStrings.Get(create?"newGame":"save.load");
+            _savesSubtitle.text=UIStrings.Get(create?"subtitle.NewGame":"subtitle.Saves");
             GameObject focus=null;
             foreach(var button in _slotButtons) if(button.interactable) {focus=button.gameObject;break;}
             SetView(TitleView.Saves,focus);
@@ -198,17 +229,18 @@ namespace Nemequene.UI
         private void BuildSettings()
         {
             _settings=_factory.Rect("Title_Settings",_root,Vector2.zero,Vector2.one).gameObject;
-            var sheet=_factory.Panel("SettingsStone",_settings.transform,new Vector2(.06f,.06f),new Vector2(.94f,.94f),true);
-            _factory.Heading(sheet,UIStrings.Get("settings"),new Vector2(.08f,.84f),new Vector2(.92f,.935f),48);
-            _factory.Divider(sheet,new Vector2(.30f,.81f),new Vector2(.70f,.835f));
-            var nav=_factory.Column(sheet,"Sections",16); nav.anchorMin=new Vector2(.075f,.28f); nav.anchorMax=new Vector2(.29f,.79f);
-            var body=_factory.Scroll(sheet,new Vector2(.34f,.19f),new Vector2(.93f,.79f));
+            // Screen 24: title and subtitle, a row of tabs, the options in one framed list.
+            Header(_settings.transform,UIStrings.Get("settings"),UIStrings.Get("subtitle.Settings"),out _,out _);
+            var nav=_factory.Row(_settings.transform,"Sections",12); nav.anchorMin=new Vector2(.04f,.755f); nav.anchorMax=new Vector2(.96f,.815f);
+            nav.offsetMin=nav.offsetMax=Vector2.zero;
+            var sheet=_factory.Panel("SettingsStone",_settings.transform,new Vector2(.12f,.10f),new Vector2(.88f,.745f),true);
+            var body=_factory.Scroll(sheet,Vector2.zero,Vector2.one); ((RectTransform)body.parent.parent).Inset(72,52,72,76);
             string[] sections={"accessibility","settings.audio","settings.graphics","controls","credits"};
             for(int i=0;i<sections.Length;i++)
             {
                 int index=i; var group=_factory.Column(body,"Settings_"+i,16); _groups.Add(group);
-                _tabs.Add(Button(nav,sections[i],()=>SelectSection(index)).GetComponent<TitleMenuButton>());
-                _factory.Text(group,UIStrings.Get(sections[i]),32,true);
+                var tab=UIFactory.Tab(Button(nav,sections[i],()=>SelectSection(index)));
+                _tabs.Add(tab.GetComponent<TitleMenuButton>());
             }
             var access=_groups[0];
             Choice(access,"access.text",new[]{"100 %","125 %","150 %"},()=>Mathf.RoundToInt((Settings.Values.textScale-1)*4),v=>Settings.Values.textScale=1+v*.25f);
@@ -248,29 +280,46 @@ namespace Nemequene.UI
             Toggle(controls,"settings.tutorials",()=>Settings.Values.tutorials,v=>Settings.Values.tutorials=v);
             _factory.Text(_groups[4],UIStrings.Get("credits.body"),24);
             _factory.Text(_groups[4],UIStrings.Get("title.credits"),22);
-            var backRow=_factory.Column(sheet,"Back"); backRow.anchorMin=new Vector2(.075f,.065f); backRow.anchorMax=new Vector2(.29f,.16f);
-            _back=Button(backRow,"title.back",BackToHome);
+            _back=_factory.FooterButton(_settings.transform,UIStrings.Get("footer.back"),BackToHome,Vector2.zero);
+            _factory.Hint(_settings.transform,UIStrings.Get("footer.change"),Vector2.right);
             SelectSection(0);
         }
+        // Screen 27: framed modal with the alert emblem; the safe action first and focused.
         private void BuildConfirmation()
         {
             _quit=_factory.Rect("Title_Confirmation",_root,Vector2.zero,Vector2.one).gameObject;
-            var sheet=_factory.Panel("ConfirmationStone",_quit.transform,new Vector2(.25f,.22f),new Vector2(.75f,.78f),true);
-            var content=_factory.Column(sheet,"ConfirmationContent",24);
-            content.anchorMin=new Vector2(.10f,.12f); content.anchorMax=new Vector2(.90f,.86f);
-            _confirmText=_factory.Text(content,"",40,true);
-            _cancelQuit=Button(content,"cancel",CancelConfirmation);
+            var sheet=_factory.Panel("ConfirmationStone",_quit.transform,new Vector2(.32f,.22f),new Vector2(.68f,.78f),true);
+            var content=_factory.Column(sheet,"ConfirmationContent",18); content.Inset(80,60,80,84);
+            content.GetComponent<VerticalLayoutGroup>().childAlignment=TextAnchor.MiddleCenter;
+            _factory.Icon(content,UIIcon.Alert,60,_theme.paleGold);
+            _confirmText=UIFactory.Tone(_factory.Text(content,"",38,true),UITone.Gold); _confirmText.alignment=TextAlignmentOptions.Center;
+            _cancelQuit=Button(content,"cancel",CancelConfirmation,true);
             _confirmQuit=Button(content,"confirm",()=>{var action=_confirmAction; _confirmAction=null; CloseConfirmation(false); action?.Invoke();});
+            UIFactory.Center(_cancelQuit); UIFactory.Center(_confirmQuit);
+            _factory.Hint(_quit.transform,UIStrings.Get("footer.cancel"),Vector2.zero);
         }
+        // Screen 07: the plaza illustration, its name in the monumental serif, real progress only.
         private void BuildLoading()
         {
             _loading=_factory.Rect("Title_Loading",_root,Vector2.zero,Vector2.one).gameObject;
-            var sheet=_factory.Panel("LoadingStone",_loading.transform,new Vector2(.24f,.25f),new Vector2(.76f,.75f),true);
-            var body=_factory.Column(sheet,"LoadingContent",24); body.anchorMin=new Vector2(.10f,.12f); body.anchorMax=new Vector2(.90f,.86f);
-            _factory.Text(body,UIStrings.Get("world.plaza"),48,true);
-            _loadStatus=_factory.Text(body,UIStrings.Get("title.loading"),28);
-            var track=_factory.Rect("Progress",body,Vector2.zero,Vector2.one); track.gameObject.AddComponent<LayoutElement>().preferredHeight=16;
+            var texture=UIBacata.Art("Plaza_Nunez");
+            if(texture!=null)
+            {
+                var art=_factory.Rect("Illustration",_loading.transform,Vector2.zero,Vector2.one);
+                var raw=art.gameObject.AddComponent<RawImage>(); raw.texture=texture; raw.raycastTarget=false;
+                var fit=art.gameObject.AddComponent<AspectRatioFitter>(); fit.aspectMode=AspectRatioFitter.AspectMode.EnvelopeParent;
+                fit.aspectRatio=(float)texture.width/texture.height;
+                var veil=_factory.Rect("Veil",_loading.transform,Vector2.zero,Vector2.one).gameObject.AddComponent<TitleMenuBackdrop>();
+                veil.raycastTarget=false; veil.readingEdge=.42f;
+            }
+            var title=_factory.Heading(_loading.transform,UIStrings.Get("world.plaza"),new Vector2(.05f,.26f),new Vector2(.80f,.36f),64);
+            title.alignment=TextAlignmentOptions.BottomLeft;
+            var body=_factory.Column(_loading.transform,"LoadingContent",14); body.anchorMin=new Vector2(.05f,.08f); body.anchorMax=new Vector2(.62f,.25f);
+            UIFactory.Tone(_factory.Text(body,UIStrings.Get("loading.tip"),24),UITone.Muted);
+            var track=_factory.Rect("Progress",body,Vector2.zero,Vector2.one); track.gameObject.AddComponent<LayoutElement>().preferredHeight=18;
             _progress=_factory.Bar(track,"ActualLoadProgress",Vector2.zero,Vector2.one);
+            _loadStatus=UIFactory.Tone(_factory.Text(body,UIStrings.Get("title.loading"),22),UITone.GoldLight);
+            _loadStatus.alignment=TextAlignmentOptions.MidlineRight;
             _loadingBack=Button(body,"title.back",()=>{if(!IsLoading)ShowHome();});
             _loadingBack.gameObject.SetActive(false);
         }
@@ -282,23 +331,16 @@ namespace Nemequene.UI
         }
         private void Toggle(Transform parent,string key,Func<bool> get,Action<bool> set)
         {
-            Button button=null;
-            Action refresh=()=>button.GetComponentInChildren<TMP_Text>().text=UIStrings.Get(key)+"   "+UIStrings.Get(get()?"on":"off");
-            button=Button(parent,key,()=>{set(!get()); Settings.Apply();});
-            button.gameObject.AddComponent<UIValueBinding>().Bind(Settings,refresh);
+            _factory.Toggle(parent,key,get,v=>{set(v);Settings.Apply();},Settings);
         }
         private void Choice(Transform parent,string key,string[] values,Func<int> get,Action<int> set)
         {
-            Button button=null;
-            Action refresh=()=>button.GetComponentInChildren<TMP_Text>().text=UIStrings.Get(key)+"   "+values[Mathf.Clamp(get(),0,values.Length-1)];
-            button=Button(parent,key,()=>{set((get()+1)%values.Length); Settings.Apply();});
-            button.gameObject.AddComponent<UIValueBinding>().Bind(Settings,refresh);
+            _factory.Choice(parent,key,values,get,v=>{set(v);Settings.Apply();},Settings);
         }
         private void Slider(Transform parent,string key,float min,float max,Func<float> get,Action<float> set)
         {
             var slider=_factory.Slider(parent,key,min,max,get(),v=>{set(v);Settings.Apply();});
-            var label=slider.transform.parent.GetComponentInChildren<TMP_Text>();
-            slider.gameObject.AddComponent<UIValueBinding>().Bind(Settings,()=>{slider.SetValueWithoutNotify(get());label.text=UIStrings.Get(key)+"   "+get().ToString("0.00");});
+            slider.gameObject.AddComponent<UIValueBinding>().Bind(Settings,()=>{slider.SetValueWithoutNotify(get());UIFactory.SetValue(slider.transform.parent,UIFactory.Format(get(),min,max));});
         }
         private static void ConnectVertical(Button[] buttons)
         {
@@ -317,7 +359,7 @@ namespace Nemequene.UI
             _changedFrame=Time.frameCount; CurrentView=view;
             _home.SetActive(view==TitleView.Home); _settings.SetActive(view==TitleView.Settings);
             _saves.SetActive(view==TitleView.Saves);
-            _shade.gameObject.SetActive(view!=TitleView.Home);
+            _shade.gameObject.SetActive(view!=TitleView.Home&&view!=TitleView.Loading);
             _quit.SetActive(view==TitleView.Quit); _loading.SetActive(view==TitleView.Loading);
             Canvas.ForceUpdateCanvases(); EventSystem.current?.SetSelectedGameObject(null); EventSystem.current?.SetSelectedGameObject(focus);
         }
@@ -352,10 +394,10 @@ namespace Nemequene.UI
             foreach(var binding in GetComponentsInChildren<UIStyleBinding>(true)) binding.Apply(_theme,Settings.Values);
             foreach(var button in GetComponentsInChildren<TitleMenuButton>(true)) button.Refresh();
             _shade.SetContrast(Settings.Values.highContrast);
-            // Larger text widens the stone menu while the landscape remains visible.
-            float right=Mathf.Lerp(.455f,.54f,(Settings.Values.textScale-1)*2);
-            _primaryActions.anchorMin=new Vector2(.065f,.09f);
-            _primaryActions.anchorMax=new Vector2(right,.57f);
+            // Larger text widens the action column while the cover remains visible.
+            float right=Mathf.Lerp(.29f,.38f,(Settings.Values.textScale-1)*2);
+            _primaryActions.anchorMin=new Vector2(.06f,.17f);
+            _primaryActions.anchorMax=new Vector2(right,.67f);
             if(Settings.Values.reducedMotion) _homeFade.alpha=1;
         }
         public void PlayCue(bool activation)
@@ -372,6 +414,8 @@ namespace Nemequene.UI
         {
             if(IsLoading)return;
             if(!Application.CanStreamedLevelBeLoaded(TutorialPath)) {ShowLoadError();return;}
+            // A new game in a slot also starts both worlds over (their own keys per slot).
+            if(!load) { MIProgress.Erase(slot); MSProgress.Erase(slot); }
             GameSaveStore.Begin(slot,load);
             _loadingBack.gameObject.SetActive(false);
             Settings.Values.configured=true;Settings.Apply();Settings.Flush();

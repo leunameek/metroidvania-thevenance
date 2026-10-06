@@ -1,3 +1,57 @@
+# Mundo inferior · nivel jugable (etapas 4–8 de la guía, sin personajes)
+
+Escena: `Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity`, generada por
+`Assets/Prototype/Editor/MundoInferior/MundoInferiorBlockoutBuilder.cs` (menú **Nemequene › Mundo Inferior ›
+Construir nivel**; se ejecuta sola una vez por versión, clave `MundoInferior.Experience.v2`). La escena se regenera
+completa en cada ejecución: no editarla a mano, cambiar el constructor.
+
+## Recorrido completo (1 de octubre de 2026)
+
+| Zona | Qué hay ahora | Resultado guardado |
+|---|---|---|
+| 01 Umbral | Portal de llegada y regreso (E), puerta del atajo, ofrenda 1 | Zona descubierta |
+| 02 Santuario | Semilla (inspección, doble salto), descanso, ensayo, ofrenda 2 en el suelo de recuperación | `semilla`, checkpoint 02 |
+| 03 Brazaletes | Brazaletes 1 (impulso 1), palanca del atajo (abre 03 y 01), pozo de ensayo, ofrenda 3 | `brazaletes1`, `atajo_03_01` |
+| 04 Centinelas | Brazaletes 2 y 3, carril de cadena, **centinela de escudo provisional**, ofrenda 4 | `brazaletes2/3`, `salida_04` |
+| 05 Péndulos | Dos péndulos desfasados con golpe (15) y caída a pinchos (10) | — |
+| 06 Derrumbe | Losa aislada y tres losas que ceden, dos estalactitas con sombra, palanca del corredor, ofrenda 5 | `corredor_06` |
+| 07 Cuerno | Pozo con apoyos, cuerno (inspección) | `cuerno` |
+| 08 Antesala | Descanso, soporte del cuerno que abre la reja ritual, ofrenda 6 | `reja_cuerno`, checkpoint 08 |
+| 09 Guardián | **Guardián provisional**: barrido, onda que se salta, dos piedras anunciadas; núcleo expuesto | `guardian`, portal de victoria |
+
+Los personajes (centinelas, vigía, custodios y los guardianes reales) quedan como marcadores
+`... (personaje pendiente)` en sus posiciones de la guía. El centinela de escudo y el guardián del fondo son
+sustitutos de piedra que ya cumplen las reglas de bloqueo (tercera cadena para romper el escudo; daño solo al
+núcleo expuesto) para cambiarlos por el personaje sin tocar el flujo.
+
+## Sistemas (Prototype.Runtime, `Controller/MundoInferior`)
+
+- `MIProgress`: estado persistente por ranura (`Bacata.MI.v1.<ranura>`, ranura que fija `GameSaveStore` a través de
+  `WorldTravel.SaveSlot`). Las capacidades se derivan de los hallazgos (nunca se suman), así que no hay duplicados.
+  Una partida nueva o una ranura borrada reinician el mundo inferior. Las ofrendas aparecen en el Archivo cultural.
+- `MundoInferiorBlockout` (director): HUD, objetivo en una frase, contadores, avisos E, pausa (Esc), daño con un solo
+  evento por caída y 1 s de protección, derrota con regreso al último descanso, ambiente y goteo.
+- `MIFind` (hallazgos y ofrendas con inspección: E examina, ratón o A/D giran, E confirma, Esc devuelve),
+  `MILever`, `MIRest`, `MIHornSocket`, `MISlab`, `MIStalactite`, `MIShieldSentinel`, `MIGuardian`, `MIGate`
+  (lee su flag), `MIPortal` (flag requerido), `MIPendulum` (sonido al cruzar el carril).
+- Vista: `View/MundoInferior/MIHud.cs` con el kit visual de Bacatá.
+
+## Arte, animación y sonido
+
+- Texturas tileables propias (`tools/textures/generate_mundo_inferior_textures.py`): suelo azul verdoso en las caras
+  transitables y piedra azul grisácea en los costados (paleta de la guía 5.1). Los bloques usan UV en metros.
+- Decorado con el kit Tripo fuera de los carriles, paredes de caverna lejanas, partículas de polvo, goteo y destellos,
+  luces por sala, cristales que respiran, hallazgos que flotan y giran, rejas, palancas, losas, piedras y portal animados.
+- 35 sonidos sintetizados (`tools/audio/generate_mundo_inferior_audio.py` → `Resources/MIAudio`).
+
+## Validación (1 de octubre de 2026)
+
+Prueba PlayMode en una copia del proyecto: arranque sin capacidades, semilla con inspección y doble salto una sola
+vez, descanso con checkpoint, ofrenda contada, palanca que abre las dos puertas del atajo, inicio del guardián al
+entrar a la arena, y derrota que regresa al descanso conservando los hallazgos. Capturas revisadas sala por sala.
+
+---
+
 # Mundo inferior · bloqueo jugable (etapas 1–3 de la guía)
 
 Escena: `Assets/Worlds/MundoInferior/Scenes/MundoInferior_Blockout.unity`, generada por

@@ -49,6 +49,7 @@ namespace Nemequene.UI
         private TutorialController _tutorial;
         private GameObject _modal;
         private TMP_Text _modalText, _modalDetail;
+        private UIIconGraphic _modalIcon;
         private Button _confirm;
         private Action _confirmed;
         private GameObject _priorFocus;
@@ -251,19 +252,22 @@ namespace Nemequene.UI
         private void BuildConfirmation()
         {
             _modal = Factory.Rect("UI_Modal_Confirmation", Root, Vector2.zero, Vector2.one).gameObject;
-            var shade = _modal.AddComponent<Image>(); shade.color = new Color(.055f,.047f,.036f,.78f); shade.raycastTarget = true;
-            // Reference block 1/4 «Modal»: parchment sheet, sun emblem, question, consequence, then
-            // Cancelar and the action side by side. Cancelar stays first and receives focus.
-            var panel = Factory.Parchment("ConfirmationSheet", _modal.transform, new Vector2(.30f,.25f), new Vector2(.70f,.75f), true);
-            var body = Factory.Column(panel, "Content", 16); body.Inset(72, 56, 72, 56);
+            var shade = _modal.AddComponent<Image>(); shade.color = new Color(.031f,.039f,.043f,.86f); shade.raycastTarget = true;
+            // Screen 27 «Confirmación y errores»: framed modal, alert emblem, the question, what is
+            // kept and what is lost, then the safe action first (it receives focus) and the
+            // confirmation as a line below it.
+            var panel = Factory.Panel("ConfirmationSheet", _modal.transform, new Vector2(.32f,.20f), new Vector2(.68f,.80f), true);
+            var body = Factory.Column(panel, "Content", 14); body.Inset(80, 60, 80, 84);
             var layout = body.GetComponent<VerticalLayoutGroup>(); layout.childAlignment = TextAnchor.MiddleCenter;
-            Factory.Icon(body, UIIcon.Sun, 76, UIPalette.GoldDeep);
-            _modalText = UIFactory.Tone(Factory.Text(body, "", 34, true), UITone.Ink); _modalText.alignment = TextAlignmentOptions.Center;
-            _modalDetail = UIFactory.Tone(Factory.Text(body, "", 22), UITone.InkMuted); _modalDetail.alignment = TextAlignmentOptions.Center;
-            var actions = Factory.Row(body, "Actions", 24); actions.gameObject.AddComponent<LayoutElement>().minHeight = 60;
-            var cancel = Factory.Button(actions, UIStrings.Get("cancel"), CloseConfirmation);
-            _confirm = Factory.Button(actions, UIStrings.Get("confirm"), () => { var action = _confirmed; CloseConfirmation(); action?.Invoke(); }, true);
-            foreach (var b in new[] { cancel, _confirm }) { b.GetComponent<LayoutElement>().flexibleWidth = 1; UIFactory.Center(b); }
+            _modalIcon = Factory.Icon(body, UIIcon.Alert, 60, UIPalette.GoldLight);
+            _modalText = Factory.Text(body, "", 40, true); _modalText.alignment = TextAlignmentOptions.Center;
+            UIFactory.Tone(_modalText, UITone.Gold);
+            _modalDetail = Factory.Text(body, "", 24); _modalDetail.alignment = TextAlignmentOptions.Center;
+            var actions = Factory.Column(body, "Actions", 10); actions.gameObject.AddComponent<LayoutElement>().minHeight = 128;
+            var cancel = Factory.Button(actions, UIStrings.Get("cancel"), CloseConfirmation, true);
+            _confirm = Factory.Button(actions, UIStrings.Get("confirm"), () => { var action = _confirmed; CloseConfirmation(); action?.Invoke(); });
+            foreach (var b in new[] { cancel, _confirm }) UIFactory.Center(b);
+            Factory.Hint(_modal.transform, UIStrings.Get("footer.cancel"), Vector2.zero);
             _modal.SetActive(false);
         }
         public void Confirm(string key, Action action)
@@ -280,6 +284,7 @@ namespace Nemequene.UI
             style.danger = key == "save.deleteConfirm" || key == "save.replaceConfirm" || key == "save.loadConfirm"
                 || key == "confirm.restart" || key == "confirm.replay" || key == "confirm.menu" || key == "confirm.quit";
             style.Refresh();
+            _modalIcon.SetIcon(style.danger ? UIIcon.Alert : key.StartsWith("graphics") ? UIIcon.Settings : UIIcon.Info);
             RefreshPause(); Voice?.Suspend();
             _accessibility.Apply(); EventSystem.current?.SetSelectedGameObject(_modal.GetComponentInChildren<Button>().gameObject);
         }

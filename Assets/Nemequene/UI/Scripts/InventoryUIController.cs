@@ -25,7 +25,7 @@ namespace Nemequene.UI
             var columns = workspace.gameObject.AddComponent<HorizontalLayoutGroup>();
             columns.spacing = 24; columns.childControlWidth = columns.childControlHeight = true;
             columns.childForceExpandWidth = false; columns.childForceExpandHeight = true;
-            var grid = ui.Factory.HudPanel("ArtifactSlots", workspace, Vector2.zero, Vector2.one);
+            var grid = ui.Factory.Rect("ArtifactSlots", workspace, Vector2.zero, Vector2.one);
             var gridSize = grid.gameObject.AddComponent<LayoutElement>(); gridSize.preferredWidth = 3 * 210 + 2 * 16 + 48; gridSize.flexibleWidth = 0;
             var layout = grid.gameObject.AddComponent<GridLayoutGroup>();
             layout.cellSize = new Vector2(210,128); layout.spacing = new Vector2(16,16);
@@ -45,7 +45,7 @@ namespace Nemequene.UI
                 ConfigureSlot(ui, locked, i, out var glyph); glyph.SetState(i,false,false);
                 locked.interactable = false; locked.GetComponent<TitleMenuButton>().Refresh();
             }
-            var detail = ui.Factory.HudPanel("ArtifactDetail", workspace, Vector2.zero, Vector2.one);
+            var detail = ui.Factory.Panel("ArtifactDetail", workspace, Vector2.zero, Vector2.one, false, true, true);
             detail.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             var icon = ui.Factory.Rect("ArtifactEmblem", detail, new Vector2(.32f,.60f), new Vector2(.68f,.88f));
             _preview = icon.gameObject.AddComponent<UIArtifactGlyph>(); _preview.raycastTarget = false;
@@ -59,6 +59,7 @@ namespace Nemequene.UI
         private static void ConfigureSlot(UIManager ui, Button button, int index, out UIArtifactGlyph glyph)
         {
             button.GetComponent<HorizontalLayoutGroup>().enabled = false;
+            var tile = button.GetComponent<TitleMenuButton>(); tile.slot = true; tile.Refresh();
             var label = button.GetComponentInChildren<TMP_Text>();
             label.alignment = TextAlignmentOptions.Center;
             label.rectTransform.anchorMin = new Vector2(.06f,.04f);
@@ -84,7 +85,7 @@ namespace Nemequene.UI
                 _slots[i].interactable = obtained;
                 _slots[i].GetComponentInChildren<TMP_Text>().text = obtained
                     ? item.Data.displayName + "  ×1" : UIStrings.Get("inventory.unknown");
-                _glyphs[i].onGold = obtained && _selected == i;
+                _glyphs[i].onGold = false;
                 _glyphs[i].SetState(i,obtained,obtained && _selected == i);
                 var style = _slots[i].GetComponent<TitleMenuButton>();
                 style.tabSelected = obtained && _selected == i; style.Refresh();

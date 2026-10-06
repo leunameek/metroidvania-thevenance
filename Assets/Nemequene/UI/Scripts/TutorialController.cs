@@ -17,21 +17,19 @@ namespace Nemequene.UI
         {
             _ui = ui;
             var f = ui.Factory;
-            // Reference block 3 «Panel de tutorial»: parchment card, sun medallion and carved title.
-            // It sits on the right, below the toast column and clear of the inspection panel.
-            var card = f.Parchment("UI_TutorialCard", ui.Root, new Vector2(.68f,.40f), new Vector2(.95f,.73f));
+            // Guide panel of screens 08 and 23: a wide framed band near the bottom edge, title in
+            // the serif, one instruction, and the acknowledgement on the right.
+            var card = f.Panel("UI_TutorialCard", ui.Root, new Vector2(.20f,.03f), new Vector2(.80f,.20f), true, true, false);
             _card = card.gameObject;
-            var column = f.Column(card, "Content", 12); column.Inset(56, 44, 56, 44);
-            column.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
-            var header = f.Row(column, "Header", 16); header.GetComponent<HorizontalLayoutGroup>().childForceExpandWidth = false;
-            f.Icon(header, UIIcon.Sun, 52, UIPalette.GoldDeep);
-            var title = f.Caption(header, UIStrings.Get("tutorial.title"), 28, UITone.Ink);
+            var column = f.Column(card, "Content", 6); column.Inset(60, 26, 380, 44);
+            column.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.MiddleLeft;
+            var title = f.Caption(column, UIStrings.Get("tutorial.title"), 30);
             title.alignment = TextAlignmentOptions.MidlineLeft;
-            var rule = f.Divider(column, Vector2.zero, Vector2.one); rule.gameObject.AddComponent<LayoutElement>().preferredHeight = 18;
-            rule.GetComponent<UIIconGraphic>().color = UIPalette.GoldDeep;
-            _instruction = UIFactory.Tone(f.Text(column, "", 24), UITone.Ink);
-            _instruction.alignment = TextAlignmentOptions.Center;
-            var close = f.Button(column, UIStrings.Get("tutorial.ok"), () => { _dismissed = true; _card.SetActive(false); }, true);
+            _instruction = f.Text(column, "", 24);
+            _instruction.alignment = TextAlignmentOptions.MidlineLeft;
+            var actions = f.Column(card, "Acknowledge"); actions.anchorMin = actions.anchorMax = actions.pivot = new Vector2(1, .5f);
+            actions.anchoredPosition = new Vector2(-44, -4); actions.sizeDelta = new Vector2(320, 60);
+            var close = f.Button(actions, UIStrings.Get("tutorial.ok"), () => { _dismissed = true; _card.SetActive(false); }, true);
             UIFactory.Center(close);
             _card.SetActive(false);
         }

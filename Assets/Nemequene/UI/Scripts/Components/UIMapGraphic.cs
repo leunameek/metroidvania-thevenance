@@ -23,8 +23,8 @@ namespace Nemequene.UI
             float scale=Mathf.Min((rect.width-64)/Mathf.Max(1,max.x-min.x),(rect.height-64)/Mathf.Max(1,max.y-min.y));
             Vector2 middle=(min+max)*.5f;
             Vector2 Project(Vector2 p)=>rect.center+(p-middle)*scale;
-            Color ink=UITheme.Hex(_highContrast?"E8D8B8":"473225");
-            Color highlight=UITheme.Hex(_highContrast?"D0A45B":"9B463A");
+            Color ink=_highContrast?Color.white:UIPalette.Muted;
+            Color highlight=UIPalette.GoldLight;
             for(int i=1;i<_trail.Count;i++) Line(vh,Project(_trail[i-1]),Project(_trail[i]),3,ink);
             foreach(var point in _markers) Ring(vh,Project(point),8,highlight);
             Ring(vh,Project(_player),13,ink); Ring(vh,Project(_player),5,highlight);

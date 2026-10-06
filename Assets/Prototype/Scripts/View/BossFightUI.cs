@@ -52,9 +52,11 @@ public class BossFightUI : MonoBehaviour
     {
         RectTransform canvas = UIKit.ScreenCanvas(transform, "BossTurnLabelCanvas", 955);
         _turnLabelGo = canvas.gameObject;
-        RectTransform plate = UIKit.Place(UIKit.HudPanel(canvas, "TurnPlate"), new Vector2(.5f, 1f), new Vector2(0f, -44f), new Vector2(560f, 84f));
-        _turnLabelText = UIKit.Label(plate, "", 30f, UIPalette.GoldText, true);
-        _turnLabelText.rectTransform.offsetMin = new Vector2(24f, 8f); _turnLabelText.rectTransform.offsetMax = new Vector2(-24f, -8f);
+        // Turn on the short crimson ribbon at the top centre (screens 14 and 15).
+        RectTransform plate = UIKit.Place(UIKit.Ribbon(canvas, "TurnPlate", true), new Vector2(.5f, 1f), new Vector2(0f, -70f), new Vector2(560f, 66f));
+        _turnLabelText = UIKit.Label(plate, "", 28f, UIPalette.Ivory);
+        _turnLabelText.fontStyle = FontStyles.Bold | FontStyles.UpperCase;
+        _turnLabelText.rectTransform.offsetMin = new Vector2(70f, 4f); _turnLabelText.rectTransform.offsetMax = new Vector2(-70f, -4f);
         _turnLabelGo.SetActive(false);
     }
 }

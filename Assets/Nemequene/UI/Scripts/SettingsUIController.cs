@@ -25,8 +25,8 @@ namespace Nemequene.UI
             for (int i = 0; i < groups.Length; i++)
             {
                 int index = i; groups[i] = f.Column(content, names[i]);
-                tabStyles[i] = f.Button(tabs, UIStrings.Get(names[i]), () => select(index)).GetComponent<TitleMenuButton>();
-                f.Text(groups[i], UIStrings.Get(names[i]), 32, true);
+                var tab = UIFactory.Tab(f.Button(tabs, UIStrings.Get(names[i]), () => select(index)));
+                tabStyles[i] = tab.GetComponent<TitleMenuButton>();
             }
             tabStyles[6].transform.SetAsFirstSibling();
             Toggle(groups[0], "settings.objectives", () => S.showObjectives, v => S.showObjectives = v);
@@ -92,9 +92,8 @@ namespace Nemequene.UI
         private void Slider(Transform p, string key, float min, float max, Func<float> get, Action<float> set)
         {
             var slider = _ui.Factory.Slider(p, key, min, max, get(), v => { set(v); Apply(); });
-            var title = slider.transform.parent.GetComponentInChildren<TMPro.TMP_Text>();
             slider.gameObject.AddComponent<UIValueBinding>().Bind(_ui.Settings, () =>
-            { slider.SetValueWithoutNotify(get()); title.text = UIStrings.Get(key) + "   " + get().ToString("0.00"); });
+            { slider.SetValueWithoutNotify(get()); UIFactory.SetValue(slider.transform.parent, UIFactory.Format(get(), min, max)); });
         }
     }
 }

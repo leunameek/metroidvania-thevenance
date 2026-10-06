@@ -1022,6 +1022,34 @@
     {
       "key": "loading.tipTitle",
       "value": "Consejo"
-    }
+    },
+    { "key": "subtitle.Settings", "value": "Personaliza tu experiencia" },
+    { "key": "subtitle.Accessibility", "value": "Lectura, movimiento y entradas" },
+    { "key": "subtitle.Map", "value": "Mapa · Lugares descubiertos" },
+    { "key": "subtitle.Objectives", "value": "Objetivos y actividades" },
+    { "key": "subtitle.Archive", "value": "Archivo cultural" },
+    { "key": "subtitle.Controls", "value": "Teclado, ratón, manos y voz" },
+    { "key": "subtitle.Credits", "value": "Créditos" },
+    { "key": "subtitle.SaveLoad", "value": "Guarda o recupera tu punto seguro" },
+    { "key": "subtitle.Inventory", "value": "Objetos del recorrido" },
+    { "key": "subtitle.Poporo", "value": "Recursos" },
+    { "key": "subtitle.VoiceCalibration", "value": "Puedes cambiar de entrada sin perder tu progreso" },
+    { "key": "subtitle.HandCalibration", "value": "Puedes cambiar de entrada sin perder tu progreso" },
+    { "key": "subtitle.Saves", "value": "Recupera tu último punto guardado" },
+    { "key": "subtitle.NewGame", "value": "El recorrido comienza en Plaza Núñez" },
+    { "key": "journal.title", "value": "Diario de Bacatá" },
+    { "key": "footer.back", "value": "Volver · Esc" },
+    { "key": "footer.select", "value": "Seleccionar · Enter" },
+    { "key": "footer.change", "value": "Cambiar valor · Enter" },
+    { "key": "footer.pause", "value": "Pausa · Esc" },
+    { "key": "footer.resume", "value": "Continuar · Esc" },
+    { "key": "footer.journal", "value": "Diario · Tab" },
+    { "key": "footer.lesson", "value": "Volver a la plaza · Esc" },
+    { "key": "footer.cancel", "value": "Cancelar · Esc" },
+    { "key": "title.version", "value": "v {0} · El Asedio de Bacatá" },
+    { "key": "inspection.heading", "value": "Lección · {0}" },
+    { "key": "inspection.subtitle", "value": "Inspección de objetos" },
+    { "key": "combat.yourTurn", "value": "Tu turno" },
+    { "key": "title.inputMode", "value": "Modo de entrada" }
   ]
 }

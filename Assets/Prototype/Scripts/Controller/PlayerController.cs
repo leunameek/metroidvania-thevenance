@@ -27,11 +27,15 @@ public class PlayerController : MonoBehaviour
 
     [Tooltip("Downward speed applied while grounded to keep the controller stuck to descending ramps. Must stay ahead of moveSpeed/dashSpeed or isGrounded flickers false when going downhill, blocking jump.")]
     [SerializeField] private float groundStickSpeed = 15f;
+    // Mundo Superior local profile (guide 1.4): the dash neither starts nor chains in the air.
+    [SerializeField] private bool allowAirDash = true;
 
     private CharacterController _controller;
     private PlayerAbilityModel _abilities;
     private Vector3 _verticalVelocity;
     private int _laddersTouching;
+    // Climbing or flight: while set, it moves the capsule instead of the walk/jump code.
+    private IPlayerMotor _motor;
     private bool _inputLocked;
 
     public Transform FaceAnchor => faceAnchor;
@@ -45,6 +49,8 @@ public class PlayerController : MonoBehaviour
     public bool InputLocked => _inputLocked;
     public float VerticalVelocity => _verticalVelocity.y;
     public bool IsOnLadder => _laddersTouching > 0;
+    public bool HasMotor => _motor != null;
+    public IPlayerMotor Motor => _motor;
 
     // Fired when a jump starts; the argument is true for the air (double) jump.
     public event System.Action<bool> Jumped;
@@ -60,6 +66,28 @@ public class PlayerController : MonoBehaviour
     public void GrantDashUpgrade() => _abilities.GrantDashUpgrade();
 
     public void GrantDoubleJump() => _abilities.GrantDoubleJump();
+
+    // One authority over the CharacterController (guide 4.2): a motor replaces the locomotion
+    // of this script until it is cleared, so the capsule never moves twice in a frame.
+    public void SetMotor(IPlayerMotor motor)
+    {
+        _motor = motor;
+        _verticalVelocity = Vector3.zero;
+        _abilities.ResetTransient();
+    }
+
+    public void ClearMotor(IPlayerMotor motor, float verticalVelocity = 0f)
+    {
+        if (_motor != motor) return;
+        _motor = null;
+        _verticalVelocity = new Vector3(0f, verticalVelocity, 0f);
+    }
+
+    // Moving support (transport): its displacement is applied before this frame's locomotion.
+    public void Carry(Vector3 delta)
+    {
+        if (_controller.enabled) _controller.Move(delta);
+    }
 
     public void SetInputLocked(bool locked)
     {
@@ -105,6 +133,12 @@ public class PlayerController : MonoBehaviour
         }
 
         if (_inputLocked) return;
+
+        if (_motor != null)
+        {
+            _motor.Tick(_controller, Time.deltaTime);
+            return;
+        }
 
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
@@ -176,6 +210,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleDashPress(float x, float z)
     {
+        if (!allowAirDash && !_controller.isGrounded) return;
         Vector3 inputDirection = new Vector3(x, 0f, z);
         if (movementReference != null)
         {
