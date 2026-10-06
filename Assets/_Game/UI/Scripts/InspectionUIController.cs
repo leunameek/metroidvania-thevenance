@@ -72,6 +72,8 @@ namespace Nemequene.UI
             _panel.anchorMin = new Vector2(.60f, Mathf.Max(.06f, .78f - (lesson.Complete ? .40f : .52f) * _ui.Settings.Values.textScale));
             _instruction.text = lesson.Complete ? UIStrings.Get("inspection.archived") : UIStrings.Get("lesson." + lesson.Lesson) + "\n\n"
                 + UIStrings.Get((_ui.Demo.MouseMode ? "inspection.mouse." : "inspection.hands.") + lesson.Lesson);
+            if (lesson.Complete && !_ui.Demo.MouseMode && _ui.Demo.Hands.Live)
+                _instruction.text += "\n\n" + UIStrings.Get("inspection.handsReturn");
             if (!_ui.Demo.MouseMode && !lesson.Complete && _ui.Hands != null && _ui.Hands.State != HandState.Detected)
                 _instruction.text += "\n\n" + _ui.Hands.StatusText + "\n" + UIStrings.Get("inspection.fallback");
             _progressText.text = lesson.Complete ? UIStrings.Get("inspection.complete") : UIStrings.Get("inspection.progress", Mathf.RoundToInt(lesson.Progress * 100));

@@ -38,6 +38,8 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     public static event Action AttemptReset;
     public int CurrentRoom => _room;
     public MIHud Hud { get; private set; }
+    // Hands and voice next to the keys: interaction, finds and the dash in combat.
+    public WorldNaturalInput Natural { get; private set; }
     public bool Busy => _paused || _dead || MIFind.Inspecting != null;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -68,6 +70,8 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         Hud = hud.AddComponent<MIHud>();
         Hud.Build(_health, Resume, () => Leave(true), () => Leave(false));
         BuildHelp();
+        Natural = WorldNaturalInput.Create(transform);
+        Natural.AddPauseEntries(Hud);
         ApplyAbilities();
         EnterRoom(0);
         MIAudio.Loop(gameObject, "ambiente_caverna", .45f, false);
@@ -220,12 +224,24 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         if (Busy) { UIWorldPrompt.Hide(this); return; }
 
         var target = player.InputLocked ? null : MIInteractable.Nearest(player.transform.position);
+        bool fight = InFight;
         if (target != null)
         {
             UIWorldPrompt.Show(this, "E", target.Prompt);
-            if (keyboard != null && keyboard.eKey.wasPressedThisFrame) target.Interact(player);
+            Natural.SetContext(NaturalContext.Interact, target.Prompt);
+            if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
         }
-        else UIWorldPrompt.Hide(this);
+        else
+        {
+            UIWorldPrompt.Hide(this);
+            if (fight) Natural.SetContext(NaturalContext.Fight);
+        }
+        // Fist (only near a fight) or the word «impulso» (anywhere): the same dash as Q.
+        if (!player.InputLocked && Natural.ConsumeAttack("Impulso", fight))
+        {
+            if (player.DashTier > 0) player.RequestDash();
+            else Hud?.Notify("Sin impulso", "Los brazaletes de la galería te darán el impulso.", UIIcon.Dodge, UIPalette.Muted);
+        }
 
         if (keyboard == null) return;
         if (keyboard.f12Key.wasPressedThisFrame) showHelp = !showHelp;
@@ -249,6 +265,11 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
                 EnterRoom(i);
             }
     }
+
+    // The guardian's duel or the shield sentinel in sight: a closed fist means a dash.
+    private bool InFight => (_guardian != null && _guardian.Fighting)
+        || (_sentinel != null && _sentinel.isActiveAndEnabled && !_sentinel.Defeated && _room == 3
+            && Vector3.Distance(player.transform.position, _sentinel.transform.position) < 16f);
 
     private void UpdateBars()
     {

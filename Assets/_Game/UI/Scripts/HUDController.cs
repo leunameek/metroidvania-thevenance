@@ -56,7 +56,7 @@ namespace Nemequene.UI
             _prompt.textWrappingMode = TextWrappingModes.NoWrap;
             f.KeyHint(_prompt, promptRow, true);
             _devicesPanel = f.Rect("DeviceStatus", _root.transform, new Vector2(.50f, .80f), new Vector2(.96f, .835f)).gameObject;
-            _devices = UIFactory.Shadow(UIFactory.Tone(f.Label(_devicesPanel.transform, "", Vector2.zero, Vector2.one, 20), UITone.Success));
+            _devices = UIFactory.Shadow(Fit(UIFactory.Tone(f.Label(_devicesPanel.transform, "", Vector2.zero, Vector2.one, 20), UITone.Success)));
             _devices.alignment = TextAlignmentOptions.TopRight;
             _hints = f.Rect("Hints", _root.transform, Vector2.zero, Vector2.one).gameObject;
             f.Hint(_hints.transform, UIStrings.Get("footer.pause"), Vector2.zero);
@@ -112,7 +112,11 @@ namespace Nemequene.UI
                 : d.NearbyPortal != null ? UIStrings.Get(d.NearbyPortal.Available ? "hud.travel" : "hud.blocked", d.NearbyPortal.destinationName)
                 : d.NearCombat ? UIStrings.Get("hud.startCombat") : "";
             _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false)); if (_prompt.text != prompt) _prompt.text = prompt;
-            _devices.text = d.Hands.Requested ? UIStrings.Get("hud.cameraActive") : "";
+            // Camera, the open-palm hint while something can be used, and the microphone.
+            string devices = d.Hands.Requested ? UIStrings.Get("hud.cameraActive") : "";
+            if (d.Hands.Live && exploration && prompt.Length > 0 && !d.MouseMode) devices += " · " + UIStrings.Get("hud.handsHold");
+            if (_ui.Voice != null && _ui.Voice.Listening) devices += (devices.Length > 0 ? " · " : "") + UIStrings.Get("hud.voiceListening");
+            _devices.text = devices;
             _devicesPanel.SetActive(_devices.text.Length > 0);
         }
         public void Dispose()

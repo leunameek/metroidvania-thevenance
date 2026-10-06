@@ -161,7 +161,7 @@ No sustituir la ruta por Downloads de un usuario: eso impide resolver el paquete
 - `Assets/_Game/Scenes/MundoInferior.unity`: mundo inferior; se entra por el portal de la plaza.
 - `Assets/_Game/Scenes/MundoSuperior.unity`: mundo superior; se entra por el portal de la plaza.
 - `Assets/_Game/Scenes/Dev/Movement.unity`: prototipo anterior de movimiento, pickups y jefe.
-- `Assets/Samples/MediaPipe Unity Plugin/0.16.3/Official Solutions/Scenes/Hand Landmark Detection/Hand Landmark Detection.unity`: la plaza la carga al pulsar C; el prototipo Movement la carga al iniciar. No hace falta abrirla manualmente.
+- `Assets/Samples/MediaPipe Unity Plugin/0.16.3/Official Solutions/Scenes/Hand Landmark Detection/Hand Landmark Detection.unity`: la plaza y los mundos la cargan al pulsar C; el prototipo Movement la carga al iniciar. No hace falta abrirla manualmente.
 
 Estas escenas ya están agregadas en `Build Settings`, un requisito de Unity para poder cargarlas en tiempo de ejecución.
 
@@ -174,6 +174,23 @@ Estas escenas ya están agregadas en `Build Settings`, un requisito de Unity par
 - `E`: interactuar con un objeto recolectable (inspeccionarlo, y de nuevo para confirmarlo).
 - `Escape`: cancelar la inspeccion sin recolectar el objeto.
 - Durante la inspeccion, la rotacion del objeto se controla con el mouse, o con las manos si la camara detecta ambas: la mano derecha abierta controla la rotacion vertical, la mano izquierda abierta controla la rotacion horizontal. Cerrar el puno congela esa rotacion en su lugar.
+
+## Manos y voz en la plaza y los mundos
+
+Las manos (MediaPipe) y la voz (reconocimiento de Windows) hacen lo mismo que las teclas; el teclado sigue funcionando siempre. La camara se activa con `C` en la plaza y en los dos mundos, y queda activa al viajar entre escenas. La voz se activa en Configuracion (o en la pausa de cada mundo); en la plaza se habla manteniendo `Ctrl izquierdo` (pulsar para hablar), en los mundos escucha de forma continua.
+
+| Accion | Teclado | Manos | Voz |
+| --- | --- | --- | --- |
+| Interactuar (estacion, hallazgo, palanca, portal, guardian) | `E` | palma abierta quieta ~1 s (barra dorada) | «examinar», «usar», «activar», «entrar», «enfrentar» |
+| Girar la pieza inspeccionada | mouse / `A` `D` `W` `S` | mover la mano abierta | — |
+| Tomar el hallazgo / volver con la leccion aprendida | `E` | puño sostenido ~0,7 s | «tomar», «recoger», «confirmar» |
+| Cerrar la inspeccion sin tomar | `Esc` | — | «salir», «volver», «cerrar» |
+| Atacar en tu turno (plaza, guardian de la cima) | `E` | cerrar la mano en puño | «atacar», «ataca», «golpe» |
+| Bloquear | `F` | dos palmas abiertas arriba | «bloquear», «bloquea», «escudo» |
+| Esquivar | `Espacio` | barrido lateral rapido de la mano abierta | «esquiva», «esquivar» |
+| Impulso contra el centinela y el guardian del fondo | `Q` | puño (solo cerca del combate) | «impulso» (en cualquier lugar) |
+
+Cada gesto solo cuenta en su turno: lo que se haga antes del aviso se descarta. El panel de la esquina inferior derecha de los mundos indica el estado de camara y microfono y el gesto que aplica en ese momento, y una cinta muestra lo que acaba de reconocerse («Puño · Impulso»). El reconocimiento de voz usa el idioma de voz de Windows: con Windows en español funciona mejor.
 
 ## Sobre el tracking de manos
 
@@ -188,5 +205,4 @@ Una advertencia especifica de macOS: la primera vez que se abra el proyecto, Gat
 ## Problemas conocidos
 
 - El objeto `Face` del personaje (usado como referencia de camara durante la inspeccion) todavia tiene una esfera visible temporal, se va a reemplazar por un objeto vacio cuando este el modelo final del personaje.
-- El sistema de dano y de romper objetos con el dash todavia no esta implementado, es la siguiente etapa del prototipo.
 - La sensibilidad de rotacion por manos y la deteccion de mano abierta/cerrada son valores iniciales sin ajustar del todo, pueden necesitar calibracion segun la camara de cada uno.

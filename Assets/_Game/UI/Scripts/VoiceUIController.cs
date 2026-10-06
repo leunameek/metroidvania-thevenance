@@ -47,24 +47,42 @@ namespace Nemequene.UI
             Set(error != null && (error.IndexOf("denied", StringComparison.OrdinalIgnoreCase) >= 0 || error.IndexOf("access", StringComparison.OrdinalIgnoreCase) >= 0)
                 ? VoiceState.PermissionDenied : VoiceState.Unavailable);
         }
-        private void Recognized(CombatCommand command, string phrase)
+        private void Recognized(VoiceCommand command, string phrase)
         {
             if (_disposed || !Listening || _ui.ModalOpen || Time.frameCount == _lastAcceptedFrame) return;
             LastPhrase = phrase; Set(VoiceState.Processing);
             if (_calibrating)
             {
                 _calibrating = false; _recognizer.StopListening();
-                Set(command == CombatCommand.Attack ? VoiceState.Recognized : VoiceState.Unrecognized);
+                Set(command == VoiceCommand.Attack ? VoiceState.Recognized : VoiceState.Unrecognized);
                 _until = Time.unscaledTime + 3; return;
             }
             var d = _ui.Demo;
-            if (d.HelpOpen || d.State != TechnicalDemoState.Combat) { Set(VoiceState.Inactive); return; }
+            if (d.HelpOpen) { Set(VoiceState.Inactive); return; }
+            if (d.State != TechnicalDemoState.Combat) { Explore(d, command); return; }
             var phase = d.Combat.Model.Phase;
-            bool allowed = command == CombatCommand.Attack ? phase == PlazaCombatPhase.Attack : phase == PlazaCombatPhase.React;
+            if (phase == PlazaCombatPhase.Won && command == VoiceCommand.Back) { Accept(); d.Combat.Cancel(); return; }
+            bool allowed = command == VoiceCommand.Attack ? phase == PlazaCombatPhase.Attack : phase == PlazaCombatPhase.React;
             if (!allowed) { Set(VoiceState.Unrecognized); _until = Time.unscaledTime + 2; return; }
+            if (command != VoiceCommand.Attack && command != VoiceCommand.Dodge && command != VoiceCommand.Guard) { Set(VoiceState.Unrecognized); _until = Time.unscaledTime + 2; return; }
+            Accept();
+            if (command == VoiceCommand.Attack) d.Combat.Attack();
+            else d.Combat.Defend(command == VoiceCommand.Dodge ? PlazaDefense.Dodge : PlazaDefense.Guard);
+        }
+        // Outside the duel the words drive objects: «examinar» what is near (a station, a portal,
+        // the training circle), «salir» or «tomar» in the inspection.
+        private void Explore(TechnicalDemoController d, VoiceCommand command)
+        {
+            bool done = false;
+            if (d.State == TechnicalDemoState.Exploration && command == VoiceCommand.Interact && HasTarget(d)) { Accept(); d.Interact(); done = true; }
+            else if (d.State == TechnicalDemoState.Analyzing && command == VoiceCommand.Back) { Accept(); d.EndAnalysis(); done = true; }
+            else if (d.State == TechnicalDemoState.Analyzing && command == VoiceCommand.Confirm && d.Lesson != null && d.Lesson.Complete) { Accept(); d.EndAnalysis(); done = true; }
+            if (!done) { Set(VoiceState.Unrecognized); _until = Time.unscaledTime + 2; }
+        }
+        private static bool HasTarget(TechnicalDemoController d) => d.Nearby != null || d.NearbyPortal != null || d.NearCombat;
+        private void Accept()
+        {
             _lastAcceptedFrame = Time.frameCount;
-            if (command == CombatCommand.Attack) d.Combat.Attack();
-            else d.Combat.Defend(command == CombatCommand.Dodge ? PlazaDefense.Dodge : PlazaDefense.Guard);
             _recognizer.StopListening(); Set(VoiceState.Recognized); _until = Time.unscaledTime + 2;
             _ui.Sound(PlazaSound.Inspect);
         }
@@ -83,8 +101,12 @@ namespace Nemequene.UI
                 return;
             }
             var d = _ui.Demo; var s = _ui.Settings.Values;
-            bool turn = d.State == TechnicalDemoState.Combat && !d.HelpOpen && _ui.Screens.Current == UIScreen.None
-                && (d.Combat.Model.Phase == PlazaCombatPhase.Attack || d.Combat.Model.Phase == PlazaCombatPhase.React);
+            var phase = d.Combat.Model.Phase;
+            bool free = !d.HelpOpen && _ui.Screens.Current == UIScreen.None;
+            bool turn = free && (d.State == TechnicalDemoState.Combat
+                    && (phase == PlazaCombatPhase.Attack || phase == PlazaCombatPhase.React || phase == PlazaCombatPhase.Won)
+                || d.State == TechnicalDemoState.Exploration && HasTarget(d)
+                || d.State == TechnicalDemoState.Analyzing);
             var k = Keyboard.current;
             if (k != null && k.leftCtrlKey.wasPressedThisFrame && turn) _talkToggle = !_talkToggle;
             bool talk = !s.pushToTalk || (s.toggleTalk ? _talkToggle : k != null && k.leftCtrlKey.isPressed);

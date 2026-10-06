@@ -146,7 +146,7 @@
     },
     {
       "key": "controls.body",
-      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nEsc · Cerrar inspección\n\nCOMBATE\nE o ATACAR · Atacar en tu turno\nEspacio o ESQUIVAR · Esquivar\nF o BLOQUEAR · Bloquear\nCtrl izquierdo · Pulsar para hablar\nEsc · Pausa\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica."
+      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nPalma abierta quieta o EXAMINAR · Interactuar\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\nE, puño o ATACAR · Atacar en tu turno\nEspacio, barrido lateral o ESQUIVAR · Esquivar\nF, dos palmas arriba o BLOQUEAR · Bloquear\nCtrl izquierdo · Pulsar para hablar\nEsc · Pausa\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica. En los mundos, C activa la cámara y la voz se cambia desde la pausa."
     },
     {
       "key": "tutorial.repeat",
@@ -1050,6 +1050,14 @@
     { "key": "inspection.heading", "value": "Lección · {0}" },
     { "key": "inspection.subtitle", "value": "Inspección de objetos" },
     { "key": "combat.yourTurn", "value": "Tu turno" },
-    { "key": "title.inputMode", "value": "Modo de entrada" }
+    { "key": "title.inputMode", "value": "Modo de entrada" },
+    { "key": "combat.hands.Attack", "value": "Manos · cierra el puño para atacar" },
+    { "key": "combat.hands.Telegraph", "value": "Manos · prepara dos palmas arriba (bloquear) o un barrido lateral (esquivar)" },
+    { "key": "combat.hands.React", "value": "Manos · dos palmas arriba bloquean · barrido lateral esquiva" },
+    { "key": "combat.hands.Feedback", "value": "Manos · espera el siguiente turno" },
+    { "key": "combat.hands.Won", "value": "Manos · puño sostenido para volver a la plaza" },
+    { "key": "inspection.handsReturn", "value": "Cierra el puño y sostenlo para volver a la plaza." },
+    { "key": "hud.voiceListening", "value": "Voz · escuchando" },
+    { "key": "hud.handsHold", "value": "Palma abierta quieta para usar" }
   ]
 }

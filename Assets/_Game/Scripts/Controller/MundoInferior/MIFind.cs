@@ -90,13 +90,22 @@ public sealed class MIFind : MIInteractable
             if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
             if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
         }
+        // Hands: an open hand turns the piece like a drag, a held fist takes it; words too.
+        var natural = WorldNaturalInput.Instance;
+        if (natural != null)
+        {
+            natural.SetContext(NaturalContext.Inspect);
+            turn += natural.ConsumeRotate() * .35f;
+            MundoInferiorBlockout.Instance?.Hud?.SetInspectionGuide(natural.InspectionGuide);
+        }
         item.Rotate(Vector3.up, -turn.x, Space.World);
         item.Rotate(_camera.transform.right, turn.y, Space.World);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
-        if (keyboard == null) return;
-        if (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame) Confirm();
-        else if (keyboard.escapeKey.wasPressedThisFrame) Close();
+        if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
+        else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) Close();
+        else if (natural != null && natural.ConsumeConfirm("Tomar " + displayName.ToLowerInvariant())) Confirm();
+        else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();
     }
 
     private void Confirm()

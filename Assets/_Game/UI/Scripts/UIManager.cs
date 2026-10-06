@@ -164,7 +164,8 @@ namespace Nemequene.UI
         public void StartSession()
         {
             SessionStarted = true; HasSession = true;
-            if (!Demo.MouseMode) Demo.ToggleInputMode();
+            // Mouse unless the camera is already on (back from a world with the hands active).
+            if (Demo.MouseMode == Demo.Hands.Requested) Demo.ToggleInputMode();
             Screens.Show(UIScreen.None, false); RefreshPause(); _hud.Refresh();
         }
         private string ProgressSignature() => string.Join("|", Demo.CompletedObjectIds) + ":" + Demo.Combat.Completed + ":" + Demo.World;

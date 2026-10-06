@@ -37,6 +37,8 @@ public class PlayerController : MonoBehaviour
     // Climbing or flight: while set, it moves the capsule instead of the walk/jump code.
     private IPlayerMotor _motor;
     private bool _inputLocked;
+    // Dash asked by a gesture or a voice command; taken on the next locomotion frame like the key.
+    private bool _dashRequested;
 
     public Transform FaceAnchor => faceAnchor;
     public float DashDamage => dashDamage;
@@ -89,6 +91,8 @@ public class PlayerController : MonoBehaviour
         if (_controller.enabled) _controller.Move(delta);
     }
 
+    public void RequestDash() => _dashRequested = true;
+
     public void SetInputLocked(bool locked)
     {
         _inputLocked = locked;
@@ -132,6 +136,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        bool dashRequested = _dashRequested;
+        _dashRequested = false;
         if (_inputLocked) return;
 
         if (_motor != null)
@@ -153,6 +159,8 @@ public class PlayerController : MonoBehaviour
         if (!enableSprint && keyboard.leftShiftKey.wasPressedThisFrame)
             HandleDashPress(x, z);
         else if (enableSprint && enableExplorationDash && keyboard.qKey.wasPressedThisFrame)
+            HandleDashPress(x, z);
+        else if (dashRequested)
             HandleDashPress(x, z);
 
         if (IsDashing)

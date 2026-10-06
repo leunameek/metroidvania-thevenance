@@ -18,6 +18,8 @@ public class HandGestureTracker : MonoBehaviour
     public IReadOnlyList<Vector2> LeftHandPoints => _leftHand.Points;
 
     public bool IsConnected => Time.realtimeSinceStartup - _lastResultRealtime < connectionTimeout;
+    // Strike, guard, swipe and holds built on both hands (see HandGestureRecognizerModel).
+    public HandGestureRecognizerModel Gestures { get; } = new HandGestureRecognizerModel();
 
     private readonly object _lock = new object();
     private HandLandmarkerResult _latestResult;
@@ -46,6 +48,7 @@ public class HandGestureTracker : MonoBehaviour
         _subscribed = false;
         _rightHand.MarkAbsent();
         _leftHand.MarkAbsent();
+        Gestures.MarkAbsent(Time.realtimeSinceStartup);
     }
 
     private void TryConnectToRunner()
@@ -83,13 +86,25 @@ public class HandGestureTracker : MonoBehaviour
             }
         }
 
-        if (hasNew) _lastResultRealtime = Time.realtimeSinceStartup;
+        if (hasNew)
+        {
+            _lastResultRealtime = Time.realtimeSinceStartup;
+            Gestures.Sample(_lastResultRealtime, Sample(_leftHand), Sample(_rightHand));
+        }
         else if (!IsConnected)
         {
             _rightHand.MarkAbsent();
             _leftHand.MarkAbsent();
+            if (Gestures.AnyHandPresent) Gestures.MarkAbsent(Time.realtimeSinceStartup);
         }
     }
+
+    private static HandSample Sample(HandGestureModel hand) => new HandSample(hand.IsPresent, hand.IsOpen, hand.Palm);
+
+    public bool ConsumeGesture(HandGesture gesture) => Gestures.Consume(gesture, Time.realtimeSinceStartup);
+
+    // Open-hand movement of either hand since the last call (x right, y down in image space).
+    public Vector2 ConsumeAnyHandDelta() => _leftHand.ConsumeDelta() + _rightHand.ConsumeDelta();
 
     public float ConsumeRightHandDeltaY() => _rightHand.ConsumeDeltaY();
 

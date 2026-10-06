@@ -17,6 +17,7 @@ public class HandGestureModel
 
     public bool IsPresent { get; private set; }
     public bool IsOpen { get; private set; }
+    public Vector2 Palm => _hasReference ? _lastPosition : new Vector2(.5f, .5f);
     public IReadOnlyList<Vector2> Points => _points;
 
     public HandGestureModel(float openFingerMargin)
@@ -71,6 +72,8 @@ public class HandGestureModel
         _deltaYAccum = 0f;
         return delta;
     }
+
+    public Vector2 ConsumeDelta() => new Vector2(ConsumeDeltaX(), ConsumeDeltaY());
 
     private bool IsHandOpen(IReadOnlyList<Vector2> landmarks)
     {

@@ -42,6 +42,8 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
 
     public static MundoSuperiorDirector Instance { get; private set; }
     public MIHud Hud { get; private set; }
+    // Hands and voice next to the keys: interaction, finds and the guardian's duel.
+    public WorldNaturalInput Natural { get; private set; }
     public bool Paused => _paused;
     public bool InCombat => _inCombat;
     public bool Busy => _paused || _dead || _moving || MSFind.Inspecting != null;
@@ -74,6 +76,9 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         Hud.Build(_health, Resume, () => Leave(true), () => Leave(false));
         hud.AddComponent<MSFlightMeter>().Build(wings);
         BuildHelp();
+        Natural = WorldNaturalInput.Create(transform);
+        Natural.AddPauseEntries(Hud);
+        ReactionMultiplier = Natural.ReactionScale;
         MSAudio.ReadSettings();
         _wind = MSAudio.Loop(gameObject, "viento_alturas", .8f, false, MSAudio.Channel.Ambience);
         _music = MSAudio.Loop(gameObject, "musica_exploracion", .7f, false, MSAudio.Channel.Music);
@@ -242,7 +247,8 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         if (target != null)
         {
             UIWorldPrompt.Show(this, "E", target.Prompt);
-            if (keyboard != null && keyboard.eKey.wasPressedThisFrame) target.Interact(player);
+            Natural.SetContext(NaturalContext.Interact, target.Prompt);
+            if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
         }
         else UIWorldPrompt.Hide(this);
         DevKeys(keyboard);

@@ -18,6 +18,9 @@ public sealed class MIHud : MonoBehaviour
     private GameObject _toast, _inspect, _pause, _boss, _death, _hints;
     private CanvasGroup _toastGroup;
     private Button _resume;
+    private RectTransform _pauseList;
+    private TMP_Text _inspectKeys;
+    private readonly System.Collections.Generic.List<(TMP_Text, Func<string>)> _pauseLabels = new System.Collections.Generic.List<(TMP_Text, Func<string>)>();
     private float _toastUntil, _healthShown = 1, _healthTarget = 1, _fadeTarget, _fadeValue;
     private Health _health;
     private readonly System.Collections.Generic.Queue<(string, string, UIIcon, Color)> _queue = new System.Collections.Generic.Queue<(string, string, UIIcon, Color)>();
@@ -70,8 +73,8 @@ public sealed class MIHud : MonoBehaviour
         _inspectKind = UIKit.Label(panel, "", 20, UIPalette.Jade); _inspectKind.alignment = TextAlignmentOptions.TopLeft; _inspectKind.characterSpacing = 2;
         _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 150, -1, 30);
         _inspectBody = UIKit.Label(panel, "", 24, UIPalette.Ivory); _inspectBody.alignment = TextAlignmentOptions.TopLeft;
-        _inspectBody.rectTransform.offsetMin = new Vector2(60, 110); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
-        var keys = UIKit.Label(panel, "E · Confirmar        Esc · Devolver al altar\nArrastra con el ratón o usa A / D para girar", 20, UIPalette.Muted);
+        _inspectBody.rectTransform.offsetMin = new Vector2(60, 140); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
+        var keys = _inspectKeys = UIKit.Label(panel, InspectionKeys, 20, UIPalette.Muted);
         keys.alignment = TextAlignmentOptions.BottomLeft; keys.rectTransform.offsetMin = new Vector2(60, 56); keys.rectTransform.offsetMax = new Vector2(-60, -10);
         keys.textWrappingMode = TextWrappingModes.Normal;
         _inspect.SetActive(false);
@@ -97,6 +100,7 @@ public sealed class MIHud : MonoBehaviour
         var list = UIKit.Rect("Actions", column); list.anchorMin = new Vector2(.08f, .30f); list.anchorMax = new Vector2(.92f, .72f);
         var layout = list.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.childAlignment = TextAnchor.UpperCenter;
         layout.childControlWidth = layout.childControlHeight = true; layout.childForceExpandHeight = false; layout.childForceExpandWidth = true;
+        _pauseList = list;
         _resume = UIKitButton.Create(list, "Continuar", resume, true);
         UIKitButton.Create(list, "Volver a Plaza Núñez", toPlaza);
         UIKitButton.Create(list, "Volver al menú principal", toMenu);
@@ -159,9 +163,37 @@ public sealed class MIHud : MonoBehaviour
     }
     public void HideInspection() => _inspect.SetActive(false);
 
+    private const string InspectionKeys = "E · Confirmar        Esc · Devolver al altar\nArrastra con el ratón o usa A / D para girar";
+    // Hands or voice on: the panel names the gesture and the words next to the keys.
+    public void SetInspectionGuide(string guide)
+    {
+        string text = string.IsNullOrEmpty(guide) ? InspectionKeys : InspectionKeys + "\n" + guide;
+        if (_inspectKeys != null && _inspectKeys.text != text) _inspectKeys.text = text;
+    }
+
+    // Extra pause entry right under «Continuar»; its label is read again each time the pause opens.
+    public void AddPauseButton(Func<string> label, Action action)
+    {
+        if (_pauseList == null) return;
+
+        var button = UIKitButton.Create(_pauseList, label(), () => { action(); Relabel(); });
+        button.transform.SetSiblingIndex(1 + _pauseLabels.Count);
+        _pauseLabels.Add((button.GetComponentInChildren<TMP_Text>(), label));
+    }
+
+    private void Relabel()
+    {
+        foreach (var (text, label) in _pauseLabels)
+        {
+            string value = label();
+            if (text != null && text.text != value) text.text = value;
+        }
+    }
+
     public void ShowPause(bool open)
     {
         _pause.SetActive(open);
+        if (open) Relabel();
         if (open && EventSystem.current != null) { EventSystem.current.SetSelectedGameObject(null); EventSystem.current.SetSelectedGameObject(_resume.gameObject); }
     }
 
@@ -180,6 +212,7 @@ public sealed class MIHud : MonoBehaviour
 
     private void Update()
     {
+        if (_pause.activeSelf && _pauseLabels.Count > 0) Relabel(); // the camera starts asynchronously
         _healthShown = Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
         if (_healthFill != null) _healthFill.fillAmount = _healthShown;
         _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);

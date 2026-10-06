@@ -84,7 +84,12 @@ public sealed class MSGuardian : MIInteractable
             // 2. Player turn: E without a time limit; the E that started the duel does not count.
             UIWorldPrompt.Show(this, "E", "Atacar al núcleo");
             yield return null;
-            while (!Pressed(Keyboard.current?.eKey)) yield return null;
+            // Fist or «atacar» do the same as E; the context names them on the hands panel.
+            while (!Pressed(Keyboard.current?.eKey) && !Natural(n => n.ConsumeAttack("Atacar al núcleo")))
+            {
+                Context(NaturalContext.Duel);
+                yield return null;
+            }
             UIWorldPrompt.Hide(this);
             float damage = MSProgress.AttackDamage;
             _health = Mathf.Max(0, _health - damage);
@@ -106,17 +111,22 @@ public sealed class MSGuardian : MIInteractable
             UIWorldPrompt.Show(this, block ? "F" : "Espacio", verb + " · " + Name(attack));
             Trigger("Attack");
             MSAudio.Play("jefe_aviso", .85f, attack == Attack.Sweep ? 1.1f : attack == Attack.Pulse ? 1.25f : 1f);
-            for (float t = 0; t < warning; t += Time.deltaTime) { Telegraph(attack, t / warning); SetCore(Color.Lerp(_coreBase, new Color(1f, .3f, .2f), t / warning), 1 + t); yield return null; }
+            for (float t = 0; t < warning; t += Time.deltaTime) { Context(NaturalContext.Defend); Telegraph(attack, t / warning); SetCore(Color.Lerp(_coreBase, new Color(1f, .3f, .2f), t / warning), 1 + t); yield return null; }
+            // Gestures and words made during the warning are ignored, like the keys.
+            director?.Natural?.ClearPending();
 
             // 5. Reactive window: one accepted answer.
             bool? answer = null;
             float limit = window * (director != null ? director.ReactionMultiplier : 1f);
             for (float t = 0; t < limit && answer == null; t += Time.deltaTime)
             {
+                Context(NaturalContext.Defend);
                 yield return null;
                 var k = Keyboard.current;
                 if (Pressed(k?.fKey)) answer = block;
                 else if (Pressed(k?.spaceKey)) answer = !block;
+                else if (Natural(n => n.ConsumeGuard("Bloquear"))) answer = block;
+                else if (Natural(n => n.ConsumeDodge("Esquivar", out _))) answer = !block;
             }
             UIWorldPrompt.Hide(this);
 
@@ -147,6 +157,15 @@ public sealed class MSGuardian : MIInteractable
         var director = MundoSuperiorDirector.Instance;
         return key != null && key.wasPressedThisFrame && (director == null || !director.Paused);
     }
+
+    private static bool Natural(System.Func<WorldNaturalInput, bool> query)
+    {
+        var director = MundoSuperiorDirector.Instance;
+        var natural = director != null ? director.Natural : null;
+        return natural != null && !director.Paused && query(natural);
+    }
+
+    private static void Context(NaturalContext context) => MundoSuperiorDirector.Instance?.Natural?.SetContext(context);
 
     private static string Name(Attack attack) => attack switch
     {

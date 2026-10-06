@@ -9,7 +9,7 @@ namespace Nemequene.UI
     {
         private readonly UIManager _ui;
         private readonly GameObject _root;
-        private readonly TMP_Text _turn, _body, _enemy, _timer, _voice;
+        private readonly TMP_Text _turn, _body, _enemy, _timer, _voice, _hands;
         private readonly Image _progress, _guardian;
         private readonly RectTransform _commands;
         private readonly Button _attack, _dodge, _block, _return;
@@ -52,6 +52,7 @@ namespace Nemequene.UI
             _return = f.Button(actions, UIStrings.Get("combat.return"), () => ui.Demo.Combat.Cancel(), true);
             UIFactory.CenterAll(actions);
             _voice = UIFactory.Tone(f.Text(body, "", 20), UITone.Success); _voice.alignment = TextAlignmentOptions.Center;
+            _hands = UIFactory.Tone(f.Text(body, "", 20), UITone.Gold); _hands.alignment = TextAlignmentOptions.Center;
             _progress = f.Bar(commands, "ReactionWindow", Vector2.zero, Vector2.one, UIPalette.GoldLight);
             ((RectTransform)_progress.transform.parent.parent).Band(36, 14, 72);
             f.Hint(_root.transform, UIStrings.Get("footer.pause"), Vector2.zero);
@@ -103,10 +104,17 @@ namespace Nemequene.UI
             _next = Time.unscaledTime + .05f;
             var m = _ui.Demo.Combat.Model;
             _commands.anchorMax = new Vector2(.76f, .31f + (_ui.Settings.Values.textScale - 1) * .22f
-                + (_ui.Settings.Values.voiceEnabled ? .04f : 0));
+                + (_ui.Settings.Values.voiceEnabled ? .04f : 0) + (_ui.Demo.Hands.Live ? .08f : 0));
             _timer.gameObject.SetActive(m.Phase == PlazaCombatPhase.React);
             _voice.text = _ui.Settings.Values.voiceEnabled && _ui.Voice != null ? _ui.Voice.StatusText : "";
             _voice.gameObject.SetActive(_voice.text.Length > 0 && _ui.Voice.State != VoiceState.Inactive);
+            // Camera on: the gesture of this turn, or the one just recognised for a moment.
+            var combat = _ui.Demo.Combat;
+            string hands = !_ui.Demo.Hands.Live ? "" : Time.unscaledTime - combat.LastGestureTime < 1.5f ? combat.LastGesture
+                : UIStrings.Get("combat.hands." + m.Phase);
+            if (hands.StartsWith("[")) hands = "";
+            if (_hands.text != hands) _hands.text = hands;
+            _hands.gameObject.SetActive(hands.Length > 0);
             _timer.text = m.Phase == PlazaCombatPhase.React ? UIStrings.Get("combat.seconds", m.Remaining.ToString("0.0")) : "";
             UIFactory.Fill(_progress, m.Phase == PlazaCombatPhase.React ? m.Remaining / m.ReactionSeconds : m.Phase == PlazaCombatPhase.Telegraph ? m.Remaining / m.TelegraphSeconds : 1);
         }

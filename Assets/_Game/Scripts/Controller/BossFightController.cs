@@ -91,9 +91,9 @@ public class BossFightController : MonoBehaviour
         if (player != null) player.PerformDodge(direction);
     }
 
-    private void OnCommandRecognized(CombatCommand command, string phrase)
+    private void OnCommandRecognized(VoiceCommand command, string phrase)
     {
-        if (command != CombatCommand.Dodge) return;
+        if (command != VoiceCommand.Dodge) return;
         _fight.RequestDodge(GetRaisedHandDirection());
     }
 

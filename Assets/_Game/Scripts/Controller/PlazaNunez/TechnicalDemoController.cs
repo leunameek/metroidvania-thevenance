@@ -84,6 +84,8 @@ public sealed class TechnicalDemoController : MonoBehaviour
         Objectives = new ExplorationObjectiveModel(ids);
         _inspection = new InspectionModel(0.4f, 0.3f, 300f, false, true);
         _hands = GetComponent<PlazaHandSession>();
+        // Turning the camera on means using the hands; turning it off goes back to the mouse.
+        if (_hands != null) _hands.RequestedChanged += SyncInputMode;
         _audio = GetComponent<PlazaAudio>();
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))
             if (light.type == LightType.Directional) _sun = light;
@@ -147,11 +149,18 @@ public sealed class TechnicalDemoController : MonoBehaviour
                 else Status = "Completa el gesto indicado. Esc permite salir y continuar después.";
                 return;
             }
+            // Lesson learnt: a held fist puts the piece back, like E.
+            if (Lesson.Complete && !MouseMode && _hands.Live && _hands.Tracker.ConsumeGesture(HandGesture.Grab)) { EndAnalysis(); return; }
             UpdateAnalysis();
             return;
         }
         FindNearby();
         if (Time.frameCount > _ignoreInteractionFrame && k != null && k.eKey.wasPressedThisFrame) Interact();
+    }
+
+    private void SyncInputMode()
+    {
+        if (_hands.Requested == MouseMode) ToggleInputMode();
     }
 
     public void ToggleInputMode()
@@ -234,6 +243,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         orbitCamera.enabled = false;
         _hands.Tracker.ConsumeLeftHandDeltaX();
         _hands.Tracker.ConsumeRightHandDeltaY();
+        _hands.Tracker.Gestures.ClearPending();
         _audio.Play(PlazaSound.Inspect);
         Status = "Sigue la instrucción. Los puños cerrados detienen el giro.";
     }
@@ -278,6 +288,8 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (Mathf.Abs(yaw) + Mathf.Abs(pitch) > 0.35f) _audio.Play(PlazaSound.Rotate, 0.22f);
         if (!complete && Lesson.Complete)
         {
+            // The fists that froze the piece must open before a held fist can close the lesson.
+            _hands.Tracker.Gestures.ClearPending();
             Objectives.Analyze(_selected.Data.objectId);
             _selected.SetCompleted();
             _audio.Play(PlazaSound.Complete);
@@ -384,6 +396,10 @@ public sealed class TechnicalDemoController : MonoBehaviour
         EndAnalysis();
         if (combat != null) combat.Cancel();
         SceneManager.LoadScene(gameObject.scene.path);
+    }
+    private void OnDestroy()
+    {
+        if (_hands != null) _hands.RequestedChanged -= SyncInputMode;
     }
     private void OnDisable()
     {

@@ -54,6 +54,7 @@ public sealed class PlazaCombatController : MonoBehaviour
         if (Model.Phase == PlazaCombatPhase.Won)
         {
             if (k != null && k.eKey.wasPressedThisFrame) Cancel();
+            else UpdateGestures();
             return;
         }
         // Tick before input so a key at the end of the reaction window cannot arrive late.
@@ -61,7 +62,35 @@ public sealed class PlazaCombatController : MonoBehaviour
         if (k != null && k.eKey.wasPressedThisFrame) Attack();
         if (k != null && k.spaceKey.wasPressedThisFrame) Defend(PlazaDefense.Dodge);
         if (k != null && k.fKey.wasPressedThisFrame) Defend(PlazaDefense.Guard);
+        UpdateGestures();
     }
+
+    // With the camera on: a fist attacks, two raised open palms block, a sideways sweep dodges.
+    // Each gesture only counts in its own turn; the ones made before the turn are dropped.
+    public string LastGesture { get; private set; } = "";
+    public float LastGestureTime { get; private set; } = -99;
+    private void UpdateGestures()
+    {
+        var hands = demo.Hands;
+        if (hands == null || !hands.Live || !Active) return;
+        var gestures = hands.Tracker.Gestures;
+        if (Model.Phase == PlazaCombatPhase.Attack && hands.Tracker.ConsumeGesture(HandGesture.Strike))
+        {
+            Gesture("Puño · Atacar");
+            Attack();
+        }
+        else if (Model.Phase == PlazaCombatPhase.React)
+        {
+            if (hands.Tracker.ConsumeGesture(HandGesture.Swipe)) { Gesture("Barrido · Esquivar"); Defend(PlazaDefense.Dodge); }
+            else if (gestures.GuardHeld) { Gesture("Dos palmas · Bloquear"); Defend(PlazaDefense.Guard); }
+        }
+        else if (Model.Phase == PlazaCombatPhase.Won && hands.Tracker.ConsumeGesture(HandGesture.Grab))
+        {
+            Gesture("Puño sostenido · Volver");
+            Cancel();
+        }
+    }
+    private void Gesture(string text) { LastGesture = text; LastGestureTime = Time.unscaledTime; }
     public void Attack()
     {
         if (!Active || demo.HelpOpen || !Model.Attack()) return;
@@ -108,6 +137,8 @@ public sealed class PlazaCombatController : MonoBehaviour
     }
     private void OnPhase()
     {
+        // A new turn or window: gestures started before it do not answer it.
+        if (demo.Hands != null && demo.Hands.Tracker != null) demo.Hands.Tracker.Gestures.ClearPending();
         if (Model.Phase == PlazaCombatPhase.Telegraph) demo.Audio.Play(PlazaSound.Warning, 0.55f);
         if (Model.Phase == PlazaCombatPhase.React) demo.Audio.Play(PlazaSound.Inspect, 0.6f);
         if (Model.Mistakes > _previousMistakes)

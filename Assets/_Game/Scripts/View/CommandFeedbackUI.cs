@@ -7,11 +7,14 @@ using UnityEngine;
 [RequireComponent(typeof(VoiceCommandRecognizer))]
 public class CommandFeedbackUI : MonoBehaviour
 {
-    private static readonly Dictionary<CombatCommand, string> EffectDescriptions = new Dictionary<CombatCommand, string>
+    private static readonly Dictionary<VoiceCommand, string> EffectDescriptions = new Dictionary<VoiceCommand, string>
     {
-        { CombatCommand.Dodge, "Esquivar según la mano alzada" },
-        { CombatCommand.Attack, "Atacar" },
-        { CombatCommand.Guard, "Bloquear" }
+        { VoiceCommand.Dodge, "Esquivar según la mano alzada" },
+        { VoiceCommand.Attack, "Atacar" },
+        { VoiceCommand.Guard, "Bloquear" },
+        { VoiceCommand.Interact, "Interactuar" },
+        { VoiceCommand.Confirm, "Confirmar" },
+        { VoiceCommand.Back, "Volver" }
     };
 
     [SerializeField] private float displayDuration = 1.5f;
@@ -33,7 +36,7 @@ public class CommandFeedbackUI : MonoBehaviour
         if (_recognizer != null) _recognizer.CommandRecognized -= OnCommandRecognized;
     }
 
-    private void OnCommandRecognized(CombatCommand command, string phrase)
+    private void OnCommandRecognized(VoiceCommand command, string phrase)
     {
         string effect = EffectDescriptions.TryGetValue(command, out string description) ? description : command.ToString();
         _label.text = phrase.ToUpperInvariant() + " · " + effect;
