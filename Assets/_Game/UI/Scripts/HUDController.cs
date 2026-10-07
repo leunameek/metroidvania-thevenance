@@ -99,7 +99,10 @@ namespace Nemequene.UI
                 : d.PortalsUnlocked ? UIStrings.Get("hud.portals") : d.Objectives.IsComplete ? UIStrings.Get("hud.duel")
                 : UIStrings.Get("hud.objective", d.Objectives.AnalyzedCount, d.Objectives.RequiredCount);
             if (exploration && objective != _previousObjective)
-            { _previousObjective = objective; _objective.text = objective; _objectiveUntil = Time.unscaledTime + 8; }
+            {
+                if (!string.IsNullOrEmpty(_previousObjective)) GameAudio.UI(UICue.Objective);
+                _previousObjective = objective; _objective.text = objective; _objectiveUntil = Time.unscaledTime + 8;
+            }
             if (d.World != _world)
             {
                 _world = d.World; _zoneUntil = Time.unscaledTime + 3;

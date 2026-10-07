@@ -48,6 +48,9 @@ public sealed class BacataDirector : MonoBehaviour
     private IEnumerator Prologue()
     {
         SetSky(false);
+        // Morning in Bacatá: wind, leaves, birds; the staff's wooden motif.
+        Sound("amb_bacata_manana", "musica_bacata_prologo", .8f);
+        AmbientScatter.On(gameObject).Add("Ambiente/ave_canto", 5f, 12f, 8f, 20f, .45f, 5f);
         yield return FadeIn("Bacatá");
         // C01: the staff carved by the uncle; the adult heir receives it.
         Place(_child, Village + new Vector3(2.2f, 0, 13), Village + new Vector3(0, 0, 13));
@@ -67,12 +70,18 @@ public sealed class BacataDirector : MonoBehaviour
         Place(_tisquesusa, Village + new Vector3(-14, 0, 6.5f), Village + new Vector3(-14, 0, 2));
         Place(_nemequene, Village + new Vector3(-14, 0, 2), Village + new Vector3(-14, 0, 6.5f));
         Shot(Village + new Vector3(-8.5f, 2.2f, 1.5f), Village + new Vector3(-14, 1.3f, 4.2f));
+        // C02: the vision brings the two-tone hum that returns with Quimue (C13, C16).
+        StartCoroutine(Swell("Criaturas/quimue_zumbido", 6f, .55f));
+        GameAudio.Caption("Zumbido de dos tonos");
         yield return Lines("H02", 0, 99, true, "Oro y plata");
         // C03: seven days and seven nights on the hill; Bachué comes along the same path.
         yield return Cut();
         Hide(_tisquesusa);
         Place(_nemequene, Hill + new Vector3(0, .9f, 0), Hill + new Vector3(0, .9f, -6));
         Shot(Hill + new Vector3(7, 3.5f, -7), Hill + new Vector3(0, 1.5f, 0));
+        // C03: water and wind on the hill; the music gives way to silence during the vigil.
+        Sound("amb_colina", null, 0);
+        AmbientScatter.On(gameObject).Clear();
         Act(_nemequene, "Pray");
         yield return Days(3);
         Place(_bachue, Hill + new Vector3(0, .9f, -4.5f), Hill + new Vector3(0, .9f, 0));
@@ -87,6 +96,9 @@ public sealed class BacataDirector : MonoBehaviour
     private IEnumerator Epilogue()
     {
         SetSky(true);
+        // C19: the same path in smoke: fire, wind, distant voices; a tense drum.
+        Sound("amb_bacata_incendio", "musica_bacata_epilogo", .8f);
+        AmbientScatter.On(gameObject).Add("Ambiente/fuego_chasquido", 1.5f, 4f, 4f, 12f, .5f, 1f);
         foreach (var s in _smoke) s.Play();
         Hide(_child); Hide(_bachue); Hide(_furachogua);
         // C19: the same path, now smoke. The uncle defends the passage and dies; the invader aims.
@@ -109,6 +121,12 @@ public sealed class BacataDirector : MonoBehaviour
         // C20: the refuge of Tunja, the journey elided. Last words; the staff to the nephew.
         yield return Cut("Refugio de Tunja");
         foreach (var s in _smoke) s.Stop();
+        // C20: inside the refuge, the hearth crackles beside them; no music under the last words.
+        Sound("amb_refugio", null, 0);
+        AmbientScatter.On(gameObject).Clear();
+        var hearth = new GameObject("Sonido_Hogar");
+        hearth.transform.SetParent(_world, false); hearth.transform.position = Refuge + new Vector3(2, .6f, -1);
+        GameAudio.Loop(hearth, "Ambiente/hoguera_bucle", .7f, true, AudioChannel.Ambience, 12f);
         Hide(_saguanmachica); Hide(_invader);
         Place(_nemequene, Refuge + new Vector3(0, .35f, 1), Refuge + new Vector3(0, .35f, 4));
         // Lying wounded: the rigged body holds the last frame of its fall; the figure is laid down.
@@ -119,12 +137,21 @@ public sealed class BacataDirector : MonoBehaviour
         Shot(Refuge + new Vector3(2.8f, 2.1f, -2.2f), Refuge + new Vector3(-.4f, .6f, 1.1f));
         yield return Lines("H20", 0, 99, true, "Transmitir antes de morir");
         // C21: Iguaque. Furachogua brings the masks kept by Bachué; the staff is laid down and taken up.
+        // C20 ends on the staff's motif.
+        GameAudio.Stinger("Musica/estinger_objetivo", .7f);
         yield return Cut("Iguaque");
         Hide(_nemequene);
         SetSky(false);
+        // C21: water and wind at the lagoon; the resolved motif.
+        Sound("amb_laguna", "musica_legado", .85f);
+        Destroy(hearth);
+        AmbientScatter.On(gameObject).Add("Ambiente/ave_canto", 6f, 14f, 10f, 24f, .35f, 4f);
         Place(_tisquesusa, Lagoon + new Vector3(0, 0, -15.5f), Lagoon + new Vector3(0, 0, -8));
         Place(_furachogua, Lagoon + new Vector3(0, -1.6f, -11), Lagoon + new Vector3(0, 0, -15.5f));
         Shot(Lagoon + new Vector3(5.5f, 2.6f, -20f), Lagoon + new Vector3(0, 1f, -12.5f));
+        GameAudio.PlayAt("Foley/aterrizaje_agua", _furachogua.position + Vector3.up * 1.6f, 1f, AudioChannel.Effects, 40f);
+        GameAudio.PlayDelayed("Foley/paso_agua", .9f, .8f, AudioChannel.Effects, _furachogua.position + Vector3.up * 1.6f);
+        GameAudio.Caption("El agua se abre");
         yield return Rise(_furachogua, 1.6f, 2.5f);
         Act(_furachogua, "Reach");
         yield return Lines("H21", 0, 99, true, "Furachogua");
@@ -168,10 +195,16 @@ public sealed class BacataDirector : MonoBehaviour
     {
         if (actor == null) yield break;
         var acting = CharacterActions.Of(actor);
-        if (acting != null && acting.Play(state, .1f)) { yield return new WaitForSeconds(2.4f); yield break; }
+        Vector3 ground = actor.position;
+        if (acting != null && acting.Play(state, .1f))
+        {
+            GameAudio.PlayDelayed("Foley/aterrizaje_fuerte", .9f, .8f, AudioChannel.Effects, ground);
+            yield return new WaitForSeconds(2.4f); yield break;
+        }
         Quaternion start = actor.rotation, end = actor.rotation * Quaternion.Euler(-85, 0, 0);
         for (float t = 0; t < seconds; t += Time.deltaTime) { actor.rotation = Quaternion.Slerp(start, end, t / seconds); yield return null; }
         actor.rotation = end;
+        GameAudio.PlayAt("Foley/aterrizaje_fuerte", ground, .8f, AudioChannel.Effects, 40f);
         yield return new WaitForSeconds(.6f);
     }
 
@@ -186,8 +219,10 @@ public sealed class BacataDirector : MonoBehaviour
     {
         var arrow = StoryProps.Part(PrimitiveType.Cylinder, _world, from, new Vector3(.04f, .45f, .04f), new Color(.75f, .72f, .6f));
         arrow.rotation = Quaternion.FromToRotation(Vector3.up, to - from);
+        GameAudio.PlayAt("Combate/baston_aire", from, .9f, AudioChannel.Effects, 40f, 1.6f, 0f);
         for (float t = 0; t < .45f; t += Time.deltaTime) { arrow.position = Vector3.Lerp(from, to, t / .45f); yield return null; }
         arrow.position = to;
+        GameAudio.PlayAt("Combate/impacto_criatura", to, .9f, AudioChannel.Effects, 40f);
     }
 
     // Three light cycles condense the seven days (C03), without seven minutes of waiting.
@@ -201,9 +236,42 @@ public sealed class BacataDirector : MonoBehaviour
             sun.transform.rotation = Quaternion.Euler(Mathf.Lerp(-10, 190, a), 30, 0);
             sun.color = Color.Lerp(new Color(1f, .62f, .4f), Color.white, Mathf.Sin(a * Mathf.PI));
             sun.intensity = Mathf.Lerp(.15f, 1.3f, Mathf.Sin(a * Mathf.PI));
+            // Birds greet each dawn, insects each night (the seven days condensed).
+            int phase = Mathf.FloorToInt(t * 4f);
+            if (phase != _dayPhase)
+            {
+                _dayPhase = phase;
+                Vector3 near = _camera != null ? _camera.transform.position + _camera.transform.forward * 6f : Hill;
+                if (phase % 4 == 0) GameAudio.PlayAt("Ambiente/ave_canto", near + Vector3.up * 3f, .6f, AudioChannel.Ambience, 30f);
+                else if (phase % 4 == 3) GameAudio.PlayAt("Ambiente/insecto_noche", near, .5f, AudioChannel.Ambience, 30f);
+            }
             yield return null;
         }
         sun.transform.rotation = rest; sun.color = color; sun.intensity = 1.1f;
+    }
+
+    private int _dayPhase = -1;
+
+    // The bed and the music of a place (null music = silence under the scene).
+    private static void Sound(string bed, string music, float musicVolume)
+    {
+        GameAudio.Ambience("Ambiente/" + bed, 1f, 2.5f);
+        if (music == null) GameAudio.StopMusic(3f);
+        else GameAudio.Music("Musica/" + music, musicVolume, 3f);
+    }
+
+    // A loop that rises and fades away once (the two-tone hum of the vision).
+    private IEnumerator Swell(string id, float seconds, float volume)
+    {
+        var host = new GameObject("Sonido_" + id);
+        host.transform.SetParent(transform, false);
+        var source = GameAudio.Loop(host, id, 0f, false, AudioChannel.Voice);
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            GameAudio.SetLoopVolume(source, volume * Mathf.Sin(Mathf.Clamp01(t / seconds) * Mathf.PI));
+            yield return null;
+        }
+        Destroy(host);
     }
 
     private void SetSky(bool smoke)

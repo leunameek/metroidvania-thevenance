@@ -247,7 +247,7 @@ namespace Nemequene.UI
             button.onClick.AddListener(() =>
             {
                 if (UIManager.Instance != null && !UIManager.Instance.CanActivate) return;
-                UIManager.Instance?.Sound(primary ? PlazaSound.Inspect : PlazaSound.Rotate); action?.Invoke();
+                GameAudio.UI(UICue.Confirm, primary ? 1f : .8f); action?.Invoke();
             });
             button.gameObject.AddComponent<TitleMenuButton>().Initialize(primary);
             return button;
@@ -398,7 +398,7 @@ namespace Nemequene.UI
             var focus = handle.gameObject.AddComponent<Outline>(); focus.effectColor = Color.white; focus.effectDistance = new Vector2(2, -2); focus.enabled = false;
             track.GetComponent<UIControlFeedback>().focus = focus;
             slider.fillRect = fill; slider.handleRect = handle; slider.minValue = min; slider.maxValue = max; slider.value = value;
-            slider.onValueChanged.AddListener(v => { shown.text = Format(v, min, max); set(v); }); return slider;
+            slider.onValueChanged.AddListener(v => { shown.text = Format(v, min, max); set(v); GameAudio.UI(UICue.Adjust); }); return slider;
         }
         public Image Bar(Transform parent, string name, Vector2 min, Vector2 max) => Bar(parent, name, min, max, Theme.gold);
         // Dark rail with a separate fill (components BAR_track and BAR_fill), tinted by role:

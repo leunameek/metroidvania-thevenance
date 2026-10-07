@@ -23,13 +23,18 @@ public sealed class JaguarSpirit : MonoBehaviour
         host._from = host.transform.position;
         host._to = enemy.position - toEnemy.normalized * 1.6f; host._to.y = host._from.y;
         host._actor.PlayAny("Rugido");
+        GameAudio.PlayAt("Criaturas/jaguar_llamada", host._from + Vector3.up, 1f, AudioChannel.Voice, 40f);
         MIBurst.Spawn(host._from + Vector3.up * .6f, new Color(1f, .75f, .3f));
     }
 
     private void Update()
     {
         _t += Time.deltaTime;
-        if (_t > Roar && _t - Time.deltaTime <= Roar) _actor.PlayAny("Embestida", "Correr");
+        if (_t > Roar && _t - Time.deltaTime <= Roar)
+        {
+            _actor.PlayAny("Embestida", "Correr");
+            GameAudio.PlayAt("Combate/jaguar_embestida", transform.position + Vector3.up * .5f, .9f, AudioChannel.Effects, 35f);
+        }
         if (_t > Roar) transform.position = Vector3.Lerp(_from, _to, Mathf.SmoothStep(0, 1, (_t - Roar) / Lunge));
         if (_t > Roar + Lunge + Stay)
         {

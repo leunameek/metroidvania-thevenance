@@ -40,8 +40,7 @@ namespace Nemequene.UI
         private TitleMenuAtmosphere _atmosphere;
         private readonly List<RectTransform> _groups=new List<RectTransform>();
         private readonly List<TitleMenuButton> _tabs=new List<TitleMenuButton>();
-        private AudioSource _music, _cues;
-        private AudioClip _cue;
+        private AudioSource _music;
         private CanvasGroup _homeFade;
         private float _entered, _lastCue, _muteRestore=.3f;
         private int _changedFrame=-1, _section;
@@ -76,8 +75,6 @@ namespace Nemequene.UI
             _music=gameObject.AddComponent<AudioSource>(); _music.playOnAwake=false; _music.loop=true; _music.volume=0;
             _music.clip=Resources.Load<AudioClip>("Nemequene/Menu_Bruma");
             if (_music.clip!=null) _music.Play();
-            _cues=gameObject.AddComponent<AudioSource>(); _cues.playOnAwake=false;
-            _cue=Resources.Load<AudioClip>("Nemequene/UI_Select");
             Settings.Changed+=ApplyPresentation; Settings.Apply(false);
             if (!Application.isBatchMode && Settings.Values.screenWidth>=800 && Settings.Values.screenHeight>=600)
                 Screen.SetResolution(Settings.Values.screenWidth,Settings.Values.screenHeight,Settings.Values.fullscreen?FullScreenMode.FullScreenWindow:FullScreenMode.Windowed);
@@ -258,10 +255,11 @@ namespace Nemequene.UI
             Button(access,"access.reset",()=>Confirm("confirm.access",Settings.ResetAccessibility));
             var audio=_groups[1];
             Slider(audio,"audio.master",0,1,()=>Settings.Values.master,v=>Settings.Values.master=v);
-            Slider(audio,"title.music",0,1,()=>Settings.Values.menuMusic,v=>Settings.Values.menuMusic=v);
-            Slider(audio,"audio.ui",0,1,()=>Settings.Values.uiVolume,v=>Settings.Values.uiVolume=v);
+            Slider(audio,"audio.music",0,1,()=>Settings.Values.music,v=>Settings.Values.music=v);
             Slider(audio,"audio.effects",0,1,()=>Settings.Values.effects,v=>Settings.Values.effects=v);
             Slider(audio,"audio.ambience",0,1,()=>Settings.Values.ambience,v=>Settings.Values.ambience=v);
+            Slider(audio,"audio.voices",0,1,()=>Settings.Values.voices,v=>Settings.Values.voices=v);
+            Slider(audio,"audio.ui",0,1,()=>Settings.Values.uiVolume,v=>Settings.Values.uiVolume=v);
             var graphics=_groups[2];
             int[] widths={1280,1920,2560,1920}; int[] heights={720,1080,1440,1200};
             int resolution=1;
@@ -400,11 +398,12 @@ namespace Nemequene.UI
             _primaryActions.anchorMax=new Vector2(right,.67f);
             if(Settings.Values.reducedMotion) _homeFade.alpha=1;
         }
+        // Interface cues come from the shared bank (wood and clay, see Specs/Audio).
         public void PlayCue(bool activation)
         {
-            if(_cues==null||_cue==null||Time.unscaledTime-_lastCue<.10f)return;
-            _lastCue=Time.unscaledTime;_cues.pitch=activation ? .86f : .70f;
-            _cues.PlayOneShot(_cue,Settings.Values.uiVolume*(activation ? .7f : .28f));
+            if(Time.unscaledTime-_lastCue<.10f)return;
+            _lastCue=Time.unscaledTime;
+            GameAudio.UI(activation?UICue.Confirm:UICue.Focus);
         }
         public void NewGame()
         {
@@ -466,12 +465,13 @@ namespace Nemequene.UI
                     else if(CurrentView==TitleView.Home)RequestQuit();
                 }
                 if(keyboard!=null&&keyboard.mKey.wasPressedThisFrame&&CurrentView==TitleView.Home)
-                {if(Settings.Values.menuMusic>.001f){_muteRestore=Settings.Values.menuMusic;Settings.Values.menuMusic=0;}else Settings.Values.menuMusic=_muteRestore;Settings.Apply();}
+                {if(Settings.Values.music>.001f){_muteRestore=Settings.Values.music;Settings.Values.music=0;}else Settings.Values.music=_muteRestore;Settings.Apply();}
                 if(keyboard!=null&&keyboard.tabKey.wasPressedThisFrame)NavigateTab(keyboard.shiftKey.isPressed);
             }
             if(_resolutionPreview&&Time.unscaledTime>=_resolutionUntil)CancelConfirmation();
             if(_resolutionPreview)_confirmText.text=UIStrings.Get("graphics.keep")+"\n"+UIStrings.Get("title.revert",Mathf.CeilToInt(_resolutionUntil-Time.unscaledTime));
-            if(_music!=null)_music.volume=Mathf.MoveTowards(_music.volume,IsLoading?0:Settings.Values.menuMusic,Time.unscaledDeltaTime*.45f);
+            // The music slider sets the menu piece like the rest of the game's music (about -26 dB RMS).
+            if(_music!=null)_music.volume=Mathf.MoveTowards(_music.volume,IsLoading?0:Settings.Values.music,Time.unscaledDeltaTime*.45f);
             _homeFade.alpha=Settings.Values.reducedMotion?1:Mathf.Clamp01((Time.unscaledTime-_entered)/.45f);
         }
         private void NavigateTab(bool backwards)

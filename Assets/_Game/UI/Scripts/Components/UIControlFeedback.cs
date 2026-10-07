@@ -8,7 +8,7 @@ namespace Nemequene.UI
     public sealed class UIControlFeedback : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public Outline focus;
-        public void OnSelect(BaseEventData e) { SetFocus(true); ScrollIntoView(); }
+        public void OnSelect(BaseEventData e) { SetFocus(true); ScrollIntoView(); GameAudio.UI(UICue.Focus); }
         public void OnDeselect(BaseEventData e) { SetFocus(false); }
         public void OnPointerEnter(PointerEventData e) { if (GetComponent<Selectable>().IsInteractable()) SetFocus(true); }
         public void OnPointerExit(PointerEventData e) { SetFocus(EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject); }

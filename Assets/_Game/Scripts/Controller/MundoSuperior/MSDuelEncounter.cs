@@ -131,16 +131,15 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
     }
 
     // ---------- IDuelStage ----------
-    public void OnTelegraph(DuelMove move) { _move = move; _moveTime = 0; MSAudio.Play("jefe_aviso", .7f, 1.2f); }
+    // The calls, wings and blows of the two birds come from DuelAudio (E09 condor, E10 eagle).
+    public void OnTelegraph(DuelMove move) { _move = move; _moveTime = 0; }
     public void OnResolved(DuelMove move, bool correct)
     {
-        MSAudio.Play(correct ? (move.Accepts(DuelDefense.Dodge) ? "defensa_esquiva" : "defensa_bloqueo") : "defensa_fallida", .85f);
         if (correct && move.Accepts(DuelDefense.Dodge) && _player != null) _player.PerformDodge(1);
         _move = null;
     }
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
     {
-        MSAudio.Play("golpe_nucleo", .8f);
         if (_figure != null) MIBurst.Spawn(_figure.position + Vector3.up * 1.4f, new Color(1f, .8f, .4f));
     }
     public void OnDecide() { }

@@ -465,6 +465,14 @@
       "value": "Ambiente"
     },
     {
+      "key": "audio.music",
+      "value": "Música"
+    },
+    {
+      "key": "audio.voices",
+      "value": "Voces y criaturas"
+    },
+    {
       "key": "audio.ui",
       "value": "Sonidos de interfaz"
     },

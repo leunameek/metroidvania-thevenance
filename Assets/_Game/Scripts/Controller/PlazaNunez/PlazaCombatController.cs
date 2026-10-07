@@ -97,7 +97,8 @@ public sealed class PlazaCombatController : MonoBehaviour
     {
         if (!Active || demo.HelpOpen || !Model.Attack()) return;
         demo.Audio.Play(PlazaSound.Attack);
-        demo.Audio.Play(PlazaSound.Impact, 0.65f);
+        // The staff reaches the guardian at the peak of the lunge (Strike, ~0.16 s), not on the key.
+        GameAudioHost.Current?.Delay(0.16f, () => { if (Active) demo.Audio.Play(PlazaSound.Impact, 0.8f); });
         _flash = 0.35f;
         StartCoroutine(Strike());
     }
@@ -142,13 +143,13 @@ public sealed class PlazaCombatController : MonoBehaviour
         // A new turn or window: gestures started before it do not answer it.
         if (demo.Hands != null && demo.Hands.Tracker != null) demo.Hands.Tracker.Gestures.ClearPending();
         if (Model.Phase == PlazaCombatPhase.Telegraph) demo.Audio.Play(PlazaSound.Warning, 0.55f);
-        if (Model.Phase == PlazaCombatPhase.React) demo.Audio.Play(PlazaSound.Inspect, 0.6f);
+        if (Model.Phase == PlazaCombatPhase.React) GameAudio.Play("Combate/turno_jugador", 0.7f, AudioChannel.Effects, 1.1f, 0f, .3f, 1);
         if (Model.Mistakes > _previousMistakes)
         {
             _previousMistakes = Model.Mistakes;
             demo.PlayerHealth.TakeDamage(10);
             if (demo.PlayerHealth.CurrentHealth <= 30) demo.PlayerHealth.Revive();
-            demo.Audio.Play(PlazaSound.Impact, 0.7f);
+            GameAudio.Play("Combate/dano_recibido", 0.8f);
             demo.SetStatus("No pasa nada. Repetimos la misma defensa; espera el aviso y pulsa la tecla indicada.");
         }
         if (Model.Phase == PlazaCombatPhase.Won)

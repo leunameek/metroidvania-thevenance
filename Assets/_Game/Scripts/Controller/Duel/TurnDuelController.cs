@@ -28,6 +28,8 @@ public sealed class TurnDuelController : MonoBehaviour
     private WorldNaturalInput _natural;
     private TurnDuelHUD _hud;
     private DuelAnimation _bodies;
+    private DuelAudio _audio;
+    private bool _listening;
     private Action<bool> _ended;
     private DuelPhase _lastPhase = (DuelPhase)(-1);
     private int _lastRound = -1;
@@ -59,6 +61,8 @@ public sealed class TurnDuelController : MonoBehaviour
         duel._stage = stage; duel._health = playerHealth; duel._natural = natural; duel._ended = ended;
         duel._hud = new TurnDuelHUD(go.transform, rules.Name, duel.Act, duel.Target, duel.Defend);
         duel._bodies = new DuelAnimation(stage);
+        duel._audio = new DuelAudio(rules.Id, stage?.Focus, playerHealth != null);
+        duel._listening = voice;
         if (playerHealth != null) playerHealth.Died += duel.OnPlayerDied;
         Current = duel;
         natural?.ClearPending();
@@ -173,6 +177,7 @@ public sealed class TurnDuelController : MonoBehaviour
         {
             _stage?.OnPlayerAction(action, target, _model.Message);
             _bodies?.PlayerAction(action, target);
+            _audio?.PlayerAction(action, _model.EnemyHealth < enemyBefore);
             if (_model.EnemyHealth < enemyBefore) _bodies?.EnemyHurt(target);
         }
         _hud.Refresh(_model, true);
@@ -188,7 +193,7 @@ public sealed class TurnDuelController : MonoBehaviour
         int before = _model.PlayerHealth;
         var phase = _model.Phase;
         _model.Defend(defense);
-        if (phase == DuelPhase.Respond) _bodies?.PlayerDefense(defense);
+        if (phase == DuelPhase.Respond) { _bodies?.PlayerDefense(defense); _audio?.Defense(defense); }
         if (_model.PlayerHealth != before) MirrorDamage(before);
         _hud.Refresh(_model, true);
     }
@@ -208,12 +213,16 @@ public sealed class TurnDuelController : MonoBehaviour
             _lastPhase = _model.Phase; _lastRound = _model.Round;
             switch (_model.Phase)
             {
-                case DuelPhase.Telegraph: _natural?.ClearPending(); _stage?.OnTelegraph(_model.Move); _bodies?.EnemyTelegraph(_model.Move); break;
+                case DuelPhase.Telegraph: _natural?.ClearPending(); _stage?.OnTelegraph(_model.Move); _bodies?.EnemyTelegraph(_model.Move); _audio?.Telegraph(_model.Move); break;
                 case DuelPhase.Respond: _natural?.ClearPending(); break;
                 case DuelPhase.Resolve:
-                    if (previous == DuelPhase.Respond && _model.Move != null) { _stage?.OnResolved(_model.Move, _model.LastDefenseCorrect); _bodies?.Resolved(_model.LastDefenseCorrect); }
+                    if (previous == DuelPhase.Respond && _model.Move != null)
+                    {
+                        _stage?.OnResolved(_model.Move, _model.LastDefenseCorrect); _bodies?.Resolved(_model.LastDefenseCorrect);
+                        _audio?.Resolved(_model.LastDefenseCorrect);
+                    }
                     break;
-                case DuelPhase.Decide: _natural?.ClearPending(); _stage?.OnDecide(); break;
+                case DuelPhase.Decide: _natural?.ClearPending(); _stage?.OnDecide(); _audio?.Decide(_listening); break;
                 case DuelPhase.Won: Finish(true); return;
                 case DuelPhase.Lost: Finish(false); return;
             }
@@ -229,6 +238,7 @@ public sealed class TurnDuelController : MonoBehaviour
         if (Current == this) Current = null;
         var ended = _ended; _ended = null;
         _bodies?.Ended(victory);
+        _audio?.Ended(victory); _audio = null;
         Destroy(gameObject);
         ended?.Invoke(victory);
     }

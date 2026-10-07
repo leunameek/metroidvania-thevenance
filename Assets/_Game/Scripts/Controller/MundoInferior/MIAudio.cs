@@ -1,59 +1,38 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-// Synthesised sound bank of the Mundo Inferior (Resources/MIAudio, built by
-// tools/audio/generate_mundo_inferior_audio.py). Every essential cue is also shown on screen
-// (guide 7.3); sounds are complementary and the level plays fine without them.
+// Sound bank of the Mundo Inferior (Resources/MIAudio, built by
+// tools/audio/generate_mundo_inferior_audio.py and revised by tools/audio/generate_game_audio.py).
+// Since the audio revision it is a facade over GameAudio: the cues follow the game's channels
+// (effects, ambience, music, interface), pool, vary and pause like every other sound. Every
+// essential cue is also shown on screen (guide 7.3); the level plays fine without them.
 public static class MIAudio
 {
-    private static readonly Dictionary<string, AudioClip> Clips = new Dictionary<string, AudioClip>();
-    private static AudioSource _ui;
+    public const string Folder = "MIAudio/";
+    // Extra trim of this bank (kept from the first mix).
     public static float Volume = 0.8f;
 
-    public static AudioClip Clip(string name)
-    {
-        if (Clips.TryGetValue(name, out var clip) && clip != null) return clip;
-        clip = Resources.Load<AudioClip>("MIAudio/" + name);
-        Clips[name] = clip;
-        return clip;
-    }
+    public static AudioClip Clip(string name) => GameAudio.Clip(Folder + name);
 
-    // Non-spatial cue (finds, menus, rests).
+    // Phrases (finds confirmed, the guardian freed, defeat) dip the music; interface cues ignore the pause.
     public static void Play(string name, float volume = 1f, float pitch = 1f)
     {
-        var clip = Clip(name);
-        if (clip == null) return;
-        if (_ui == null)
-        {
-            var go = new GameObject("MIAudio_UI");
-            _ui = go.AddComponent<AudioSource>(); _ui.playOnAwake = false; _ui.spatialBlend = 0; _ui.ignoreListenerPause = true;
-        }
-        _ui.pitch = pitch;
-        _ui.PlayOneShot(clip, volume * Volume);
+        if (IsPhrase(name)) { GameAudio.Stinger(Folder + name, volume * Volume); return; }
+        GameAudio.Play(Folder + name, volume * Volume, ChannelOf(name), pitch, name.StartsWith("ui_") ? .02f : .03f);
     }
 
-    // World cue at a position (gates, rocks, slabs).
     public static void PlayAt(string name, Vector3 position, float volume = 1f, float pitch = 1f)
-    {
-        var clip = Clip(name);
-        if (clip == null) return;
-        var go = new GameObject("MIAudio_" + name);
-        go.transform.position = position;
-        var source = go.AddComponent<AudioSource>();
-        source.clip = clip; source.volume = volume * Volume; source.pitch = pitch;
-        source.spatialBlend = 1; source.rolloffMode = AudioRolloffMode.Linear; source.minDistance = 3; source.maxDistance = 30;
-        source.Play();
-        Object.Destroy(go, clip.length / Mathf.Max(0.1f, pitch) + 0.1f);
-    }
+        => GameAudio.PlayAt(Folder + name, position, volume * Volume, ChannelOf(name), 30f, pitch);
 
-    // Looping source owned by an object (ambience, pendulum creak, boss music).
     public static AudioSource Loop(GameObject owner, string name, float volume, bool spatial, float maxDistance = 25f)
+        => GameAudio.Loop(owner, Folder + name, volume * Volume, spatial, ChannelOf(name), maxDistance);
+
+    private static bool IsPhrase(string name) => name == "victoria" || name == "derrota" || name == "hallazgo_confirmar";
+
+    private static AudioChannel ChannelOf(string name)
     {
-        var clip = Clip(name);
-        var source = owner.AddComponent<AudioSource>();
-        source.clip = clip; source.loop = true; source.volume = volume * Volume; source.playOnAwake = false;
-        source.spatialBlend = spatial ? 1 : 0; source.rolloffMode = AudioRolloffMode.Linear; source.minDistance = 2; source.maxDistance = maxDistance;
-        if (clip != null) source.Play();
-        return source;
+        if (name.StartsWith("ui_")) return AudioChannel.Interface;
+        if (name.StartsWith("ambiente") || name == "gota") return AudioChannel.Ambience;
+        if (name.StartsWith("musica")) return AudioChannel.Music;
+        return AudioChannel.Effects;
     }
 }
