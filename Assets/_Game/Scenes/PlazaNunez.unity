@@ -40446,7 +40446,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 9eccb7d880914ace8393bfb046e7c2b0, type: 3}
       propertyPath: destinationSceneName
-      value: Movement
+      value: MundoSuperior
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -121843,6 +121843,7 @@ MonoBehaviour:
   dodgeDistance: 4
   dodgeDuration: 0.25
   groundStickSpeed: 15
+  allowAirDash: 1
 --- !u!114 &1821698968
 MonoBehaviour:
   m_ObjectHideFlags: 0

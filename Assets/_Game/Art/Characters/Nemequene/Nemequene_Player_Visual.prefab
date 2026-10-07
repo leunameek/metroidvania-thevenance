@@ -95,6 +95,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0a5fd4c191c78d64a89ca07551105ee0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 932951127427768660}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0a5fd4c191c78d64a89ca07551105ee0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7546648155023877063}
   m_SourcePrefab: {fileID: 100100000, guid: 0a5fd4c191c78d64a89ca07551105ee0, type: 3}
 --- !u!1 &7055499982028368644 stripped
 GameObject:
@@ -118,3 +121,17 @@ MonoBehaviour:
   hardLandSpeed: 14
   speedDamping: 0.08
   climbReferenceSpeed: 4
+--- !u!114 &7546648155023877063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7055499982028368644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b08c9389d2a4ff0884ef66c2086085d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Prototype.Runtime::CharacterActions
+  restState: Locomotion
+  animator: {fileID: 0}
