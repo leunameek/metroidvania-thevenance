@@ -222,7 +222,9 @@ public sealed class StoryPlayer : MonoBehaviour
         _revealed = 0;
         _view.SetLine(line.speaker, line.note, line.text);
         var actor = StoryActor.Find(line.speaker);
-        Frame(actor);
+        // A line about something in the place (the crack, the falling stones) looks at it.
+        var focus = StoryFocus.Find(line.cue);
+        if (!(focus.HasValue && Frame(actor, focus.Value))) Frame(actor);
         Act(actor);
     }
 
@@ -291,26 +293,75 @@ public sealed class StoryPlayer : MonoBehaviour
             }
             _framing = true;
         }
-        // Three-quarter close shot from the side the camera already was, at face height.
+        // Three-quarter close shot from the side the camera already was. Someone lying is seen
+        // from above, beside them.
         Vector3 face = actor.Face;
+        bool lying = actor.Lying;
+        float distance = lying ? 2.2f : 2.6f, rise = lying ? 1.4f : .3f;
         Vector3 side = _cameraPosition - face; side.y = 0;
         if (side.sqrMagnitude < .01f) side = actor.transform.forward;
         side = side.normalized;
         // First clear three-quarter angle: nobody (the player included) stands between.
-        _shotPosition = face + Quaternion.AngleAxis(25f, Vector3.up) * side * 2.6f + Vector3.up * .25f;
+        _shotPosition = face + Quaternion.AngleAxis(25f, Vector3.up) * side * distance + Vector3.up * rise;
         foreach (float angle in new[] { 25f, -25f, 60f, -60f, 100f, -100f, 150f, -150f })
         {
-            Vector3 eye = face + Quaternion.AngleAxis(angle, Vector3.up) * side * 2.6f + Vector3.up * .25f;
+            Vector3 eye = face + Quaternion.AngleAxis(angle, Vector3.up) * side * distance + Vector3.up * rise;
             if (Clear(actor, face, eye)) { _shotPosition = eye; break; }
         }
-        _shotRotation = Quaternion.LookRotation(face - _shotPosition);
+        _shotRotation = AboveTheBox(_shotPosition, face);
+    }
+
+    // Looks a little below the face, so the face sits in the upper third of the screen and the
+    // dialogue box (the lower third) covers the body, never the face (2026-10-07 playtest).
+    private Quaternion AboveTheBox(Vector3 eye, Vector3 face)
+    {
+        float fov = _camera != null ? _camera.fieldOfView : 60f;
+        Vector3 toFace = face - eye;
+        float half = Mathf.Tan(fov * .5f * Mathf.Deg2Rad) * toFace.magnitude;
+        var look = Quaternion.LookRotation(toFace);
+        Vector3 down = look * Vector3.down;
+        return Quaternion.LookRotation(face + down * half * .4f - eye);
+    }
+
+    // A shot of something in the place, over the speaker's shoulder (or from where the camera was).
+    private bool Frame(StoryActor actor, Vector3 point)
+    {
+        if (!_framing)
+        {
+            if (actor == null) return false;
+            Frame(actor);
+            if (!_framing) return false;
+        }
+        Vector3 from = actor != null ? actor.Face : _cameraPosition;
+        Vector3 back = from - point; back.y = 0;
+        float far = back.magnitude;
+        if (back.sqrMagnitude < .01f) back = Vector3.back;
+        back = back.normalized;
+        Vector3 aside = Vector3.Cross(Vector3.up, back);
+        // Near enough to see it well (at most 7 m away), from the speaker's side.
+        _shotPosition = point + back * Mathf.Min(far + 2.2f, 7f) + aside * 1.2f + Vector3.up * 1.6f;
+        _shotRotation = AboveTheBox(_shotPosition, point);
+        return true;
     }
     private static bool Clear(StoryActor actor, Vector3 face, Vector3 eye)
     {
         Vector3 d = eye - face;
         foreach (var hit in Physics.SphereCastAll(face, .25f, d.normalized, d.magnitude, ~0, QueryTriggerInteraction.Ignore))
             if (!hit.transform.IsChildOf(actor.transform)) return false;
+        // Nobody else in the way either (the cast often has no colliders): their head or body
+        // close to the line between the face and the eye.
+        foreach (var other in StoryActor.All)
+        {
+            if (other == null || other == actor || !other.isActiveAndEnabled) continue;
+            if (Near(face, eye, other.Face) || Near(face, eye, other.transform.position + Vector3.up * .9f)) return false;
+        }
         return true;
+    }
+    private static bool Near(Vector3 a, Vector3 b, Vector3 p)
+    {
+        Vector3 ab = b - a;
+        float t = Mathf.Clamp01(Vector3.Dot(p - a, ab) / Mathf.Max(ab.sqrMagnitude, 1e-4f));
+        return t > .05f && Vector3.Distance(a + ab * t, p) < .45f;
     }
     private void UpdateCamera()
     {

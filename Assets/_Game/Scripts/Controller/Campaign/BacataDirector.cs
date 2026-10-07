@@ -143,7 +143,9 @@ public sealed class BacataDirector : MonoBehaviour
         if (wounded == null || !wounded.Hold("DeathBack")) _nemequene.rotation = Quaternion.Euler(-90, 90, 0);
         // The staff lies on the mat beside him, ready to be handed on.
         if (heirStaff != null) { heirStaff.SetParent(_world, true); heirStaff.SetPositionAndRotation(Refuge + new Vector3(.55f, .12f, 1.4f), Quaternion.Euler(0, 15, 90)); }
-        Place(_tisquesusa, Refuge + new Vector3(-1.3f, 0, 1.2f), Refuge + new Vector3(0, 0, 1));
+        // Beside his head (he fell backwards: the head lies 1.5 m behind his feet), on the far side
+        // of the mat, so the shot from the hearth sees both faces.
+        Place(_tisquesusa, Refuge + new Vector3(-1.2f, 0, 1.85f), Refuge + new Vector3(-1.45f, 0, 1));
         var nephew = CharacterActions.Of(_tisquesusa); if (nephew != null) nephew.Hold("Kneel");
         Shot(Refuge + new Vector3(2.8f, 2.1f, -2.2f), Refuge + new Vector3(-.4f, .6f, 1.1f));
         yield return Lines("H20", 0, 99, true, "Transmitir antes de morir");

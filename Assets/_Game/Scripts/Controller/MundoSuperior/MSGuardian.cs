@@ -43,6 +43,8 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         Transform shape = _serpent != null ? _serpent.transform : body;
         if (core != null) core.gameObject.SetActive(false);
+        // The stand-in pieces kept their colliders under the model: they go too.
+        CreatureDissolve.Unblock(body != null ? body.parent : null);
         if (instant) { CreatureDissolve.HideNow(shape); return; }
         CreatureDissolve.Run(shape, new Color(.95f, .85f, .55f), .3f);
     }

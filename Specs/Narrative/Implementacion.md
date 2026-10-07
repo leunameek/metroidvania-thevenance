@@ -226,6 +226,32 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
   el controlador del jugador las muertes ya no vuelven a estar de pie. Nemequene sigue acostado
   sobre la estera en el refugio.
 
+## Segunda ronda de prueba del 2026-10-07
+
+- **Encaje:**
+  - El dibujo dorado de la pieza (contorno brillante con relleno de vidrio, shader
+    `Resources/Effects/FitSketch`) se dibuja en su mesa, en el lugar y la posición exactos donde
+    debe quedar.
+  - Durante la inspección, la pieza se sostiene justo encima de la mesa y la cámara encuadra las
+    dos.
+  - Encaja con más margen. Cerca de su posición, la pieza se atrae sola y el dibujo brilla más; al
+    entrar en esa zona suena un aviso claro y hay un destello.
+- **Diálogos:**
+  - La cámara toma la cara del hueso de la cabeza: a alguien acostado o arrodillado se le encuadra
+    donde de verdad está su cara.
+  - La cara queda en el tercio superior de la pantalla, encima del cuadro de diálogo; a quien está
+    acostado se le ve desde arriba.
+  - Una línea puede mirar un lugar en vez de a quien habla (`StoryFocus`, por la `cue` de
+    historia.json). Con «La grieta avisa antes de ceder», la estalactita más cercana de la galería
+    avisa y cae mientras la cámara la mira.
+- **Mundo inferior:**
+  - La palanca muestra solo el modelo; el mango dorado provisional se oculta.
+  - Las rocas de las paredes (T08) tienen colisión.
+- **Poses finales:** acostado, arrodillado o agachado se quedan en el último cuadro aunque el
+  controlador tenga una salida (Nemequene ya no se levanta en el refugio).
+- **Jefes:** al liberarse el guardián o la serpiente, se apagan los colisionadores de su figura
+  provisional; no queda una pared invisible.
+
 ## Compilar el juego (Windows)
 
 - *Nemequene > Compilar > Windows* (o `-executeMethod GameBuild.Windows` en modo batch) compila

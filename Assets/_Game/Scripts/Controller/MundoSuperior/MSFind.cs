@@ -44,6 +44,9 @@ public sealed class MSFind : MIInteractable
     // stay there; the wings and the medallion are taken once fitted (he wears and uses them).
     public bool Fits => findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb || findId == MSProgress.Wings || findId == MSProgress.Key;
     private bool Stays => _fit != null && (findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb);
+    // The inspection looks at the piece, or at the piece held over its table and the table.
+    private Vector3 Focus => _fit != null ? _fit.FramePoint : _itemPosition;
+    private float Distance => _fit != null ? 1.9f : 1.5f;
     private bool ItemShown => (!Collected || Stays) && RequirementsMet && TrialMet;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -117,7 +120,7 @@ public sealed class MSFind : MIInteractable
         if (_orbit != null) _orbit.enabled = false;
         _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
         _itemPosition = item.position; _itemRotation = item.rotation;
-        _frameSide = InspectionFraming.ClearSide(_itemPosition, _cameraPosition, 1.5f, item, player.transform);
+        _frameSide = InspectionFraming.ClearSide(Focus, _cameraPosition, Distance, item, player.transform);
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
         WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
@@ -140,10 +143,12 @@ public sealed class MSFind : MIInteractable
         Vector3 toCamera = _frameSide;
         if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
         Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
-        Vector3 framed = _itemPosition + toCamera.normalized * 1.5f + Vector3.up * .2f - side * .5f;
-        Quaternion look = Quaternion.LookRotation(_itemPosition - side * .5f - framed);
+        Vector3 framed = Focus + toCamera.normalized * Distance + Vector3.up * (_fit != null ? .55f : .2f) - side * .5f;
+        Quaternion look = Quaternion.LookRotation(Focus - side * .5f - framed);
         float t = Mathf.SmoothStep(0, 1, _blend);
         _camera.transform.SetPositionAndRotation(Vector3.Lerp(_cameraPosition, framed, t), Quaternion.Slerp(_cameraRotation, look, t));
+        // A piece to fit is held just above its table, where its sketch is drawn.
+        if (_fit != null) item.position = Vector3.Lerp(_itemPosition, _fit.Hover, t);
 
         var mouse = Mouse.current; var keyboard = Keyboard.current;
         Vector2 turn = Vector2.zero;

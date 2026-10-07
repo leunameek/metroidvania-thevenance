@@ -17,6 +17,7 @@ public sealed class CharacterActions : MonoBehaviour
     private int _windupHash;
     private float _windupAt;
     private bool _frozen;
+    private float _since;
 
     public Animator Animator => animator;
     public string Current { get; private set; } = "";
@@ -44,6 +45,24 @@ public sealed class CharacterActions : MonoBehaviour
         { animator.speed = .03f; _frozen = true; }
         if (!string.IsNullOrEmpty(Stance) && _windupHash == 0 && settled && info.shortNameHash == Animator.StringToHash(restState) && Has(Stance))
             animator.CrossFadeInFixedTime(Stance, .3f, 0);
+        Pin(info, settled);
+    }
+
+    // A final pose (lying dead, kneeling, crouched, the freed serpent lowered) stays on its last
+    // frame until another state is asked for, whatever the controller's own transitions say
+    // (2026-10-07 playtest: Nemequene stood up again in the refuge after lying a while).
+    private void Pin(AnimatorStateInfo info, bool settled)
+    {
+        if (_windupHash != 0 || System.Array.IndexOf(FinalPoses, Current) < 0 || Time.time - _since < .5f) return;
+        int hash = Animator.StringToHash(Current);
+        if (!settled)
+        {
+            // Still fading into the pose: let it come. Fading out of it on its own: back to it.
+            if (animator.GetNextAnimatorStateInfo(0).shortNameHash == hash) return;
+            animator.Play(hash, 0, .99f); animator.speed = 0; return;
+        }
+        if (info.shortNameHash != hash) { animator.Play(hash, 0, .99f); animator.speed = 0; return; }
+        if (info.normalizedTime >= .97f) animator.speed = 0;
     }
 
     // The nearest acting component of a character: on it, under it, or above it.
@@ -58,6 +77,8 @@ public sealed class CharacterActions : MonoBehaviour
     // Held poses (kneeling, lying, sitting, meditating, crouched) that a line must not break.
     public bool Posed => System.Array.IndexOf(HeldPoses, Current) >= 0;
     private static readonly string[] HeldPoses = { "Kneel", "Death", "DeathBack", "Sit", "Pray", "Crouch", "Liberada", "Reposo" };
+    // The held poses that do not loop: they end on a frame and stay there.
+    private static readonly string[] FinalPoses = { "Kneel", "Death", "DeathBack", "Crouch", "Liberada" };
 
     public bool Has(string state) => animator != null && animator.isActiveAndEnabled && !string.IsNullOrEmpty(state)
         && animator.HasState(0, Animator.StringToHash(state));
@@ -67,7 +88,7 @@ public sealed class CharacterActions : MonoBehaviour
         if (!Has(state)) return false;
         ClearWindup();
         animator.CrossFadeInFixedTime(state, fade, 0);
-        Current = state;
+        Current = state; _since = Time.time;
         return true;
     }
 
@@ -108,8 +129,10 @@ public sealed class CharacterActions : MonoBehaviour
     public bool Hold(string state)
     {
         if (!Has(state)) return false;
-        animator.Play(state, 0, .98f);
+        ClearWindup();
+        animator.Play(state, 0, .99f);
         Current = state;
+        if (System.Array.IndexOf(FinalPoses, state) >= 0) animator.speed = 0;
         return true;
     }
 

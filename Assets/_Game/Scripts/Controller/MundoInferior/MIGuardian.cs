@@ -271,6 +271,8 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         Transform shape = _boss != null ? _boss.transform : body;
         if (core != null) core.gameObject.SetActive(false);
         if (coreLight != null) coreLight.enabled = false;
+        // The stand-in body's solid volume goes too: nothing invisible stays in the arena.
+        CreatureDissolve.Unblock(body);
         if (instant) { CreatureDissolve.HideNow(shape); return; }
         CreatureDissolve.Run(shape, new Color(.75f, .65f, 1f), .3f);
     }

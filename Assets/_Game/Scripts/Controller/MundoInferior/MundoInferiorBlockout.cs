@@ -78,6 +78,8 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         SpawnStoryPieces();
         StoryPlayer.Listen();
         StoryPlayer.AddGate(this, () => !_paused && !_dead && MIFind.Inspecting == null && (!InFight || (_guardian != null && _guardian.Fighting)));
+        SolidRocks();
+        StoryFocus.Register("derrumbe", CrackFocus);
         EnterRoom(0);
         // Cave bed (air, distant water) crossfaded from the plaza; stones settle and a bat passes
         // far away now and then. Footsteps on wet stone.
@@ -91,8 +93,52 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         if (MIProgress.FindsCount == 0) Hud.Notify("Mundo inferior", "Encuentra el santuario de raíces siguiendo el camino de piedra.", UIIcon.Objective, UIPalette.GoldLight);
     }
 
+    // The rock clusters along the walls (T08) are solid (2026-10-07 playtest: Nemequene walked
+    // through them in the gallery of the collapse). A box from the mesh's own bounds, a little
+    // narrower than the rock so its rough sides do not stop him in the air.
+    private static void SolidRocks()
+    {
+        foreach (var r in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+        {
+            if (!r.name.StartsWith("T08") || Solid(r.transform)) continue;
+            var filter = r.GetComponent<MeshFilter>();
+            if (filter == null || filter.sharedMesh == null) continue;
+            var box = r.gameObject.AddComponent<BoxCollider>();
+            var b = filter.sharedMesh.bounds;
+            box.center = b.center; box.size = Vector3.Scale(b.size, new Vector3(.8f, 1f, .8f));
+        }
+    }
+
+    private static bool Solid(Transform t)
+    {
+        foreach (var c in t.GetComponentsInChildren<Collider>()) if (!c.isTrigger) return true;
+        for (var p = t.parent; p != null; p = p.parent)
+            foreach (var c in p.GetComponents<Collider>()) if (!c.isTrigger) return true;
+        return false;
+    }
+
+    // «La grieta avisa antes de ceder»: while it is said, the nearest stalactite of the room
+    // announces its fall and drops, and the camera looks at it.
+    private Vector3? CrackFocus()
+    {
+        var room = roomSpawns[_room] != null ? roomSpawns[_room].parent : null;
+        Vector3 from = player != null ? player.transform.position : roomSpawns[_room].position;
+        MIStalactite best = null; float bestDistance = float.MaxValue;
+        foreach (var s in FindObjectsByType<MIStalactite>(FindObjectsSortMode.None))
+        {
+            if (room == null || !s.transform.IsChildOf(room)) continue;
+            float d = Vector3.Distance(s.transform.position, from);
+            if (d < 3f || d >= bestDistance) continue;
+            best = s; bestDistance = d;
+        }
+        if (best == null) return null;
+        best.Trigger();
+        return best.Focus;
+    }
+
     private void OnDestroy()
     {
+        StoryFocus.Unregister("derrumbe");
         MIProgress.Changed -= OnProgress;
         if (_health != null) _health.Died -= OnDied;
         if (Instance == this) Instance = null;

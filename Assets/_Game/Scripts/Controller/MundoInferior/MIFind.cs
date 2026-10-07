@@ -43,6 +43,9 @@ public sealed class MIFind : MIInteractable
 
     public bool Fits => kind == Kind.Bracelets || kind == Kind.Offering;
     private bool Stays => _fit != null && kind == Kind.Offering;
+    // The inspection looks at the piece, or at the piece held over its table and the table.
+    private Vector3 Focus => _fit != null ? _fit.FramePoint : _itemPosition;
+    private float Distance => _fit != null ? 2.1f : 1.7f;
 
     private void Start()
     {
@@ -98,7 +101,7 @@ public sealed class MIFind : MIInteractable
         if (_orbit != null) _orbit.enabled = false;
         _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
         _itemPosition = item.position; _itemRotation = item.rotation;
-        _frameSide = InspectionFraming.ClearSide(_itemPosition, _cameraPosition, 1.7f, item, player.transform);
+        _frameSide = InspectionFraming.ClearSide(Focus, _cameraPosition, Distance, item, player.transform);
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
         WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
@@ -122,10 +125,12 @@ public sealed class MIFind : MIInteractable
         Vector3 toCamera = _frameSide;
         if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
         Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
-        Vector3 framed = _itemPosition + toCamera.normalized * 1.7f + Vector3.up * .25f - side * .55f;
+        Vector3 framed = Focus + toCamera.normalized * Distance + Vector3.up * (_fit != null ? .6f : .25f) - side * .55f;
         // Camera right is -side: shifting both eye and target keeps the piece left of the panel.
-        Quaternion look = Quaternion.LookRotation(_itemPosition - side * .55f - framed);
+        Quaternion look = Quaternion.LookRotation(Focus - side * .55f - framed);
         float t = Mathf.SmoothStep(0, 1, _blend);
+        // A piece to fit is held just above its table, where its sketch is drawn.
+        if (_fit != null) item.position = Vector3.Lerp(_itemPosition, _fit.Hover, t);
         _camera.transform.SetPositionAndRotation(Vector3.Lerp(_cameraPosition, framed, t), Quaternion.Slerp(_cameraRotation, look, t));
 
         var mouse = Mouse.current; var keyboard = Keyboard.current;
