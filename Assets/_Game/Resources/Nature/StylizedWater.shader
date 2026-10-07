@@ -111,7 +111,7 @@ Shader "Nemequene/Stylized Water"
                 water = lerp(water, _FoamColor.rgb * (half(0.8) + half(0.2) * shadow), foam * .85);
 
                 float alpha = saturate(depth / .06);
-                return half4(MixFog(water, i.fog), alpha);
+                return half4(NatureFinite(MixFog(water, i.fog)), saturate(alpha));
             }
             ENDHLSL
         }

@@ -74,8 +74,8 @@ Shader "Nemequene/Stylized Foliage"
             half4 Frag(Varyings i) : SV_Target
             {
                 half3 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv).rgb * _BaseColor.rgb;
-                half3 lit = NatureLight(albedo, i.positionWS, normalize(i.normalWS), .4, _ShadeTint.rgb);
-                return half4(MixFog(lit, i.fog), 1);
+                half3 lit = NatureLight(albedo, i.positionWS, SafeNormalize(i.normalWS), .4, _ShadeTint.rgb);
+                return half4(NatureFinite(MixFog(lit, i.fog)), 1);
             }
             ENDHLSL
         }

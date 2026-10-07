@@ -252,6 +252,36 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
 - **Jefes:** al liberarse el guardián o la serpiente, se apagan los colisionadores de su figura
   provisional; no queda una pared invisible.
 
+## Tercera ronda de prueba del 2026-10-07
+
+- **Bastón:** se sostiene vertical en el puño (`HeldUpright`), sin importar cómo gire la mano en el
+  clip; al caer Nemequene, cae con él.
+- **Piedra de la colina:** tiene colisión, y Nemequene se arrodilla sobre ella, a la altura medida
+  del modelo.
+- **Plaza Núñez:**
+  - Se quitaron el pasto y el viento de las jardineras; ahí aparecían destellos blancos. Queda solo
+    el agua de la fuente.
+  - Los shaders de naturaleza normalizan con seguridad y limitan el color final, así un valor
+    inválido no se vuelve un destello del bloom.
+- **Interfaces:**
+  - El panel de las lecciones se ve completo, sin desplazar; si no cabe, el texto se achica.
+  - La placa del nombre en los diálogos crece con el nombre (hasta 640 px) y achica el texto si
+    hace falta.
+  - El aviso de interacción del mundo crece con su texto.
+  - Con la voz activa, los botones del duelo de entrenamiento dicen su palabra una sola vez
+    («Atacar»).
+- **Encaje:** el dibujo se apoya en la superficie más alta bajo la pieza (su cuna) y es más tenue.
+  La semilla del santuario mide la mitad y se apoya más cerca del altar.
+- **Coca:**
+  - Aparece donde estaba el centinela de escudo, después de derrotarlo.
+  - El objetivo pide primero romper el escudo y luego recoger la coca.
+- **Criaturas de impulso:** tienen unas 1,7 veces más vida (centinela 55, murciélago 70, vigía del
+  cuerno y hombre-caimán 100).
+- **Rocas T08:** sus muros invisibles suben 6 m sobre la roca, así el doble salto no las pasa.
+- **Diálogos:** quien habla gira la cabeza (y algo el cuello) hacia la cámara, con un límite.
+- **Urnas:** las tres empiezan cerradas e iguales; la vacía se cambia por la abierta cuando se ha
+  mirado dentro.
+
 ## Compilar el juego (Windows)
 
 - *Nemequene > Compilar > Windows* (o `-executeMethod GameBuild.Windows` en modo batch) compila

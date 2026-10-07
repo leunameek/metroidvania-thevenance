@@ -44,6 +44,14 @@ half3 NatureLight(half3 albedo, float3 positionWS, half3 normalWS, half wrap, ha
     return albedo * (direct + shade);
 }
 
+// A colour the bloom can take: no NaN or infinity (some GPUs produce them from degenerate normals
+// of imported meshes, and the bloom spreads one bad pixel into a white blob), and no runaway HDR.
+half3 NatureFinite(half3 c)
+{
+    c = (c == c) ? c : half3(0, 0, 0);
+    return clamp(c, half3(0, 0, 0), half3(8, 8, 8));
+}
+
 // Shadow caster position (the light direction is set by URP for the shadow pass).
 float3 _LightDirection;
 float3 _LightPosition;
@@ -66,7 +74,7 @@ float4 NatureShadowClip(float3 positionWS, float3 normalWS)
 // The normal for the depth-normals prepass (screen-space ambient occlusion reads it).
 half4 NatureDepthNormal(float3 normalWS)
 {
-    float3 n = normalize(normalWS);
+    float3 n = SafeNormalize(normalWS);
 #if defined(_GBUFFER_NORMALS_OCT)
     float2 octahedral = PackNormalOctQuadEncode(n);
     float2 remapped = saturate(octahedral * .5 + .5);

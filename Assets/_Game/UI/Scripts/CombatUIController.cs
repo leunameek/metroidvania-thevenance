@@ -77,8 +77,12 @@ namespace Nemequene.UI
         private void OnScreen(UIScreen s) { Refresh(); }
         private static void Label(Button button, string key, string word, string keyName)
         {
-            // UIKeyHint splits it again into the label and the cap on its next LateUpdate.
-            button.GetComponentInChildren<TMP_Text>().text = UIStrings.Get(key, VoicePrompt.Cap(word, keyName));
+            // With the voice on, the button says its word once, in the middle («Atacar»), and the line
+            // below says the voice is listening (2026-10-07 playtest: «Atacar» and «ATACAR» side by
+            // side). With the voice off, UIKeyHint splits "Atacar · E" into the label and its key cap.
+            var text = button.GetComponentInChildren<TMP_Text>();
+            text.text = VoicePrompt.Enabled ? "«" + char.ToUpperInvariant(word[0]) + word.Substring(1) + "»"
+                : UIStrings.Get(key, VoicePrompt.Cap(word, keyName));
         }
         private void Refresh()
         {

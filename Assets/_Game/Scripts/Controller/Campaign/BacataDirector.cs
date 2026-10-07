@@ -83,7 +83,7 @@ public sealed class BacataDirector : MonoBehaviour
         // C03: seven days and seven nights on the hill; Bachué comes along the same path.
         yield return Cut();
         Hide(_tisquesusa);
-        Place(_nemequene, Hill + new Vector3(0, .9f, 0), Hill + new Vector3(0, .9f, -6));
+        Place(_nemequene, _vigil, Hill + new Vector3(0, .9f, -6));
         Shot(Hill + new Vector3(7, 3.5f, -7), Hill + new Vector3(0, 1.5f, 0));
         // C03: water and wind on the hill; the music gives way to silence during the vigil.
         Sound("amb_colina", null, 0);
@@ -142,7 +142,7 @@ public sealed class BacataDirector : MonoBehaviour
         var wounded = CharacterActions.Of(_nemequene);
         if (wounded == null || !wounded.Hold("DeathBack")) _nemequene.rotation = Quaternion.Euler(-90, 90, 0);
         // The staff lies on the mat beside him, ready to be handed on.
-        if (heirStaff != null) { heirStaff.SetParent(_world, true); heirStaff.SetPositionAndRotation(Refuge + new Vector3(.55f, .12f, 1.4f), Quaternion.Euler(0, 15, 90)); }
+        if (heirStaff != null) { var grip = heirStaff.GetComponent<HeldUpright>(); if (grip != null) { grip.enabled = false; Destroy(grip); } heirStaff.SetParent(_world, true); heirStaff.SetPositionAndRotation(Refuge + new Vector3(.55f, .12f, 1.4f), Quaternion.Euler(0, 15, 90)); }
         // Beside his head (he fell backwards: the head lies 1.5 m behind his feet), on the far side
         // of the mat, so the shot from the hearth sees both faces.
         Place(_tisquesusa, Refuge + new Vector3(-1.2f, 0, 1.85f), Refuge + new Vector3(-1.45f, 0, 1));
@@ -370,6 +370,8 @@ public sealed class BacataDirector : MonoBehaviour
     // ------------------------------------------------------------------ the land
 
     private NatureGround _savanna, _lagoonGround;
+    // Where he kneels for the vigil: the top of the offering stone (measured when it is built).
+    private Vector3 _vigil = Hill + new Vector3(0, .9f, 0);
     private readonly NatureTrees.Forest _forest = new NatureTrees.Forest();
 
     // The savanna of Bacatá and the meditation hill share one ground: flat where the scenes are
@@ -498,8 +500,23 @@ public sealed class BacataDirector : MonoBehaviour
     {
         var g = _savanna;
         // The offering stone where he keeps his vigil (C03), under his knees, on top of the mound.
-        if (Model("PiedraOfrenda", Hill + new Vector3(0, .74f, 0), 0) == null)
+        var stone = Model("PiedraOfrenda", Hill + new Vector3(0, .74f, 0), 0);
+        if (stone == null)
             Block(PrimitiveType.Cylinder, Hill + new Vector3(0, .82f, 0), new Vector3(1.3f, .08f, 1.3f), new Color(.55f, .54f, .5f));
+        else
+        {
+            // Solid, and he kneels on its top, not sunk in it (2026-10-07 playtest).
+            Bounds b = default; bool any = false;
+            foreach (var r in stone.GetComponentsInChildren<Renderer>()) { if (any) b.Encapsulate(r.bounds); else { b = r.bounds; any = true; } }
+            if (any)
+            {
+                var box = stone.gameObject.AddComponent<BoxCollider>();
+                box.center = stone.InverseTransformPoint(b.center);
+                var size = stone.InverseTransformVector(b.size);
+                box.size = new Vector3(Mathf.Abs(size.x), Mathf.Abs(size.y), Mathf.Abs(size.z));
+                _vigil = new Vector3(Hill.x, b.min.y + b.size.y * .9f, Hill.z);
+            }
+        }
         // Frailejones and straw of the páramo on its slopes.
         for (int i = 0; i < 9; i++)
         {
@@ -658,15 +675,16 @@ public sealed class BacataDirector : MonoBehaviour
         var hand = animator != null && animator.isHuman ? animator.GetBoneTransform(right ? HumanBodyBones.RightHand : HumanBodyBones.LeftHand) : null;
         if (hand != null)
         {
-            prop.SetParent(hand, false);
-            // Held upright through the fist (props stand on their base along +Y).
-            prop.localPosition = Vector3.zero;
-            prop.localRotation = Quaternion.identity;
-            prop.position = hand.position - actor.up * (prop.name == "Baston" ? .75f : .05f);
-            prop.rotation = Quaternion.LookRotation(actor.forward, actor.up);
-            var s = prop.lossyScale; prop.localScale = new Vector3(prop.localScale.x / s.x, prop.localScale.y / s.y, prop.localScale.z / s.z);
+            // Held upright through the fist (props stand on their base along +Y), whatever the
+            // hand's own turn in the clip (2026-10-07 playtest: the staff lay flat, pointing ahead).
+            prop.SetParent(actor, true);
+            var held = prop.GetComponent<HeldUpright>(); if (held == null) held = prop.gameObject.AddComponent<HeldUpright>();
+            held.enabled = true;
+            held.Hand = hand; held.Actor = actor; held.Below = prop.name == "Baston" ? .75f : .05f;
+            held.LateUpdate();
             return;
         }
+        var upright = prop.GetComponent<HeldUpright>(); if (upright != null) { upright.enabled = false; Destroy(upright); }
         prop.SetParent(actor, false);
         prop.localPosition = new Vector3(right ? .35f : -.35f, prop.name == "Baston" ? 0 : .9f, .1f);
         prop.localRotation = Quaternion.identity;
@@ -726,5 +744,29 @@ public sealed class BacataDirector : MonoBehaviour
         else actor = StoryProps.Figure(name, _world, Vector3.zero, robe, accent, height);
         StoryActor.Ensure(actor.gameObject, speaker ?? name, height * .9f);
         return actor;
+    }
+}
+
+// A prop held in a hand that stays upright: it follows the fist but not the fist's turn.
+public sealed class HeldUpright : MonoBehaviour
+{
+    public Transform Hand, Actor;
+    public float Below;
+    private CharacterActions _acting;
+
+    public void LateUpdate()
+    {
+        if (Hand == null || Actor == null) return;
+        Vector3 forward = Vector3.ProjectOnPlane(Actor.forward, Vector3.up);
+        if (forward.sqrMagnitude < .01f) forward = Vector3.forward;
+        if (_acting == null) _acting = CharacterActions.Of(Actor);
+        if (_acting != null && (_acting.Current == "Death" || _acting.Current == "DeathBack"))
+        {
+            // He falls: the staff falls with him and lies beside his hand.
+            Vector3 at = Hand.position; at.y = Actor.position.y + .05f;
+            transform.SetPositionAndRotation(at, Quaternion.LookRotation(forward, Vector3.up) * Quaternion.Euler(0, 0, 90));
+            return;
+        }
+        transform.SetPositionAndRotation(Hand.position - Vector3.up * Below, Quaternion.LookRotation(forward, Vector3.up));
     }
 }

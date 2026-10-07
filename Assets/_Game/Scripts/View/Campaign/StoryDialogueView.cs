@@ -10,6 +10,7 @@ public sealed class StoryDialogueView
 {
     private readonly GameObject _root;
     private readonly TMP_Text _speaker, _line, _hint, _title;
+    private readonly RectTransform _ribbon;
     private readonly GameObject _titlePlate;
     private readonly Image _skip;
 
@@ -21,9 +22,13 @@ public sealed class StoryDialogueView
         // A deeper plate than the HUD's: the line is read over any scene behind it.
         var deep = UIKit.Rect("Depth", panel); deep.SetAsFirstSibling(); deep.offsetMin = new Vector2(10, 10); deep.offsetMax = new Vector2(-10, -10);
         var depth = deep.gameObject.AddComponent<Image>(); var tone = UIPalette.Deep; tone.a = .9f; depth.color = tone; depth.raycastTarget = false;
-        var ribbon = UIKit.Place(UIKit.Ribbon(panel, "Speaker"), new Vector2(0, 1), new Vector2(64, 26), new Vector2(420, 60));
-        _speaker = UIKit.Label(ribbon, "", 26, UIPalette.GoldLight, true);
-        _speaker.margin = new Vector4(18, 4, 18, 4);
+        _ribbon = UIKit.Place(UIKit.Ribbon(panel, "Speaker"), new Vector2(0, 1), new Vector2(64, 26), new Vector2(420, 60));
+        _speaker = UIKit.Label(_ribbon, "", 26, UIPalette.GoldLight, true);
+        // One line always inside the plate (2026-10-07 playtest: «Guardián de entrenamiento» spilled
+        // out): the plate widens with the name up to 640 px, and a longer one shrinks to fit.
+        _speaker.margin = new Vector4(44, 4, 44, 4);
+        _speaker.textWrappingMode = TextWrappingModes.NoWrap;
+        _speaker.enableAutoSizing = true; _speaker.fontSizeMax = 26; _speaker.fontSizeMin = 16;
         _line = UIKit.Label(panel, "", 30, UIPalette.Ivory);
         _line.alignment = TextAlignmentOptions.TopLeft;
         _line.enableAutoSizing = true; _line.fontSizeMax = 30; _line.fontSizeMin = 21;
@@ -51,6 +56,10 @@ public sealed class StoryDialogueView
     public void SetLine(string speaker, string note, string text)
     {
         _speaker.text = string.IsNullOrEmpty(note) ? speaker : speaker + " · " + note;
+        _speaker.enableAutoSizing = false; _speaker.fontSize = 26;
+        float width = _speaker.GetPreferredValues(_speaker.text, 10000, 60).x + 88 + 24;
+        _speaker.enableAutoSizing = true;
+        _ribbon.sizeDelta = new Vector2(Mathf.Clamp(width, 420, 640), _ribbon.sizeDelta.y);
         _line.text = text;
         _line.maxVisibleCharacters = 0;
     }

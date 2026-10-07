@@ -9,6 +9,8 @@ public sealed class StoryActor : MonoBehaviour
     [Tooltip("Height of the face above the pivot, in metres.")]
     public float faceHeight = 1.6f;
     private static readonly List<StoryActor> Actors = new List<StoryActor>();
+    // Who is saying the current line: they look at the camera while they speak.
+    public static StoryActor Speaking;
 
     // The face: the head bone of a rigged body (so someone lying or kneeling is framed where their
     // head really is), otherwise the authored height above the pivot.
@@ -24,8 +26,37 @@ public sealed class StoryActor : MonoBehaviour
     // Lying down (the head near the floor): the story camera frames from above.
     public bool Lying => Head != null && Head.position.y - transform.position.y < faceHeight * .45f;
 
-    private Transform _head;
+    private Transform _head, _neck;
     private bool _headSearched;
+    private Quaternion _faceLocal = Quaternion.identity;
+    private float _look;
+
+    // While speaking, the head (and a little the neck) turns toward the camera, after the clip
+    // has posed the body (2026-10-07 playtest: the characters should look at us). Limited, eased in
+    // and out; someone lying only turns the head a little.
+    private void LateUpdate()
+    {
+        float target = Speaking == this ? 1f : 0f;
+        _look = Mathf.MoveTowards(_look, target, Time.unscaledDeltaTime * 2.5f);
+        if (_look <= 0f) return;
+        var head = Head; var camera = Camera.main;
+        if (head == null || camera == null) return;
+        Vector3 face = head.rotation * (_faceLocal * Vector3.forward);
+        Vector3 toCamera = camera.transform.position - head.position;
+        if (toCamera.sqrMagnitude < .01f) return;
+        float limit = Lying ? 25f : 55f;
+        var turn = Quaternion.FromToRotation(face, toCamera.normalized);
+        turn.ToAngleAxis(out float angle, out Vector3 axis);
+        if (angle > 180f) angle -= 360f;
+        angle = Mathf.Clamp(angle, -limit, limit) * Mathf.SmoothStep(0, 1, _look);
+        if (Mathf.Abs(angle) < .01f || float.IsNaN(axis.x)) return;
+        if (_neck != null && !Lying)
+        {
+            _neck.rotation = Quaternion.AngleAxis(angle * .35f, axis) * _neck.rotation;
+            head.rotation = Quaternion.AngleAxis(angle * .65f, axis) * head.rotation;
+        }
+        else head.rotation = Quaternion.AngleAxis(angle, axis) * head.rotation;
+    }
     private Transform Head
     {
         get
@@ -36,7 +67,9 @@ public sealed class StoryActor : MonoBehaviour
             {
                 if (animator == null || !animator.isActiveAndEnabled || !animator.isHuman) continue;
                 _head = animator.GetBoneTransform(HumanBodyBones.Head);
-                if (_head != null) break;
+                _neck = animator.GetBoneTransform(HumanBodyBones.Neck);
+                // The face looks along the body's forward when the character stands as built.
+                if (_head != null) { _faceLocal = Quaternion.Inverse(_head.rotation) * Quaternion.LookRotation(transform.forward, Vector3.up); break; }
             }
             return _head;
         }

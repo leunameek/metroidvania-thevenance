@@ -93,19 +93,24 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         if (MIProgress.FindsCount == 0) Hud.Notify("Mundo inferior", "Encuentra el santuario de raíces siguiendo el camino de piedra.", UIIcon.Objective, UIPalette.GoldLight);
     }
 
-    // The rock clusters along the walls (T08) are solid (2026-10-07 playtest: Nemequene walked
-    // through them in the gallery of the collapse). A box from the mesh's own bounds, a little
-    // narrower than the rock so its rough sides do not stop him in the air.
+    // The rock clusters along the walls (T08) are solid (2026-10-07 playtests: Nemequene walked
+    // through them in the gallery of the collapse, then jumped over them with the double jump): a
+    // box a little narrower than the rock, so its rough sides do not stop him in the air, rising
+    // 6 m above it so no jump clears it.
     private static void SolidRocks()
     {
+        var walls = new GameObject("Muros de roca").transform;
         foreach (var r in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
         {
             if (!r.name.StartsWith("T08") || Solid(r.transform)) continue;
-            var filter = r.GetComponent<MeshFilter>();
-            if (filter == null || filter.sharedMesh == null) continue;
-            var box = r.gameObject.AddComponent<BoxCollider>();
-            var b = filter.sharedMesh.bounds;
-            box.center = b.center; box.size = Vector3.Scale(b.size, new Vector3(.8f, 1f, .8f));
+            var b = r.bounds;
+            var wall = new GameObject("Muro " + r.name).transform;
+            wall.gameObject.layer = 2; // Ignore Raycast: it stops him, not the camera or the ground checks
+            wall.SetParent(walls, false);
+            wall.position = new Vector3(b.center.x, b.min.y, b.center.z);
+            var box = wall.gameObject.AddComponent<BoxCollider>();
+            box.size = new Vector3(b.size.x * .78f, b.size.y + 6f, b.size.z * .78f);
+            box.center = Vector3.up * box.size.y * .5f;
         }
     }
 
@@ -177,16 +182,17 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     {
         SpawnCustodio();
         SpawnCreatures();
-        foreach (var find in FindObjectsByType<MIFind>(FindObjectsSortMode.None))
+        // The coca is what the shield sentinel guarded: it appears where the sentinel stood once it
+        // falls (2026-10-07 playtest: in the third pair's niche it could not even be seen).
+        var sentinel = FindFirstObjectByType<MIShieldSentinel>(FindObjectsInactive.Include);
+        if (sentinel != null)
         {
-            if (find.FindId != MIProgress.Bracelets3) continue;
-            Vector3 at = find.transform.position;
-            MIFind.CreateStory(find.transform.parent, at, MIProgress.Coca, "Coca",
+            Vector3 at = sentinel.transform.position;
+            MIFind.CreateStory(sentinel.transform.parent, at, MIProgress.Coca, "Coca",
                 "Hojas de coca de fantasía, ligadas al extremo jaguar del bastón. El poporo las guarda: no se agotan ni se preparan.",
                 "Afinidad del jaguar", "El jaguar del bastón responde al poporo. En el duelo final del inframundo podrás decir «Jaguar».",
                 StoryProps.Build("Coca", transform, at + Vector3.up * 1.15f),
-                MIProgress.Seed, MIProgress.Bracelets1, MIProgress.Bracelets2, MIProgress.Bracelets3);
-            break;
+                MIProgress.Seed, MIProgress.Shield04);
         }
         var socket = FindFirstObjectByType<MIHornSocket>();
         if (socket != null)
@@ -421,23 +427,24 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         }
     }
 
+    // Health about 1.7 times the first pass (2026-10-07 playtest: they fell too quickly).
     private static MIDashEnemy SpawnCreature(Transform marker, int room)
     {
         string n = marker.name;
         if (n.StartsWith("C01 Centinela A") || n.StartsWith("C01 Centinela B"))
             return MIDashEnemy.Create(MIDashEnemy.Kind.Guard, marker, room, n.StartsWith("C01 Centinela A") ? "centinela_04a" : "centinela_04b",
-                "Centinela caimán", 30, "Un centinela cierra el patio. Apártate de su mordida marcada e impúlsate contra él.",
+                "Centinela caimán", 55, "Un centinela cierra el patio. Apártate de su mordida marcada e impúlsate contra él.",
                 "Se aparta y te deja pasar.");
         else if (n.StartsWith("C02a Vigía"))
-            return MIDashEnemy.Create(MIDashEnemy.Kind.Bat, marker, room, "vigia_04", "Hombre-murciélago vigía", 40,
+            return MIDashEnemy.Create(MIDashEnemy.Kind.Bat, marker, room, "vigia_04", "Hombre-murciélago vigía", 70,
                 "«La orden me arrastra.» Escóndete tras los pilares de sus dardos; cuando baje en picada, impúlsate.",
                 "«El tercer par está antes del escudo.»");
         else if (n.StartsWith("C01 Centinela") && room == 6)
-            return MIDashEnemy.Create(MIDashEnemy.Kind.HornBat, marker, room, "vigia_cuerno", "Vigía del cuerno", 60,
+            return MIDashEnemy.Create(MIDashEnemy.Kind.HornBat, marker, room, "vigia_cuerno", "Vigía del cuerno", 100,
                 "«La llamada debe quedar aquí.» Su grito se carga en un anillo: impúlsate contra él antes de que estalle.",
                 "«Debe volver a quien pueda responder.» Baja las alas: la ruta al cuerno queda libre.");
         else if (n.StartsWith("C01 Centinela"))
-            return MIDashEnemy.Create(MIDashEnemy.Kind.Caiman, marker, room, "caiman_03", "Hombre-caimán", 60,
+            return MIDashEnemy.Create(MIDashEnemy.Kind.Caiman, marker, room, "caiman_03", "Hombre-caimán", 100,
                 "«Tu bastón no abre una tumba.» Su guardia frontal resiste: rodéalo e impúlsate por un costado.",
                 "«Entonces no te quedes con lo que no te pertenece.»");
         return null;

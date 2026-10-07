@@ -91,7 +91,7 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
             if (!CampaignProgress.Has(CampaignFlags.ChiaSealed))
             { hud?.Notify(displayName, "El guardián retiene a Chía. Antes examina la máscara sellada del nicho lunar.", UIIcon.Guardian, UIPalette.GoldLight); return; }
             if (!CampaignProgress.Has(CampaignFlags.CocaAffinity))
-            { hud?.Notify(displayName, "Sin la afinidad del jaguar no podrás cortar su lazo. La coca está en el nicho del tercer par.", UIIcon.Guardian, UIPalette.GoldLight); return; }
+            { hud?.Notify(displayName, "Sin la afinidad del jaguar no podrás cortar su lazo. La coca está donde cayó el centinela de escudo.", UIIcon.Guardian, UIPalette.GoldLight); return; }
         }
         Begin();
     }

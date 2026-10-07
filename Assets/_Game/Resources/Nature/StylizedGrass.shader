@@ -105,7 +105,7 @@ Shader "Nemequene/Stylized Grass"
                 float3 view = normalize(GetWorldSpaceViewDir(i.positionWS));
                 half through = pow(saturate(dot(-view, sun.direction)), 4) * h * _Translucency;
                 lit += sun.color * tip * through;
-                return half4(MixFog(lit, i.fog), 1);
+                return half4(NatureFinite(MixFog(lit, i.fog)), 1);
             }
             ENDHLSL
         }

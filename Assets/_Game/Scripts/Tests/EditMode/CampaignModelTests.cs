@@ -72,8 +72,10 @@ public class CampaignModelTests
         c.Set(CampaignFlags.MiSeed); c.Set(CampaignFlags.MiBracelets1);
         StringAssert.Contains("centinelas", c.Objective.Text);
         c.Set(CampaignFlags.MiBracelets2); c.Set(CampaignFlags.MiBracelets3);
+        StringAssert.Contains("centinela", c.Objective.Text);
+        c.Set(CampaignFlags.MiShield04);
         StringAssert.Contains("coca", c.Objective.Text);
-        c.Set(CampaignFlags.CocaAffinity); c.Set(CampaignFlags.MiShield04);
+        c.Set(CampaignFlags.CocaAffinity);
         StringAssert.Contains("cuerno", c.Objective.Text);
         c.Set(CampaignFlags.ChiaSealed);
         StringAssert.Contains("lazo", c.Objective.Text);

@@ -50,16 +50,27 @@ public sealed class FitPuzzle
         _flat = max > 0 && min < max * .45f;
         Vector3 worldAxis = thin == 0 ? Vector3.right : thin == 1 ? Vector3.up : Vector3.forward;
         _faceLocal = Quaternion.Inverse(_rest) * worldAxis;
-        // The slot: the piece lowered onto the first surface right under it (its table, not the
-        // floor beneath the table).
+        // The slot: the piece lowered onto its table. Each part of it (each bracelet of a pair)
+        // looks straight down for the first surface under it, and the piece rests on the highest
+        // of them: its cradle, not a lower step or the floor beneath the table between them.
         Vector3 offset = item.position - bounds.center;
         _slot = item.position;
-        float nearest = float.MaxValue;
-        foreach (var hit in Physics.RaycastAll(bounds.center, Vector3.down, 4f, ~0, QueryTriggerInteraction.Ignore))
+        float surface = float.MinValue;
+        foreach (var r in item.GetComponentsInChildren<Renderer>())
         {
-            if (hit.collider.transform.IsChildOf(item) || hit.distance >= nearest) continue;
-            Vector3 seat = new Vector3(bounds.center.x, hit.point.y + e.y * .85f, bounds.center.z) + offset;
-            if (seat.y < item.position.y && item.position.y - seat.y < 2.5f) { _slot = seat; nearest = hit.distance; }
+            if (r is ParticleSystemRenderer || !r.enabled) continue;
+            float first = float.MaxValue, y = float.MinValue;
+            foreach (var hit in Physics.RaycastAll(r.bounds.center, Vector3.down, 4f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (hit.collider.transform.IsChildOf(item) || hit.distance >= first) continue;
+                first = hit.distance; y = hit.point.y;
+            }
+            if (y > surface) surface = y;
+        }
+        if (surface > float.MinValue)
+        {
+            Vector3 seat = new Vector3(bounds.center.x, surface + e.y * .85f, bounds.center.z) + offset;
+            if (seat.y < item.position.y && item.position.y - seat.y < 2.5f) _slot = seat;
         }
     }
 
@@ -177,6 +188,7 @@ public sealed class FitPuzzle
         // The line around the fill (drawn after it, only outside it).
         var lineShader = Resources.Load<Shader>("Effects/FitSketchLine");
         var line = lineShader != null && material.shader.name == "Nemequene/Fit Sketch" ? new Material(lineShader) { name = "Guia_Encaje_Linea" } : null;
+        if (line != null) line.SetColor("_Color", new Color(1f, .82f, .42f, .6f));
         foreach (var filter in _item.GetComponentsInChildren<MeshFilter>())
         {
             var renderer = filter.GetComponent<MeshRenderer>();
@@ -208,7 +220,8 @@ public sealed class FitPuzzle
     private static Material GuideMaterial()
     {
         var sketch = Resources.Load<Shader>("Effects/FitSketch");
-        if (sketch != null) return new Material(sketch) { name = "Guia_Encaje" };
+        // Soft: a drawing of the place, never as strong as the piece itself.
+        if (sketch != null) { var soft = new Material(sketch) { name = "Guia_Encaje" }; soft.SetColor("_Color", new Color(1f, .82f, .42f, .45f)); return soft; }
         var shader = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Sprites/Default");
         var m = new Material(shader) { name = "Guia_Encaje" };
         m.SetFloat("_Surface", 1); m.SetFloat("_Blend", 0);

@@ -97,7 +97,7 @@ Shader "Nemequene/Stylized Tree"
             half4 Frag(Varyings i, bool front : SV_IsFrontFace) : SV_Target
             {
                 half open = i.color.b, g = i.color.g;
-                half3 n = normalize(i.normalWS);
+                half3 n = SafeNormalize(i.normalWS);
                 half3 color;
                 half wrap;
                 if (i.color.r > .5)
@@ -128,7 +128,7 @@ Shader "Nemequene/Stylized Tree"
                     half through = pow(saturate(dot(-view, sun.direction)), 3) * _Translucency * (.4 + .6 * open);
                     lit += sun.color * _LeafLight.rgb * through;
                 }
-                return half4(MixFog(lit, i.fog), 1);
+                return half4(NatureFinite(MixFog(lit, i.fog)), 1);
             }
             ENDHLSL
         }

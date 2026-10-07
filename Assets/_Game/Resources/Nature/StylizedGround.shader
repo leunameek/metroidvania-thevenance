@@ -89,7 +89,7 @@ Shader "Nemequene/Stylized Ground"
             half4 Frag(Varyings i) : SV_Target
             {
                 float2 p = i.positionWS.xz * _NoiseScale;
-                half3 n = normalize(i.normalWS);
+                half3 n = SafeNormalize(i.normalWS);
                 float large = NatureFbm(p * .045);
                 float mid = NatureFbm(p * .19 + 7.3);
                 float fine = NatureNoise(p * 1.7);
@@ -116,7 +116,7 @@ Shader "Nemequene/Stylized Ground"
                 color *= 1.0 - .38 * saturate(-above * 1.5);
 
                 half3 lit = NatureLight(color, i.positionWS, n, .35, _ShadeTint.rgb);
-                return half4(MixFog(lit, i.fog), 1);
+                return half4(NatureFinite(MixFog(lit, i.fog)), 1);
             }
             ENDHLSL
         }

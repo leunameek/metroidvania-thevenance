@@ -10,11 +10,12 @@ namespace Nemequene.UI
         private readonly UIManager _ui;
         private readonly GameObject _root;
         private readonly TMP_Text _name, _instruction, _progressText, _heading;
-        private readonly RectTransform _panel;
+        private readonly RectTransform _panel, _body;
         private readonly Button _close;
         private readonly Image _progress;
         private AnalyzableObject _selected;
         private float _next, _zoom = 1;
+        private string _closeText;
         private Vector3 _cameraAnchor, _focus;
         public InspectionUIController(UIManager ui)
         {
@@ -33,7 +34,7 @@ namespace Nemequene.UI
             f.Hint(_root.transform, UIStrings.Get("footer.lesson"), Vector2.zero);
             _panel = f.Panel("UI_Panel_ObjectInspection", _root.transform, new Vector2(.60f,.13f), new Vector2(.94f,.78f), true);
             // Pixel insets from the panel edges: the rim, the emblem and the feather stay clear of text.
-            var body = f.Scroll(_panel, Vector2.zero, Vector2.one);
+            var body = f.Scroll(_panel, Vector2.zero, Vector2.one); _body = body;
             ((RectTransform)body.parent.parent).Inset(60, 196, 60, 76);
             _name = f.Caption(body, "", 44);
             _progressText = UIFactory.Tone(f.Text(body, "", 20), UITone.Success); _progressText.fontStyle = FontStyles.UpperCase;
@@ -72,7 +73,6 @@ namespace Nemequene.UI
             if (Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + .1f;
             var lesson = _ui.Demo.Lesson;
-            _panel.anchorMin = new Vector2(.60f, Mathf.Max(.06f, .78f - (lesson.Complete ? .40f : .52f) * _ui.Settings.Values.textScale));
             _instruction.text = lesson.Complete ? UIStrings.Get("inspection.archived") : UIStrings.Get("lesson." + lesson.Lesson) + "\n\n"
                 + UIStrings.Get((_ui.Demo.MouseMode ? "inspection.mouse." : "inspection.hands.") + lesson.Lesson);
             if (lesson.Complete && !_ui.Demo.MouseMode && _ui.Demo.Hands.Live)
@@ -80,9 +80,32 @@ namespace Nemequene.UI
             if (!_ui.Demo.MouseMode && !lesson.Complete && _ui.Hands != null && _ui.Hands.State != HandState.Detected)
                 _instruction.text += "\n\n" + _ui.Hands.StatusText + "\n" + UIStrings.Get("inspection.fallback");
             _progressText.text = lesson.Complete ? UIStrings.Get("inspection.complete") : UIStrings.Get("inspection.progress", Mathf.RoundToInt(lesson.Progress * 100));
-            _close.GetComponentInChildren<TMP_Text>().text = lesson.Complete ? UIStrings.Get("inspection.return", VoicePrompt.Cap("volver", "E"))
+            // Set only when it changes: the key-cap helper splits the label once per change, so
+            // rewriting it each tick showed the key twice («Cerrar · Esc» beside its cap).
+            string close = lesson.Complete ? UIStrings.Get("inspection.return", VoicePrompt.Cap("volver", "E"))
                 : UIStrings.Get("inspection.close", VoicePrompt.Cap("salir", "Esc"));
+            if (close != _closeText) { _closeText = close; _close.GetComponentInChildren<TMP_Text>().text = close; }
             UIFactory.Fill(_progress, lesson.Progress);
+            FitPanel();
+        }
+
+        // The panel holds all its text without scrolling (2026-10-07 playtest: the text had to be
+        // scrolled, before and after the lesson): it stands tall on the right, and if the text
+        // still does not fit its viewport, the instruction shrinks until it does.
+        private void FitPanel()
+        {
+            _panel.anchorMin = new Vector2(.60f, .10f);
+            var viewport = (RectTransform)_body.parent;
+            Canvas.ForceUpdateCanvases();
+            float room = viewport.rect.height;
+            if (room <= 0) return;
+            for (int size = 26; size >= 17; size--)
+            {
+                _instruction.fontSize = size;
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_body);
+                if (LayoutUtility.GetPreferredHeight(_body) <= room) break;
+            }
+            _body.anchoredPosition = Vector2.zero;
         }
         public static string CulturalDescription(AnalyzableObjectData data)
         {

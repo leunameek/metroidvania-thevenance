@@ -38,6 +38,7 @@ public sealed class MIFind : MIInteractable
     private float _blend, _haloIntensity;
     private bool _confirmFrame;
     private FitPuzzle _fit;
+    private bool _seedSized;
     private Renderer[] _hiddenPlayer;
     private Vector3 _frameSide = Vector3.back;
 
@@ -50,6 +51,18 @@ public sealed class MIFind : MIInteractable
     private void Start()
     {
         if (halo != null) _haloIntensity = halo.intensity;
+        // The seed of the sanctuary was larger than its altar (2026-10-07 playtest): half its size,
+        // resting closer to the stone.
+        if (kind == Kind.Seed && item != null && !_seedSized)
+        {
+            _seedSized = true;
+            var floating = item.GetComponent<MIFloat>();
+            bool floats = floating != null && floating.enabled;
+            if (floats) floating.enabled = false; // back to its rest, so the float takes the new one
+            item.localScale *= .5f;
+            item.position -= Vector3.up * .35f;
+            if (floats) floating.enabled = true;
+        }
         if (Fits && item != null) _fit = new FitPuzzle(item);
         Refresh();
     }

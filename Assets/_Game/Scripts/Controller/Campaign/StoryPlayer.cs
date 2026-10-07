@@ -222,6 +222,7 @@ public sealed class StoryPlayer : MonoBehaviour
         _revealed = 0;
         _view.SetLine(line.speaker, line.note, line.text);
         var actor = StoryActor.Find(line.speaker);
+        StoryActor.Speaking = actor;
         // A line about something in the place (the crack, the falling stones) looks at it.
         var focus = StoryFocus.Find(line.cue);
         if (!(focus.HasValue && Frame(actor, focus.Value))) Frame(actor);
@@ -247,6 +248,7 @@ public sealed class StoryPlayer : MonoBehaviour
         if (!done.Repeatable) CampaignProgress.Set(done.Key);
         if (done.Complete && done.Sequence != null) CampaignProgress.CompleteSequence(done.Sequence.id);
         _view.Show(false);
+        StoryActor.Speaking = null;
         if (_talking != null && _talking.Talking) _talking.Rest();
         _talking = null;
         RestoreCamera();

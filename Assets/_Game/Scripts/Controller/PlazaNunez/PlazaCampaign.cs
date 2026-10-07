@@ -205,22 +205,45 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         {
             int index = i;
             Vector3 at = Ground(portal + toSpawn * 3.5f + side * (4.5f + 1.8f * i));
-            var urn = StoryProps.Build(index == EmptyUrn ? "UrnaVacia" : "UrnaMemoria", transform, at);
+            // All three look alike, closed (2026-10-07 playtest): which one is empty is found by
+            // looking inside, and only then it shows open.
+            var urn = StoryProps.Build("UrnaMemoria", transform, at);
             urn.rotation = Quaternion.LookRotation(toSpawn);
+            _urns[i] = urn;
             PlazaStoryPoint.Create("Urna " + (i + 1), transform, at, 1.4f,
-                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, urn));
+                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, _urns[index]));
         }
     }
+
+    private readonly Transform[] _urns = new Transform[3];
+    private bool _emptyFound;
 
     // O-N06: each urn is taken in the hands and turned to look inside; only then it can be used.
     private void InspectUrn(int index, Transform urn)
     {
         bool empty = index == EmptyUrn;
+        if (empty && !_emptyFound) StartCoroutine(RevealWhenSeen(index));
         PlazaPieceInspection.Open(_demo, urn, "Urna " + (index + 1),
             "Una urna de barro de las que guardan a los antepasados, junto al portal superior.",
             () => empty ? "Está vacía y liviana: no guarda restos. El soporte de su interior tiene la forma del cuerno."
                 : "Dentro reposan restos y ofrendas de alguien querido. Esta memoria debe quedarse aquí.",
             empty ? "Usar el poporo" : "Devolverla", () => UseUrn(index));
+    }
+
+    // Once its inside has been seen and the urn is put down, the empty one is the open urn.
+    private System.Collections.IEnumerator RevealWhenSeen(int index)
+    {
+        bool seen = false;
+        yield return null;
+        while (PlazaPieceInspection.Active != null) { seen |= PlazaPieceInspection.Seen; yield return null; }
+        if (!seen || _emptyFound || _urns[index] == null) yield break;
+        _emptyFound = true;
+        var closed = _urns[index];
+        var open = StoryProps.Build("UrnaVacia", transform, closed.position);
+        open.rotation = closed.rotation;
+        _urns[index] = open;
+        MIBurst.Spawn(open.position + Vector3.up * .6f, new Color(1f, .85f, .5f));
+        Destroy(closed.gameObject);
     }
 
     private void UseUrn(int index)
