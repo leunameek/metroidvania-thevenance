@@ -11,7 +11,8 @@ using UnityEngine;
 //    Block, Death...) made of Nemequene's Mixamo clips, shared by every humanoid through
 //    Humanoid retargeting; a "calm" override swaps the combat idle for Breathing Idle.
 //  - Serpiente / Jaguar / Guacamaya controllers from their *_Animado.fbx takes.
-//  - The same acting states added to Nemequene_Player.controller (they return to locomotion).
+//  - The same acting states added to Nemequene_Player.controller (they return to locomotion,
+//    except the deaths, which hold).
 //  - One prefab per character in Assets/_Game/Resources/Characters/<Key>.prefab: root at the
 //    feet facing +Z, the model scaled to its height, URP material from the .fbm textures,
 //    Animator and CharacterActions. The scenes already load these keys (StoryProps.Figure,
@@ -28,7 +29,7 @@ public static class CharacterLibrarySetup
     private const string PlayerPrefab = ArtRoot + "Nemequene/Nemequene_Player_Visual.prefab";
     // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
     // v3: CombatIdle (duel stance) and the reworked creature clips.
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v3";
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v4";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
@@ -227,6 +228,10 @@ public static class CharacterLibrarySetup
         var sm = controller.layers[0].stateMachine;
         var locomotion = sm.states.First(s => s.state.name == "Locomotion").state;
         AddActions(sm, locomotion, holdPoses: false);
+        // Dying is final: the body stays on the ground (the epilogue holds it into the refuge).
+        foreach (var child in sm.states)
+            if (child.state.name == "Death" || child.state.name == "DeathBack")
+                foreach (var t in child.state.transitions.ToArray()) child.state.RemoveTransition(t);
         EditorUtility.SetDirty(controller);
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefab);
         if (prefab != null && prefab.GetComponent<CharacterActions>() == null)

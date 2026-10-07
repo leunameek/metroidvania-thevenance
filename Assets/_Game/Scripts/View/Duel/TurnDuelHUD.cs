@@ -7,13 +7,15 @@ using UnityEngine.UI;
 
 // Turn duel screen of the Bacatá kit (guion 07): enemy name, health and bond status at the top;
 // the turn banner (TU TURNO / PREPARA / RESPONDE) with the window bar in the middle; on the left
-// the player's concentration and counter chance; at the bottom only the legal actions as buttons
-// with their key and spoken word. Form, name and verb always accompany the colour.
+// the player's concentration and counter chance; the usual vitality frame at the bottom left; at
+// the bottom only the legal actions as buttons with their key and spoken word. Form, name and verb always accompany the colour.
 public sealed class TurnDuelHUD
 {
     private readonly GameObject _root;
     private readonly TMP_Text _enemy, _status, _banner, _verbs, _message, _concentration, _hint;
-    private readonly Image _enemyHealth, _window, _bannerPlate;
+    private readonly Image _enemyHealth, _window, _bannerPlate, _playerHealth;
+    private readonly TMP_Text _playerValue;
+    private float _playerShown = -1;
     private readonly RectTransform _actions;
     private readonly Action<DuelAction> _act;
     private readonly Action<int> _target;
@@ -54,8 +56,14 @@ public sealed class TurnDuelHUD
         _concentration = UIKit.Label(left, "", 22, UIPalette.Ivory);
         _concentration.margin = new Vector4(18, 8, 18, 8);
 
-        // The choices on one plate at the bottom: the buttons and, under them, how to answer.
-        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(.5f, 0), new Vector2(0, 44), new Vector2(1260, 150));
+        // The player's vitality, the same frame as in exploration, moved to the bottom left.
+        _playerHealth = UIKit.HealthFrame(canvas, "Vida", out _playerValue);
+        _playerValue.color = UIPalette.Ivory;
+        UIKit.Place((RectTransform)_playerHealth.transform.parent.parent, new Vector2(0, 0), new Vector2(40, 40), new Vector2(452, 138));
+
+        // The choices on one plate at the bottom (right of the vitality): the buttons and, under
+        // them, how to answer.
+        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(.5f, 0), new Vector2(240, 44), new Vector2(1260, 150));
         _actions = UIKit.Rect("Actions", bar); _actions.anchorMin = new Vector2(0, .42f); _actions.offsetMin = new Vector2(30, 0); _actions.offsetMax = new Vector2(-30, -14);
         var row = _actions.gameObject.AddComponent<HorizontalLayoutGroup>();
         row.spacing = 10; row.childAlignment = TextAnchor.MiddleCenter;
@@ -72,7 +80,11 @@ public sealed class TurnDuelHUD
     {
         _enemyHealth.fillAmount = m.EnemyMaxHealth > 0 ? (float)m.EnemyHealth / m.EnemyMaxHealth : 0;
         _status.text = m.Rules.Status(m);
-        _concentration.text = $"Vida {m.PlayerHealth}\nConcentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
+        float health = (float)m.PlayerHealth / TurnDuelModel.PlayerMaxHealth;
+        _playerShown = _playerShown < 0 ? health : Mathf.MoveTowards(_playerShown, health, Time.unscaledDeltaTime * 1.4f);
+        _playerHealth.fillAmount = _playerShown;
+        _playerValue.text = m.PlayerHealth + " / " + TurnDuelModel.PlayerMaxHealth;
+        _concentration.text = $"Concentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
             + (m.Counter == CounterWindow.Reinforced ? "\nContraataque reforzado listo"
                 : m.Counter == CounterWindow.Normal ? "\nContraataque listo" : "");
         _message.text = m.Message;

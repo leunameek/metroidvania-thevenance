@@ -220,6 +220,7 @@ public sealed class MSFind : MIInteractable
     {
         if (Inspecting != this) return;
         Inspecting = null;
+        _fit?.HideGuide();
         FitView.ShowPlayer(_hiddenPlayer); _hiddenPlayer = null;
         if (item != null && !keepItem)
         {

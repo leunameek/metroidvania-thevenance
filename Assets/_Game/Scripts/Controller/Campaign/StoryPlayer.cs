@@ -28,7 +28,7 @@ public sealed class StoryPlayer : MonoBehaviour
     private Request _current;
     private int _index;
     private float _revealed, _skipHeld;
-    private bool _voiceNext, _wasLocked;
+    private bool _voiceNext, _wasLocked, _gestureLock;
     private StoryDialogueView _view;
     private PlayerController _player;
     private readonly List<VoiceCommandRecognizer> _voices = new List<VoiceCommandRecognizer>();
@@ -202,7 +202,10 @@ public sealed class StoryPlayer : MonoBehaviour
         _player = FindFirstObjectByType<PlayerController>();
         if (_player != null)
         {
-            _wasLocked = _player.InputLocked; _player.SetInputLocked(true);
+            // A lock held only by a hand gesture (a pickup whose effect starts these lines) is not
+            // given back at the end: the gesture is over by then and nobody would release it.
+            _wasLocked = _player.InputLocked; _gestureLock = PlayerInteraction.Busy(_player);
+            _player.SetInputLocked(true);
             if (StoryActor.Find("Nemequene") == null) StoryActor.Ensure(_player.gameObject, "Nemequene", 1.55f);
         }
         Hook();
@@ -246,7 +249,7 @@ public sealed class StoryPlayer : MonoBehaviour
         _talking = null;
         RestoreCamera();
         Unhook();
-        if (_player != null) _player.SetInputLocked(_wasLocked);
+        if (_player != null) _player.SetInputLocked(_wasLocked && !(_gestureLock && !PlayerInteraction.Busy(_player)));
         Finished?.Invoke(done.Key);
         done.Done?.Invoke();
     }

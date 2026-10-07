@@ -43,11 +43,14 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         if (coreHit != null) coreHit.enabled = false;
         StoryActor.Ensure(gameObject, "Guardián caimán-murciélago", 4f);
         // The rigged boss (Resources/Characters/JefeLagartoMurcielago) stands in the idol's place
-        // and follows its leans; the stone pieces hide, the crystal core stays readable.
+        // and follows its leans. The stone idol and its stone core hide (2026-10-07 playtest: the
+        // old rocks showed on the boss); the core's light stays, glowing at its chest. The model
+        // faces its own +Z, opposite to the idol's body, so it is turned to face the arena.
         if (body != null && CharacterModels.Exists("JefeLagartoMurcielago"))
         {
-            CharacterModels.Hide(body, core);
-            _boss = CharacterModels.Spawn("JefeLagartoMurcielago", body, Vector3.zero, Quaternion.identity);
+            CharacterModels.Hide(body);
+            if (core != null) foreach (var r in core.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
+            _boss = CharacterModels.Spawn("JefeLagartoMurcielago", body, Vector3.zero, Quaternion.Euler(0, 180, 0));
         }
         _music = MIAudio.Loop(gameObject, "musica_guardian", .95f, false); _music.Stop();
         if (MIProgress.Has(MIProgress.Guardian)) { ShowDefeated(); Vanish(true); return; }
@@ -59,6 +62,7 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
     {
         if (_phase == Phase.Defeated) return;
         if (_duel != null) { var d = _duel; _duel = null; d.Abort(); }
+        EndCamera();
         _phase = Phase.Waiting; _move = null;
         ClearEffects();
         if (arenaGate != null) arenaGate.Release();
@@ -112,14 +116,20 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
     {
         if (_phase != Phase.Intro) return;
         _phase = Phase.Duel;
+        // Three-quarter view of the duel: Nemequene and the guardian side by side in the frame.
+        _camera = DuelCamera.Begin(_player.transform, Focus);
         var director = MundoInferiorBlockout.Instance;
         _duel = TurnDuelController.Run(new HybridGuardianRules(), this, 20, _player.GetComponent<Health>(),
             director != null ? director.Natural : null, director != null && director.Natural != null ? director.Natural.ReactionScale : 1f, OnDuelEnded);
     }
 
+    private DuelCamera _camera;
+    private void EndCamera() { if (_camera != null) _camera.End(); _camera = null; }
+
     private void OnDuelEnded(bool victory)
     {
         _duel = null;
+        EndCamera();
         if (!victory) return; // the director's defeat flow resets the encounter
         Defeat();
     }

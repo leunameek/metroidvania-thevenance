@@ -61,7 +61,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
     public PlazaStoryPoint NearbyStory { get; private set; }
     public bool HasInteraction => Nearby != null || NearbyStory != null || NearbyPortal != null || NearCombat;
     public PlazaCampaign Campaign { get; private set; }
-    public bool NearCombat => combat != null && Vector3.Distance(player.transform.position, combat.EntryPosition) < 3.2f;
+    // The training circle belongs to the tutorial: once the story moves on it is no longer offered.
+    public bool NearCombat => combat != null && CampaignProgress.Model.Chapter <= CampaignChapter.PlazaTutorial
+        && Vector3.Distance(player.transform.position, combat.EntryPosition) < 3.2f;
     public float Fade { get; private set; }
     public int World { get; private set; }
     public bool HelpOpen { get; private set; }

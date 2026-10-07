@@ -191,6 +191,26 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
   cargar en canteros de pasto y flores que se mecen con el viento de las alturas. La pieza gris
   queda oculta en la escena, así que el inventario del constructor no cambia.
 
+## Ronda de prueba del 2026-10-07
+
+- **Guardián caimán-murciélago:** el modelo mira a la arena (girado 180°) y ya no muestra la roca
+  del núcleo ni el ídolo de piedra; queda la luz del núcleo en su pecho. Durante el duelo la cámara
+  pasa a una vista 3/4 (`Controller/Duel/DuelCamera.cs`), a un lado y detrás de Nemequene, y
+  vuelve a la cámara de exploración al terminar.
+- **Encaje con guía:** junto a la pieza aparece una figura dorada translúcida con la posición que
+  debe tomar; se oculta cuando la pieza asienta.
+- **Mujer-cóndor y mujer-águila:** flotan sobre el borde del fondo de su terraza, frente a la
+  cámara. La mujer-cóndor no está antes de la Runa 2: al tomarla, desciende del cielo con su
+  llamado y un aviso.
+- **Bloqueo al tomar objetos:** si el efecto del gesto inicia un diálogo, al terminar el diálogo
+  se libera el control (antes quedaba bloqueado hasta abrir la pausa).
+- **Plaza Núñez:** «Muévete con WASD» y «Comenzar entrenamiento» solo durante el tutorial.
+- **Duelos por turnos:** la vida usa el mismo marco del HUD de exploración, abajo a la izquierda.
+- **Muerte en el epílogo:** los clips que llevan el cuerpo al suelo (morir, arrodillarse, sentarse,
+  rezar, agacharse, recoger) se importan con la altura en la pose, así el cuerpo llega al piso; en
+  el controlador del jugador las muertes ya no vuelven a estar de pie. Nemequene sigue acostado
+  sobre la estera en el refugio.
+
 ## Sustituir las figuras provisionales
 
 - Personas en la escena de Bacatá: asignar el prefab en el `BacataDirector` (o volver a ejecutar

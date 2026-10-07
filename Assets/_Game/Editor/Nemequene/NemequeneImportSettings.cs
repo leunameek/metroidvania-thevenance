@@ -16,6 +16,17 @@ public class NemequeneImportSettings : AssetPostprocessor
         "Breathing Idle", "Talking", "Talking (1)", "Praying", "Sitting Idle"
     };
 
+    // Clips that take the body down to the floor (lying, kneeling, sitting, crouching): their
+    // height is baked into the pose, as authored, so the body really reaches the ground. Unbaked,
+    // the drop went to root motion (discarded) and the body hung in the air.
+    private static readonly string[] GroundedClips =
+    {
+        "Dying", "Dying Backwards", "Kneeling Down", "Sitting Idle", "Praying", "Standing To Crouch", "Crouch To Standing", "Picking Up Object"
+    };
+
+    // Raised when the rules change, so Unity reimports the clips with them.
+    public override uint GetVersion() => 2;
+
     private static bool IsNemequeneAsset(string path) => path.Replace('\\', '/').StartsWith(ModelFolder + "/");
 
     private void OnPreprocessModel()
@@ -51,7 +62,7 @@ public class NemequeneImportSettings : AssetPostprocessor
             // travel in non in-place clips is discarded (applyRootMotion is off).
             clip.lockRootRotation = true;
             clip.keepOriginalOrientation = true;
-            clip.lockRootHeightY = false;
+            clip.lockRootHeightY = System.Array.IndexOf(GroundedClips, clipName) >= 0;
             clip.keepOriginalPositionY = true;
             clip.lockRootPositionXZ = false;
             // "Hanging Idle" and "Climbing To Top" face the opposite way from "Climbing Ladder";

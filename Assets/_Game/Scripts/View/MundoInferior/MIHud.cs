@@ -255,7 +255,13 @@ public sealed class MIHud : MonoBehaviour
     {
         if (_pause.activeSelf && _pauseLabels.Count > 0) Relabel(); // the camera starts asynchronously
         _healthShown = Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
-        if (_healthFill != null) _healthFill.fillAmount = _healthShown;
+        if (_healthFill != null)
+        {
+            _healthFill.fillAmount = _healthShown;
+            // In a turn duel the same vitality frame sits at the bottom left (TurnDuelHUD).
+            var vitality = _healthFill.transform.parent.parent.gameObject;
+            if (vitality.activeSelf == TurnDuelController.Running) vitality.SetActive(!TurnDuelController.Running);
+        }
         _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);
         _fade.color = new Color(.031f, .039f, .043f, _fadeValue);
         // Notices wait while the inspection, the pause or a duel holds the screen.

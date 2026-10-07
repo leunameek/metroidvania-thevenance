@@ -87,8 +87,9 @@ public sealed class PlayerInteraction : MonoBehaviour
         }
         Flush();
         if (played != null) yield return new WaitForSeconds(length * (.85f - ContactOf(played)));
-        _player.SetInputLocked(false);
         _running = null;
+        // Lines started by the effect keep the player still; they release the lock when they end.
+        if (!StoryPlayer.Active) _player.SetInputLocked(false);
     }
 
     private void OnDisable()

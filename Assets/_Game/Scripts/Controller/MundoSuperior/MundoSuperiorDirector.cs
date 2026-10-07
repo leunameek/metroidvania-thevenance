@@ -96,11 +96,12 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         var first = entrySpawn != null ? entrySpawn.GetComponentInParent<MSZone>() : null;
         SpawnStoryPieces();
         StoryPlayer.Listen();
-        // Trials of the script built beside their terraces (E09 after Runa 2, E10 before the key).
+        // Trials of the script on their terraces (E09 after Runa 2, E10 before the key): the figure
+        // hovers above the back edge, in front of the camera (its yaw is 0 on both terraces).
         MSDuelEncounter.Spawn("MS03_RunaEscalada", CondorRules.EncounterId, MSProgress.Condor, "Mujer-cóndor", "Characters/MujerCondor",
-            new Color(.16f, .15f, .17f), new Vector3(2.5f, 0, -4.5f), new Vector3(2.5f, .5f, -12f));
+            new Color(.16f, .15f, .17f), new Vector3(0, 0, 2.2f), new Vector3(1f, 3.4f, 8.8f));
         MSDuelEncounter.Spawn("TerrazaLlave", EagleRules.EncounterId, MSProgress.Eagle, "Mujer-águila", "Characters/MujerAguila",
-            new Color(.45f, .3f, .16f), new Vector3(0, 0, -3.5f), new Vector3(0, 1f, -11f));
+            new Color(.45f, .3f, .16f), new Vector3(-3f, 0, 1.5f), new Vector3(-3.5f, 2.4f, 9f));
         StoryPlayer.AddGate(this, () => !_paused && !_dead && !_moving && MSFind.Inspecting == null);
         if (first != null) EnterZone(first, true);
         MSProgress.Changed += OnProgress;

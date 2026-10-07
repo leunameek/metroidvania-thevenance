@@ -136,7 +136,7 @@ public sealed class BacataDirector : MonoBehaviour
         hearth.transform.SetParent(_world, false); hearth.transform.position = Refuge + new Vector3(2, .6f, -1);
         GameAudio.Loop(hearth, "Ambiente/hoguera_bucle", .7f, true, AudioChannel.Ambience, 12f);
         Hide(_saguanmachica); Hide(_invader);
-        Place(_nemequene, Refuge + new Vector3(0, .35f, 1), Refuge + new Vector3(0, .35f, 4));
+        Place(_nemequene, Refuge + new Vector3(0, .06f, 1), Refuge + new Vector3(0, .06f, 4));
         // Lying wounded: the rigged body holds the last frame of its fall; the figure is laid down.
         var wounded = CharacterActions.Of(_nemequene);
         if (wounded == null || !wounded.Hold("DeathBack")) _nemequene.rotation = Quaternion.Euler(-90, 90, 0);

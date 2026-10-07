@@ -4,10 +4,11 @@ using UnityEngine;
 
 // Seating a piece in its table (2026-10-06 playtest: turning the pieces had no purpose). Each
 // bracelet, ring, wing or coin rests on a table shaped for it. The inspection lifts it out turned
-// at random; the player turns it until it sits as the table expects — there is no silhouette, only
-// the piece's light warming and a soft resonance growing as it nears its place — and it seats with
-// a click. Only a seated piece can be fitted, and only a fitted piece counts as found. Fitted, it
-// stays in its table.
+// at random; the player turns it until it sits as the table expects. A small golden figure beside
+// it shows the pose to reach (2026-10-07 playtest: some pieces were too hard to place without
+// one); the piece's light warms and a soft resonance grows as it nears its place, and it seats
+// with a click. Only a seated piece can be fitted, and only a fitted piece counts as found.
+// Fitted, it stays in its table.
 //  - Flat pieces (rings, discs, coins, bracelets seen edge-on) only need their face the right way;
 //    the turn around that face is free. Other pieces need their whole orientation.
 public sealed class FitPuzzle
@@ -18,6 +19,9 @@ public sealed class FitPuzzle
     private readonly Vector3 _slot, _faceLocal;
     private readonly bool _flat;
     private float _bestBand = 999;
+    private Transform _guide;
+    private float _guideSize;
+    private static Material _guideMaterial;
 
     public bool Seated { get; private set; }
     // 0 far, 1 in place (drives the piece's light).
@@ -80,6 +84,7 @@ public sealed class FitPuzzle
             Quaternion target = _flat ? Quaternion.FromToRotation(_item.rotation * _faceLocal, _rest * _faceLocal) * _item.rotation : _rest;
             _item.rotation = Quaternion.Slerp(_item.rotation, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 12f));
         }
+        Guide(!Seated);
         // The light warms as the piece nears its place; each 20° closer, a soft resonance.
         if (glow != null) glow.intensity = baseGlow * Mathf.Lerp(.35f, 2.4f, Seated ? 1f : Closeness * Closeness);
         float band = Mathf.Floor(error / 20f);
@@ -105,6 +110,83 @@ public sealed class FitPuzzle
         MIParticles.Burst(_slot + Vector3.up * .1f, new Color(1f, .8f, .4f, .9f), 50, 2f, .08f, -.3f);
     }
 
+    // ---------- the guide: the piece's own shape in golden glass, in the pose it must take ----------
+
+    // Shown just above the piece on screen (a little smaller), seen by the same camera.
+    private void Guide(bool visible)
+    {
+        if (_guide == null)
+        {
+            if (!visible) return;
+            BuildGuide();
+            if (_guide == null) return;
+        }
+        if (_guide.gameObject.activeSelf != visible) _guide.gameObject.SetActive(visible);
+        if (!visible) return;
+        var camera = Camera.main;
+        if (camera == null) return;
+        Vector3 right = camera.transform.right, up = camera.transform.up;
+        _guide.SetPositionAndRotation(_item.position + up * (_guideSize * 1.7f + .1f) + right * _guideSize * .2f, _rest);
+        // A slow breath of light, so it reads as a hint and not as a second piece.
+        if (_guideMaterial != null)
+        {
+            float pulse = .55f + .15f * Mathf.Sin(Time.unscaledTime * 3f);
+            _guideMaterial.SetColor("_BaseColor", new Color(1f, .82f, .42f, pulse));
+        }
+    }
+
+    public void HideGuide()
+    {
+        if (_guide != null) Object.Destroy(_guide.gameObject);
+        _guide = null;
+    }
+
+    private void BuildGuide()
+    {
+        var root = new GameObject("Guía de encaje").transform;
+        var toItem = _item.worldToLocalMatrix;
+        foreach (var filter in _item.GetComponentsInChildren<MeshFilter>())
+        {
+            var renderer = filter.GetComponent<MeshRenderer>();
+            if (renderer == null || !renderer.enabled || filter.sharedMesh == null) continue;
+            var relative = toItem * filter.transform.localToWorldMatrix;
+            var part = new GameObject(filter.name).transform;
+            part.SetParent(root, false);
+            part.localPosition = relative.GetColumn(3);
+            part.localRotation = relative.rotation;
+            part.localScale = relative.lossyScale;
+            part.gameObject.AddComponent<MeshFilter>().sharedMesh = filter.sharedMesh;
+            var r = part.gameObject.AddComponent<MeshRenderer>();
+            r.sharedMaterial = GuideMaterial;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; r.receiveShadows = false;
+        }
+        if (root.childCount == 0) { Object.Destroy(root.gameObject); return; }
+        // Same scale as the piece, a little smaller.
+        var scale = _item.lossyScale * .7f;
+        root.localScale = scale;
+        _guideSize = Mathf.Min(Bounds(_item).extents.magnitude * .7f, .35f);
+        _guide = root;
+    }
+
+    private static Material GuideMaterial
+    {
+        get
+        {
+            if (_guideMaterial != null) return _guideMaterial;
+            var shader = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Sprites/Default");
+            var m = new Material(shader) { name = "Guia_Encaje" };
+            m.SetFloat("_Surface", 1); m.SetFloat("_Blend", 0);
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.SetInt("_ZWrite", 0);
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            m.renderQueue = 3050;
+            m.SetColor("_BaseColor", new Color(1f, .82f, .42f, .38f));
+            return _guideMaterial = m;
+        }
+    }
+
     // A piece fitted in an earlier visit: already in its table.
     public void PlaceFitted() { _item.SetPositionAndRotation(_slot, _rest); }
 
@@ -126,12 +208,12 @@ public static class FitView
 {
     public static string Status(bool seated) => seated
         ? "Encaja: está en su posición. " + (VoicePrompt.Enabled ? "Di «tomar» o pulsa E para encajarla en su mesa." : "Pulsa E para encajarla en su mesa.")
-        : "Gíralo hasta que encaje en su mesa: su luz se aviva al acercarte y suena al asentar.";
+        : "Gírala hasta que quede como la figura dorada: su luz se aviva al acercarte y suena al asentar.";
 
     public static void NotYet(MIHud hud)
     {
         GameAudio.UI(UICue.Blocked);
-        hud?.SetInspectionFit("Aún no encaja. Sigue girándola: su luz se aviva al acercarte y suena al asentar.");
+        hud?.SetInspectionFit("Aún no encaja. Sigue girándola hasta que quede como la figura dorada.");
     }
 
     public static Renderer[] HidePlayer(PlayerController player)
