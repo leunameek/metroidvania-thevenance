@@ -213,7 +213,20 @@ public sealed class StoryPlayer : MonoBehaviour
         var line = _current.Lines[_index];
         _revealed = 0;
         _view.SetLine(line.speaker, line.note, line.text);
-        Frame(StoryActor.Find(line.speaker));
+        var actor = StoryActor.Find(line.speaker);
+        Frame(actor);
+        Act(actor);
+    }
+
+    // The speaker talks (two variants alternate); whoever spoke before goes back to rest.
+    private CharacterActions _talking;
+    private void Act(StoryActor actor)
+    {
+        var next = actor != null ? CharacterActions.Of(actor) : null;
+        if (_talking != null && _talking != next && _talking.Talking) _talking.Rest();
+        _talking = next;
+        // Someone kneeling, lying or meditating keeps the pose and talks from it.
+        if (next != null && !next.Posed) next.PlayAny(_index % 2 == 0 ? "Talk" : "Talk2", "Talk");
     }
 
     private void End()
@@ -224,6 +237,8 @@ public sealed class StoryPlayer : MonoBehaviour
         if (!done.Repeatable) CampaignProgress.Set(done.Key);
         if (done.Complete && done.Sequence != null) CampaignProgress.CompleteSequence(done.Sequence.id);
         _view.Show(false);
+        if (_talking != null && _talking.Talking) _talking.Rest();
+        _talking = null;
         RestoreCamera();
         Unhook();
         if (_player != null) _player.SetInputLocked(_wasLocked);

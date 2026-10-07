@@ -59,6 +59,7 @@ public sealed class BacataDirector : MonoBehaviour
         Hide(_child);
         Place(_nemequene, Village + new Vector3(1.6f, 0, 12.5f), Village + new Vector3(-1.2f, 0, 13));
         Shot(Village + new Vector3(4f, 2f, 7f), Village + new Vector3(0, 1.2f, 13));
+        Act(_saguanmachica, "Reach");
         yield return Lines("H01", 3, 2, true);
         // C02: the vision of gold and silver, before the council.
         yield return Cut();
@@ -72,8 +73,10 @@ public sealed class BacataDirector : MonoBehaviour
         Hide(_tisquesusa);
         Place(_nemequene, Hill + new Vector3(0, .9f, 0), Hill + new Vector3(0, .9f, -6));
         Shot(Hill + new Vector3(7, 3.5f, -7), Hill + new Vector3(0, 1.5f, 0));
+        Act(_nemequene, "Pray");
         yield return Days(3);
         Place(_bachue, Hill + new Vector3(0, .9f, -4.5f), Hill + new Vector3(0, .9f, 0));
+        Act(_bachue, "Reach");
         yield return Lines("H03", 0, 99, true, "Siete días y siete noches");
         // The poporo and the map are received; the journey to the plaza is elided (C04).
         yield return FadeOut();
@@ -95,12 +98,12 @@ public sealed class BacataDirector : MonoBehaviour
         yield return FadeIn("La verdadera imagen");
         Shot(Village + new Vector3(4, 2.2f, 3.5f), Village + new Vector3(0, 1.1f, 10.5f));
         yield return Lines("H19", 0, 2, false);
-        yield return Fall(_saguanmachica, 1.2f);
+        yield return Fall(_saguanmachica, 1.2f, "Death");
         Show(_invader);
         Shot(Village + new Vector3(-2.5f, 2f, 6.5f), Village + new Vector3(7, 1.6f, 15));
         yield return Lines("H19", 2, 1, false);
         yield return Arrow(_invader.position + Vector3.up * 1.5f, _nemequene.position + Vector3.up * 1.3f);
-        yield return Fall(_nemequene, .8f);
+        yield return Fall(_nemequene, .8f, "DeathBack");
         Shot(Village + new Vector3(-3.5f, 2f, 3f), Village + new Vector3(0, .8f, 9));
         yield return Lines("H19", 3, 1, true);
         // C20: the refuge of Tunja, the journey elided. Last words; the staff to the nephew.
@@ -108,8 +111,11 @@ public sealed class BacataDirector : MonoBehaviour
         foreach (var s in _smoke) s.Stop();
         Hide(_saguanmachica); Hide(_invader);
         Place(_nemequene, Refuge + new Vector3(0, .35f, 1), Refuge + new Vector3(0, .35f, 4));
-        _nemequene.rotation = Quaternion.Euler(-90, 90, 0);
+        // Lying wounded: the rigged body holds the last frame of its fall; the figure is laid down.
+        var wounded = CharacterActions.Of(_nemequene);
+        if (wounded == null || !wounded.Hold("DeathBack")) _nemequene.rotation = Quaternion.Euler(-90, 90, 0);
         Place(_tisquesusa, Refuge + new Vector3(-1.3f, 0, 1.2f), Refuge + new Vector3(0, 0, 1));
+        var nephew = CharacterActions.Of(_tisquesusa); if (nephew != null) nephew.Hold("Kneel");
         Shot(Refuge + new Vector3(2.8f, 2.1f, -2.2f), Refuge + new Vector3(-.4f, .6f, 1.1f));
         yield return Lines("H20", 0, 99, true, "Transmitir antes de morir");
         // C21: Iguaque. Furachogua brings the masks kept by Bachué; the staff is laid down and taken up.
@@ -120,6 +126,7 @@ public sealed class BacataDirector : MonoBehaviour
         Place(_furachogua, Lagoon + new Vector3(0, -1.6f, -11), Lagoon + new Vector3(0, 0, -15.5f));
         Shot(Lagoon + new Vector3(5.5f, 2.6f, -20f), Lagoon + new Vector3(0, 1f, -12.5f));
         yield return Rise(_furachogua, 1.6f, 2.5f);
+        Act(_furachogua, "Reach");
         yield return Lines("H21", 0, 99, true, "Furachogua");
         yield return Credits();
     }
@@ -150,9 +157,18 @@ public sealed class BacataDirector : MonoBehaviour
     private static void Hide(Transform actor) { if (actor != null) actor.gameObject.SetActive(false); }
     private static void Show(Transform actor) { if (actor != null) actor.gameObject.SetActive(true); }
 
-    private IEnumerator Fall(Transform actor, float seconds)
+    private static void Act(Transform actor, string state)
+    {
+        var acting = actor != null ? CharacterActions.Of(actor) : null;
+        if (acting != null) acting.Play(state);
+    }
+
+    // A rigged actor plays its death clip; the provisional figure tips over.
+    private IEnumerator Fall(Transform actor, float seconds, string state)
     {
         if (actor == null) yield break;
+        var acting = CharacterActions.Of(actor);
+        if (acting != null && acting.Play(state, .1f)) { yield return new WaitForSeconds(2.4f); yield break; }
         Quaternion start = actor.rotation, end = actor.rotation * Quaternion.Euler(-85, 0, 0);
         for (float t = 0; t < seconds; t += Time.deltaTime) { actor.rotation = Quaternion.Slerp(start, end, t / seconds); yield return null; }
         actor.rotation = end;

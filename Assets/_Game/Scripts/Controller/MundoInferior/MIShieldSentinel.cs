@@ -30,7 +30,24 @@ public sealed class MIShieldSentinel : MonoBehaviour
         if (body != null) _bodyHome = body.localPosition;
         MundoInferiorBlockout.AttemptReset += OnAttemptReset;
         if (MIProgress.Has(MIProgress.Shield04)) { _dead = true; gameObject.SetActive(false); return; }
+        // The rigged hombre-caimán (with and without shield) replaces the stone stand-in; the
+        // shield object keeps its logic, the core stays as the reading of the pulse.
+        if (body != null && CharacterModels.Exists("HombreCaimanEscudo"))
+        {
+            CharacterModels.Hide(body, core != null ? core.transform : null);
+            if (shield != null) CharacterModels.Hide(shield.transform);
+            _shielded = CharacterModels.Spawn("HombreCaimanEscudo", body, Vector3.zero, Quaternion.identity);
+            _bare = CharacterModels.Spawn("HombreCaiman", body, Vector3.zero, Quaternion.identity);
+        }
         ResetEncounter();
+    }
+
+    private CharacterActions _shielded, _bare;
+    private CharacterActions Actor => _shieldUp || _bare == null ? _shielded : _bare;
+    private void ShowShield(bool up)
+    {
+        if (_shielded != null) _shielded.gameObject.SetActive(up || _bare == null);
+        if (_bare != null) _bare.gameObject.SetActive(!up);
     }
     private void OnDestroy() { MundoInferiorBlockout.AttemptReset -= OnAttemptReset; }
     private void OnAttemptReset() { if (!_dead) ResetEncounter(); }
@@ -40,6 +57,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
         _health = maxHealth; _shieldUp = true; _timer = 0; _pulseT = -1;
         if (shield != null) shield.SetActive(true);
         if (pulseRing != null) pulseRing.gameObject.SetActive(false);
+        ShowShield(true);
     }
 
     private bool PlayerHere => MundoInferiorBlockout.Instance != null && MundoInferiorBlockout.Instance.CurrentRoom == room
@@ -60,6 +78,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
                 _pulseT = 0; _timer = 0;
                 if (core != null) core.color = new Color(1f, .35f, .3f);
                 if (pulseRing != null) { pulseRing.gameObject.SetActive(true); pulseRing.localScale = Vector3.one * .2f; }
+                Actor?.PlayAny("PowerUp", "Attack");
                 MIAudio.PlayAt("guardian_carga", transform.position, .8f);
             }
         }
@@ -73,6 +92,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
                 if (core != null) core.color = new Color(.45f, .8f, 1f);
                 if (pulseRing != null) pulseRing.gameObject.SetActive(false);
                 MIAudio.PlayAt("guardian_golpe", transform.position);
+                Actor?.PlayAny("Spin", "Attack");
                 MIParticles.Burst(transform.position + Vector3.up * .2f, new Color(.6f, .58f, .55f, .8f), 50, 4f, .15f, 1f);
                 Vector3 d = _player.transform.position - transform.position;
                 if (new Vector2(d.x, d.z).magnitude <= pulseRadius) MundoInferiorBlockout.Instance?.Damage(pulseDamage, transform.position);
@@ -97,11 +117,13 @@ public sealed class MIShieldSentinel : MonoBehaviour
                 _shieldUp = false; _flash = 1;
                 if (shield != null) { MIParticles.Burst(shield.transform.position, new Color(.75f, .7f, .6f), 70, 4f, .16f, 1.4f); shield.SetActive(false); }
                 MIAudio.PlayAt("escudo_rompe", transform.position);
+                ShowShield(false); Actor?.PlayAny("HitGut");
                 hud?.Notify("Defensa rota", "La tercera cadena quebró el escudo. Ahora cada impulso lo daña.", UIIcon.Shield, UIPalette.GoldLight);
             }
             else
             {
                 MIAudio.PlayAt("escudo_bloquea", transform.position);
+                Actor?.PlayAny("Block");
                 MIParticles.Burst(other.transform.position + Vector3.up, new Color(1f, .85f, .5f), 16, 3f, .06f, .2f);
                 if (Time.time - _lastBlockedNotice > 6f)
                 {
@@ -113,6 +135,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
         }
         _health -= player.DashDamage; _flash = 1;
         MIAudio.PlayAt("golpe_piedra", transform.position);
+        Actor?.PlayAny(_health % 2 < 1 ? "HitLeft" : "HitRight", "HitGut");
         MIParticles.Burst(transform.position + Vector3.up * 1.2f, new Color(.6f, .85f, 1f), 24, 2.5f, .08f, .4f);
         if (_health > 0) return;
         _dead = true;

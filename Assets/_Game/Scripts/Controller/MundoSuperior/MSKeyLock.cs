@@ -27,6 +27,7 @@ public sealed class MSKeyLock : MIInteractable
     public override void Interact(PlayerController player)
     {
         var hud = MundoSuperiorDirector.Instance?.Hud;
+        CharacterActions.Of(player)?.PlayAny(MSProgress.Has(MSProgress.Key) ? "Open" : "Reach");
         if (!MSProgress.Has(MSProgress.Key))
         {
             hud?.Notify("Cierre de la cima", "Falta el medallón de la llave. Está en el altar del camino de la llave.", UIIcon.Info, UIPalette.Muted);

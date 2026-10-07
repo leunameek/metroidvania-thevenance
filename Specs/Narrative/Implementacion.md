@@ -80,6 +80,40 @@ así que «Continuar» desde el menú tras saltar hacia atrás puede reabrir el 
 | Plaza | `PlazaCampaign.cs` (Bachué, urnas, Quimue, desenlace), `PlazaStoryPoint.cs` |
 | Prólogo y epílogo | `Scripts/Controller/Campaign/BacataDirector.cs`, `Editor/Campaign/BacataSceneBuilder.cs` |
 
+## Personajes riggeados y animaciones (2026-10-06)
+
+`Editor/Characters/CharacterLibrarySetup.cs` (se ejecuta solo una vez al compilar; también
+*Nemequene > Personajes > Construir personajes*) arma el elenco desde `Art/Characters`:
+
+- **Humanoides con rig de Mixamo** (Bachué, Quimue, Furachogua, Custodio, invasor, mujer-águila,
+  hombre-caimán con y sin escudo, hombre-murciélago, jefe lagarto-murciélago, Nemequene niño y
+  adulto): se importan como Humanoid y comparten los clips de `Nemequene/Animations` mediante
+  `_Compartido/Bacata_Humanoid.controller` (locomoción + Talk, Talk2, Point, Reach, Pickup, Lever,
+  Button, Open, Pray, Sit, Kneel, Crouch/Stand, Attack, Combo, Spin, Block, PowerUp, DodgeLeft/Right,
+  HitLeft/Right/Gut, Death, DeathBack, Land). Los serenos usan *Breathing Idle* (override), los
+  combatientes *Orc Idle*.
+- **Rig humanoide de Tripo** (Tisquesusa, mujer-cóndor): avatar Humanoid construido con un mapa de
+  huesos explícito; la mujer-cóndor usa `Mujer_condor_Optimizado.fbx` (40 k triángulos en vez de 2 M).
+- **Criaturas** (serpiente, jaguar, guacamaya): animaciones creadas por código en Blender
+  (`tools/Blender/animate_creatures.py` → `<carpeta>/Animations/<Nombre>_Animado.fbx`):
+  serpiente Idle, AtaqueA, SacudidaA, AtaqueB, PulsoB, GolpeA, GolpeB, Emerger, Liberada, Reposo;
+  jaguar Idle, Caminar, Correr, Embestida, Rugido, Golpe; guacamaya Idle, Despegue, Vuelo, Planeo,
+  Aterrizaje.
+- El reproductor de Nemequene (`Nemequene_Player.controller`) recibe los mismos estados de acción.
+- Prefabs en `Resources/Characters/<Clave>` (raíz en los pies mirando a +Z, `CharacterActions`).
+
+En el juego: quien habla en un diálogo gesticula (dos variantes); en los duelos Nemequene ataca,
+bloquea, esquiva y recibe golpes, el enemigo amaga en el aviso y acusa los golpes; «Jaguar» llama
+al jaguar, que ruge y embiste; la guacamaya sale volando de la urna vacía (H12). El guardián de
+MI09 es el jefe lagarto-murciélago, la cima del mundo superior es la serpiente bicéfala, el
+centinela de escudo es el hombre-caimán (pierde el escudo al romperlo). Nemequene recoge hallazgos,
+jala la palanca, usa el cuerno y la llave, y se arrodilla en los descansos. En Bacatá: tallado y
+entrega del bastón, meditación, muerte del tío y caída de Nemequene, Tisquesusa arrodillado.
+
+Falta el modelo de **Saguanmachica** (sigue la figura provisional). Los centinelas y vigías comunes
+del inframundo (hombre-caimán, hombre-murciélago) tienen prefab pero aún no comportamiento de combate
+por dash en sus marcas.
+
 ## Sustituir las figuras provisionales
 
 - Personas en la escena de Bacatá: asignar el prefab en el `BacataDirector` (o volver a ejecutar

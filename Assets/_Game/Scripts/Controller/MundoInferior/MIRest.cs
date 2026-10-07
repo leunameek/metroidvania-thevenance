@@ -14,6 +14,7 @@ public sealed class MIRest : MIInteractable
     {
         var health = player.GetComponent<Health>();
         if (health != null) health.Heal(health.MaxHealth);
+        CharacterActions.Of(player)?.PlayAny("Kneel");
         MIProgress.SetCheckpoint(room);
         MIAudio.Play("descanso", .9f);
         MIParticles.Burst(transform.position + Vector3.up * .3f, new Color(.45f, .9f, .8f, .9f), 50, 1.6f, .09f, -.6f);

@@ -29,10 +29,25 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     public Transform Focus => body != null ? body : transform;
     public Transform PlayerMark => playerMark;
 
+    private CharacterActions _serpent;
+
     private void Start()
     {
         StoryActor.Ensure(gameObject, "Serpiente", 5f);
+        UseSerpentModel();
         if (Defeated) ShowDefeated();
+    }
+
+    // The rigged serpent (Resources/Characters/Serpiente) replaces the stand-in: the grey pieces
+    // and the training-guardian model hide (colliders stay), the core keeps floating on its chest.
+    private void UseSerpentModel()
+    {
+        var root = body != null ? body.parent : null;
+        if (root == null || !CharacterModels.Exists("Serpiente")) return;
+        CharacterModels.Hide(root, core != null ? core.transform : null);
+        _serpent = CharacterModels.Spawn("Serpiente", root, Vector3.zero, Quaternion.identity);
+        animator = null;
+        if (_serpent != null) _serpent.PlayAny("Emerger");
     }
 
     public override void Interact(PlayerController player)
@@ -165,6 +180,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     private void ShowDefeated()
     {
         Trigger("Die");
+        if (_serpent != null) _serpent.PlayAny("Reposo");
         if (body != null) body.localRotation = Quaternion.Euler(18f, 0, 0);
         Pose(30f, 30f, 0);
         SetCore(new Color(.25f, .22f, .2f), 0);

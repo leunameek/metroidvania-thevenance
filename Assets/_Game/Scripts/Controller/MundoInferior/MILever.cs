@@ -17,6 +17,7 @@ public sealed class MILever : MIInteractable
     public override void Interact(PlayerController player)
     {
         if (!MIProgress.Set(flagId)) return;
+        CharacterActions.Of(player)?.PlayAny("Lever");
         MIAudio.PlayAt("palanca", transform.position);
         var director = MundoInferiorBlockout.Instance;
         director?.Hud?.Notify(doneTitle, doneText, UIIcon.Rotate, UIPalette.GoldLight);

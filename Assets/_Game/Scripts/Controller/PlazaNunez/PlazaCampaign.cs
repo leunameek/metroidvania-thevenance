@@ -78,7 +78,10 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         }
         // Defeated: on his knees, the two bonds dark.
         bool defeated = c.Has(CampaignFlags.QuimueDefeated);
-        _quimue.localScale = new Vector3(1, defeated ? .6f : 1, 1);
+        // C17: the rigged Quimue kneels; the provisional figure only shrinks.
+        var acting = CharacterActions.Of(_quimue);
+        if (acting != null) { if (defeated && acting.Current != "Kneel" && !_finalRunning) acting.PlayAny("Kneel"); }
+        else _quimue.localScale = new Vector3(1, defeated ? .6f : 1, 1);
         if (_quimueLight != null) _quimueLight.enabled = !defeated;
     }
 
@@ -226,8 +229,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             _demo.Audio?.Play(PlazaSound.Inspect);
             return;
         }
-        // The poporo projects the memory of the horn into the empty support; the clouds open.
+        // The poporo projects the memory of the horn into the empty support; the clouds open and
+        // the guacamaya (C11) rises from the urn toward the upper portal.
         _demo.Audio?.Play(PlazaSound.Complete);
+        CreatureFlight.Launch("Guacamaya", Ground(_upper != null ? _upper.transform.position + (_demo.Player.transform.position - _upper.transform.position).normalized * 3f : _demo.Player.transform.position),
+            _upper != null ? _upper.transform.position + Vector3.up * 6f : _demo.Player.transform.position + Vector3.up * 8f);
         StoryPlayer.PlaySequence("H12", () =>
         {
             _demo.SetStatus("La guacamaya cruza las nubes hacia el umbral superior.");

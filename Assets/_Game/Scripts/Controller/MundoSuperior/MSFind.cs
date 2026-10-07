@@ -140,6 +140,7 @@ public sealed class MSFind : MIInteractable
     {
         bool first = MSProgress.Set(findId);
         Close();
+        if (first && _player != null) CharacterActions.Of(_player)?.PlayAny("Pickup");
         Refresh();
         if (!first) return;
         MSAudio.Play("hallazgo_confirmar", .9f);

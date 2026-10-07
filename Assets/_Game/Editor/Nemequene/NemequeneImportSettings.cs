@@ -12,7 +12,8 @@ public class NemequeneImportSettings : AssetPostprocessor
 
     private static readonly string[] LoopingClips =
     {
-        "Orc Idle", "Walking", "Running", "Running Backward", "Falling Idle", "Climbing Ladder", "Flying", "Hanging Idle"
+        "Orc Idle", "Walking", "Running", "Running Backward", "Falling Idle", "Climbing Ladder", "Flying", "Hanging Idle",
+        "Breathing Idle", "Talking", "Talking (1)", "Praying", "Sitting Idle"
     };
 
     private static bool IsNemequeneAsset(string path) => path.Replace('\\', '/').StartsWith(ModelFolder + "/");

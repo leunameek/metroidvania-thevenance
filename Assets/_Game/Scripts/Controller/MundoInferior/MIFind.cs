@@ -140,6 +140,7 @@ public sealed class MIFind : MIInteractable
     {
         bool first = MIProgress.Set(findId);
         Close();
+        if (first && _player != null) CharacterActions.Of(_player)?.PlayAny("Pickup");
         Refresh();
         if (!first) return;
         var director = MundoInferiorBlockout.Instance;

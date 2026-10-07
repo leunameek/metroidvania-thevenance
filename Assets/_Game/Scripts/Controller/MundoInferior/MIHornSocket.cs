@@ -19,6 +19,7 @@ public sealed class MIHornSocket : MIInteractable
     public override void Interact(PlayerController player)
     {
         var director = MundoInferiorBlockout.Instance;
+        CharacterActions.Of(player)?.PlayAny(MIProgress.Has(MIProgress.Horn) ? "Button" : "Reach");
         if (!MIProgress.Has(MIProgress.Horn))
         {
             MIAudio.Play("ui_error", .6f);

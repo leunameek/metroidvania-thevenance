@@ -42,6 +42,13 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         if (body != null) _bodyHome = body.localPosition;
         if (coreHit != null) coreHit.enabled = false;
         StoryActor.Ensure(gameObject, "Guardián caimán-murciélago", 4f);
+        // The rigged boss (Resources/Characters/JefeLagartoMurcielago) stands in the idol's place
+        // and follows its leans; the stone pieces hide, the crystal core stays readable.
+        if (body != null && CharacterModels.Exists("JefeLagartoMurcielago"))
+        {
+            CharacterModels.Hide(body, core);
+            _boss = CharacterModels.Spawn("JefeLagartoMurcielago", body, Vector3.zero, Quaternion.identity);
+        }
         _music = MIAudio.Loop(gameObject, "musica_guardian", .55f, false); _music.Stop();
         if (MIProgress.Has(MIProgress.Guardian)) { ShowDefeated(); return; }
         ResetEncounter();
@@ -244,12 +251,15 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         StoryPlayer.Trigger("duel:E07:won");
     }
 
+    private CharacterActions _boss;
+
     private void ShowDefeated()
     {
         _phase = Phase.Defeated; _move = null;
+        if (_boss != null) _boss.PlayAny("Kneel");
         ClearEffects(); SetCore(false);
         if (coreLight != null) coreLight.intensity = .2f;
-        if (body != null) { body.localPosition = _bodyHome + Vector3.down * 1.2f; body.localRotation = Quaternion.Euler(8, 0, 4); }
+        if (body != null && _boss == null) { body.localPosition = _bodyHome + Vector3.down * 1.2f; body.localRotation = Quaternion.Euler(8, 0, 4); }
         if (arenaGate != null) arenaGate.Release();
         if (_music != null) _music.Stop();
     }
