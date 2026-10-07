@@ -239,8 +239,12 @@ public sealed class WorldNaturalInput : MonoBehaviour
         _context = NaturalContext.None; _contextAction = "";
         // With neither camera nor voice, the panel only appears where they could be used.
         bool inUse = _hands.Requested || _prefs.voiceEnabled;
-        bool visible = Time.timeScale > 0 && (inUse || context != NaturalContext.None);
+        // In a duel the duel screen already names the keys: the plate shows only when hands or
+        // voice are in use, and then clear of the action bar.
+        bool duel = TurnDuelController.Running;
+        bool visible = Time.timeScale > 0 && (inUse || (context != NaturalContext.None && !duel)) && !StoryPlayer.Active;
         _view.SetVisible(visible);
+        _view.SetDuelLayout(duel);
         if (!visible) { _shownContext = context; return; }
         if (context != _shownContext)
         {
@@ -276,7 +280,7 @@ public sealed class WorldNaturalInput : MonoBehaviour
         switch (context)
         {
             case NaturalContext.Interact: h = "Palma abierta quieta: " + action.ToLowerInvariant(); v = "«examinar» o «usar»"; break;
-            case NaturalContext.Inspect: h = HandInspection.Guide + " · puño sostenido: tomar"; v = "«tomar» para quedártela · «salir» para devolverla"; break;
+            case NaturalContext.Inspect: h = HandInspection.Guide + " · puño sostenido: tomar"; v = "«tomar» para quedártela o encajarla · «salir» para devolverla"; break;
             case NaturalContext.Duel: h = "Cierra el puño: atacar"; v = "«atacar»"; break;
             case NaturalContext.Defend: h = "Dos palmas arriba: bloquear · barrido: esquivar"; v = "«bloquea» · «esquiva»"; break;
             case NaturalContext.Fight: h = "Cierra el puño: impulso"; v = "«impulso»"; break;

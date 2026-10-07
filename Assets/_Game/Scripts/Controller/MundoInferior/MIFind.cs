@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 // A/D, E confirms once (reward granted in a single operation through MIProgress), Escape gives
 // it back untouched. The pickup is an independent child of the altar; collected pieces vanish
 // and the altar light dims. Offerings are optional pieces for the cultural archive.
+// Bracelets and offerings (rings, discs, coins) are fitted in their table (FitPuzzle): they come
+// out turned and count only once seated and fitted. Offerings then stay in their table; the
+// bracelets, once fitted, are taken by Nemequene (he wears them).
 public sealed class MIFind : MIInteractable
 {
     public enum Kind { Seed, Bracelets, Horn, Offering, Story }
@@ -34,10 +37,17 @@ public sealed class MIFind : MIInteractable
     private PlayerController _player;
     private float _blend, _haloIntensity;
     private bool _confirmFrame;
+    private FitPuzzle _fit;
+    private Renderer[] _hiddenPlayer;
+    private Vector3 _frameSide = Vector3.back;
+
+    public bool Fits => kind == Kind.Bracelets || kind == Kind.Offering;
+    private bool Stays => _fit != null && kind == Kind.Offering;
 
     private void Start()
     {
         if (halo != null) _haloIntensity = halo.intensity;
+        if (Fits && item != null) _fit = new FitPuzzle(item);
         Refresh();
     }
 
@@ -66,7 +76,13 @@ public sealed class MIFind : MIInteractable
     private void Refresh()
     {
         bool collected = Collected;
-        if (item != null) item.gameObject.SetActive(!collected && RequirementsMet);
+        if (item != null) item.gameObject.SetActive((!collected || Stays) && RequirementsMet);
+        // A fitted offering rests in its table, still.
+        if (collected && Stays && item != null)
+        {
+            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
+            if (Inspecting != this) _fit.PlaceFitted();
+        }
         float intensity = collected ? _haloIntensity * .18f : _haloIntensity;
         if (halo != null) { halo.intensity = intensity; var glow = halo.GetComponent<MIGlow>(); if (glow != null) glow.SetBase(intensity); }
         if (sparks != null) sparks.gameObject.SetActive(!collected);
@@ -82,12 +98,18 @@ public sealed class MIFind : MIInteractable
         if (_orbit != null) _orbit.enabled = false;
         _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
         _itemPosition = item.position; _itemRotation = item.rotation;
+        _frameSide = InspectionFraming.ClearSide(_itemPosition, _cameraPosition, 1.7f, item, player.transform);
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
         WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
         MIAudio.Play("hallazgo_abrir", .8f);
         string kindLabel = kind == Kind.Offering ? "Ofrenda opcional · archivo" : "Hallazgo";
-        MundoInferiorBlockout.Instance?.Hud?.ShowInspection(displayName, kindLabel, description);
+        // Nemequene steps out of the shot: the piece and the panel have the screen.
+        _hiddenPlayer = FitView.HidePlayer(player);
+        _fit?.Scramble();
+        var hud = MundoInferiorBlockout.Instance?.Hud;
+        hud?.ShowInspection(displayName, kindLabel, description);
+        hud?.SetInspectionFit(_fit != null ? FitView.Status(false) : null);
     }
 
     private void Update()
@@ -97,7 +119,7 @@ public sealed class MIFind : MIInteractable
         if (Inspecting != this) return;
         _blend = Mathf.MoveTowards(_blend, 1, Time.unscaledDeltaTime / .35f);
         // Frame the piece from the player's side, a little above, the panel on the right.
-        Vector3 toCamera = _cameraPosition - _itemPosition; toCamera.y = 0;
+        Vector3 toCamera = _frameSide;
         if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
         Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
         Vector3 framed = _itemPosition + toCamera.normalized * 1.7f + Vector3.up * .25f - side * .55f;
@@ -128,23 +150,47 @@ public sealed class MIFind : MIInteractable
         }
         item.Rotate(Vector3.up, -turn.x + handYaw, Space.World);
         item.Rotate(_camera.transform.right, turn.y + handPitch, Space.World);
+        if (_fit != null)
+        {
+            bool was = _fit.Seated;
+            _fit.Tick(halo, _haloIntensity, item.position);
+            if (was != _fit.Seated) MundoInferiorBlockout.Instance?.Hud?.SetInspectionFit(FitView.Status(_fit.Seated));
+        }
         // The piece turning in the hands: a soft friction, rate-limited by the mixer.
         if (Mathf.Abs(turn.x - handYaw) + Mathf.Abs(turn.y + handPitch) > .35f) GameAudio.Play("Foley/objeto_girar", .3f, AudioChannel.Effects, 1f, .06f, .2f, 1);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
         if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
         else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { GameAudio.Play("Foley/examinar_cerrar", .7f); Close(); }
-        else if (natural != null && natural.ConsumeConfirm("Tomar " + displayName.ToLowerInvariant())) Confirm();
+        else if (natural != null && natural.ConsumeConfirm((_fit != null ? "Encajar " : "Tomar ") + displayName.ToLowerInvariant())) Confirm();
         else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();
     }
 
+    // The piece goes back to its altar, Nemequene takes it with his hands, and it is his (flag,
+    // ability, reward) at the moment of the grasp.
     private void Confirm()
     {
-        bool first = MIProgress.Set(findId);
+        bool first = !MIProgress.Has(findId);
+        if (_fit != null && first)
+        {
+            // Only a seated piece goes into its table.
+            if (!_fit.Seated) { FitView.NotYet(MundoInferiorBlockout.Instance?.Hud); return; }
+            Close(keepItem: true);
+            StartCoroutine(_fit.Settle());
+            if (_player != null) PlayerInteraction.Perform(_player, item, Take, Stays ? "Reach" : "Pickup", "Reach");
+            else Take();
+            return;
+        }
         Close();
-        if (first && _player != null) CharacterActions.Of(_player)?.PlayAny("Pickup");
+        if (!first) { Refresh(); return; }
+        if (_player != null) PlayerInteraction.Perform(_player, item != null ? item : transform, Take, "Pickup");
+        else Take();
+    }
+
+    private void Take()
+    {
+        if (!MIProgress.Set(findId)) { Refresh(); return; }
         Refresh();
-        if (!first) return;
         var director = MundoInferiorBlockout.Instance;
         director?.ApplyAbilities();
         MIAudio.Play(kind == Kind.Offering ? "ofrenda" : "hallazgo_confirmar", .9f);
@@ -159,14 +205,19 @@ public sealed class MIFind : MIInteractable
         }
     }
 
-    private void Close()
+    private void Close() => Close(false);
+
+    // keepItem: the piece is being fitted (it stays where the player seated it, then settles).
+    private void Close(bool keepItem)
     {
         if (Inspecting != this) return;
         Inspecting = null;
-        if (item != null)
+        FitView.ShowPlayer(_hiddenPlayer); _hiddenPlayer = null;
+        if (item != null && !keepItem)
         {
             item.SetPositionAndRotation(_itemPosition, _itemRotation);
-            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = true;
+            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = !(Collected && Stays);
+            if (halo != null) halo.intensity = Collected ? _haloIntensity * .18f : _haloIntensity;
         }
         if (_camera != null) _camera.transform.SetPositionAndRotation(_cameraPosition, _cameraRotation);
         if (_orbit != null) { _orbit.enabled = true; _orbit.SnapAfterTeleport(); }

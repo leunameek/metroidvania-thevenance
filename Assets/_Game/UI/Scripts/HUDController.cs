@@ -9,7 +9,7 @@ namespace Nemequene.UI
     {
         private readonly UIManager _ui;
         private readonly Health _healthSource;
-        private readonly GameObject _root, _healthPanel, _objectivePanel, _promptPanel, _zonePanel, _devicesPanel, _hints;
+        private readonly GameObject _root, _healthPanel, _objectivePanel, _promptPanel, _zonePanel, _devicesPanel, _hints, _headerScrim;
         private readonly TMP_Text _health, _objective, _zone, _prompt, _devices;
         private readonly Image _healthFill, _fade;
         private float _healthTarget = 1, _healthShown = 1, _next, _zoneUntil, _objectiveUntil;
@@ -41,11 +41,15 @@ namespace Nemequene.UI
             name.alignment = TextAlignmentOptions.BottomLeft; name.fontStyle = FontStyles.Bold;
             _health = UIFactory.Shadow(Fit(UIFactory.Tone(f.Label(health, "", new Vector2(.62f, .64f), new Vector2(.90f, .98f), 20), UITone.Muted)));
             _health.alignment = TextAlignmentOptions.BottomRight;
+            // Zone, objective and device state float over a bright plaza: a smoked backdrop behind them.
+            _headerScrim = UIKit.Scrim(_root.transform, "HeaderScrim", Vector2.one, Vector2.one, .55f).gameObject;
+            UIKit.Place((RectTransform)_headerScrim.transform, Vector2.one, new Vector2(-14, -20), new Vector2(840, 230));
+            _headerScrim.transform.SetSiblingIndex(1);
             _zonePanel = f.Rect("Zone", _root.transform, new Vector2(.50f, .885f), new Vector2(.96f, .955f)).gameObject;
             _zone = UIFactory.Shadow(f.Heading(_zonePanel.transform, "", Vector2.zero, Vector2.one, 42));
             _zone.alignment = TextAlignmentOptions.BottomRight;
             _objectivePanel = f.Rect("Objective", _root.transform, new Vector2(.50f, .835f), new Vector2(.96f, .885f)).gameObject;
-            _objective = UIFactory.Shadow(f.Label(_objectivePanel.transform, "", Vector2.zero, Vector2.one, 24));
+            _objective = UIFactory.Shadow(Fit(f.Label(_objectivePanel.transform, "", Vector2.zero, Vector2.one, 24)));
             _objective.alignment = TextAlignmentOptions.TopRight;
             _promptPanel = f.Rect("UI_Indicator_Interaction", _root.transform, new Vector2(.32f, .17f), new Vector2(.68f, .235f)).gameObject;
             UIBacata.Skin(_promptPanel.transform, "Controls/Ribbon");
@@ -112,6 +116,7 @@ namespace Nemequene.UI
             // Zone and objective share the upper-right corner, so both can stay on screen; only
             // one main objective occupies the header.
             _zonePanel.SetActive(exploration);
+            _headerScrim.SetActive(exploration);
             _hints.SetActive(exploration);
             _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             // Voice first: the cap names the word to say, or the key while the voice is off.

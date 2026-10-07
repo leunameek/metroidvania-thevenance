@@ -5,8 +5,8 @@ using UnityEngine;
 // MS03, E10 mujer-águila on the key terrace of MS06). Built at runtime next to their terraces so
 // the hand-edited scene stays untouched: an E mark on the terrace edge and the creature hovering
 // beyond it. The figure is a provisional silhouette until the rigged model is added under
-// Resources/Characters/<model> (it is used instead when present). A victory is recognition, not
-// death: the creature folds its wings and stays in peace.
+// Resources/Characters/<model> (it is used instead when present). A victory is recognition: the
+// creature says its last line (D09 / D10) and goes out in motes, leaving nothing on the terrace.
 public sealed class MSDuelEncounter : MIInteractable, IDuelStage
 {
     private string _encounter, _flag, _speaker, _modelPath;
@@ -21,9 +21,8 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
 
     public bool Fighting => _fighting;
     public bool Resolved => MSProgress.Has(_flag);
-    // After the trial the creature stays in peace and answers one question (D09 / D10).
-    public override bool Available => base.Available && !_fighting && Ready && !StoryPlayer.Pending;
-    public override string Prompt => Resolved ? "Hablar con la " + _speaker.ToLowerInvariant() : "Responder a la prueba de la " + _speaker.ToLowerInvariant();
+    public override bool Available => base.Available && !_fighting && !Resolved && Ready && !StoryPlayer.Pending;
+    public override string Prompt => "Responder a la prueba de la " + _speaker.ToLowerInvariant();
     public Transform Focus => _figure;
     // E09 waits for Runa 2; E10 for the arrival on the key terrace (always true there).
     private bool Ready => _encounter != CondorRules.EncounterId || MSProgress.Has(MSProgress.RuneClimb);
@@ -47,7 +46,7 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         e._playerMark.localRotation = Quaternion.identity;
         e.BuildFigure(zone.transform.TransformPoint(perch));
         StoryActor.Ensure(e._figure.gameObject, speaker, 1.7f);
-        if (e.Resolved) e.ShowResolved();
+        if (e.Resolved) CreatureDissolve.HideNow(e._figure);
         return e;
     }
 
@@ -91,11 +90,6 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
     public override void Interact(PlayerController player)
     {
         if (!Available) return;
-        if (Resolved)
-        {
-            StoryPlayer.PlayHint(CampaignProgress.Script.Hint(_encounter == CondorRules.EncounterId ? "D09" : "D10"), _speaker);
-            return;
-        }
         _player = player; _fighting = true;
         MundoSuperiorDirector.Instance?.BeginCombat(this, _playerMark);
         if (!StoryPlayer.Trigger(StoryTriggers.Duel(_encounter, "intro"), StartDuel)) StartDuel();
@@ -128,6 +122,14 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         var director = MundoSuperiorDirector.Instance;
         director?.EndCombat(false);
         director?.Hud?.Notify(_speaker, "Te reconoce y pliega las alas. El camino sigue abierto.", UIIcon.Objective, UIPalette.Jade);
+        var hint = CampaignProgress.Script != null ? CampaignProgress.Script.Hint(_encounter == CondorRules.EncounterId ? "D09" : "D10") : null;
+        if (hint != null) StoryPlayer.PlayHint(hint, _speaker, Vanish); else Vanish();
+    }
+
+    private void Vanish()
+    {
+        if (_figure == null || !_figure.gameObject.activeSelf) return;
+        CreatureDissolve.Run(_figure, new Color(.95f, .85f, .6f), .2f);
     }
 
     // ---------- IDuelStage ----------
@@ -135,7 +137,7 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
     public void OnTelegraph(DuelMove move) { _move = move; _moveTime = 0; }
     public void OnResolved(DuelMove move, bool correct)
     {
-        if (correct && move.Accepts(DuelDefense.Dodge) && _player != null) _player.PerformDodge(1);
+        if (correct && move.Accepts(DuelDefense.Dodge) && _player != null) _player.PerformDodge(TurnDuelController.Current != null ? TurnDuelController.Current.DodgeSide : 1);
         _move = null;
     }
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)

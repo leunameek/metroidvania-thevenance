@@ -27,7 +27,8 @@ public static class CharacterLibrarySetup
     private const string PlayerController = ArtRoot + "Nemequene/Nemequene_Player.controller";
     private const string PlayerPrefab = ArtRoot + "Nemequene/Nemequene_Player_Visual.prefab";
     // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v2";
+    // v3: CombatIdle (duel stance) and the reworked creature clips.
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v3";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
@@ -75,6 +76,7 @@ public static class CharacterLibrarySetup
         ("HitRight", "Standing React Large From Right", false, false), ("HitGut", "Standing React Large Gut", false, false),
         ("Death", "Dying", false, true), ("DeathBack", "Dying Backwards", false, true), ("Land", "Landing", false, false),
         ("Fly", "Flying", true, true), ("Fall", "Falling Idle", true, true),
+        ("CombatIdle", "Orc Idle", true, true),
     };
 
     // Creature states: state = take name; one-shots return to `next` (default Idle).
@@ -211,6 +213,7 @@ public static class CharacterLibrarySetup
             // Held poses wait for CharacterActions.Rest; everything else returns to rest by itself.
             if (hold && holdPoses) continue;
             if (loop && holdPoses) continue;
+            if (state == "CombatIdle") continue; // the duel stance holds until the duel ends
             var t = s.AddTransition(rest);
             t.hasExitTime = true; t.exitTime = loop ? 1f : .9f; t.duration = .2f; t.hasFixedDuration = true;
         }

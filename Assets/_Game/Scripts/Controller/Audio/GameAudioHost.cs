@@ -361,17 +361,26 @@ public sealed class GameAudioHost : MonoBehaviour
         {
             var canvas = UIKit.ScreenCanvas(transform, "SubtitulosDeSonido", 880);
             _captionRoot = UIKit.Rect("Lineas", canvas);
-            UIKit.Place(_captionRoot, new Vector2(0, 0), new Vector2(40, 150), new Vector2(620, 140));
+            // Lower left, above the duel's action bar and the key hints.
+            UIKit.Place(_captionRoot, new Vector2(0, 0), new Vector2(56, 330), new Vector2(620, 150));
             _captionRoot.pivot = new Vector2(0, 0);
             var layout = _captionRoot.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
             layout.childAlignment = TextAnchor.LowerLeft; layout.spacing = 4;
             layout.childControlHeight = layout.childControlWidth = true; layout.childForceExpandHeight = false;
         }
         foreach (var c in _captions) if (c.text != null && c.text.text == "[" + text + "]") return;
-        if (_captions.Count >= 3) { if (_captions[0].text != null) Destroy(_captions[0].text.gameObject); _captions.RemoveAt(0); }
-        var label = UIKit.Label(_captionRoot, "[" + text + "]", 24, UIPalette.Ivory);
-        label.alignment = TextAlignmentOptions.MidlineLeft;
+        if (_captions.Count >= 3) { if (_captions[0].text != null) Destroy(_captions[0].text.transform.parent.gameObject); _captions.RemoveAt(0); }
+        // Each line on its own smoked backdrop, as wide as its words.
+        var line = UIKit.Rect("Linea", _captionRoot);
+        line.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 40;
+        line.gameObject.AddComponent<CanvasGroup>();
+        var label = UIKit.Label(line, "[" + text + "]", 24, UIPalette.Ivory);
+        label.alignment = TextAlignmentOptions.MidlineLeft; label.textWrappingMode = TextWrappingModes.NoWrap;
         UIKit.Shadow(label);
+        var scrim = UIKit.Scrim(line, "Scrim", Vector2.zero, new Vector2(0, 1), .65f);
+        scrim.rectTransform.pivot = new Vector2(0, .5f);
+        scrim.rectTransform.sizeDelta = new Vector2(label.GetPreferredValues(label.text).x + 56, 10);
+        scrim.rectTransform.anchoredPosition = new Vector2(-28, 0);
         _captions.Add((label, Time.unscaledTime + 2.8f));
     }
 
@@ -382,8 +391,8 @@ public sealed class GameAudioHost : MonoBehaviour
             var (text, until) = _captions[i];
             if (text == null) { _captions.RemoveAt(i); continue; }
             float left = until - Time.unscaledTime;
-            text.alpha = Mathf.Clamp01(left / .5f);
-            if (left <= 0) { Destroy(text.gameObject); _captions.RemoveAt(i); }
+            text.transform.parent.GetComponent<CanvasGroup>().alpha = Mathf.Clamp01(left / .5f);
+            if (left <= 0) { Destroy(text.transform.parent.gameObject); _captions.RemoveAt(i); }
         }
     }
 }

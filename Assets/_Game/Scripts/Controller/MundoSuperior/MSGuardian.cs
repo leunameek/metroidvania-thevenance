@@ -35,7 +35,16 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         StoryActor.Ensure(gameObject, "Serpiente", 5f);
         UseSerpentModel();
-        if (Defeated) ShowDefeated();
+        if (Defeated) { ShowDefeated(); Vanish(true); }
+    }
+
+    // Freed, the serpent goes out in motes once its last words are said: nothing stays at the summit.
+    private void Vanish(bool instant)
+    {
+        Transform shape = _serpent != null ? _serpent.transform : body;
+        if (core != null) core.gameObject.SetActive(false);
+        if (instant) { CreatureDissolve.HideNow(shape); return; }
+        CreatureDissolve.Run(shape, new Color(.95f, .85f, .55f), .3f);
     }
 
     // The rigged serpent (Resources/Characters/Serpiente) replaces the stand-in: the grey pieces
@@ -92,7 +101,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         ShowDefeated();
         _fighting = false;
         MundoSuperiorDirector.Instance?.EndCombat(true);
-        StoryPlayer.Trigger(StoryTriggers.Duel("E08", "won"));
+        if (!StoryPlayer.Trigger(StoryTriggers.Duel("E08", "won"), () => Vanish(false))) Vanish(false);
     }
 
     // ---------- IDuelStage ----------

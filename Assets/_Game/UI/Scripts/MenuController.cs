@@ -45,15 +45,41 @@ namespace Nemequene.UI
             _objectives = ui.Factory.Text(objectives, "");
             _finish = ui.Factory.Button(objectives, UIStrings.Get("finish"), () => ui.Screens.Show(UIScreen.Complete), true);
             var controls = Page(UIScreen.Controls, UIStrings.Get("controls"));
-            ui.Factory.Text(controls, UIStrings.Get("controls.body"));
-            ui.Factory.Button(controls, UIStrings.Get("tutorial.repeat"), ui.RepeatTutorial);
-            Link(controls, "voice.calibrate", UIScreen.VoiceCalibration);
-            Link(controls, "hands.calibrate", UIScreen.HandCalibration);
+            BuildControls(controls);
             var credits = Page(UIScreen.Credits, UIStrings.Get("game.title"));
             ui.Factory.Text(credits, UIStrings.Get("credits.body"));
             BuildDefeat();
             BuildComplete();
         }
+        // Controls and help on one page without scrolling (2026-10-06 playtest): the sections of
+        // controls.body (separated by a blank line) in three columns whose text shrinks to fit,
+        // and the three actions side by side under them.
+        private void BuildControls(RectTransform body)
+        {
+            var f = _ui.Factory;
+            var sections = UIStrings.Get("controls.body").Replace("\r", "").Split(new[] { "\n\n" }, System.StringSplitOptions.RemoveEmptyEntries);
+            var columns = f.Row(body, "Columns", 36);
+            var rowLayout = columns.GetComponent<HorizontalLayoutGroup>();
+            rowLayout.childForceExpandHeight = true; rowLayout.childAlignment = TextAnchor.UpperLeft;
+            var size = columns.gameObject.AddComponent<LayoutElement>(); size.minHeight = size.preferredHeight = 500;
+            int perColumn = Mathf.CeilToInt(sections.Length / 3f);
+            for (int c = 0; c < 3; c++)
+            {
+                int from = c * perColumn, count = Mathf.Min(perColumn, sections.Length - from);
+                if (count <= 0) break;
+                var text = f.Text(columns, string.Join("\n\n", sections, from, count), 21);
+                text.alignment = TextAlignmentOptions.TopLeft;
+                text.enableAutoSizing = true; text.fontSizeMax = 21; text.fontSizeMin = 14;
+                text.overflowMode = TextOverflowModes.Truncate;
+                text.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            var actions = f.Row(body, "Actions", 18);
+            actions.gameObject.AddComponent<LayoutElement>().minHeight = 60;
+            f.Button(actions, UIStrings.Get("tutorial.repeat"), _ui.RepeatTutorial);
+            Link(actions, "voice.calibrate", UIScreen.VoiceCalibration);
+            Link(actions, "hands.calibrate", UIScreen.HandCalibration);
+        }
+
         // Screen 28 «Derrota y reintento»: no frame, a crimson title over the dimmed scene, the
         // reassurance that approved lessons are kept, Reintentar first.
         private void BuildDefeat()
@@ -124,7 +150,7 @@ namespace Nemequene.UI
                 _titles[id] = f.Heading(screen, title, new Vector2(.04f, .865f), new Vector2(.70f, .95f), 56);
                 _titles[id].alignment = TextAlignmentOptions.BottomLeft;
                 _subtitles[id] = Subtitle(screen, "subtitle." + id, new Vector2(.04f, .825f), new Vector2(.70f, .865f), TextAlignmentOptions.TopLeft);
-                bool wide = id == UIScreen.Inventory || id == UIScreen.SaveLoad;
+                bool wide = id == UIScreen.Inventory || id == UIScreen.SaveLoad || id == UIScreen.Controls;
                 // Calibration keeps the right side for the camera preview (screens 05 and 06).
                 bool split = id == UIScreen.VoiceCalibration || id == UIScreen.HandCalibration;
                 panel = f.Panel("ReadingSurface", screen, new Vector2(split ? .06f : wide ? .08f : .18f, .10f), new Vector2(split ? .60f : wide ? .92f : .82f, .79f));

@@ -66,10 +66,45 @@ namespace Nemequene.UI
         {
             var material = text.fontMaterial;
             material.EnableKeyword(ShaderUtilities.Keyword_Underlay);
-            material.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0, 0, 0, .85f));
-            material.SetFloat(ShaderUtilities.ID_UnderlaySoftness, .7f);
-            material.SetFloat(ShaderUtilities.ID_UnderlayDilate, .35f);
+            material.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0, 0, 0, 1f));
+            material.SetFloat(ShaderUtilities.ID_UnderlaySoftness, .55f);
+            material.SetFloat(ShaderUtilities.ID_UnderlayDilate, .55f);
             return text;
+        }
+        // Smoked backdrop with feathered edges behind HUD text that floats over the scene (zone and
+        // objective, key hints, the duel's announcements): the text keeps its place and the kit's
+        // look, and reads over clouds, snow or crystals. Drawn first, so it stays behind its siblings.
+        public static RawImage Scrim(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, float alpha = .62f)
+        {
+            var rect = Rect(name, parent); rect.anchorMin = anchorMin; rect.anchorMax = anchorMax;
+            rect.SetAsFirstSibling();
+            var image = rect.gameObject.AddComponent<RawImage>(); image.texture = ScrimTexture(); image.raycastTarget = false;
+            image.color = new Color(.031f, .039f, .043f, alpha);
+            var ignore = rect.gameObject.AddComponent<LayoutElement>(); ignore.ignoreLayout = true;
+            return image;
+        }
+        // Scrim that follows a laid-out row (a key hint): it spills a little beyond the row.
+        public static RawImage ScrimBehind(RectTransform row, float padX = 26, float padY = 10, float alpha = .62f)
+        {
+            var image = Scrim(row, "Scrim", Vector2.zero, Vector2.one, alpha);
+            image.rectTransform.offsetMin = new Vector2(-padX, -padY); image.rectTransform.offsetMax = new Vector2(padX, padY);
+            return image;
+        }
+        private static Texture2D _scrim;
+        private static Texture2D ScrimTexture()
+        {
+            if (_scrim != null) return _scrim;
+            const int w = 64, h = 32;
+            _scrim = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "HUD_Scrim" };
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    float u = Mathf.Min(x, w - 1 - x) / (w * .22f), v = Mathf.Min(y, h - 1 - y) / (h * .3f);
+                    float a = Mathf.SmoothStep(0, 1, Mathf.Clamp01(u)) * Mathf.SmoothStep(0, 1, Mathf.Clamp01(v));
+                    _scrim.SetPixel(x, y, new Color(1, 1, 1, a));
+                }
+            _scrim.Apply();
+            return _scrim;
         }
         // Player vitality of screen 08: portrait in the ring of Marco_HUD, name and value above
         // the crimson bar. The fill is an Image.Filled driven by fillAmount.
@@ -105,8 +140,13 @@ namespace Nemequene.UI
             var capSize = cap.gameObject.AddComponent<LayoutElement>(); capSize.minHeight = capSize.preferredHeight = 36;
             capSize.preferredWidth = capSize.minWidth = Mathf.Max(40, capText.GetPreferredValues(key).x + 26); capSize.flexibleWidth = 0;
             capLayout.childForceExpandWidth = capLayout.childForceExpandHeight = false;
-            var text = Label(row, action, 22, UIPalette.Muted); text.textWrappingMode = TextWrappingModes.NoWrap;
+            var text = Shadow(Label(row, action, 22, UIPalette.Ivory)); text.textWrappingMode = TextWrappingModes.NoWrap;
             var textSize = text.gameObject.AddComponent<LayoutElement>(); textSize.preferredWidth = text.GetPreferredValues(action).x + 4; textSize.flexibleWidth = 0;
+            // The backdrop hugs the cap and the word, not the whole row.
+            float width = capSize.preferredWidth + 10 + textSize.preferredWidth;
+            var scrim = Scrim(row, "Scrim", new Vector2(corner.x, 0), new Vector2(corner.x, 1));
+            scrim.rectTransform.pivot = new Vector2(corner.x, .5f);
+            scrim.rectTransform.sizeDelta = new Vector2(width + 56, 20); scrim.rectTransform.anchoredPosition = new Vector2(corner.x < .5f ? -28 : 28, 0);
             return row;
         }
         public static TMP_Text Label(Transform parent, string value, float size, Color color, bool display = false)

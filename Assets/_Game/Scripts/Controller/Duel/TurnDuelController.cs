@@ -39,6 +39,8 @@ public sealed class TurnDuelController : MonoBehaviour
     private VoiceCommand? _heard;
 
     public TurnDuelModel Model => _model;
+    // Side of the last dodge clip (+1 right, -1 left), for the stage's sidestep.
+    public int DodgeSide => _bodies != null ? _bodies.DodgeSide : 1;
     public static bool Running => Current != null && !Current._over;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -176,9 +178,8 @@ public sealed class TurnDuelController : MonoBehaviour
         if (result == DuelInput.Accepted)
         {
             _stage?.OnPlayerAction(action, target, _model.Message);
-            _bodies?.PlayerAction(action, target);
+            _bodies?.PlayerAction(action, target, _model.EnemyHealth < enemyBefore, _model.Phase == DuelPhase.Won);
             _audio?.PlayerAction(action, _model.EnemyHealth < enemyBefore);
-            if (_model.EnemyHealth < enemyBefore) _bodies?.EnemyHurt(target);
         }
         _hud.Refresh(_model, true);
     }
@@ -222,7 +223,7 @@ public sealed class TurnDuelController : MonoBehaviour
                         _audio?.Resolved(_model.LastDefenseCorrect);
                     }
                     break;
-                case DuelPhase.Decide: _natural?.ClearPending(); _stage?.OnDecide(); _audio?.Decide(_listening); break;
+                case DuelPhase.Decide: _natural?.ClearPending(); _stage?.OnDecide(); _bodies?.Decide(); _audio?.Decide(_listening); break;
                 case DuelPhase.Won: Finish(true); return;
                 case DuelPhase.Lost: Finish(false); return;
             }

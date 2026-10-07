@@ -119,7 +119,11 @@ la misma altura. El resto del elenco se mide igual (Bachué 1,70, Quimue 1,95, C
 
 **Enemigos comunes del inframundo** (`MundoInferior/MIDashEnemy.cs`, se colocan solos en las marcas
 «(personaje pendiente)» del nivel): se pelean con el impulso; cada golpe se marca en el suelo antes
-de llegar y al perder ceden el paso de rodillas (no mueren; queda guardado):
+de llegar (un anillo translúcido que se llena hasta el golpe, `View/TelegraphMark.cs`) y al perder
+se arrodillan, se deshacen en partículas y desaparecen (`View/CreatureDissolve.cs`; queda guardado).
+Una caída al pozo no les devuelve la vida (solo la derrota de Nemequene), y el combate no se suelta
+por los impulsos del propio combate. Todos son obligatorios: un lazo oscuro cierra la salida de su
+sala hasta vencerlos (`MundoInferior/MIPassageSeal.cs`: 03, patio de 04 y 07).
 - E03 Hombre-caimán (03, plataforma tras el pozo): guardia frontal (por delante el impulso hace la
   mitad, hay que rodearlo), mordida a la marca y coletazo en anillo. Vida 60.
 - Dos centinelas caimán al inicio del patio de 04: solo mordida. Vida 30.
@@ -128,6 +132,28 @@ de llegar y al perder ceden el paso de rodillas (no mueren; queda guardado):
 - E05 Hombre-caimán de escudo (04, final): el centinela de escudo (cadena de tres impulsos).
 - E06 Vigía del cuerno (07): grito que crece en anillo (un impulso durante la carga lo interrumpe y lo
   aturde) y picada. Vida 60.
+
+El centinela de escudo, los jefes (guardián de MI09 y serpiente) y las pruebas del mundo superior
+también se desvanecen al ser vencidos (los jefes y las mujeres-ave después de su última línea). Las
+pruebas de la mujer-cóndor (antes de las alas) y la mujer-águila (antes de la llave) son obligatorias
+también al abrir la escena sola desde el editor.
+
+**Duelos por turnos** (`Controller/Duel/DuelAnimation.cs`): Nemequene queda en guardia (CombatIdle)
+todo el duelo; el aviso es una carga: el enemigo levanta el golpe y lo sostiene, y lo suelta cuando
+Nemequene responde (su defensa coincide con el golpe) o se acaba el tiempo; el golpe de Nemequene
+hace reaccionar al enemigo cuando llega, no al pulsar. Tras cada intercambio vuelve a su sitio (los
+esquives ya no lo sacan del mapa). El jaguar (afinidad) ruge, se agazapa, salta y cae; el turno
+espera a que aterrice. Sus animaciones se rehicieron con cinemática inversa (patas plantadas, peso,
+columna y cola).
+
+**Encajar las piezas** (`Controller/FitPuzzle.cs`): brazaletes y ofrendas del inframundo, runas,
+alas y medallón de la llave del mundo superior salen de su mesa girados al azar; hay que girarlos
+hasta la posición en que asientan (sin silueta: la luz de la pieza se aviva y suena al acercarse, y
+hace clic al asentar). Solo una pieza asentada se encaja («E · Encajar», «tomar»), y solo encajada
+cuenta. Ofrendas y runas quedan en su mesa; brazaletes, alas y medallón los toma Nemequene.
+
+**Acciones a tiempo** (`Controller/PlayerInteraction.cs`): palancas, cuerno, cierre, descansos y
+hallazgos: Nemequene se gira, hace el gesto y el efecto ocurre en el contacto.
 
 ## Sustituir las figuras provisionales
 

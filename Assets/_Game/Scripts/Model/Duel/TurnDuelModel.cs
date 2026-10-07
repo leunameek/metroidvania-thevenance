@@ -43,6 +43,8 @@ public sealed class TurnDuelModel
 {
     public const int PlayerMaxHealth = 100, MaxConcentration = 3;
     public const float TelegraphSeconds = 1.8f, ExecuteSeconds = 0.9f, ResolveSeconds = 1.1f;
+    // The jaguar roars, springs and lands before the enemy answers (JaguarSpirit).
+    public const float JaguarExecuteSeconds = 2.7f;
     public const float KeyboardWindow = 2.4f, VoiceWindow = 4.8f;
 
     public readonly DuelRules Rules;
@@ -147,7 +149,7 @@ public sealed class TurnDuelModel
         Message = hit.Text;
         Target = DuelTarget.None;
         if (EnemyHealth <= 0) { Phase = DuelPhase.Won; Message = Rules.Victory; Changed?.Invoke(); return DuelInput.Accepted; }
-        Set(DuelPhase.Execute, ExecuteSeconds);
+        Set(DuelPhase.Execute, action == DuelAction.Jaguar ? JaguarExecuteSeconds : ExecuteSeconds);
         return DuelInput.Accepted;
     }
     private string TargetNames()

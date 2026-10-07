@@ -14,14 +14,18 @@ public sealed class MILever : MIInteractable
     public override bool Available => base.Available && !MIProgress.Has(flagId);
     public override string Prompt => "Accionar " + displayName.ToLowerInvariant();
     private void Start() { _t = MIProgress.Has(flagId) ? 1 : 0; Apply(); }
+    // The handle moves (and the gates open) when Nemequene's hands pull it.
     public override void Interact(PlayerController player)
     {
-        if (!MIProgress.Set(flagId)) return;
-        CharacterActions.Of(player)?.PlayAny("Lever");
-        MIAudio.PlayAt("palanca", transform.position);
-        var director = MundoInferiorBlockout.Instance;
-        director?.Hud?.Notify(doneTitle, doneText, UIIcon.Rotate, UIPalette.GoldLight);
-        director?.RefreshObjective();
+        if (MIProgress.Has(flagId)) return;
+        PlayerInteraction.Perform(player, handle != null ? handle : transform, () =>
+        {
+            if (!MIProgress.Set(flagId)) return;
+            MIAudio.PlayAt("palanca", transform.position);
+            var director = MundoInferiorBlockout.Instance;
+            director?.Hud?.Notify(doneTitle, doneText, UIIcon.Rotate, UIPalette.GoldLight);
+            director?.RefreshObjective();
+        }, "Lever");
     }
     private void Update()
     {

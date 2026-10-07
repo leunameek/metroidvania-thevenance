@@ -88,6 +88,17 @@ public sealed class NaturalInputHUD : MonoBehaviour
         if (_guide.text != guide) _guide.text = guide;
     }
 
+    // During a turn duel the action bar takes the bottom: the plate and the hands view move up
+    // to the right edge, under the duel's banner.
+    private bool _duelLayout;
+    public void SetDuelLayout(bool duel)
+    {
+        if (_duelLayout == duel || _panel == null) return;
+        _duelLayout = duel;
+        UIKit.Place((RectTransform)_panel.transform, duel ? new Vector2(1, .5f) : new Vector2(1, 0), duel ? new Vector2(-40, 40) : new Vector2(-64, 100), new Vector2(470, 176));
+        UIKit.Place((RectTransform)_viewport.transform, duel ? new Vector2(1, .5f) : new Vector2(1, 0), duel ? new Vector2(-40, 230) : new Vector2(-64, 288), new Vector2(230, 150));
+    }
+
     // The find panel takes the lower right during an inspection; its guide moves into that panel.
     public void SetPanelVisible(bool visible)
     {

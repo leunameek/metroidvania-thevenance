@@ -27,13 +27,22 @@ public sealed class MSKeyLock : MIInteractable
     public override void Interact(PlayerController player)
     {
         var hud = MundoSuperiorDirector.Instance?.Hud;
-        CharacterActions.Of(player)?.PlayAny(MSProgress.Has(MSProgress.Key) ? "Open" : "Reach");
         if (!MSProgress.Has(MSProgress.Key))
         {
-            hud?.Notify("Cierre de la cima", "Falta el medallón de la llave. Está en el altar del camino de la llave.", UIIcon.Info, UIPalette.Muted);
-            MSAudio.Unavailable();
+            PlayerInteraction.Perform(player, transform, () =>
+            {
+                hud?.Notify("Cierre de la cima", "Falta el medallón de la llave. Está en el altar del camino de la llave.", UIIcon.Info, UIPalette.Muted);
+                MSAudio.Unavailable();
+            }, "Reach");
             return;
         }
+        // The medallion goes in, and the leaf swings, when the hands reach the lock.
+        _opening = true;
+        PlayerInteraction.Perform(player, transform, () => { _opening = false; Insert(hud); }, "Open", "Reach");
+    }
+
+    private void Insert(MIHud hud)
+    {
         MSProgress.Set(MSProgress.LockOpen);
         if (placedMedallion != null) placedMedallion.SetActive(true);
         MSAudio.Play("cierre_insertar", .9f);

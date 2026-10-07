@@ -29,6 +29,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
         _player = FindFirstObjectByType<PlayerController>();
         if (body != null) _bodyHome = body.localPosition;
         MundoInferiorBlockout.AttemptReset += OnAttemptReset;
+        MundoInferiorBlockout.DefeatReset += OnDefeatReset;
         if (MIProgress.Has(MIProgress.Shield04)) { _dead = true; gameObject.SetActive(false); return; }
         // The rigged hombre-caimán (with and without shield) replaces the stone stand-in; the
         // shield object keeps its logic, the core stays as the reading of the pulse.
@@ -49,8 +50,20 @@ public sealed class MIShieldSentinel : MonoBehaviour
         if (_shielded != null) _shielded.gameObject.SetActive(up || _bare == null);
         if (_bare != null) _bare.gameObject.SetActive(!up);
     }
-    private void OnDestroy() { MundoInferiorBlockout.AttemptReset -= OnAttemptReset; }
-    private void OnAttemptReset() { if (!_dead) ResetEncounter(); }
+    private void OnDestroy()
+    {
+        MundoInferiorBlockout.AttemptReset -= OnAttemptReset;
+        MundoInferiorBlockout.DefeatReset -= OnDefeatReset;
+    }
+    // A fall only cancels the pulse in progress; the broken shield and the wounds stay. A defeat
+    // of Nemequene makes it whole again.
+    private void OnAttemptReset()
+    {
+        if (_dead) return;
+        _timer = 0; _pulseT = -1;
+        if (pulseRing != null) pulseRing.gameObject.SetActive(false);
+    }
+    private void OnDefeatReset() { if (!_dead) ResetEncounter(); }
 
     private void ResetEncounter()
     {
@@ -144,6 +157,10 @@ public sealed class MIShieldSentinel : MonoBehaviour
         MIParticles.Burst(transform.position + Vector3.up, new Color(.55f, .53f, .5f, .9f), 120, 4f, .2f, 1.2f);
         hud?.Notify("Centinela vencido", "La salida hacia el paso de péndulos queda abierta.", UIIcon.Check, UIPalette.Jade);
         MundoInferiorBlockout.Instance?.RefreshObjective();
-        gameObject.SetActive(false);
+        // It kneels and goes out in motes; nothing of it stays in the patio.
+        foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
+        if (pulseRing != null) pulseRing.gameObject.SetActive(false);
+        Actor?.PlayAny("Kneel");
+        CreatureDissolve.Run(transform, new Color(.6f, .95f, .75f), .7f);
     }
 }

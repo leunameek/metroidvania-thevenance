@@ -46,6 +46,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
     public WorldNaturalInput Natural { get; private set; }
     public bool Paused => _paused;
     public bool InCombat => _inCombat;
+    public Transform Player => player != null ? player.transform : null;
     public bool Busy => _paused || _dead || _moving || MSFind.Inspecting != null || StoryPlayer.Active;
     // Accessibility multiplier of the reaction window (1-3, guide 7.5).
     public float ReactionMultiplier { get; set; } = 1f;
@@ -179,9 +180,11 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         string objective =
             !MSProgress.Has(MSProgress.RunePortals) ? "Examina el altar de la runa en la primera terraza" :
             !MSProgress.Has(MSProgress.RuneClimb) ? "Activa el portal rosado y recoge la runa de escalada" :
+            !MSProgress.Has(MSProgress.Condor) ? "Responde a la prueba de la mujer-cóndor junto a la runa" :
             !MSProgress.Has(MSProgress.Wings) ? "Vuelve por el portal y sube la pared de apoyos" :
             (MSProgress.ZonesMask & (1 << 5)) == 0 ? "Vuela hasta la isla del portal azul" + (MSProgress.Has(MSProgress.Yopo2) ? "" : " · opcional: la isla del yopo") :
-            !MSProgress.Has(MSProgress.Key) ? "Sube volando por los apoyos hasta el altar de la llave" :
+            !MSProgress.Has(MSProgress.Eagle) ? "Sube volando a la terraza de la llave y responde a la mujer-águila" :
+            !MSProgress.Has(MSProgress.Key) ? "Toma la llave del altar" :
             !MSProgress.Has(MSProgress.LockOpen) ? "Toma el transporte y coloca el medallón en el cierre" :
             !MSProgress.Has(MSProgress.Guardian) ? "Sube a la cima y enfrenta al guardián" :
             "Usa el portal de la cima para volver a Plaza Núñez";

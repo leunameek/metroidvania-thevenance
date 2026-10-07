@@ -15,7 +15,7 @@ public sealed class MIHud : MonoBehaviour
     private TMP_Text _bossName, _healthValue, _deathBody;
     private Image _healthFill, _bossFill, _fade;
     private UIIconGraphic _toastIcon;
-    private GameObject _toast, _inspect, _pause, _boss, _death, _hints;
+    private GameObject _toast, _inspect, _pause, _boss, _death, _hints, _header;
     private CanvasGroup _toastGroup;
     private Button _resume;
     private RectTransform _pauseList;
@@ -43,29 +43,38 @@ public sealed class MIHud : MonoBehaviour
         var veilImage = veil.gameObject.AddComponent<RawImage>(); veilImage.texture = Gradient(); veilImage.raycastTarget = false;
 
         _healthFill = UIKit.HealthFrame(canvas, "Vida", out _healthValue);
+        _healthValue.color = UIPalette.Ivory;
         if (_health != null) { _health.HealthChanged += OnHealth; OnHealth(_health.CurrentHealth, _health.MaxHealth); }
 
+        // Zone, objective and counters on a smoked backdrop (they float over clouds and crystals).
+        _header = UIKit.Scrim(canvas, "HeaderScrim", Vector2.one, Vector2.one, .74f).gameObject;
+        UIKit.Place((RectTransform)_header.transform, Vector2.one, new Vector2(-18f, -18f), new Vector2(820f, 196f));
         _zone = UIKit.Shadow(UIKit.Label(canvas, "Mundo inferior", 42f, UIPalette.GoldText, true));
-        UIKit.Place(_zone.rectTransform, Vector2.one, new Vector2(-76f, -40f), new Vector2(900f, 60f)); _zone.alignment = TextAlignmentOptions.BottomRight;
+        UIKit.Place(_zone.rectTransform, Vector2.one, new Vector2(-76f, -40f), new Vector2(720f, 60f)); _zone.alignment = TextAlignmentOptions.BottomRight;
+        _zone.enableAutoSizing = true; _zone.fontSizeMax = 42; _zone.fontSizeMin = 28; _zone.textWrappingMode = TextWrappingModes.NoWrap;
         _objective = UIKit.Shadow(UIKit.Label(canvas, "", 24f, UIPalette.Ivory));
-        UIKit.Place(_objective.rectTransform, Vector2.one, new Vector2(-76f, -102f), new Vector2(900f, 64f)); _objective.alignment = TextAlignmentOptions.TopRight;
-        _counters = UIKit.Shadow(UIKit.Label(canvas, "", 20f, UIPalette.Muted));
-        UIKit.Place(_counters.rectTransform, Vector2.one, new Vector2(-76f, -160f), new Vector2(900f, 30f)); _counters.alignment = TextAlignmentOptions.TopRight;
+        UIKit.Place(_objective.rectTransform, Vector2.one, new Vector2(-76f, -102f), new Vector2(680f, 60f)); _objective.alignment = TextAlignmentOptions.TopRight;
+        _objective.enableAutoSizing = true; _objective.fontSizeMax = 24; _objective.fontSizeMin = 18;
+        _counters = UIKit.Shadow(UIKit.Label(canvas, "", 20f, UIPalette.Ivory));
+        UIKit.Place(_counters.rectTransform, Vector2.one, new Vector2(-76f, -166f), new Vector2(720f, 30f)); _counters.alignment = TextAlignmentOptions.TopRight;
+        _counters.enableAutoSizing = true; _counters.fontSizeMax = 20; _counters.fontSizeMin = 16; _counters.textWrappingMode = TextWrappingModes.NoWrap;
 
         // Notification plate (INPUT_notification): icon, name and text, never colour alone.
-        _toast = UIKit.Place(UIKit.HudPanel(canvas, "Toast"), Vector2.one, new Vector2(-64f, -210f), new Vector2(580f, 112f)).gameObject;
+        // The plate grows with its text (SizeToast), so a long line never spills out of it.
+        _toast = UIKit.Place(UIKit.HudPanel(canvas, "Toast"), Vector2.one, new Vector2(-64f, -222f), new Vector2(580f, 112f)).gameObject;
         _toastGroup = _toast.AddComponent<CanvasGroup>();
         _toastIcon = UIKit.Icon(_toast.transform, UIIcon.Info, UIPalette.GoldLight);
-        UIKit.Place(_toastIcon.rectTransform, new Vector2(0, .5f), new Vector2(28, 0), new Vector2(44, 44));
-        _toastTitle = UIKit.Label(_toast.transform, "", 22, UIPalette.GoldText, true); _toastTitle.alignment = TextAlignmentOptions.BottomLeft;
-        _toastTitle.rectTransform.anchorMin = new Vector2(0, .5f); _toastTitle.rectTransform.offsetMin = new Vector2(92, 0); _toastTitle.rectTransform.offsetMax = new Vector2(-24, -14);
+        UIKit.Place(_toastIcon.rectTransform, new Vector2(0, 1), new Vector2(28, -24), new Vector2(44, 44));
+        _toastIcon.rectTransform.pivot = new Vector2(0, 1);
+        _toastTitle = UIKit.Label(_toast.transform, "", 22, UIPalette.GoldText, true); _toastTitle.alignment = TextAlignmentOptions.TopLeft;
+        Inset(_toastTitle.rectTransform, 92, 24, 18, 0, 30);
         _toastText = UIKit.Label(_toast.transform, "", 20, UIPalette.Ivory); _toastText.alignment = TextAlignmentOptions.TopLeft;
-        _toastText.rectTransform.anchorMax = new Vector2(1, .5f); _toastText.rectTransform.offsetMin = new Vector2(92, 12); _toastText.rectTransform.offsetMax = new Vector2(-24, -2);
+        Inset(_toastText.rectTransform, 92, 24, 50, 0, 60);
         _toast.SetActive(false);
 
         // Inspection of a find (screens 10-12): the piece keeps the left, the panel the right.
         _inspect = UIKit.Rect("Inspection", canvas).gameObject;
-        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .16f); panel.anchorMax = new Vector2(.94f, .74f);
+        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .11f); panel.anchorMax = new Vector2(.94f, .76f);
         var bg = panel.gameObject.AddComponent<Image>(); bg.color = UIPalette.Stone; bg.raycastTarget = false;
         if (UIBacata.Available) UIBacata.Frame(panel.gameObject, .6f, true, true);
         _inspectName = UIKit.Label(panel, "", 44, UIPalette.GoldText, true); _inspectName.alignment = TextAlignmentOptions.TopLeft;
@@ -73,19 +82,30 @@ public sealed class MIHud : MonoBehaviour
         _inspectKind = UIKit.Label(panel, "", 20, UIPalette.Jade); _inspectKind.alignment = TextAlignmentOptions.TopLeft; _inspectKind.characterSpacing = 2;
         _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 150, -1, 30);
         _inspectBody = UIKit.Label(panel, "", 24, UIPalette.Ivory); _inspectBody.alignment = TextAlignmentOptions.TopLeft;
-        _inspectBody.rectTransform.offsetMin = new Vector2(60, 140); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
-        var keys = _inspectKeys = UIKit.Label(panel, InspectionKeys, 20, UIPalette.Muted);
-        keys.alignment = TextAlignmentOptions.BottomLeft; keys.rectTransform.offsetMin = new Vector2(60, 56); keys.rectTransform.offsetMax = new Vector2(-60, -10);
-        keys.textWrappingMode = TextWrappingModes.Normal;
+        _inspectBody.rectTransform.offsetMin = new Vector2(60, 232); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
+        _inspectBody.enableAutoSizing = true; _inspectBody.fontSizeMax = 24; _inspectBody.fontSizeMin = 17;
+        // What to do with the piece: a rule above it, one line per way of answering.
+        var keyRule = UIKit.Icon(panel, UIIcon.Divider, UIPalette.Gold);
+        keyRule.rectTransform.anchorMin = new Vector2(0, 0); keyRule.rectTransform.anchorMax = new Vector2(1, 0);
+        keyRule.rectTransform.offsetMin = new Vector2(60, 214); keyRule.rectTransform.offsetMax = new Vector2(-60, 226);
+        var keys = _inspectKeys = UIKit.Label(panel, InspectionKeys, 19, UIPalette.Muted);
+        keys.alignment = TextAlignmentOptions.TopLeft; keys.rectTransform.anchorMin = Vector2.zero; keys.rectTransform.anchorMax = new Vector2(1, 0);
+        keys.rectTransform.offsetMin = new Vector2(60, 40); keys.rectTransform.offsetMax = new Vector2(-60, 206);
+        keys.textWrappingMode = TextWrappingModes.Normal; keys.enableAutoSizing = true; keys.fontSizeMax = 20; keys.fontSizeMin = 16;
+        keys.lineSpacing = 6;
         _inspect.SetActive(false);
 
         // Guardian bar: name in the serif and a crimson bar at the top centre.
+        // Guardian bar: name in the serif and a crimson bar at the bottom centre, on a backdrop, so
+        // it never meets the zone and objective of the upper right.
         _boss = UIKit.Rect("GuardianBar", canvas).gameObject;
-        var bossRect = (RectTransform)_boss.transform; bossRect.anchorMin = new Vector2(.32f, .86f); bossRect.anchorMax = new Vector2(.68f, .955f);
+        var bossRect = UIKit.Place((RectTransform)_boss.transform, new Vector2(.5f, 0), new Vector2(0, 244), new Vector2(760, 96));
+        UIKit.Scrim(bossRect, "Scrim", Vector2.zero, Vector2.one, .6f).rectTransform.offsetMin = new Vector2(-60, -14);
         _bossName = UIKit.Shadow(UIKit.Label(_boss.transform, "", 30, UIPalette.GoldText, true));
         _bossName.rectTransform.anchorMin = new Vector2(0, .5f);
+        _bossName.enableAutoSizing = true; _bossName.fontSizeMax = 30; _bossName.fontSizeMin = 20; _bossName.textWrappingMode = TextWrappingModes.NoWrap;
         _bossFill = UIKit.Bar((RectTransform)_boss.transform, new Vector2(640, 26), UIPalette.Crimson);
-        var rail = (RectTransform)_bossFill.transform.parent.parent; rail.anchorMin = rail.anchorMax = new Vector2(.5f, .22f);
+        var rail = (RectTransform)_bossFill.transform.parent.parent; rail.anchorMin = rail.anchorMax = new Vector2(.5f, .26f);
         _boss.SetActive(false);
 
         // Pause (screen 19): one framed column over the dimmed cavern.
@@ -160,6 +180,7 @@ public sealed class MIHud : MonoBehaviour
     {
         foreach (var t in new[] { _zone, _objective, _counters })
             if (t != null && t.gameObject.activeSelf != visible) t.gameObject.SetActive(visible);
+        if (_header != null && _header.activeSelf != visible) _header.SetActive(visible);
     }
 
     public void Notify(string title, string text, UIIcon icon, Color color)
@@ -172,14 +193,23 @@ public sealed class MIHud : MonoBehaviour
         _inspectName.text = name; _inspectKind.text = kind; _inspectBody.text = body;
         _inspect.SetActive(true);
     }
-    public void HideInspection() => _inspect.SetActive(false);
+    public void HideInspection() { _inspect.SetActive(false); _fitStatus = null; _guide = null; }
 
-    private const string InspectionKeys = "E · Tomar        Esc · Devolver al altar        Ratón o A / D · Girar";
-    // Hands or voice on: the words and gestures come first, the keys after them.
-    public void SetInspectionGuide(string guide)
+    private const string InspectionKeys = "E · Tomar     Esc · Devolver al altar\nRatón o A / D · Girar";
+    private const string FitKeys = "E · Encajar     Esc · Devolver al altar\nRatón, A / D y W / S · Girar";
+    private string _fitStatus, _guide;
+    // Hands or voice on: the words and gestures come first, the keys after them. A piece to fit
+    // in its table puts its status (turning, seated, not yet) above them, in gold.
+    public void SetInspectionGuide(string guide) { _guide = guide; ComposeKeys(); }
+    public void SetInspectionFit(string status) { _fitStatus = status; ComposeKeys(); }
+    private void ComposeKeys()
     {
-        string text = string.IsNullOrEmpty(guide) ? InspectionKeys : guide + "\n" + InspectionKeys;
-        if (_inspectKeys != null && _inspectKeys.text != text) _inspectKeys.text = text;
+        if (_inspectKeys == null) return;
+        string keys = _fitStatus != null ? FitKeys : InspectionKeys;
+        string text = (string.IsNullOrEmpty(_fitStatus) ? "" : "<color=#E8C77A>" + _fitStatus + "</color>\n")
+            + (string.IsNullOrEmpty(_guide) ? "" : _guide + "\n") + keys;
+        _inspectKeys.richText = true;
+        if (_inspectKeys.text != text) _inspectKeys.text = text;
     }
 
     // Extra pause entry right under «Continuar»; its label is read again each time the pause opens.
@@ -228,17 +258,31 @@ public sealed class MIHud : MonoBehaviour
         if (_healthFill != null) _healthFill.fillAmount = _healthShown;
         _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);
         _fade.color = new Color(.031f, .039f, .043f, _fadeValue);
-        if (Time.unscaledTime >= _toastUntil)
+        // Notices wait while the inspection, the pause or a duel holds the screen.
+        bool held = _inspect.activeSelf || _pause.activeSelf || _death.activeSelf || TurnDuelController.Running;
+        if (held) { if (_toast.activeSelf) _toast.SetActive(false); _toastUntil = 0; }
+        else if (Time.unscaledTime >= _toastUntil)
         {
             if (_queue.Count > 0)
             {
                 var (title, text, icon, color) = _queue.Dequeue();
                 _toastTitle.text = title; _toastText.text = text; _toastIcon.SetIcon(icon); _toastIcon.color = color;
-                _toast.SetActive(true); _toastUntil = Time.unscaledTime + 4.5f;
+                _toast.SetActive(true); SizeToast(); _toastUntil = Time.unscaledTime + 4.5f;
             }
             else if (_toast.activeSelf) _toast.SetActive(false);
         }
         if (_toast.activeSelf) _toastGroup.alpha = Mathf.Clamp01((_toastUntil - Time.unscaledTime) / .3f);
+    }
+
+    // Height of the notice plate from its text: title line, then the body as it wraps.
+    private void SizeToast()
+    {
+        var plate = (RectTransform)_toast.transform;
+        float width = plate.sizeDelta.x - 92 - 24;
+        float body = string.IsNullOrEmpty(_toastText.text) ? 0 : _toastText.GetPreferredValues(_toastText.text, width, 0).y;
+        float height = Mathf.Max(96, 50 + body + 22);
+        plate.sizeDelta = new Vector2(plate.sizeDelta.x, height);
+        _toastText.rectTransform.offsetMin = new Vector2(92, -50 - body - 4);
     }
 
     private void OnDestroy() { if (_health != null) _health.HealthChanged -= OnHealth; }

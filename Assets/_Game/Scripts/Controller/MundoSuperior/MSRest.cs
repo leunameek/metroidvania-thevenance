@@ -12,9 +12,14 @@ public sealed class MSRest : MIInteractable
     public override string Prompt => "Descansar";
     public override void Interact(PlayerController player)
     {
+        // He kneels on the disc; the rest takes hold when his knee touches it.
+        PlayerInteraction.Perform(player, null, () => Rest(player), "Kneel");
+    }
+
+    private void Rest(PlayerController player)
+    {
         var health = player.GetComponent<Health>();
         if (health != null) health.Heal(health.MaxHealth);
-        CharacterActions.Of(player)?.PlayAny("Kneel");
         MSProgress.SetCheckpoint(zone);
         MSAudio.Play("descanso", .9f);
         MIParticles.Burst(transform.position + Vector3.up * .3f, new Color(1f, .86f, .55f, .9f), 50, 1.6f, .09f, -.6f);

@@ -23,9 +23,12 @@ namespace Nemequene.UI
             // the lesson panel sits on the right with name, step, instruction, progress and actions.
             _root = f.Rect("UI_ObjectInspection", ui.Root, Vector2.zero, Vector2.one).gameObject;
             var veil = _root.AddComponent<TitleMenuBackdrop>(); veil.raycastTarget = false; veil.fromTop = true; veil.readingEdge = .30f; veil.strength = .80f;
+            // The lesson title sits over the sky and the trees: a smoked backdrop behind it.
+            var scrim = UIKit.Scrim(_root.transform, "TitleScrim", new Vector2(0, 1), new Vector2(0, 1), .6f);
+            UIKit.Place(scrim.rectTransform, new Vector2(0, 1), new Vector2(20, -40), new Vector2(1240, 170));
             _heading = UIFactory.Shadow(f.Heading(_root.transform, "", new Vector2(.04f, .865f), new Vector2(.62f, .95f), 56));
             _heading.alignment = TextAlignmentOptions.BottomLeft;
-            var subtitle = UIFactory.Shadow(UIFactory.Tone(f.Label(_root.transform, UIStrings.Get("inspection.subtitle"), new Vector2(.04f, .825f), new Vector2(.62f, .865f), 22), UITone.Muted));
+            var subtitle = UIFactory.Shadow(f.Label(_root.transform, UIStrings.Get("inspection.subtitle"), new Vector2(.04f, .825f), new Vector2(.62f, .865f), 22));
             subtitle.alignment = TextAlignmentOptions.TopLeft;
             f.Hint(_root.transform, UIStrings.Get("footer.lesson"), Vector2.zero);
             _panel = f.Panel("UI_Panel_ObjectInspection", _root.transform, new Vector2(.60f,.13f), new Vector2(.94f,.78f), true);

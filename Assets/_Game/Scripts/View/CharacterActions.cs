@@ -14,15 +14,36 @@ public sealed class CharacterActions : MonoBehaviour
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private bool _hasSpeed;
+    private int _windupHash;
+    private float _windupAt;
+    private bool _frozen;
 
     public Animator Animator => animator;
     public string Current { get; private set; } = "";
+    // A state to stand in instead of the resting one while it is set (CombatIdle during a duel):
+    // one-shot actions that return to rest flow into it.
+    public string Stance { get; set; }
+    // A wind-up is holding its pose until Release.
+    public bool WindingUp => _windupHash != 0;
 
     private void Awake()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>();
         if (animator == null) return;
         foreach (var p in animator.parameters) if (p.nameHash == SpeedHash) _hasSpeed = true;
+    }
+
+    private void Update()
+    {
+        if (animator == null || !animator.isActiveAndEnabled) return;
+        var info = animator.GetCurrentAnimatorStateInfo(0);
+        bool settled = !animator.IsInTransition(0);
+        // The wind-up plays to its loaded moment and almost stops there (a held breath, not a
+        // freeze), until the blow is released.
+        if (_windupHash != 0 && !_frozen && settled && info.shortNameHash == _windupHash && info.normalizedTime >= _windupAt)
+        { animator.speed = .03f; _frozen = true; }
+        if (!string.IsNullOrEmpty(Stance) && _windupHash == 0 && settled && info.shortNameHash == Animator.StringToHash(restState) && Has(Stance))
+            animator.CrossFadeInFixedTime(Stance, .3f, 0);
     }
 
     // The nearest acting component of a character: on it, under it, or above it.
@@ -41,9 +62,10 @@ public sealed class CharacterActions : MonoBehaviour
     public bool Has(string state) => animator != null && animator.isActiveAndEnabled && !string.IsNullOrEmpty(state)
         && animator.HasState(0, Animator.StringToHash(state));
 
-    public bool Play(string state, float fade = .15f)
+    public bool Play(string state, float fade = .22f)
     {
         if (!Has(state)) return false;
+        ClearWindup();
         animator.CrossFadeInFixedTime(state, fade, 0);
         Current = state;
         return true;
@@ -54,6 +76,32 @@ public sealed class CharacterActions : MonoBehaviour
     {
         foreach (var s in states) if (Play(s)) return true;
         return false;
+    }
+
+    // The announced blow: the first state the character has plays up to `at` (normalized) and
+    // holds there; Release lets it land.
+    public bool Windup(float at, params string[] states)
+    {
+        foreach (var s in states)
+        {
+            if (!Play(s, .25f)) continue;
+            _windupHash = Animator.StringToHash(s); _windupAt = at; _frozen = false;
+            return true;
+        }
+        return false;
+    }
+
+    public bool Release()
+    {
+        if (_windupHash == 0) return false;
+        ClearWindup();
+        return true;
+    }
+
+    private void ClearWindup()
+    {
+        _windupHash = 0; _frozen = false;
+        if (animator != null) animator.speed = 1;
     }
 
     // Straight into the last frame of a pose (someone already lying or kneeling when the shot opens).
@@ -67,6 +115,7 @@ public sealed class CharacterActions : MonoBehaviour
 
     public void Rest(float fade = .25f)
     {
+        if (!string.IsNullOrEmpty(Stance) && Play(Stance, fade)) { Current = ""; return; }
         if (Play(restState, fade)) Current = "";
     }
 

@@ -263,8 +263,15 @@ namespace Nemequene.UI
             {
                 UIKeyHint.Split(part, out var action, out var key);
                 if (key != null) KeyCap(row, key, 18);
-                var text = Tone(Text(row, action, 22), UITone.Muted); text.textWrappingMode = TextWrappingModes.NoWrap;
+                var text = Shadow(Tone(Text(row, action, 22), UITone.Default)); text.textWrappingMode = TextWrappingModes.NoWrap;
             }
+            // A smoked backdrop hugging the caps and words, so the corner reads over a bright plaza.
+            float width = 0; int parts = 0;
+            foreach (RectTransform child in row) { width += LayoutUtility.GetPreferredWidth(child); parts++; }
+            width += Mathf.Max(0, parts - 1) * 10;
+            var scrim = UIKit.Scrim(row, "Scrim", new Vector2(corner.x, 0), new Vector2(corner.x, 1), .6f);
+            scrim.rectTransform.pivot = new Vector2(corner.x, .5f);
+            scrim.rectTransform.sizeDelta = new Vector2(width + 60, 20); scrim.rectTransform.anchoredPosition = new Vector2(corner.x < .5f ? -30 : 30, 0);
             return row;
         }
         // Footer action ("Esc  Volver"): plain text in the corner, ribbon on focus, key cap first.

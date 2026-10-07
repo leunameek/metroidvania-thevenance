@@ -8,7 +8,8 @@ using UnityEngine.UI;
 
 // Prologue (H01-H03 / C01-C03) and epilogue (H19-H21 / C19-C21) of the campaign, staged as
 // cinematics in four places built at runtime: Bacatá, the meditation hill, the refuge of Tunja and
-// the lagoon of Iguaque. Fixed camera shots, the story camera frames whoever speaks, fades between
+// the lagoon of Iguaque. The places use the models of Resources/Bacata (BacataModelSetup) and keep
+// a block where one is missing; the staff, the poporo, the bow and the arrow are Resources/Props. Fixed camera shots, the story camera frames whoever speaks, fades between
 // places. Characters are provisional figures until their rigged models exist (prefab fields here or
 // Resources/Characters/<Name>). The death is cinematic: no HUD, no command heard, no respawn.
 public sealed class BacataDirector : MonoBehaviour
@@ -57,12 +58,15 @@ public sealed class BacataDirector : MonoBehaviour
         Place(_saguanmachica, Village + new Vector3(-1.2f, 0, 13), Village + new Vector3(2, 0, 13));
         Hide(_nemequene); Hide(_tisquesusa); Hide(_bachue); Hide(_furachogua); Hide(_invader);
         Shot(Village + new Vector3(0.5f, 1.6f, 8.5f), Village + new Vector3(0.5f, 1.1f, 13));
+        // The uncle holds the staff he carved; it passes to the heir when he reaches out (C01).
+        var staff = Hold(_saguanmachica, "Baston", true);
         yield return Lines("H01", 0, 3, false, "Dos extremos");
         yield return Cut();
         Hide(_child);
         Place(_nemequene, Village + new Vector3(1.6f, 0, 12.5f), Village + new Vector3(-1.2f, 0, 13));
         Shot(Village + new Vector3(4f, 2f, 7f), Village + new Vector3(0, 1.2f, 13));
         Act(_saguanmachica, "Reach");
+        StartCoroutine(Hand(staff, _nemequene, .9f));
         yield return Lines("H01", 3, 2, true);
         // C02: the vision of gold and silver, before the council.
         yield return Cut();
@@ -85,6 +89,7 @@ public sealed class BacataDirector : MonoBehaviour
         Act(_nemequene, "Pray");
         yield return Days(3);
         Place(_bachue, Hill + new Vector3(0, .9f, -4.5f), Hill + new Vector3(0, .9f, 0));
+        Hold(_bachue, "Poporo", false);
         Act(_bachue, "Reach");
         yield return Lines("H03", 0, 99, true, "Siete días y siete noches");
         // The poporo and the map are received; the journey to the plaza is elided (C04).
@@ -106,6 +111,8 @@ public sealed class BacataDirector : MonoBehaviour
         Place(_nemequene, Village + new Vector3(.6f, 0, 9), Village + new Vector3(-.8f, 0, 12));
         Place(_tisquesusa, Village + new Vector3(-6, 0, 4), Village + new Vector3(0, 0, 9));
         Place(_invader, Village + new Vector3(9, 0, 17), Village + new Vector3(.6f, 0, 9));
+        Hold(_invader, "Arco", false);
+        var heirStaff = Hold(_nemequene, "Baston", true);
         Hide(_invader);
         yield return FadeIn("La verdadera imagen");
         Shot(Village + new Vector3(4, 2.2f, 3.5f), Village + new Vector3(0, 1.1f, 10.5f));
@@ -132,6 +139,8 @@ public sealed class BacataDirector : MonoBehaviour
         // Lying wounded: the rigged body holds the last frame of its fall; the figure is laid down.
         var wounded = CharacterActions.Of(_nemequene);
         if (wounded == null || !wounded.Hold("DeathBack")) _nemequene.rotation = Quaternion.Euler(-90, 90, 0);
+        // The staff lies on the mat beside him, ready to be handed on.
+        if (heirStaff != null) { heirStaff.SetParent(_world, true); heirStaff.SetPositionAndRotation(Refuge + new Vector3(.55f, .12f, 1.4f), Quaternion.Euler(0, 15, 90)); }
         Place(_tisquesusa, Refuge + new Vector3(-1.3f, 0, 1.2f), Refuge + new Vector3(0, 0, 1));
         var nephew = CharacterActions.Of(_tisquesusa); if (nephew != null) nephew.Hold("Kneel");
         Shot(Refuge + new Vector3(2.8f, 2.1f, -2.2f), Refuge + new Vector3(-.4f, .6f, 1.1f));
@@ -147,6 +156,7 @@ public sealed class BacataDirector : MonoBehaviour
         Destroy(hearth);
         AmbientScatter.On(gameObject).Add("Ambiente/ave_canto", 6f, 14f, 10f, 24f, .35f, 4f);
         Place(_tisquesusa, Lagoon + new Vector3(0, 0, -15.5f), Lagoon + new Vector3(0, 0, -8));
+        if (heirStaff != null) Attach(heirStaff, _tisquesusa, true);
         Place(_furachogua, Lagoon + new Vector3(0, -1.6f, -11), Lagoon + new Vector3(0, 0, -15.5f));
         Shot(Lagoon + new Vector3(5.5f, 2.6f, -20f), Lagoon + new Vector3(0, 1f, -12.5f));
         GameAudio.PlayAt("Foley/aterrizaje_agua", _furachogua.position + Vector3.up * 1.6f, 1f, AudioChannel.Effects, 40f);
@@ -217,8 +227,14 @@ public sealed class BacataDirector : MonoBehaviour
 
     private IEnumerator Arrow(Vector3 from, Vector3 to)
     {
-        var arrow = StoryProps.Part(PrimitiveType.Cylinder, _world, from, new Vector3(.04f, .45f, .04f), new Color(.75f, .72f, .6f));
-        arrow.rotation = Quaternion.FromToRotation(Vector3.up, to - from);
+        // The arrow model lies along its X (point at +X); the block stands in without it.
+        var arrow = Model("Flecha", from, 0, "Props");
+        if (arrow != null) arrow.rotation = Quaternion.LookRotation(to - from) * Quaternion.Euler(0, -90, 0);
+        else
+        {
+            arrow = StoryProps.Part(PrimitiveType.Cylinder, _world, from, new Vector3(.04f, .45f, .04f), new Color(.75f, .72f, .6f));
+            arrow.rotation = Quaternion.FromToRotation(Vector3.up, to - from);
+        }
         GameAudio.PlayAt("Combate/baston_aire", from, .9f, AudioChannel.Effects, 40f, 1.6f, 0f);
         for (float t = 0; t < .45f; t += Time.deltaTime) { arrow.position = Vector3.Lerp(from, to, t / .45f); yield return null; }
         arrow.position = to;
@@ -350,25 +366,43 @@ public sealed class BacataDirector : MonoBehaviour
     {
         Block(PrimitiveType.Plane, Village + new Vector3(0, 0, 10), new Vector3(14, 1, 14), new Color(.42f, .45f, .28f));
         Block(PrimitiveType.Cube, Village + new Vector3(0, .02f, 4), new Vector3(3, .04f, 26), new Color(.55f, .45f, .32f)); // path
-        // Temple of the training with its door (C01).
-        Block(PrimitiveType.Cube, Village + new Vector3(0, 2.5f, 20), new Vector3(10, 5, 6), new Color(.62f, .52f, .38f));
-        Block(PrimitiveType.Cube, Village + new Vector3(0, 1.4f, 16.95f), new Vector3(1.8f, 2.8f, .1f), new Color(.25f, .17f, .1f));
-        Block(PrimitiveType.Cube, Village + new Vector3(0, 5.6f, 20), new Vector3(11, .5f, 7), new Color(.8f, .66f, .35f));
-        // Council circle (C02).
+        // The zipa's enclosure with its door toward the path (C01).
+        if (Model("CasaZipa", Village + new Vector3(0, 0, 21), 180) == null)
+        {
+            Block(PrimitiveType.Cube, Village + new Vector3(0, 2.5f, 20), new Vector3(10, 5, 6), new Color(.62f, .52f, .38f));
+            Block(PrimitiveType.Cube, Village + new Vector3(0, 1.4f, 16.95f), new Vector3(1.8f, 2.8f, .1f), new Color(.25f, .17f, .1f));
+            Block(PrimitiveType.Cube, Village + new Vector3(0, 5.6f, 20), new Vector3(11, .5f, 7), new Color(.8f, .66f, .35f));
+        }
+        // Council circle of standing stones (C02).
         for (int i = 0; i < 8; i++)
         {
             float a = i * Mathf.PI / 4;
-            Block(PrimitiveType.Cube, Village + new Vector3(-14 + Mathf.Cos(a) * 4.5f, .45f, 4 + Mathf.Sin(a) * 4.5f), new Vector3(.9f, .9f, .9f), new Color(.5f, .5f, .48f));
+            Vector3 at = Village + new Vector3(-14 + Mathf.Cos(a) * 4.5f, 0, 4 + Mathf.Sin(a) * 4.5f);
+            if (Model("PiedraVertical" + (1 + i % 3), at, i * 47f) == null)
+                Block(PrimitiveType.Cube, at + Vector3.up * .45f, new Vector3(.9f, .9f, .9f), new Color(.5f, .5f, .48f));
         }
-        // Round houses with thatched roofs; smoke rises from them in the epilogue.
+        // Round houses with thatched roofs, their doors toward the path; smoke rises from them in the epilogue.
         var houses = new[] { new Vector3(9, 0, 6), new Vector3(12, 0, 15), new Vector3(-9, 0, 15), new Vector3(-20, 0, 12), new Vector3(16, 0, -2), new Vector3(-6, 0, -6), new Vector3(7, 0, -9) };
-        foreach (var h in houses)
+        for (int i = 0; i < houses.Length; i++)
         {
-            Vector3 at = Village + h;
-            Block(PrimitiveType.Cylinder, at + Vector3.up * 1.2f, new Vector3(4.5f, 1.2f, 4.5f), new Color(.72f, .62f, .48f));
-            Block(PrimitiveType.Sphere, at + Vector3.up * 2.9f, new Vector3(5.6f, 2.6f, 5.6f), new Color(.6f, .5f, .28f));
+            Vector3 at = Village + houses[i];
+            Vector3 toPath = new Vector3(-houses[i].x, 0, 0);
+            float yaw = Quaternion.LookRotation(toPath.sqrMagnitude > .01f ? toPath : Vector3.forward).eulerAngles.y;
+            if (Model(i % 2 == 0 ? "Bohio1" : "Bohio2", at, yaw) == null)
+            {
+                Block(PrimitiveType.Cylinder, at + Vector3.up * 1.2f, new Vector3(4.5f, 1.2f, 4.5f), new Color(.72f, .62f, .48f));
+                Block(PrimitiveType.Sphere, at + Vector3.up * 2.9f, new Vector3(5.6f, 2.6f, 5.6f), new Color(.6f, .5f, .28f));
+            }
             _smoke.Add(Smoke(at + Vector3.up * 3.6f));
         }
+        // The palisade closes the village behind the houses, open toward the camera's side.
+        if (Resources.Load<GameObject>("Bacata/Empalizada") != null)
+            for (int i = 0; i < 40; i++)
+            {
+                float a = Mathf.Lerp(-20f, 200f, i / 39f) * Mathf.Deg2Rad;
+                Vector3 at = Village + new Vector3(Mathf.Cos(a) * 27, 0, 8 + Mathf.Sin(a) * 27);
+                Model("Empalizada", at, -Mathf.Rad2Deg * a);
+            }
         for (int i = 0; i < 14; i++)
         {
             float a = i * Mathf.PI * 2 / 14;
@@ -379,17 +413,32 @@ public sealed class BacataDirector : MonoBehaviour
     private void BuildHill()
     {
         Block(PrimitiveType.Sphere, Hill + new Vector3(0, -3.2f, 0), new Vector3(16, 8, 16), new Color(.4f, .44f, .27f));
-        Block(PrimitiveType.Cylinder, Hill + new Vector3(0, .82f, 0), new Vector3(1.3f, .08f, 1.3f), new Color(.55f, .54f, .5f));
+        // The offering stone where he keeps his vigil (C03), under his knees.
+        if (Model("PiedraOfrenda", Hill + new Vector3(0, .74f, 0), 0) == null)
+            Block(PrimitiveType.Cylinder, Hill + new Vector3(0, .82f, 0), new Vector3(1.3f, .08f, 1.3f), new Color(.55f, .54f, .5f));
         Block(PrimitiveType.Cube, Hill + new Vector3(0, .3f, -6), new Vector3(1.5f, .05f, 8), new Color(.55f, .45f, .32f));
+        // Frailejones on the slopes of the páramo.
+        for (int i = 0; i < 9; i++)
+        {
+            float a = i * 40f * Mathf.Deg2Rad + .3f;
+            float r = 3.2f + (i % 3) * .9f;
+            float y = Mathf.Sqrt(Mathf.Max(0, 1 - (r * r) / 64f)) * 4f - 3.2f;
+            Model("Frailejon", Hill + new Vector3(Mathf.Cos(a) * r, y - .1f, Mathf.Sin(a) * r), i * 33f, "Bacata", .8f + .1f * (i % 4));
+        }
     }
 
     private void BuildRefuge()
     {
         Block(PrimitiveType.Plane, Refuge, new Vector3(3, 1, 3), new Color(.45f, .36f, .26f));
-        Block(PrimitiveType.Cube, Refuge + new Vector3(0, 1.5f, 4.5f), new Vector3(9, 3, .3f), new Color(.66f, .56f, .42f));
-        Block(PrimitiveType.Cube, Refuge + new Vector3(-4.5f, 1.5f, 0), new Vector3(.3f, 3, 9), new Color(.66f, .56f, .42f));
-        Block(PrimitiveType.Cube, Refuge + new Vector3(4.5f, 1.5f, 0), new Vector3(.3f, 3, 9), new Color(.66f, .56f, .42f));
-        Block(PrimitiveType.Cube, Refuge + new Vector3(0, .1f, 1), new Vector3(1.2f, .2f, 2.4f), new Color(.7f, .58f, .35f)); // mat
+        if (Model("InteriorRefugio", Refuge + new Vector3(0, 0, .5f), 180) == null)
+        {
+            Block(PrimitiveType.Cube, Refuge + new Vector3(0, 1.5f, 4.5f), new Vector3(9, 3, .3f), new Color(.66f, .56f, .42f));
+            Block(PrimitiveType.Cube, Refuge + new Vector3(-4.5f, 1.5f, 0), new Vector3(.3f, 3, 9), new Color(.66f, .56f, .42f));
+            Block(PrimitiveType.Cube, Refuge + new Vector3(4.5f, 1.5f, 0), new Vector3(.3f, 3, 9), new Color(.66f, .56f, .42f));
+        }
+        if (Model("Estera", Refuge + new Vector3(0, .02f, 1), 90) == null)
+            Block(PrimitiveType.Cube, Refuge + new Vector3(0, .1f, 1), new Vector3(1.2f, .2f, 2.4f), new Color(.7f, .58f, .35f)); // mat
+        Model("Fogon", Refuge + new Vector3(2, 0, -1), 0);
         var fire = new GameObject("Fuego").AddComponent<Light>();
         fire.transform.SetParent(_world, false); fire.transform.position = Refuge + new Vector3(2, .6f, -1);
         fire.type = LightType.Point; fire.color = new Color(1f, .6f, .3f); fire.range = 9; fire.intensity = 3;
@@ -399,13 +448,92 @@ public sealed class BacataDirector : MonoBehaviour
     {
         Block(PrimitiveType.Plane, Lagoon, new Vector3(10, 1, 10), new Color(.46f, .5f, .32f));
         Block(PrimitiveType.Cylinder, Lagoon + new Vector3(0, .02f, 0), new Vector3(30, .02f, 22), new Color(.22f, .4f, .48f));
+        // Reeds along the water, rocks on the shore and frailejones beyond; the near shore stays
+        // open where Tisquesusa stands (the shot looks across it).
+        bool reeds = Resources.Load<GameObject>("Bacata/Juncos") != null;
         for (int i = 0; i < 24; i++)
         {
             float a = i * Mathf.PI * 2 / 24;
-            Block(PrimitiveType.Cylinder, Lagoon + new Vector3(Mathf.Cos(a) * 15.5f, .5f, Mathf.Sin(a) * 11.5f), new Vector3(.08f, .5f, .08f), new Color(.45f, .55f, .3f));
+            Vector3 at = Lagoon + new Vector3(Mathf.Cos(a) * 15.5f, 0, Mathf.Sin(a) * 11.5f);
+            bool front = Mathf.Abs(Mathf.Cos(a)) < .35f && Mathf.Sin(a) < 0;
+            if (reeds) { if (!front) Model("Juncos", at, i * 51f, "Bacata", .8f + .15f * (i % 3)); }
+            else Block(PrimitiveType.Cylinder, at + Vector3.up * .5f, new Vector3(.08f, .5f, .08f), new Color(.45f, .55f, .3f));
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            float a = (i * 36f + 12f) * Mathf.Deg2Rad;
+            Vector3 shore = Lagoon + new Vector3(Mathf.Cos(a) * 17.5f, 0, Mathf.Sin(a) * 13.5f);
+            if (Mathf.Abs(Mathf.Cos(a)) < .3f && Mathf.Sin(a) < 0) continue;
+            Model("RocaOrilla" + (1 + i % 3), shore, i * 71f);
+            Model("Frailejon", Lagoon + new Vector3(Mathf.Cos(a + .15f) * 21f, 0, Mathf.Sin(a + .15f) * 16.5f), i * 29f, "Bacata", .9f + .1f * (i % 3));
         }
         for (int i = 0; i < 6; i++)
             Block(PrimitiveType.Sphere, Lagoon + new Vector3(-50 + i * 20, 8, 55), new Vector3(34, 26, 24), new Color(.36f, .42f, .4f));
+    }
+
+    // Soft, alpha-blended puffs (the shared particle material is additive: dark smoke vanished in it).
+    private static Material _smokeMaterial;
+    private static Material SmokeMaterial
+    {
+        get
+        {
+            if (_smokeMaterial != null) return _smokeMaterial;
+            var m = new Material(MIParticles.Material) { name = "Humo" };
+            m.SetFloat("_Blend", 0);
+            m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            return _smokeMaterial = m;
+        }
+    }
+
+    // A model of Resources/<folder>/<key> placed on the ground (null when it is missing).
+    private Transform Model(string key, Vector3 at, float yaw, string folder = "Bacata", float scale = 1f)
+    {
+        var prefab = Resources.Load<GameObject>(folder + "/" + key);
+        if (prefab == null) return null;
+        var go = Instantiate(prefab, _world, false);
+        go.name = key;
+        go.transform.SetPositionAndRotation(at, Quaternion.Euler(0, yaw, 0));
+        go.transform.localScale = Vector3.one * scale;
+        return go.transform;
+    }
+
+    // A prop in an actor's right (or left) hand; on a provisional figure it rests at its side.
+    private Transform Hold(Transform actor, string key, bool right)
+    {
+        if (actor == null) return null;
+        var prop = Model(key, actor.position, 0, "Props");
+        if (prop == null) return null;
+        Attach(prop, actor, right);
+        return prop;
+    }
+
+    private static void Attach(Transform prop, Transform actor, bool right)
+    {
+        var animator = actor.GetComponentInChildren<Animator>();
+        var hand = animator != null && animator.isHuman ? animator.GetBoneTransform(right ? HumanBodyBones.RightHand : HumanBodyBones.LeftHand) : null;
+        if (hand != null)
+        {
+            prop.SetParent(hand, false);
+            // Held upright through the fist (props stand on their base along +Y).
+            prop.localPosition = Vector3.zero;
+            prop.localRotation = Quaternion.identity;
+            prop.position = hand.position - actor.up * (prop.name == "Baston" ? .75f : .05f);
+            prop.rotation = Quaternion.LookRotation(actor.forward, actor.up);
+            var s = prop.lossyScale; prop.localScale = new Vector3(prop.localScale.x / s.x, prop.localScale.y / s.y, prop.localScale.z / s.z);
+            return;
+        }
+        prop.SetParent(actor, false);
+        prop.localPosition = new Vector3(right ? .35f : -.35f, prop.name == "Baston" ? 0 : .9f, .1f);
+        prop.localRotation = Quaternion.identity;
+    }
+
+    // The staff passes from one hand to another (C01: the uncle to the heir).
+    private IEnumerator Hand(Transform prop, Transform to, float delay)
+    {
+        if (prop == null || to == null) yield break;
+        yield return new WaitForSeconds(delay);
+        Attach(prop, to, true);
     }
 
     private ParticleSystem Smoke(Vector3 at)
@@ -418,9 +546,13 @@ public sealed class BacataDirector : MonoBehaviour
         main.playOnAwake = false;
         var emission = ps.emission; emission.rateOverTime = 4;
         var shape = ps.shape; shape.radius = .8f;
-        var renderer = go.GetComponent<ParticleSystemRenderer>();
-        var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (shader != null) renderer.material = new Material(shader) { color = new Color(.25f, .23f, .22f, .55f) };
+        var size = ps.sizeOverLifetime; size.enabled = true; size.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, .6f, 1, 2.2f));
+        var fade = ps.colorOverLifetime; fade.enabled = true;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+            new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1, .2f), new GradientAlphaKey(0, 1) });
+        fade.color = new ParticleSystem.MinMaxGradient(g);
+        go.GetComponent<ParticleSystemRenderer>().sharedMaterial = SmokeMaterial;
         return ps;
     }
 

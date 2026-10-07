@@ -36,6 +36,8 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     public static MundoInferiorBlockout Instance { get; private set; }
     // Raised when an attempt restarts (fall, defeat): slabs, stones and encounters rebuild.
     public static event Action AttemptReset;
+    // Raised after a defeat only (not a fall): the encounters heal.
+    public static event Action DefeatReset;
     public int CurrentRoom => _room;
     public MIHud Hud { get; private set; }
     // Hands and voice next to the keys: interaction, finds and the dash in combat.
@@ -43,7 +45,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     public bool Busy => _paused || _dead || MIFind.Inspecting != null || StoryPlayer.Active;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() { AttemptReset = null; Instance = null; }
+    private static void ResetStatics() { AttemptReset = null; DefeatReset = null; Instance = null; }
 
     private void Awake()
     {
@@ -263,6 +265,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         if (zone != null && orbitCamera != null) { orbitCamera.SetYaw(zone.Yaw, true); orbitCamera.SetFraming(zone.Distance, zone.Pitch, true); }
         if (_guardian != null) _guardian.ResetEncounter();
         AttemptReset?.Invoke();
+        DefeatReset?.Invoke();
         Hud.ShowDeath(false);
         Hud.SetFade(0);
         _invulnerableUntil = Time.time + 1.5f;
@@ -346,28 +349,58 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     // "(personaje pendiente)"; they are fought with the dash (MIDashEnemy).
     private void SpawnCreatures()
     {
+        var byRoom = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<MIDashEnemy>>();
+        var roots = new System.Collections.Generic.Dictionary<int, Transform>();
         foreach (var marker in FindObjectsByType<Transform>(FindObjectsSortMode.None))
         {
             if (!marker.name.EndsWith("(personaje pendiente)")) continue;
             int room = RoomOf(marker);
-            string n = marker.name;
-            if (n.StartsWith("C01 Centinela A") || n.StartsWith("C01 Centinela B"))
-                MIDashEnemy.Create(MIDashEnemy.Kind.Guard, marker, room, n.StartsWith("C01 Centinela A") ? "centinela_04a" : "centinela_04b",
-                    "Centinela caimán", 30, "Un centinela cierra el patio. Apártate de su mordida marcada e impúlsate contra él.",
-                    "Se aparta y te deja pasar.");
-            else if (n.StartsWith("C02a Vigía"))
-                MIDashEnemy.Create(MIDashEnemy.Kind.Bat, marker, room, "vigia_04", "Hombre-murciélago vigía", 40,
-                    "«La orden me arrastra.» Escóndete tras los pilares de sus dardos; cuando baje en picada, impúlsate.",
-                    "«El tercer par está antes del escudo.»");
-            else if (n.StartsWith("C01 Centinela") && room == 6)
-                MIDashEnemy.Create(MIDashEnemy.Kind.HornBat, marker, room, "vigia_cuerno", "Vigía del cuerno", 60,
-                    "«La llamada debe quedar aquí.» Su grito se carga en un anillo: impúlsate contra él antes de que estalle.",
-                    "«Debe volver a quien pueda responder.» Baja las alas: la ruta al cuerno queda libre.");
-            else if (n.StartsWith("C01 Centinela"))
-                MIDashEnemy.Create(MIDashEnemy.Kind.Caiman, marker, room, "caiman_03", "Hombre-caimán", 60,
-                    "«Tu bastón no abre una tumba.» Su guardia frontal resiste: rodéalo e impúlsate por un costado.",
-                    "«Entonces no te quedes con lo que no te pertenece.»");
+            var creature = SpawnCreature(marker, room);
+            if (creature == null) continue;
+            if (!byRoom.TryGetValue(room, out var list)) { byRoom[room] = list = new System.Collections.Generic.List<MIDashEnemy>(); roots[room] = RoomRoot(marker); }
+            list.Add(creature);
         }
+        // Every fight is required (2026-10-06 playtest): a veil closes the way on until the room's
+        // creatures yield. Positions are local to the builder's rooms (floor plan of the guide).
+        foreach (var pair in byRoom)
+        {
+            var root = roots[pair.Key];
+            if (root == null) continue;
+            switch (pair.Key)
+            {
+                case 2: MIPassageSeal.Create(root, new Vector3(0, 0, 17.9f), 12.4f, 6f, pair.Value, "el hombre-caimán"); break;
+                case 3: MIPassageSeal.Create(root, new Vector3(0, 0, 22.6f), 20f, 7f, pair.Value, "los centinelas y el vigía"); break;
+                case 6: MIPassageSeal.Create(root, new Vector3(0, 0, 7.1f), 15f, 6f, pair.Value, "el vigía del cuerno"); break;
+            }
+        }
+    }
+
+    private static MIDashEnemy SpawnCreature(Transform marker, int room)
+    {
+        string n = marker.name;
+        if (n.StartsWith("C01 Centinela A") || n.StartsWith("C01 Centinela B"))
+            return MIDashEnemy.Create(MIDashEnemy.Kind.Guard, marker, room, n.StartsWith("C01 Centinela A") ? "centinela_04a" : "centinela_04b",
+                "Centinela caimán", 30, "Un centinela cierra el patio. Apártate de su mordida marcada e impúlsate contra él.",
+                "Se aparta y te deja pasar.");
+        else if (n.StartsWith("C02a Vigía"))
+            return MIDashEnemy.Create(MIDashEnemy.Kind.Bat, marker, room, "vigia_04", "Hombre-murciélago vigía", 40,
+                "«La orden me arrastra.» Escóndete tras los pilares de sus dardos; cuando baje en picada, impúlsate.",
+                "«El tercer par está antes del escudo.»");
+        else if (n.StartsWith("C01 Centinela") && room == 6)
+            return MIDashEnemy.Create(MIDashEnemy.Kind.HornBat, marker, room, "vigia_cuerno", "Vigía del cuerno", 60,
+                "«La llamada debe quedar aquí.» Su grito se carga en un anillo: impúlsate contra él antes de que estalle.",
+                "«Debe volver a quien pueda responder.» Baja las alas: la ruta al cuerno queda libre.");
+        else if (n.StartsWith("C01 Centinela"))
+            return MIDashEnemy.Create(MIDashEnemy.Kind.Caiman, marker, room, "caiman_03", "Hombre-caimán", 60,
+                "«Tu bastón no abre una tumba.» Su guardia frontal resiste: rodéalo e impúlsate por un costado.",
+                "«Entonces no te quedes con lo que no te pertenece.»");
+        return null;
+    }
+
+    private static Transform RoomRoot(Transform t)
+    {
+        for (; t != null; t = t.parent) if (t.name.StartsWith("Room_")) return t;
+        return null;
     }
 
     // Room index (0-8) of a builder object: its ancestor "Room_0N_...".

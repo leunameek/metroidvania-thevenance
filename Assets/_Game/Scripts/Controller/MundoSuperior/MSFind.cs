@@ -21,9 +21,12 @@ public sealed class MSFind : MIInteractable
     public static MSFind Inspecting { get; private set; }
     public string FindId => findId;
     public bool Collected => MSProgress.Has(findId);
-    // Guion O-S06: the key plate is offered once the eagle has recognised the visitor.
-    public override bool Available => base.Available && !Collected && Inspecting == null && RequirementsMet
-        && (findId != MSProgress.Key || MSProgress.Has(MSProgress.Eagle) || CampaignProgress.FreeTravel);
+    // Every trial is required (2026-10-06 playtest), also when the scene is opened on its own: the
+    // wings are offered once the condor has recognised the visitor (E09), the key plate once the
+    // eagle has (guion O-S06, E10).
+    public override bool Available => base.Available && !Collected && Inspecting == null && RequirementsMet && TrialMet;
+    public string Trial => findId == MSProgress.Key ? MSProgress.Eagle : findId == MSProgress.Wings ? MSProgress.Condor : null;
+    private bool TrialMet => Trial == null || MSProgress.Has(Trial);
     public override string Prompt => "Examinar " + displayName.ToLowerInvariant();
 
     private Vector3 _itemPosition, _cameraPosition;
@@ -33,6 +36,15 @@ public sealed class MSFind : MIInteractable
     private PlayerController _player;
     private float _blend, _haloIntensity;
     private bool _confirmFrame;
+    private FitPuzzle _fit;
+    private Renderer[] _hiddenPlayer;
+    private Vector3 _frameSide = Vector3.back;
+
+    // The runes, the wings and the key medallion are fitted in their table (FitPuzzle). The runes
+    // stay there; the wings and the medallion are taken once fitted (he wears and uses them).
+    public bool Fits => findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb || findId == MSProgress.Wings || findId == MSProgress.Key;
+    private bool Stays => _fit != null && (findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb);
+    private bool ItemShown => (!Collected || Stays) && RequirementsMet && TrialMet;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics() => Inspecting = null;
@@ -40,6 +52,7 @@ public sealed class MSFind : MIInteractable
     private void Start()
     {
         if (halo != null) _haloIntensity = halo.intensity;
+        if (Fits && item != null) _fit = new FitPuzzle(item);
         Refresh();
     }
 
@@ -68,10 +81,30 @@ public sealed class MSFind : MIInteractable
     private void Refresh()
     {
         bool collected = Collected;
-        if (item != null) item.gameObject.SetActive(!collected && RequirementsMet);
+        if (item != null) item.gameObject.SetActive(ItemShown);
+        if (collected && Stays && item != null)
+        {
+            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
+            if (Inspecting != this) _fit.PlaceFitted();
+        }
         float intensity = collected ? 0f : _haloIntensity;
         if (halo != null) { halo.intensity = intensity; var glow = halo.GetComponent<MIGlow>(); if (glow != null) glow.SetBase(intensity); }
         if (sparks != null) sparks.gameObject.SetActive(!collected);
+    }
+
+    // Near the empty altar while its trial waits: one line says who keeps the piece.
+    private float _nextTrialNotice;
+    private void WarnTrial()
+    {
+        var director = MundoSuperiorDirector.Instance;
+        var p = director != null ? director.Player : null;
+        if (p == null || Time.time < _nextTrialNotice || Vector3.Distance(p.position, transform.position) > range + 2f) return;
+        _nextTrialNotice = Time.time + 8f;
+        bool eagle = Trial == MSProgress.Eagle;
+        director.Hud?.Notify(eagle ? "La llave está guardada" : "Las alas están guardadas",
+            eagle ? "La mujer-águila guarda la llave: responde primero a su prueba en la terraza."
+                  : "La mujer-cóndor guarda las alas: responde primero a su prueba junto a la runa.",
+            UIIcon.Guardian, UIPalette.Muted);
     }
 
     public override void Interact(PlayerController player)
@@ -84,21 +117,27 @@ public sealed class MSFind : MIInteractable
         if (_orbit != null) _orbit.enabled = false;
         _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
         _itemPosition = item.position; _itemRotation = item.rotation;
+        _frameSide = InspectionFraming.ClearSide(_itemPosition, _cameraPosition, 1.5f, item, player.transform);
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
         WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
         MSAudio.Play("hallazgo_abrir", .8f);
-        MundoSuperiorDirector.Instance?.Hud?.ShowInspection(displayName, kindLabel, description);
+        _hiddenPlayer = FitView.HidePlayer(player);
+        _fit?.Scramble();
+        var hud = MundoSuperiorDirector.Instance?.Hud;
+        hud?.ShowInspection(displayName, kindLabel, description);
+        hud?.SetInspectionFit(_fit != null ? FitView.Status(false) : null);
     }
 
     private void Update()
     {
         // A story piece appears on its altar as soon as its requirements are met.
-        if (requires.Length > 0 && item != null && item.gameObject.activeSelf != (!Collected && RequirementsMet)) Refresh();
+        if ((requires.Length > 0 || Trial != null) && item != null && item.gameObject.activeSelf != ItemShown) Refresh();
+        if (!Collected && !TrialMet) WarnTrial();
         if (Inspecting != this) return;
         _blend = Mathf.MoveTowards(_blend, 1, Time.unscaledDeltaTime / .35f);
         // Frame the piece from the player's side, a little above, the panel on the right.
-        Vector3 toCamera = _cameraPosition - _itemPosition; toCamera.y = 0;
+        Vector3 toCamera = _frameSide;
         if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
         Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
         Vector3 framed = _itemPosition + toCamera.normalized * 1.5f + Vector3.up * .2f - side * .5f;
@@ -128,36 +167,65 @@ public sealed class MSFind : MIInteractable
         }
         item.Rotate(Vector3.up, -turn.x + handYaw, Space.World);
         item.Rotate(_camera.transform.right, turn.y + handPitch, Space.World);
+        if (_fit != null)
+        {
+            bool was = _fit.Seated;
+            _fit.Tick(halo, _haloIntensity, item.position);
+            if (was != _fit.Seated) MundoSuperiorDirector.Instance?.Hud?.SetInspectionFit(FitView.Status(_fit.Seated));
+        }
         // The piece turning in the hands: a soft friction, rate-limited by the mixer.
         if (Mathf.Abs(turn.x - handYaw) + Mathf.Abs(turn.y + handPitch) > .35f) GameAudio.Play("Foley/objeto_girar", .3f, AudioChannel.Effects, 1f, .06f, .2f, 1);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
         if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
         else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { GameAudio.Play("Foley/examinar_cerrar", .7f); Close(); }
-        else if (natural != null && natural.ConsumeConfirm("Tomar " + displayName.ToLowerInvariant())) Confirm();
+        else if (natural != null && natural.ConsumeConfirm((_fit != null ? "Encajar " : "Tomar ") + displayName.ToLowerInvariant())) Confirm();
         else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();
     }
 
+    // The piece goes back to its altar, Nemequene takes it with his hands, and it is his at the
+    // moment of the grasp.
     private void Confirm()
     {
-        bool first = MSProgress.Set(findId);
+        bool first = !MSProgress.Has(findId);
+        if (_fit != null && first)
+        {
+            // Only a seated piece goes into its table.
+            if (!_fit.Seated) { FitView.NotYet(MundoSuperiorDirector.Instance?.Hud); return; }
+            Close(keepItem: true);
+            StartCoroutine(_fit.Settle());
+            if (_player != null) PlayerInteraction.Perform(_player, item, Take, Stays ? "Reach" : "Pickup", "Reach");
+            else Take();
+            return;
+        }
         Close();
-        if (first && _player != null) CharacterActions.Of(_player)?.PlayAny("Pickup");
+        if (!first) { Refresh(); return; }
+        if (_player != null) PlayerInteraction.Perform(_player, item != null ? item : transform, Take, "Pickup");
+        else Take();
+    }
+
+    private void Take()
+    {
+        if (!MSProgress.Set(findId)) { Refresh(); return; }
         Refresh();
-        if (!first) return;
         MSAudio.Play("hallazgo_confirmar", .9f);
         MIBurst.Spawn(_itemPosition, new Color(1f, .82f, .45f));
         MundoSuperiorDirector.Instance?.OnFound(this, rewardTitle, rewardText);
     }
 
-    private void Close()
+    private void Close() => Close(false);
+
+    // keepItem: the piece is being fitted (it stays where the player seated it, then settles).
+    private void Close(bool keepItem)
     {
         if (Inspecting != this) return;
         Inspecting = null;
-        if (item != null)
+        FitView.ShowPlayer(_hiddenPlayer); _hiddenPlayer = null;
+        if (item != null && !keepItem)
         {
             item.SetPositionAndRotation(_itemPosition, _itemRotation);
-            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = true;
+            var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = !(Collected && Stays);
+            if (halo != null) halo.intensity = _haloIntensity;
         }
         if (_camera != null) _camera.transform.SetPositionAndRotation(_cameraPosition, _cameraRotation);
         if (_orbit != null) { _orbit.enabled = true; _orbit.SnapAfterTeleport(); }

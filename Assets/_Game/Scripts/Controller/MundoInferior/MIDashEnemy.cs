@@ -19,7 +19,7 @@ public sealed class MIDashEnemy : MonoBehaviour
     private enum Phase { Idle, Cooldown, Telegraph, Strike, Recover, Yielded }
     private enum Move { Bite, Tail, Shoot, Dive, Scream }
 
-    private const float HoverHeight = 3.2f, FailDamage = 15f;
+    private const float HoverHeight = 2.6f, FailDamage = 15f, Leash = 8f;
     private static readonly List<MIDashEnemy> All = new List<MIDashEnemy>();
     public static MIDashEnemy Engaged { get; private set; }
 
@@ -28,20 +28,23 @@ public sealed class MIDashEnemy : MonoBehaviour
     private string _flag, _name, _greeting, _farewell;
     private float _max, _health, _t, _hover, _engageRange;
     private int _step, _lastDash = -1;
-    private bool _greeted, _guardNoticeShown, _interrupted;
+    private bool _greeted, _guardNoticeShown, _interrupted, _engaged, _groundNoticeShown;
+    private float _telegraphLength = 1;
     private Phase _phase;
     private Move _move;
     private Vector3 _home, _target, _strikeFrom;
     private Quaternion _homeRotation;
     private CharacterActions _actor;
     private CapsuleCollider _hit;
-    private Transform _warning;
-    private Renderer _warningRenderer;
+    private TelegraphMark _warning;
     private PlayerController _player;
 
     public string DisplayName => _name;
     public float Health01 => _max > 0 ? Mathf.Clamp01(_health / _max) : 0;
     public bool Yielded => _phase == Phase.Yielded;
+    public int Room => _room;
+    public static IReadOnlyList<MIDashEnemy> Active => All;
+    public static event System.Action<MIDashEnemy> YieldedEvent;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics() { All.Clear(); Engaged = null; }
@@ -55,7 +58,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         var e = go.AddComponent<MIDashEnemy>();
         e._kind = kind; e._room = room; e._flag = flag; e._name = name; e._max = e._health = health;
         e._greeting = greeting; e._farewell = farewell;
-        e._engageRange = kind == Kind.Bat ? 15f : kind == Kind.HornBat ? 13f : 9f;
+        e._engageRange = kind == Kind.Bat ? 15f : kind == Kind.HornBat ? 13f : 10f;
         e._home = go.transform.position; e._homeRotation = go.transform.rotation;
         string model = kind == Kind.Bat || kind == Kind.HornBat ? "HombreMurcielago" : "HombreCaiman";
         e._actor = CharacterModels.Spawn(model, go.transform, Vector3.zero, Quaternion.identity, kind == Kind.Guard ? .9f : 1f);
@@ -63,7 +66,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         e._hit = go.AddComponent<CapsuleCollider>();
         e._hit.isTrigger = true; e._hit.radius = .8f; e._hit.height = 2.4f; e._hit.center = new Vector3(0, 1.2f, 0);
         var rb = go.AddComponent<Rigidbody>(); rb.isKinematic = true; rb.useGravity = false;
-        e.BuildWarning();
+        e._warning = TelegraphMark.Create(go.transform.parent);
         StoryActor.Ensure(go, name, 1.8f);
         return e;
     }
@@ -74,16 +77,32 @@ public sealed class MIDashEnemy : MonoBehaviour
     private void Start()
     {
         _player = FindFirstObjectByType<PlayerController>();
-        MundoInferiorBlockout.AttemptReset += ResetEncounter;
+        MundoInferiorBlockout.AttemptReset += Disengage;
+        MundoInferiorBlockout.DefeatReset += ResetEncounter;
         if (MIProgress.Has(_flag)) { Yield(true); return; }
         ResetEncounter();
     }
-    private void OnDestroy() { MundoInferiorBlockout.AttemptReset -= ResetEncounter; }
+    private void OnDestroy()
+    {
+        MundoInferiorBlockout.AttemptReset -= Disengage;
+        MundoInferiorBlockout.DefeatReset -= ResetEncounter;
+    }
 
+    // Defeat of Nemequene: the creature is whole again.
     private void ResetEncounter()
     {
         if (_phase == Phase.Yielded) return;
-        _health = _max; _phase = Phase.Idle; _t = 0; _step = 0; _interrupted = false;
+        _health = _max; _step = 0;
+        Disengage();
+    }
+
+    // A fall, leaving the room or a step too far: the creature returns to its post and keeps the
+    // wounds already dealt (a missed dash over the pit no longer restarts the fight).
+    private void Disengage()
+    {
+        if (_phase == Phase.Yielded) return;
+        StopAllCoroutines();
+        _phase = Phase.Idle; _t = 0; _interrupted = false; _engaged = false;
         _hover = IsFlyer ? HoverHeight : 0;
         transform.SetPositionAndRotation(_home + Vector3.up * _hover, _homeRotation);
         ShowWarning(false);
@@ -98,14 +117,18 @@ public sealed class MIDashEnemy : MonoBehaviour
         var director = MundoInferiorBlockout.Instance;
         if (director == null || director.Busy || TurnDuelController.Running) return;
         Vector3 toPlayer = _player.transform.position - _home; toPlayer.y = 0;
-        bool here = director.CurrentRoom == _room && toPlayer.magnitude < _engageRange
-            && Mathf.Abs(_player.transform.position.y - _home.y) < 3f;
+        // Engages at its range and lets go only well beyond it (hysteresis), so the dashes of the
+        // fight itself never carry Nemequene out of it.
+        float reach = _engaged ? _engageRange + Leash : _engageRange;
+        float dy = _player.transform.position.y - _home.y;
+        bool here = director.CurrentRoom == _room && toPlayer.magnitude < reach && dy < 6f && dy > -4f;
         if (!here)
         {
-            if (_phase != Phase.Idle) ResetEncounter();
+            if (_phase != Phase.Idle || _engaged) Disengage();
             if (Engaged == this) Engaged = null;
             return;
         }
+        _engaged = true;
         // Several can be awake in the patio: the bar follows the nearest.
         if (Engaged == null || Engaged == this || Engaged.Yielded || Distance(this) < Distance(Engaged)) Engaged = this;
         if (!_greeted)
@@ -139,7 +162,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         {
             case Kind.Caiman: _move = _step % 2 == 0 ? Move.Bite : Move.Tail; break;
             case Kind.Guard: _move = Move.Bite; break;
-            case Kind.Bat: _move = _step % 3 < 2 ? Move.Shoot : Move.Dive; break;
+            case Kind.Bat: _move = _step % 2 == 0 ? Move.Shoot : Move.Dive; break;
             default: _move = _step % 2 == 0 ? Move.Scream : Move.Dive; break;
         }
         _step++;
@@ -153,17 +176,17 @@ public sealed class MIDashEnemy : MonoBehaviour
             case Move.Dive: _t = 1.1f; Warn(_target, 1.8f); break;
             case Move.Scream: _t = 1.6f; Warn(Ground(transform.position), .5f); _actor?.PlayAny("PowerUp"); MIAudio.PlayAt("guardian_carga", transform.position, .9f, 1.4f); break;
         }
+        _telegraphLength = Mathf.Max(.1f, _t);
     }
 
     private void UpdateTelegraph()
     {
-        // The scream ring grows toward its reach; the dive mark follows nothing (it was announced).
-        if (_move == Move.Scream && _warning != null)
-        {
-            float k = 1 - Mathf.Clamp01(_t / 1.6f);
-            float r = Mathf.Lerp(.5f, 4.5f, k);
-            _warning.localScale = new Vector3(r * 2, .02f, r * 2);
-        }
+        // The fill closes on the ring as the blow approaches; the scream ring also widens toward its
+        // reach. The dive mark follows nothing (it was announced).
+        float k = 1 - Mathf.Clamp01(_t / _telegraphLength);
+        if (_warning == null || !_warning.Visible) return;
+        if (_move == Move.Scream) _warning.SetRadius(Mathf.Lerp(.5f, 4.5f, k));
+        _warning.SetProgress(k);
     }
 
     private void Strike()
@@ -221,7 +244,12 @@ public sealed class MIDashEnemy : MonoBehaviour
         }
         _phase = Phase.Recover;
         // On the ground after a dive the creature is open to the dash; a stunned scream too.
-        _t = _move == Move.Dive ? 2.2f : _interrupted ? 2f : .6f;
+        _t = _move == Move.Dive ? 2.8f : _interrupted ? 2.2f : .6f;
+        if (_move == Move.Dive && !_groundNoticeShown)
+        {
+            _groundNoticeShown = true;
+            MundoInferiorBlockout.Instance?.Hud?.Notify("En el suelo", "Ahora está a tu alcance: impúlsate contra él antes de que vuelva a subir.", UIIcon.Dodge, UIPalette.GoldLight);
+        }
         if (_move == Move.Bite) StartCoroutine(StepBack());
     }
 
@@ -269,16 +297,21 @@ public sealed class MIDashEnemy : MonoBehaviour
         _actor?.PlayAny(_step % 2 == 0 ? "HitLeft" : "HitRight", "HitGut");
     }
 
+    // Beaten: it kneels for a moment and goes out in motes, leaving nothing behind (2026-10-06
+    // playtest). A creature already beaten in the save is simply absent.
     private void Yield(bool loaded)
     {
+        StopAllCoroutines();
         _phase = Phase.Yielded; _hover = 0;
         ShowWarning(false);
         if (_hit != null) _hit.enabled = false;
-        transform.position = loaded ? _home : Ground(transform.position);
-        if (_actor != null) { if (loaded) _actor.Hold("Kneel"); else _actor.PlayAny("Kneel"); }
         if (Engaged == this) Engaged = null;
-        if (loaded) return;
+        if (loaded) { HideBody(); YieldedEvent?.Invoke(this); return; }
+        transform.position = Ground(transform.position);
+        _actor?.PlayAny("Kneel");
+        CreatureDissolve.Run(Body, IsFlyer ? new Color(.75f, .65f, 1f) : new Color(.6f, .95f, .75f), .7f);
         MIProgress.Set(_flag);
+        YieldedEvent?.Invoke(this);
         MIAudio.PlayAt("guardian_cae", transform.position);
         MundoInferiorBlockout.Instance?.Hud?.Notify(_name + " cede el paso", _farewell, UIIcon.Check, UIPalette.Jade);
         MundoInferiorBlockout.Instance?.RefreshObjective();
@@ -308,34 +341,17 @@ public sealed class MIDashEnemy : MonoBehaviour
         Vector3 p = transform.position; p.y = _home.y + _hover; transform.position = p;
     }
 
-    private Vector3 Ground(Vector3 at)
+    private Vector3 Ground(Vector3 at) => TelegraphMark.Floor(at, _home.y);
+
+    // The visible body (the model, or the provisional figure's parts).
+    private Transform Body => _actor != null ? _actor.transform : transform;
+    private void HideBody()
     {
-        if (Physics.Raycast(at + Vector3.up * 1.5f, Vector3.down, out var hit, 6f, ~0, QueryTriggerInteraction.Ignore)) return hit.point;
-        at.y = _home.y; return at;
+        if (_actor != null) { CreatureDissolve.HideNow(_actor.transform); return; }
+        foreach (var r in GetComponentsInChildren<Renderer>()) r.enabled = false;
     }
 
-    private void BuildWarning()
-    {
-        var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        Destroy(disc.GetComponent<Collider>());
-        disc.name = "Aviso";
-        _warning = disc.transform;
-        _warning.SetParent(transform.parent, false);
-        _warningRenderer = disc.GetComponent<Renderer>();
-        var shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader != null) _warningRenderer.material = new Material(shader);
-        _warningRenderer.material.color = new Color(.85f, .25f, .2f);
-        _warningRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        disc.SetActive(false);
-    }
+    private void Warn(Vector3 at, float radius) { if (_warning != null) _warning.Show(at, radius); }
 
-    private void Warn(Vector3 at, float radius)
-    {
-        if (_warning == null) return;
-        _warning.position = at + Vector3.up * .04f;
-        _warning.localScale = new Vector3(radius * 2, .02f, radius * 2);
-        _warning.gameObject.SetActive(true);
-    }
-
-    private void ShowWarning(bool visible) { if (_warning != null) _warning.gameObject.SetActive(visible); }
+    private void ShowWarning(bool visible) { if (_warning != null && !visible) _warning.Hide(); }
 }

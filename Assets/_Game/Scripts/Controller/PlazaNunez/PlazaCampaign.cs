@@ -153,7 +153,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         Vector3 side = Quaternion.Euler(0, 35, 0) * toSpawn;
         Vector3 at = Ground(center + side * (radius + 1.1f));
         var bachue = StoryProps.Figure("Bachue", transform, at, new Color(.88f, .84f, .74f), new Color(.2f, .55f, .45f), 1.72f);
-        bachue.rotation = Quaternion.LookRotation(-side);
+        // She faces the plaza camera (toward the arrival path when there is none), not the fountain.
+        var cam = Camera.main;
+        Vector3 facing = cam != null ? cam.transform.position - at : toSpawn;
+        facing.y = 0;
+        bachue.rotation = Quaternion.LookRotation(facing.sqrMagnitude > .01f ? facing.normalized : toSpawn);
         StoryActor.Ensure(bachue.gameObject, "Bachué", 1.6f);
         PlazaStoryPoint.Create("Hablar con Bachue", transform, at, 2.8f, () => true, BachuePrompt, TalkToBachue);
     }

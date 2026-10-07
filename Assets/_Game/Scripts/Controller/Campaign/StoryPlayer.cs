@@ -173,6 +173,10 @@ public sealed class StoryPlayer : MonoBehaviour
             if (_queue.Count > 0 && GatesOpen()) Begin(_queue.Dequeue());
             return;
         }
+        // A pause (or a loading fade) hides the line and holds it; it comes back where it was.
+        bool paused = Time.timeScale <= 0f;
+        _view.Show(!paused);
+        if (paused) return;
         var keyboard = Keyboard.current; var mouse = Mouse.current;
         UpdateCamera();
         // Hold Esc to skip the rest.

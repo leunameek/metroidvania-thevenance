@@ -50,7 +50,7 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
             _boss = CharacterModels.Spawn("JefeLagartoMurcielago", body, Vector3.zero, Quaternion.identity);
         }
         _music = MIAudio.Loop(gameObject, "musica_guardian", .95f, false); _music.Stop();
-        if (MIProgress.Has(MIProgress.Guardian)) { ShowDefeated(); return; }
+        if (MIProgress.Has(MIProgress.Guardian)) { ShowDefeated(); Vanish(true); return; }
         ResetEncounter();
     }
 
@@ -252,7 +252,17 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         var director = MundoInferiorBlockout.Instance;
         director?.Hud?.Notify("Chía vuelve a responder", "El guardián está libre. El portal de regreso se enciende a la derecha de la cámara.", UIIcon.Portal, UIPalette.Jade);
         director?.RefreshObjective();
-        StoryPlayer.Trigger("duel:E07:won");
+        if (!StoryPlayer.Trigger("duel:E07:won", () => Vanish(false))) Vanish(false);
+    }
+
+    // Freed, the guardian goes out in motes once its last words are said: nothing stays in the arena.
+    private void Vanish(bool instant)
+    {
+        Transform shape = _boss != null ? _boss.transform : body;
+        if (core != null) core.gameObject.SetActive(false);
+        if (coreLight != null) coreLight.enabled = false;
+        if (instant) { CreatureDissolve.HideNow(shape); return; }
+        CreatureDissolve.Run(shape, new Color(.75f, .65f, 1f), .3f);
     }
 
     private CharacterActions _boss;

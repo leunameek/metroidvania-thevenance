@@ -19,13 +19,21 @@ public sealed class MIHornSocket : MIInteractable
     public override void Interact(PlayerController player)
     {
         var director = MundoInferiorBlockout.Instance;
-        CharacterActions.Of(player)?.PlayAny(MIProgress.Has(MIProgress.Horn) ? "Button" : "Reach");
         if (!MIProgress.Has(MIProgress.Horn))
         {
-            GameAudio.UI(UICue.Blocked);
-            director?.Hud?.Notify("Reja cerrada", "Necesitas el cuerno de la cámara inferior (zona 07).", UIIcon.Lock, UIPalette.Danger);
+            PlayerInteraction.Perform(player, transform, () =>
+            {
+                GameAudio.UI(UICue.Blocked);
+                director?.Hud?.Notify("Reja cerrada", "Necesitas el cuerno de la cámara inferior (zona 07).", UIIcon.Lock, UIPalette.Danger);
+            }, "Reach");
             return;
         }
+        // The horn settles in the socket when the hand reaches it.
+        PlayerInteraction.Perform(player, transform, () => PlaceHorn(director), "Button", "Reach");
+    }
+
+    private void PlaceHorn(MundoInferiorBlockout director)
+    {
         if (!MIProgress.Set(MIProgress.HornGate)) return;
         MIAudio.Play("cuerno", 1f);
         GameAudio.Caption("Cuerno responde");
