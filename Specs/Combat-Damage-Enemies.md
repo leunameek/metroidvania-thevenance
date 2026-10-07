@@ -7,10 +7,11 @@ jump. That file's "Combat system" section describes the *first pass* (still accu
 of truth for everything that changed or was added on top of it. Read both — this one doesn't
 repeat what's still correct there.
 
-Scene: `Assets/Prototype/Scenes/Movement.unity`
-Scripts: `Assets/Prototype/Scripts/`
-Prefabs: `Assets/Prototype/Prefabs/`
-Materials: `Assets/Prototype/Materials/`
+Scene: `Assets/_Game/Scenes/Dev/Movement.unity`
+Scripts: `Assets/_Game/Scripts/{Model,View,Controller}/` — split into an MVC layout after
+this doc was written; see "Architecture (MVC)" in `Technical-Summary.md` for the map.
+Prefabs: `Assets/_Game/Prefabs/`
+Materials: `Assets/_Game/Materials/`
 
 ## Health bar bug: `Image.Type.Filled` silently ignored without a sprite
 

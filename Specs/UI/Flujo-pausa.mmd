@@ -1,0 +1,14 @@
+flowchart TD
+    EXPLORAR([03 · Durante la exploración]) -->|Esc| PAUSA["Menú de pausa"]
+    PAUSA -->|Reanudar| RETOMAR([Volver al punto anterior])
+    PAUSA -->|Diario| DIARIO["Mapa, objetivos<br/>y archivo"]
+    PAUSA -->|Configuración| AJUSTES["Ajustes y controles<br/>Dispositivos opcionales"]
+    PAUSA -->|Menú principal o Salir| CONFIRMAR{"¿Confirmar<br/>acción elegida?"}
+    DIARIO -->|Volver| VOLVER([Volver a Pausa])
+    AJUSTES -->|Volver| VOLVER
+    CONFIRMAR -->|Cancelar| VOLVER
+    CONFIRMAR -->|Confirmar| DESTINO([Ir al menú principal<br/>o cerrar el juego])
+
+    classDef default fill:#f6f8f5,stroke:#52665b,color:#182c23;
+    classDef referencia fill:#eaf1fa,stroke:#42648a,color:#203b5b;
+    class EXPLORAR,RETOMAR,VOLVER,DESTINO referencia;

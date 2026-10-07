@@ -1,0 +1,961 @@
+{
+ "version": 1,
+ "source": "Guion H01-H21 (canon), propuesta 1.0 del 2026-10-06",
+ "sequences": [
+  {
+   "id": "H01",
+   "title": "El bastón y la herencia",
+   "place": "Bacatá / prólogo",
+   "summary": "Saguanmachica guía la mano de un niño tallando jaguar y guacamaya. Corte al adulto que falla al golpear una puerta y la abre leyendo su unión. El tío entrega bastón y formación al heredero estando vivo. Dos extremos y una misma herramienta preparan máscaras y legado.",
+   "objective": "Presentar familia, ambición y bastón.",
+   "storyboard": "C01",
+   "requires": [],
+   "sets": [
+    "staff_owned"
+   ],
+   "lines": [
+    {
+     "speaker": "Saguanmachica",
+     "note": "",
+     "text": "Un extremo encuentra el suelo. El otro mira más lejos.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "niño",
+     "text": "¿Cuál debo seguir?",
+     "cue": ""
+    },
+    {
+     "speaker": "Saguanmachica",
+     "note": "",
+     "text": "Si solo escuchas uno, el bastón deja de servir.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Haré que Bacatá llegue más lejos.",
+     "cue": ""
+    },
+    {
+     "speaker": "Saguanmachica",
+     "note": "",
+     "text": "Aprende también cuándo debe detenerse.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H02",
+   "title": "Oro y plata",
+   "place": "Bacatá / visión",
+   "summary": "Tisquesusa ve metales, humo y bastón partido sin rostro. Nemequene identifica esa fuerza con Quimue y convierte su misión territorial en búsqueda. Su sobrino interrumpe antes de partir y corrige esa certeza. Breve tramo caminable hasta meditación, sin otro nivel de guerra.",
+   "objective": "Establecer visión y su interpretación equivocada.",
+   "storyboard": "C02",
+   "requires": [
+    "staff_owned"
+   ],
+   "sets": [
+    "vision_seen"
+   ],
+   "lines": [
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "Vi oro y plata sobre Bacatá. Y tu bastón entre el humo.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Quimue toma fuerza de dos mundos. Iré a detenerlo.",
+     "cue": ""
+    },
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "No vi su rostro. No conviertas mi miedo en certeza.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Buscaré una respuesta antes de marchar sobre Tunja.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H03",
+   "title": "Siete días y siete noches",
+   "place": "Meditación / Bachué",
+   "summary": "Montaje de luz y lluvia condensa la semana. Bachué aparece en cuerpo de chamana, advierte sobre amenaza exterior y da poporo y mapa. La misión concreta es liberar máscaras y restituir tránsito. Aún no concede coca ni yopo.",
+   "objective": "Recibir poporo y mapa.",
+   "storyboard": "C03 / O-N01 / O-N02",
+   "requires": [
+    "vision_seen"
+   ],
+   "sets": [
+    "poporo_owned",
+    "map_owned"
+   ],
+   "lines": [
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Tu sobrino vio una amenaza que no pertenece solo a estos caminos.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "¿Puedes apartarla de Bacatá?",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "No puedo decidir la guerra de los hombres. Sí enseñarte a restituir lo que Quimue torció.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Chía y Sué sostienen dos extremos. Sus máscaras deben responder juntas.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Volveré con ellas.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "El poporo guardará afinidades. Primero aprende a reconocerlas.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H04",
+   "title": "Plaza Núñez",
+   "place": "Plaza / llegada sur",
+   "summary": "El mapa conduce al lugar sagrado. Un murciélago y una figura ave se ven en umbrales, sin emboscada inicial. Bachué señala las tres estaciones y el círculo. La plaza es segura salvo duelos iniciados explícitamente.",
+   "objective": "Tres lecciones y práctica; orden libre.",
+   "storyboard": "C04",
+   "requires": [
+    "map_owned"
+   ],
+   "sets": [
+    "hub_active"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Dos mundos llegaron hasta el mismo patio.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Quimue abrió pasos para atraer poder, no para permitir regreso.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Examina las tres piezas. Después el círculo enseñará a decidir cuando te desafíen.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H05",
+   "title": "Manos y voz",
+   "place": "Plaza / tutorial",
+   "summary": "Vasija enseña giro horizontal, disco inclinación y figura congelación. Tres ataques y dos defensas completan el duelo. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.",
+   "objective": "Tutorial y primer portal.",
+   "storyboard": "O-P01-O-P03 / E01 / C05",
+   "requires": [
+    "hub_active"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Bachué",
+     "note": "vasija",
+     "text": "Gira para encontrar lo que el frente oculta.",
+     "cue": "vasija"
+    },
+    {
+     "speaker": "Bachué",
+     "note": "disco",
+     "text": "También hay señales debajo.",
+     "cue": "disco"
+    },
+    {
+     "speaker": "Bachué",
+     "note": "figura",
+     "text": "Mantén ambos ejes quietos.",
+     "cue": "figura"
+    },
+    {
+     "speaker": "Guardián de entrenamiento",
+     "note": "",
+     "text": "Di atacar cuando decidas. Esperaré.",
+     "cue": "duelo_inicio"
+    },
+    {
+     "speaker": "Guardián de entrenamiento",
+     "note": "",
+     "text": "Esquiva el directo. Bloquea la onda cuando abra la señal.",
+     "cue": "duelo_defensa"
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "La máscara lunar está en las raíces. Su camino debe abrir primero.",
+     "cue": "portal"
+    }
+   ]
+  },
+  {
+   "id": "H06",
+   "title": "Santuario de raíces",
+   "place": "MI01-02",
+   "summary": "El árbol seco domina la caverna. Custodio protege un apoyo y no abandona su anclaje. La semilla está en suelo alcanzable: descubrir dos caras, estabilizar y confirmar. Doble salto se ensaya antes de pinchos. Una silueta híbrida en fondo anticipa al jefe.",
+   "objective": "Semilla y ensayo seguro.",
+   "storyboard": "O-I01 / T-I02",
+   "requires": [
+    "mi_unlocked"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Custodio de Raíces",
+     "note": "",
+     "text": "Los guardianes dejaron de reconocer al que llega.",
+     "cue": "custodio"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "¿Quimue les dio esa orden?",
+     "cue": "custodio"
+    },
+    {
+     "speaker": "Custodio de Raíces",
+     "note": "",
+     "text": "Ató su voluntad. Algunos aún pueden escuchar.",
+     "cue": "custodio"
+    },
+    {
+     "speaker": "Custodio de Raíces",
+     "note": "",
+     "text": "La semilla guarda un segundo apoyo. Encuentra su unión.",
+     "cue": "semilla"
+    }
+   ]
+  },
+  {
+   "id": "H07",
+   "title": "Tres impulsos",
+   "place": "MI03-04",
+   "summary": "Brazaletes 1 antes del primer hombre-caimán; atajo desde 03. En 04 murciélago y caimán de escudo custodian encuentros separados. Semilla y brazaletes 1-2 completan tres análisis que habilitan coca en nicho del tercer par. Los tres pares quedan antes del escudo. No aparecen recursos durante el jefe sin preparación.",
+   "objective": "Impulso 1-3, coca y salida.",
+   "storyboard": "O-I02-O-I04 / O-N03 / E03-E05",
+   "requires": [
+    "mi_unlocked"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Hombre-caimán",
+     "note": "",
+     "text": "Tu bastón no da derecho a cruzar una tumba.",
+     "cue": "caiman"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Vengo a devolver un camino, no a llevarme a sus muertos.",
+     "cue": "caiman"
+    },
+    {
+     "speaker": "Hombre-murciélago",
+     "note": "",
+     "text": "La orden me arrastra. Muéstrame que puedes detenerla.",
+     "cue": "murcielago"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "tercer par",
+     "text": "Comenzar, mantener, terminar. No son tres golpes separados.",
+     "cue": "tercer_par"
+    }
+   ]
+  },
+  {
+   "id": "H08",
+   "title": "Dejar un regreso",
+   "place": "MI05-06",
+   "summary": "Después de combatir, primer paso de péndulos y derrumbe sin enemigos. Espera entre peligros; prueba aislada antes de combinación. El corredor lateral abierto deja un retorno seguro. Ofrendas opcionales aportan memoria de antiguos viajeros.",
+   "objective": "Navegación y atajo.",
+   "storyboard": "T-I05 / T-I06 / M03",
+   "requires": [
+    "mi_unlocked"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Hay un apoyo entre los péndulos.",
+     "cue": "pendulos"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "La grieta avisa antes de ceder.",
+     "cue": "derrumbe"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Quien vuelva no repetirá el derrumbe.",
+     "cue": "atajo"
+    }
+   ]
+  },
+  {
+   "id": "H09",
+   "title": "Cuerno y Chía sellada",
+   "place": "MI07-08",
+   "summary": "Murciélago en aproximación, fuera del aterrizaje. Cuerno revela canal de respuesta. En 08 abre reja y nicho lunar. Chía se registra sellada hasta cortar vínculo en 09. Eco del Custodio explica Jaguar; tocar cuerno es sonido del juego por interacción, no soplar al micrófono.",
+   "objective": "Cuerno, Chía sellada y descanso.",
+   "storyboard": "O-I05 / O-N04 / C06",
+   "requires": [
+    "mi_unlocked"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "El cuerno devuelve un sonido.",
+     "cue": "cuerno"
+    },
+    {
+     "speaker": "Custodio de Raíces",
+     "note": "",
+     "text": "Tienes su forma, pero el guardián conserva el lazo.",
+     "cue": "soporte"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Aún no puedo llevar su respuesta.",
+     "cue": "soporte"
+    },
+    {
+     "speaker": "Custodio de Raíces",
+     "note": "",
+     "text": "Cuando el lazo ceda, el jaguar sostendrá tu voluntad.",
+     "cue": "soporte"
+    }
+   ]
+  },
+  {
+   "id": "H10",
+   "title": "Caimán y murciélago",
+   "place": "MI09",
+   "summary": "El jefe extiende alas sobre cuerpo reptiliano. Barrido, onda y piedras son turnos anunciados. Después de aprender defensa, la exposición permite Jaguar. Transformación breve, acción especial y homenaje al vencer liberan Chía y retorno. No se exige forma animal para plataformas.",
+   "objective": "Liberar Chía y honrar criatura.",
+   "storyboard": "C07 / C08 / E07 / C09",
+   "requires": [
+    "chia_sealed",
+    "coca_affinity"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Guardián caimán-murciélago",
+     "note": "",
+     "text": "No puedo soltar el paso.",
+     "cue": "intro"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Cortaré lo que te obliga a retenerlo.",
+     "cue": "intro"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Jaguar.",
+     "cue": "jaguar"
+    },
+    {
+     "speaker": "Guardián caimán-murciélago",
+     "note": "liberado",
+     "text": "Chía vuelve a responder.",
+     "cue": "liberado"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Tu fuerza defendía este lugar. Que vuelva a pertenecerte.",
+     "cue": "liberado"
+    }
+   ]
+  },
+  {
+   "id": "H11",
+   "title": "Mitad del viaje",
+   "place": "Plaza / retorno lunar",
+   "summary": "Bachué custodia Chía y refleja afinidad en poporo. Entrega yopo renovable y pista de urna vacía. Sué sigue apagada. Aclara que recuperar equilibrio no equivale a conocer futuro.",
+   "objective": "Yopo y puzzle superior.",
+   "storyboard": "C10 / O-N05 / O-N06",
+   "requires": [
+    "chia_released"
+   ],
+   "sets": [
+    "chia_in_custody",
+    "guacamaya_affinity"
+   ],
+   "lines": [
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Has devuelto una respuesta. Solo una mitad.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "El guardián no era mi enemigo. Lo era el vínculo.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Conserva esa diferencia ante Quimue.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Este yopo despertará guacamaya. No se agotará en un intento.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Busca la urna sin restos. Tu cuerno puede recordar su abertura.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H12",
+   "title": "La urna vacía",
+   "place": "Plaza / ramal del portal superior",
+   "summary": "Tres urnas muestran interior. Dos conservan memorias y se devuelven sin tocar restos; una está vacía con cavidad para cuerno. El poporo proyecta el recuerdo del original conservado. Nota abre nubes. Guacamaya cruza en cinemática a MS01 y vuelve humano al aterrizar, sin exigir Alas antes de adquirirlas.",
+   "objective": "Abrir superior.",
+   "storyboard": "O-N06 / C11",
+   "requires": [
+    "guacamaya_affinity"
+   ],
+   "sets": [
+    "urn_solved",
+    "ms_unlocked",
+    "first_guacamaya_seen"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "No hay restos. El soporte espera un sonido.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "La abertura escucha el cuerno que ya conservas.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Veo dónde termina el vuelo.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H13",
+   "title": "Armaduras y rutas",
+   "place": "MS01-03-02",
+   "summary": "Hebilla de armadura sostiene Runa 1, brazal de antiguo portador sostiene Runa 2. P1-P2 conduce a 03; cóndor prueba en anexo estable tras la runa, permite volver por P2-P1. Pared conocida de 02 lleva a 04. No hay puente 03-05.",
+   "objective": "Runas, memoria de dos armaduras y cóndor.",
+   "storyboard": "O-S01 / O-S02 / E09 / T-S02",
+   "requires": [
+    "ms_unlocked"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Quien portó esto marcó ida y regreso.",
+     "cue": "hebilla"
+    },
+    {
+     "speaker": "Mujer-cóndor",
+     "note": "",
+     "text": "Alcanzar altura no basta. Conserva el regreso.",
+     "cue": "condor"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Ese será mi compromiso.",
+     "cue": "condor"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "La marca coincide con la pared del primer altar.",
+     "cue": "pared"
+    }
+   ]
+  },
+  {
+   "id": "H14",
+   "title": "Alas y vuelos",
+   "place": "MS04-06",
+   "summary": "Alas estabilizan afinidad de guacamaya para vuelo controlado; forma total ave queda en cinemáticas. Ensayo, 04-05, P3-P4 y cuatro vuelos con recuperación. Dos yopos opcionales son potencia, no combustible. Águila desafía en terraza ancha de llave tras vuelos; ningún combate durante primeros ensayos.",
+   "objective": "Alas, vuelos y águila.",
+   "storyboard": "C12 / O-S03-O-S05 / E10 / T-S06",
+   "requires": [
+    "ms_rune_2"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "El poporo dio la forma. Estas alas sostienen la dirección.",
+     "cue": "alas"
+    },
+    {
+     "speaker": "Mujer-águila",
+     "note": "",
+     "text": "¿Has visto el suelo de quienes vienen detrás?",
+     "cue": "aguila"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Dejé un camino de vuelta.",
+     "cue": "aguila"
+    },
+    {
+     "speaker": "Mujer-águila",
+     "note": "",
+     "text": "Entonces puedes continuar.",
+     "cue": "aguila"
+    }
+   ]
+  },
+  {
+   "id": "H15",
+   "title": "Último fragmento",
+   "place": "MS06-07",
+   "summary": "Tercer fragmento lleva medallón llave. Perfil se compara con cierre visto desde llegada. Reverso tiene marca forzada de dos tonos como abajo. Transporte conduce a descanso 07; llave abre sin consumirse. Voz de Quimue anticipa que sigue la resonancia.",
+   "objective": "Llave, tercer recuerdo y cierre.",
+   "storyboard": "O-S06 / C13",
+   "requires": [
+    "eagle_resolved"
+   ],
+   "sets": [
+    "quimue_echo_seen"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Esta marca también estaba junto a Chía.",
+     "cue": "placa"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "eco",
+     "text": "Dos máscaras. Un solo portador. Sigue subiendo.",
+     "cue": "eco"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "No eres la voz de este mundo.",
+     "cue": "eco"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "El fragmento conserva permiso, no obediencia.",
+     "cue": "llave"
+    }
+   ]
+  },
+  {
+   "id": "H16",
+   "title": "Dos cabezas",
+   "place": "MS08",
+   "summary": "Serpiente bicéfala ocupa arena existente. Una cabeza prepara presión física, otra pulso. Fase 2 alterna patrones ya enseñados. Elegir vínculo ofensivo y leer cabeza que anuncia. Victoria libera Sué; se inspecciona en altar fijo y se anuncia grieta de Quimue.",
+   "objective": "Sué y retorno final.",
+   "storyboard": "C14 / E08 / O-N07 / C15",
+   "requires": [
+    "ms_lock_open"
+   ],
+   "sets": [],
+   "lines": [
+    {
+     "speaker": "Serpiente",
+     "note": "cabeza A",
+     "text": "El paso permanece en el horizonte.",
+     "cue": "intro"
+    },
+    {
+     "speaker": "Serpiente",
+     "note": "cabeza B",
+     "text": "La orden lo retiene.",
+     "cue": "intro"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Ninguna cabeza debe obedecer a quien las separa.",
+     "cue": "intro"
+    },
+    {
+     "speaker": "Serpiente",
+     "note": "",
+     "text": "Sué devuelve la dirección.",
+     "cue": "liberado"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "eco",
+     "text": "Sé dónde regresará la luz.",
+     "cue": "eco"
+    }
+   ]
+  },
+  {
+   "id": "H17",
+   "title": "Quimue en el hub",
+   "place": "Plaza / círculo ampliado",
+   "summary": "Resonancia solar permite que Quimue alcance plaza por su último vínculo. Bachué custodia máscaras; él intenta tomarlas. Duelo con lectura lunar, solar y unión, uso contextual de máscaras y bastón. No roba inventario ni cambia el mapa.",
+   "objective": "Vencer antagonista.",
+   "storyboard": "C16 / E11 / C17",
+   "requires": [
+    "sue_released"
+   ],
+   "sets": [
+    "final_duel_available"
+   ],
+   "lines": [
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Reuniste lo que no pude tomar unido.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Forzaste a quienes guardaban los pasos.",
+     "cue": ""
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Tú también querías más tierra.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Por eso no me quedaré con su voluntad.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Corta el vínculo. Las máscaras sostienen tránsito, no dominio.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H18",
+   "title": "Victoria incompleta",
+   "place": "Plaza / despedida",
+   "summary": "Bachué preserva máscaras. Nemequene pide regresar y acepta defender al pueblo aunque cree cumplida gran parte de su misión. Luz repara portales, no escudo sobre Bacatá. Su mirada triste refleja límite de su favor, no información secreta.",
+   "objective": "Custodia y regreso.",
+   "storyboard": "C18",
+   "requires": [
+    "quimue_defeated"
+   ],
+   "sets": [
+    "masks_in_custody",
+    "return_home_seen"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Devuélveme a Bacatá.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Los pasos están en equilibrio. La amenaza no termina aquí.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Defenderé a los míos con lo aprendido.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "Guardaré las máscaras. Lleva bastón y conocimiento.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H19",
+   "title": "La verdadera imagen",
+   "place": "Bacatá / regreso",
+   "summary": "Mismo encuadre inicial, ahora humo. Saguanmachica herido defiende paso y muere junto al sobrino. Invasor oro/plata revela interpretación errónea. Tirador se establece antes de flecha fatal, cinemática sin HUD ni defensa ignorada.",
+   "objective": "Revelación y herida fatal.",
+   "storyboard": "C19",
+   "requires": [
+    "return_home_seen"
+   ],
+   "sets": [
+    "canonical_wound"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Tío, he vuelto.",
+     "cue": ""
+    },
+    {
+     "speaker": "Saguanmachica",
+     "note": "",
+     "text": "No dejes que se pierda el camino.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "No era Quimue.",
+     "cue": ""
+    },
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "¡Nemequene!",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H20",
+   "title": "Transmitir antes de morir",
+   "place": "Refugio de Tunja",
+   "summary": "Tisquesusa retira a su tío a refugio de territorios recuperados tras derrota de Quimue. Traslado elidido. Nemequene resume aprendizajes concretos y entrega bastón. Muere sin respawn; sobrino recibe tarea de protección, no mandato de repetir conquista.",
+   "objective": "Muerte y legado.",
+   "storyboard": "C20",
+   "requires": [
+    "canonical_wound"
+   ],
+   "sets": [
+    "nemequene_dead",
+    "tisquesusa_staff"
+   ],
+   "lines": [
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Tu visión tenía razón. Elegí el rostro equivocado.",
+     "cue": ""
+    },
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "Dime qué debo hacer.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Mira antes de nombrar al enemigo. Escucha a quienes guardan el camino.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Las máscaras están con Bachué. El bastón, contigo.",
+     "cue": ""
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "El tiempo de actuar es ahora. Protege a los que aún pueden llegar.",
+     "cue": ""
+    }
+   ]
+  },
+  {
+   "id": "H21",
+   "title": "Furachogua",
+   "place": "Iguaque / epílogo",
+   "summary": "Furachogua entrega máscaras conservadas por Bachué. Tisquesusa ya posee bastón: lo deposita y lo recibe como nuevo portador. No aparecen objetos de la nada. Decide reunir gente y escuchar, sin victoria automática ni segunda campaña. Créditos y modo de recuerdos previo a final.",
+   "objective": "Cerrar campaña.",
+   "storyboard": "C21",
+   "requires": [
+    "tisquesusa_staff"
+   ],
+   "sets": [
+    "campaign_complete"
+   ],
+   "lines": [
+    {
+     "speaker": "Furachogua",
+     "note": "",
+     "text": "Bachué conservó lo que tu tío devolvió al equilibrio.",
+     "cue": ""
+    },
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "Las máscaras no detuvieron el asedio.",
+     "cue": ""
+    },
+    {
+     "speaker": "Furachogua",
+     "note": "",
+     "text": "No deciden el futuro. Ayudan a reconocer el camino.",
+     "cue": ""
+    },
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "Llevaré su bastón sin repetir su certeza. Primero reuniré a quienes quedan.",
+     "cue": ""
+    }
+   ]
+  }
+ ],
+ "contextual": [
+  {
+   "id": "D01",
+   "speaker": "Tisquesusa",
+   "question": "¿Viste a Quimue?",
+   "answer": "Vi oro y plata. No vi un rostro.",
+   "rule": "Antes de meditar; no afirmar identidad."
+  },
+  {
+   "id": "D02",
+   "speaker": "Bachué",
+   "question": "¿Qué falta del tutorial?",
+   "answer": "La pieza que no has completado enseñará un gesto. Luego el círculo.",
+   "rule": "Enumerar solo pendientes."
+  },
+  {
+   "id": "D03",
+   "speaker": "Bachué",
+   "question": "¿Cómo llego arriba?",
+   "answer": "Primero libera Chía. El otro umbral requiere su respuesta y otra afinidad.",
+   "rule": "No yopo base antes de luna."
+  },
+  {
+   "id": "D04",
+   "speaker": "Custodio",
+   "question": "No veo la señal.",
+   "answer": "Gira hacia la hendidura. Detén ambos ejes cuando se una.",
+   "rule": "Pista gradual; no ejecutar gesto por jugador."
+  },
+  {
+   "id": "D05",
+   "speaker": "Custodio",
+   "question": "Escudo no cede.",
+   "answer": "Las tres partes del impulso están antes de su círculo.",
+   "rule": "Con nivel 3 enseñar Impulso, Uno, Dos, Tres."
+  },
+  {
+   "id": "D06",
+   "speaker": "Custodio",
+   "question": "Ya tengo Chía.",
+   "answer": "Tienes su forma. El guardián conserva el lazo.",
+   "rule": "Sin victoria no entregar; retorno temprano permitido."
+  },
+  {
+   "id": "D07",
+   "speaker": "Bachué",
+   "question": "No lo logré.",
+   "answer": "Tus hallazgos siguen allí. El diario conserva el siguiente paso.",
+   "rule": "No avanzar diálogo lunar sin máscara libre."
+  },
+  {
+   "id": "D08",
+   "speaker": "Bachué",
+   "question": "¿Cómo reconozco urna?",
+   "answer": "Mira interior. La vacía conserva soporte de cuerno.",
+   "rule": "No trivia ni dependencia de oír."
+  },
+  {
+   "id": "D09",
+   "speaker": "Cóndor",
+   "question": "¿Por qué luchabas?",
+   "answer": "Protegía una memoria. Quimue la convirtió en cierre.",
+   "rule": "Tras duelo no hostil."
+  },
+  {
+   "id": "D10",
+   "speaker": "Águila",
+   "question": "¿Qué espera arriba?",
+   "answer": "Dos voces atadas. Mira cuál cabeza anuncia el ataque.",
+   "rule": "Prepara serpiente sin revelar solución completa."
+  },
+  {
+   "id": "D11",
+   "speaker": "Bachué",
+   "question": "¿Salvarán Bacatá?",
+   "answer": "Restauran pasos. Defender al pueblo seguirá siendo tu tarea.",
+   "rule": "Antes de Quimue y despedida; nunca prometer escudo."
+  },
+  {
+   "id": "D12",
+   "speaker": "Ayuda",
+   "question": "Necesito pista.",
+   "answer": "Observa cara, busca marca, luego estabiliza.",
+   "rule": "Tres niveles a petición; tras tres intentos ofrecer, no penalizar."
+  }
+ ]
+}

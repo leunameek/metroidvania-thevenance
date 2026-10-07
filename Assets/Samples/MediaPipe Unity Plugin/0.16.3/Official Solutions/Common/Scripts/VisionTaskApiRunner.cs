@@ -31,7 +31,7 @@ namespace Mediapipe.Unity.Sample
     public override void Pause()
     {
       base.Pause();
-      ImageSourceProvider.ImageSource.Pause();
+      ImageSourceProvider.ImageSource?.Pause();
     }
 
     public override void Resume()
@@ -43,8 +43,9 @@ namespace Mediapipe.Unity.Sample
     public override void Stop()
     {
       base.Stop();
-      StopCoroutine(_coroutine);
-      ImageSourceProvider.ImageSource.Stop();
+      if (_coroutine != null) StopCoroutine(_coroutine);
+      _coroutine = null;
+      ImageSourceProvider.ImageSource?.Stop();
       taskApi?.Close();
       taskApi = null;
     }

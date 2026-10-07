@@ -1,0 +1,18 @@
+flowchart TD
+    ENTRADA([02 · Desde Nueva partida]) --> LOBBY["Recorrer el lobby<br/>Portales bloqueados"]
+    LOBBY -->|Elegir estación| OBJETO["Inspeccionar una pieza"]
+    LOBBY -->|Entrar al círculo| DUELO["Duelo de entrenamiento<br/>Reintentar defensas fallidas"]
+
+    OBJETO -->|Completar lección| REQUISITOS{"¿Tres lecciones<br/>y duelo ganado?"}
+    DUELO -->|Ganar| REQUISITOS
+    OBJETO -->|Salir| VOLVER([Volver al lobby<br/>Continuar lo pendiente])
+    DUELO -->|Cancelar| VOLVER
+    REQUISITOS -->|No| VOLVER
+    REQUISITOS -->|Sí| GUARDAR["Recordar tutorial completado"]
+    GUARDAR --> LIBRE([01 · Lobby libre<br/>Portales habilitados])
+
+    classDef default fill:#f6f8f5,stroke:#52665b,color:#182c23;
+    classDef referencia fill:#eaf1fa,stroke:#42648a,color:#203b5b;
+    classDef pendiente fill:#fff2cc,stroke:#9c6500,color:#342600;
+    class ENTRADA,VOLVER,LIBRE referencia;
+    class GUARDAR pendiente;

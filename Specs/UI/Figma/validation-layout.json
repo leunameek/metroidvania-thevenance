@@ -1,0 +1,1096 @@
+{
+  "createdNodeIds": [],
+  "mutatedNodeIds": [
+    "6:110",
+    "7:608",
+    "8:278",
+    "8:293",
+    "8:308",
+    "8:323",
+    "8:339",
+    "8:354",
+    "8:376",
+    "8:396",
+    "8:414",
+    "8:422",
+    "8:439",
+    "8:447",
+    "8:464",
+    "8:482",
+    "8:500",
+    "8:520",
+    "8:528",
+    "8:546",
+    "8:554",
+    "9:502",
+    "9:582",
+    "9:605",
+    "9:628",
+    "10:479",
+    "8:449",
+    "8:451",
+    "8:556",
+    "8:558",
+    "7:389",
+    "10:602",
+    "10:604",
+    "10:606",
+    "10:614",
+    "10:616",
+    "10:618",
+    "10:620",
+    "10:622",
+    "10:624",
+    "10:626",
+    "10:631",
+    "10:634",
+    "10:637",
+    "10:640",
+    "10:645",
+    "10:613"
+  ],
+  "progressChecks": [
+    {
+      "screen": "I03",
+      "expected": 60,
+      "width": 720,
+      "fill": 432
+    },
+    {
+      "screen": "E09",
+      "expected": 60,
+      "width": 197,
+      "fill": 118.19999694824219
+    },
+    {
+      "screen": "N01",
+      "expected": 35,
+      "width": 350,
+      "fill": 122.5
+    },
+    {
+      "screen": "N02",
+      "expected": 60,
+      "width": 350,
+      "fill": 210
+    },
+    {
+      "screen": "N03",
+      "expected": 75,
+      "width": 350,
+      "fill": 262.5
+    },
+    {
+      "screen": "N04",
+      "expected": 100,
+      "width": 350,
+      "fill": 350
+    },
+    {
+      "screen": "N05",
+      "expected": 45,
+      "width": 350,
+      "fill": 157.5
+    },
+    {
+      "screen": "N06",
+      "expected": 45,
+      "width": 350,
+      "fill": 157.5
+    },
+    {
+      "screen": "B01",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B02",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B03",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B03",
+      "expected": 60,
+      "width": 344,
+      "fill": 206.39999389648438
+    },
+    {
+      "screen": "B04",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B04",
+      "expected": 60,
+      "width": 344,
+      "fill": 206.39999389648438
+    },
+    {
+      "screen": "B05",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B06",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B07",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B08",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B08",
+      "expected": 60,
+      "width": 344,
+      "fill": 206.39999389648438
+    },
+    {
+      "screen": "B09",
+      "expected": 100,
+      "width": 177,
+      "fill": 177
+    },
+    {
+      "screen": "B09",
+      "expected": 60,
+      "width": 344,
+      "fill": 206.39999389648438
+    },
+    {
+      "screen": "D02",
+      "expected": 30,
+      "width": 632,
+      "fill": 189.60000610351562
+    },
+    {
+      "screen": "D06",
+      "expected": 33,
+      "width": 632,
+      "fill": 208.55999755859375
+    },
+    {
+      "screen": "D07",
+      "expected": 66,
+      "width": 632,
+      "fill": 417.1199951171875
+    },
+    {
+      "screen": "D08",
+      "expected": 100,
+      "width": 632,
+      "fill": 632
+    },
+    {
+      "screen": "C07",
+      "expected": 65,
+      "width": 720,
+      "fill": 468
+    }
+  ],
+  "largeChecks": [
+    {
+      "screen": "X06",
+      "id": "10:602",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X06",
+      "id": "10:604",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X06",
+      "id": "10:606",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:614",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:616",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:618",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:620",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:622",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:624",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:626",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:631",
+      "fontSize": 27,
+      "height": 80
+    },
+    {
+      "screen": "X07",
+      "id": "10:634",
+      "fontSize": 27,
+      "height": 80
+    },
+    {
+      "screen": "X07",
+      "id": "10:637",
+      "fontSize": 27,
+      "height": 80
+    },
+    {
+      "screen": "X07",
+      "id": "10:640",
+      "fontSize": 27,
+      "height": 76
+    },
+    {
+      "screen": "X07",
+      "id": "10:645",
+      "fontSize": 27,
+      "height": 76
+    }
+  ],
+  "screens": [
+    {
+      "screen": "I01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 3
+    },
+    {
+      "screen": "I02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 12
+    },
+    {
+      "screen": "I03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "I04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "I05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 11
+    },
+    {
+      "screen": "I06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 12
+    },
+    {
+      "screen": "I07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 10
+    },
+    {
+      "screen": "I08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 6
+    },
+    {
+      "screen": "A01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 13
+    },
+    {
+      "screen": "A02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 14
+    },
+    {
+      "screen": "A03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 15
+    },
+    {
+      "screen": "A04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 15
+    },
+    {
+      "screen": "A05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 13
+    },
+    {
+      "screen": "A06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 16
+    },
+    {
+      "screen": "A07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 9
+    },
+    {
+      "screen": "A08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 15
+    },
+    {
+      "screen": "A09",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 16
+    },
+    {
+      "screen": "A10",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "A11",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "E01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 0
+    },
+    {
+      "screen": "E02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 0
+    },
+    {
+      "screen": "E03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "E09",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "E10",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "N01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "N02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "N03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "N04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "N05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "N06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 3
+    },
+    {
+      "screen": "B01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "B02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "B03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "B04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "B05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "B06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "B07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "B08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "B09",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "B10",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 10
+    },
+    {
+      "screen": "J01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "J02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "J03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "J04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "J05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "J06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "J07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "D01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 6
+    },
+    {
+      "screen": "D02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 6
+    },
+    {
+      "screen": "D03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "D04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "D05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "D06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "D07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "D08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 5
+    },
+    {
+      "screen": "D09",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 4
+    },
+    {
+      "screen": "D10",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 9
+    },
+    {
+      "screen": "C01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "C02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "C03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "C04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 3
+    },
+    {
+      "screen": "C05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 3
+    },
+    {
+      "screen": "C06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "C07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "C08",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "C09",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "C10",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 9
+    },
+    {
+      "screen": "X01",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "X02",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "X03",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 2
+    },
+    {
+      "screen": "X04",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans"
+      ],
+      "instances": 0
+    },
+    {
+      "screen": "X05",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    },
+    {
+      "screen": "X06",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 3
+    },
+    {
+      "screen": "X07",
+      "w": 1280,
+      "h": 720,
+      "fonts": [
+        "Noto Serif",
+        "Noto Sans"
+      ],
+      "instances": 12
+    },
+    {
+      "screen": "X08",
+      "w": 1280,
+      "h": 800,
+      "fonts": [
+        "Noto Sans",
+        "Noto Serif"
+      ],
+      "instances": 1
+    }
+  ]
+}

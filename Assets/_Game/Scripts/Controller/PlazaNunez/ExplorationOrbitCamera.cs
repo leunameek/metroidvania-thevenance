@@ -1,0 +1,104 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+// Separate camera experiment: existing CameraFollow remains the legacy camera.
+[RequireComponent(typeof(Camera))]
+public sealed class ExplorationOrbitCamera : MonoBehaviour
+{
+    [SerializeField] private Transform target;
+    [SerializeField, Min(1f)] private float distance = 7f;
+    [SerializeField] private float pivotHeight = 1.3f;
+    [SerializeField] private float sensitivity = 0.16f;
+    [SerializeField, Min(0.01f)] private float smoothTime = 0.12f;
+    [SerializeField] private float minPitch = 15f;
+    [SerializeField] private float maxPitch = 65f;
+    [SerializeField] private LayerMask obstructionMask = 1; // Graybox geometry on Default.
+    // The player cannot turn the camera: it keeps a fixed angle behind the character.
+    [SerializeField] private bool allowPlayerOrbit;
+    private float _yaw;
+    // Fixed-angle levels that turn between rooms ease the yaw towards this (camera zones set it).
+    private float _targetYaw, _yawVelocity;
+    private float _pitch = 30f;
+    private float _currentDistance;
+    private float _distanceVelocity;
+    private bool _initialized;
+    private float _uiSensitivity = 1, _motionScale = 1;
+    private bool _invertY;
+    // Per-room framing (Mundo Inferior camera zones); 0 keeps the serialized distance and pitch.
+    private float _framingDistance, _framingPitch;
+
+    public void ConfigurePresentation(float multiplier, bool invert, float motion)
+    {
+        _uiSensitivity = Mathf.Clamp(multiplier, .25f, 2); _invertY = invert; _motionScale = Mathf.Clamp01(motion);
+    }
+
+    private void LateUpdate()
+    {
+        if (target == null) return;
+        Mouse mouse = Mouse.current;
+        bool orbiting = allowPlayerOrbit && mouse != null && mouse.rightButton.isPressed;
+        if (allowPlayerOrbit)
+        {
+            Cursor.lockState = orbiting ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = !orbiting;
+        }
+        if (orbiting)
+        {
+            Vector2 delta = mouse.delta.ReadValue();
+            _yaw += delta.x * sensitivity * _uiSensitivity;
+            _pitch = Mathf.Clamp(_pitch - delta.y * sensitivity * _uiSensitivity * (_invertY ? -1 : 1), minPitch, maxPitch);
+            _targetYaw = _yaw;
+        }
+        else if (!Mathf.Approximately(_yaw, _targetYaw))
+            _yaw = Mathf.SmoothDampAngle(_yaw, _targetYaw, ref _yawVelocity, Mathf.Max(.001f, 0.45f * _motionScale));
+
+        if (_framingPitch > 0 && !orbiting) _pitch = Mathf.MoveTowards(_pitch, _framingPitch, Time.unscaledDeltaTime * 40f);
+        float framedDistance = _framingDistance > 0 ? _framingDistance : distance;
+        Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0f);
+        Vector3 pivot = target.position + Vector3.up * pivotHeight;
+        Vector3 direction = rotation * Vector3.back;
+        float desiredDistance = framedDistance;
+        if (Physics.SphereCast(pivot, 0.25f, direction, out RaycastHit hit, framedDistance,
+            obstructionMask, QueryTriggerInteraction.Ignore))
+            desiredDistance = Mathf.Max(0.1f, hit.distance - 0.15f);
+
+        // Move inward immediately to avoid clipping; ease back out when the obstacle clears.
+        if (!_initialized || desiredDistance < _currentDistance)
+        {
+            _currentDistance = desiredDistance;
+            _distanceVelocity = 0f;
+            _initialized = true;
+        }
+        else _currentDistance = Mathf.SmoothDamp(_currentDistance, desiredDistance,
+            ref _distanceVelocity, Mathf.Max(.001f, smoothTime * _motionScale));
+        transform.SetPositionAndRotation(pivot + direction * _currentDistance, rotation);
+    }
+
+    public float Yaw => _yaw;
+
+    public void SetYaw(float yaw, bool instant = false)
+    {
+        _targetYaw = yaw;
+        if (instant) { _yaw = yaw; _yawVelocity = 0f; }
+    }
+
+    // Distance and pitch for the current room; 0 returns to the default framing.
+    public void SetFraming(float framingDistance, float pitch, bool instant = false)
+    {
+        _framingDistance = framingDistance; _framingPitch = pitch;
+        if (instant && pitch > 0) _pitch = pitch;
+        if (instant && pitch <= 0) _pitch = 30f;
+    }
+
+    public void SnapAfterTeleport()
+    {
+        _initialized = false;
+        _distanceVelocity = 0f;
+    }
+
+    private void OnDisable()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+}

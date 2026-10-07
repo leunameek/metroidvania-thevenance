@@ -1,0 +1,39 @@
+{
+  "screenCount": 80,
+  "indexId": "14:447",
+  "sections": 9,
+  "componentPage": "2:3",
+  "flows": [
+    {
+      "nodeId": "14:447",
+      "name": "Índice de los 80 wireframes"
+    },
+    {
+      "nodeId": "6:51",
+      "name": "Inicio del juego"
+    },
+    {
+      "nodeId": "7:513",
+      "name": "Exploración"
+    },
+    {
+      "nodeId": "8:367",
+      "name": "Combate de ejemplo"
+    },
+    {
+      "nodeId": "9:473",
+      "name": "Calibraciones opcionales"
+    }
+  ],
+  "fontFamilies": [
+    "Noto Sans",
+    "Noto Serif"
+  ],
+  "links": 310,
+  "edgeTypes": {
+    "ON_KEY_DOWN": 77,
+    "ON_CLICK": 227,
+    "AFTER_TIMEOUT": 6
+  },
+  "errors": []
+}

@@ -1,0 +1,9 @@
+Unity: 6000.3.21f1
+Target: StandaloneWindows64
+Build: Development
+Result: Succeeded
+Errors: 0
+UI Play Mode checks: 64 passed
+Existing Edit Mode tests: 29 passed
+Windows smoke: PASS, 0 errors
+Report source: Builds/ui-windows-build.log

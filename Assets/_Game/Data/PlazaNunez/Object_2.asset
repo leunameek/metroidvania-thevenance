@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79df25e4c9934db981242f8ab9398b0c, type: 3}
+  m_Name: Object_2
+  m_EditorClassIdentifier: Prototype.Model::AnalyzableObjectData
+  objectId: placeholder_2
+  displayName: Disco del alba
+  description: "Observa su relieve desde otro \xE1ngulo."
+  evidenceStatus: 2
+  sourceOrValidationNote: "Pieza original de ficci\xF3n creada para ense\xF1ar interacci\xF3n.
+    No es una reproducci\xF3n arqueol\xF3gica."

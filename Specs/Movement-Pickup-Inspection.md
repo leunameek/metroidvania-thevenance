@@ -1,15 +1,18 @@
 # Movement, Pickup, Inspection, Hand Tracking & Combat
 
-Spec of everything built in the `Assets/Prototype` sandbox so far: 3D movement, camera,
+Spec of everything built in the `Assets/_Game` sandbox so far: 3D movement, camera,
 ladders, ramps, the reusable pickup/inspection flow, the dash ability, MediaPipe-based
 hand-gesture control of the inspection camera, and the health/combat system (dash damage,
 3 enemy types, player/enemy health bars, respawn). Written for a future session to pick up
 context quickly — check the scene/scripts against this if anything drifted.
 
-Scene: `Assets/Prototype/Scenes/Movement.unity`
-Scripts: `Assets/Prototype/Scripts/`
-Prefabs: `Assets/Prototype/Prefabs/`
-Materials: `Assets/Prototype/Materials/`
+Scene: `Assets/_Game/Scenes/Dev/Movement.unity`
+Scripts: `Assets/_Game/Scripts/{Model,View,Controller}/` — the flat script folder was split
+into an MVC layout after this doc was written; a script named below now lives in whichever of
+those three subfolders matches its role (same filename/GUID, just moved, plus a few were split
+into a `*Model.cs` counterpart). See "Architecture (MVC)" in `Technical-Summary.md` for the map.
+Prefabs: `Assets/_Game/Prefabs/`
+Materials: `Assets/_Game/Materials/`
 Setup/run instructions for teammates (Spanish): `README.md` at repo root.
 
 Unity 6000.3.21f1, URP, new Input System only (`activeInputHandler: 1` in ProjectSettings —
@@ -81,9 +84,9 @@ fix that if it ever becomes visible, not needed for the prototype.
 
 Three-tier dash, unlocked progressively by the pickups (see below). Trigger key: **Left Shift**.
 
-- `DashTier` (0–3) on `PlayerController`, `HasDash => DashTier > 0`. `GrantDash(tier)` only
-  ever raises it (`if (tier > DashTier) DashTier = tier`) — highest tier collected wins,
-  order doesn't matter.
+- `DashTier` progresses from 0 to 3 after collecting the three pickups. Each calls
+  `GrantDashUpgrade()` and adds exactly **+1**, regardless of collection order.
+  `GrantDash(tier)` remains an absolute minimum for scene initialization, not pickup rewards.
 - A dash locks in a direction once, at the moment it starts: current WASD input if any is
   held, else `transform.forward`. The character snaps to face that direction immediately.
   For the dash's duration, this direction fully overrides normal horizontal movement (gravity
@@ -132,8 +135,11 @@ type (health, key items, lore, etc.), not just the dash ability.
   `FaceAnchor`, mouse/hand-driven object rotation, and the camera snap-back fix. In `Awake()`
   it does `_reward = GetComponent<IPickupReward>()`; `Claim()` calls `_reward?.Grant(_player)`.
   It never references dash-specific anything.
-- **`DashPickupReward.cs`** — the only dash-specific piece left: `[Range(1,3)] dashTier` and
-  `Grant()` → `player.GrantDash(dashTier)`.
+- **`DashPickupReward.cs`** — `Grant()` → `player.GrantDashUpgrade()`. Every instance adds
+  exactly one chain link; there is no configurable tier on the reward.
+
+Regression verified in Unity EditMode: all 8 `PlayerAbilityModelTests` pass, including a
+single upgrade from 0, 1 and 2 charges and a three-upgrade chain that rejects a fourth dash.
 
 **Pattern for a new pickup type:** write a small `SomethingReward : MonoBehaviour,
 IPickupReward`, drop it on a new prefab alongside `InspectablePickup` (and whatever visual you
@@ -207,16 +213,15 @@ which required standing almost inside the tiny orb — bumped up so the prompt z
 
 `UpdateInspectRotation()` checks `_handTracker != null && _handTracker.IsConnected` (a result
 arrived within the last second) — if so, uses hand deltas; otherwise falls back to
-`Mouse.current.delta`. Mapping (mirrors the mouse-drag convention: hand-down ≡ mouse-down,
-hand-right ≡ mouse-right):
+`Mouse.current.delta`. Mapping:
 
 - Right hand (open only) vertical movement → pitch, via `ConsumeRightHandDeltaY()`.
-- Left hand (open only) horizontal movement → yaw, via `ConsumeLeftHandDeltaX()`.
+- Left hand (open only) horizontal movement → yaw in the opposite direction of the tracked
+  movement, via `ConsumeLeftHandDeltaX()` with `invertHorizontal` enabled.
 - `handRotationSensitivity` (400, much larger than mouse's `rotationSensitivity` 0.3 since hand
   deltas are normalized `[0,1]` image coordinates, not raw pixels).
-- `invertVertical`/`invertHorizontal` checkboxes — **added as a safety net because the actual
-  sign/mirroring was never verified live in this session** (no webcam access while building
-  it). If gestures rotate the object backwards, flip these before touching code.
+- `invertVertical`/`invertHorizontal` checkboxes remain available per pickup. Horizontal is
+  enabled by default after live feedback; vertical remains disabled.
 
 ## Hand tracking — MediaPipe integration
 
@@ -364,15 +369,14 @@ judged too fragile to get right blind via YAML for something this fiddly.
 ## Scene placement
 
 Three pickup instances of the one `DashPickup` prefab (source guid
-`ac95da82b8c94d579b1d9b52b84156be`), tier set via a `dashTier` override per `PrefabInstance` —
-**target `fileID: 109`**, the `DashPickupReward` component (not `107`, which is now
-`InspectablePickup` and no longer has a `dashTier` field, after the reusability refactor):
+`ac95da82b8c94d579b1d9b52b84156be`). All use the same +1 reward. The obsolete fixed-tier
+overrides were removed, so reaching the farthest object first still grants only one dash.
 
-| Tier | Name in Hierarchy | Position |
+| Pickup | Name in Hierarchy | Position |
 |---|---|---|
-| 1 | Dash Pickup (Tier 1) | `(1.69, 2.51, -6.65)` — near spawn |
-| 2 | Dash Pickup (Tier 2) | `(16.52, 6.3, 7.29)` — above the platform reached by the ladder |
-| 3 | Dash Pickup (Tier 3) | `(51.57, 2.59, 7.27)` — far platform, end of the current layout |
+| 1 | Dash Pickup (+1) 1 | `(1.69, 2.51, -6.65)` — near spawn |
+| 2 | Dash Pickup (+1) 2 | `(16.52, 6.3, 7.29)` — above the platform reached by the ladder |
+| 3 | Dash Pickup (+1) 3 | `(51.57, 2.59, 7.27)` — far platform, end of the current layout |
 
 `PlayerController.faceAnchor` on the `Character` is wired to the `Face` child transform.
 
@@ -477,7 +481,7 @@ Died`: calls `PlayerController.Teleport(...)` back there, then `Health.Revive()`
 
 ### Enemy prefabs & scene placement
 
-`Assets/Prototype/Prefabs/`: `ArcherEnemy.prefab`, `MeleeEnemy.prefab`, `ShieldEnemy.prefab`,
+`Assets/_Game/Prefabs/`: `ArcherEnemy.prefab`, `MeleeEnemy.prefab`, `ShieldEnemy.prefab`,
 `Arrow.prefab` — hand-authored YAML, same fileID/GUID workflow used for `DashPickup.prefab`.
 Materials: `ArcherEnemyBody.mat` (green), `MeleeEnemyBody.mat` (dark red), `ShieldEnemyBody.mat`
 (steel grey), `ShieldVisual.mat` (glowing cyan), `Arrow.mat` (dark brown). One instance of each
@@ -497,8 +501,8 @@ registered in the scene's `SceneRoots` manifest alongside the existing pickups/`
   just set to reasonable starting values.
 - No UI/prompt currently shows "Press E to inspect" or dash-tier feedback — everything is
   silent/keyboard-only right now.
-- Hand-rotation sign/mirroring (`invertVertical`/`invertHorizontal` on `InspectablePickup`) was
-  never verified live — check first if gestures feel backwards before assuming it's a logic bug.
+- Horizontal hand rotation was inverted after live feedback. Vertical mirroring remains available
+  through `invertVertical` if later testing shows that axis feels backwards.
 - `openFingerMargin` (1.2×) is an untuned starting heuristic for open/closed detection; may need
   calibration per webcam/lighting.
 - A gesture-based alternative to the **E** key for confirming a pickup was discussed but not

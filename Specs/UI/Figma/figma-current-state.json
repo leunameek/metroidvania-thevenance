@@ -1,0 +1,128 @@
+{
+  "createdNodeIds": [
+    "2:2",
+    "2:3"
+  ],
+  "mutatedNodeIds": [
+    "0:1"
+  ],
+  "pages": {
+    "guide": "0:1",
+    "screens": "2:2",
+    "kit": "2:3"
+  },
+  "variables": {
+    "screen": "VariableID:2:13",
+    "panel": "VariableID:2:14",
+    "world": "VariableID:2:15",
+    "text": "VariableID:2:16",
+    "secondary": "VariableID:2:17",
+    "border": "VariableID:2:18",
+    "focus": "VariableID:2:19",
+    "onfocus": "VariableID:2:20",
+    "space8": "VariableID:2:21",
+    "space16": "VariableID:2:22",
+    "space24": "VariableID:2:23",
+    "space32": "VariableID:2:24",
+    "space48": "VariableID:2:25",
+    "radius": "VariableID:2:26"
+  },
+  "primitiveIds": {
+    "paper": "VariableID:2:6",
+    "world": "VariableID:2:7",
+    "surface": "VariableID:2:8",
+    "ink": "VariableID:2:9",
+    "muted": "VariableID:2:10",
+    "line": "VariableID:2:11",
+    "focus": "VariableID:2:12"
+  },
+  "collections": [
+    "VariableCollectionId:2:4",
+    "VariableCollectionId:2:5"
+  ],
+  "styles": {
+    "display": "S:ad8c15b8690570b5f4aae806267ae5eeca0f34f3,",
+    "title": "S:455f5b92dc41629396ee0a604ad3710511ffd9fc,",
+    "body": "S:483d61055609e420ed6d9eccd7236d78b2a1acd0,",
+    "label": "S:8d58eb8257891af50c349ed88bedcc366bf0b526,",
+    "note": "S:f675124e106171891c7e40aa9347d3149c983740,"
+  },
+  "counts": {
+    "collections": 2,
+    "variables": 21,
+    "styles": 5
+  },
+  "fontFamilies": [
+    "Noto Sans",
+    "Noto Serif"
+  ],
+  "components": {
+    "buttonNormal": {
+      "id": "5:6",
+      "props": {
+        "label": "Etiqueta#5:5"
+      }
+    },
+    "buttonFoco": {
+      "id": "5:8",
+      "props": {
+        "label": "Etiqueta#5:5"
+      }
+    },
+    "buttonPresionado": {
+      "id": "5:10",
+      "props": {
+        "label": "Etiqueta#5:5"
+      }
+    },
+    "buttonDesactivado": {
+      "id": "5:12",
+      "props": {
+        "label": "Etiqueta#5:5"
+      }
+    },
+    "buttonCargando": {
+      "id": "5:14",
+      "props": {
+        "label": "Etiqueta#5:5"
+      }
+    },
+    "Interruptor": {
+      "id": "5:18",
+      "props": {
+        "label": "Etiqueta#5:12",
+        "value": "Valor#5:13"
+      }
+    },
+    "Selector": {
+      "id": "5:21",
+      "props": {
+        "label": "Etiqueta#5:12",
+        "value": "Valor#5:13"
+      }
+    },
+    "Deslizador": {
+      "id": "5:24",
+      "props": {
+        "label": "Etiqueta#5:12",
+        "value": "Valor#5:13"
+      }
+    },
+    "status": {
+      "id": "5:29",
+      "props": {
+        "label": "Etiqueta#5:14"
+      }
+    },
+    "progress": {
+      "id": "5:31",
+      "props": {}
+    }
+  },
+  "sets": {
+    "WF/Botón": "5:16",
+    "control": "5:27"
+  },
+  "kitId": "5:2",
+  "fileKey": "UScmu79X81R49LLxqkB7Ir"
+}

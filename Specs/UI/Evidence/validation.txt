@@ -1,0 +1,68 @@
+Checks: 64
+Runtime errors: 0
+Editor search diagnostics: 1
+Exit: 0
+UI root and fonts loaded
+startup pauses world
+devices opt in
+keyboard enters first setup
+continue disabled without save
+screen and keyboard focus: Settings
+back returns from Settings
+screen and keyboard focus: Accessibility
+back returns from Accessibility
+screen and keyboard focus: VoiceCalibration
+back returns from VoiceCalibration
+screen and keyboard focus: HandCalibration
+back returns from HandCalibration
+screen and keyboard focus: Pause
+back returns from Pause
+screen and keyboard focus: Map
+back returns from Map
+screen and keyboard focus: Objectives
+back returns from Objectives
+screen and keyboard focus: Poporo
+back returns from Poporo
+screen and keyboard focus: Archive
+back returns from Archive
+screen and keyboard focus: Controls
+back returns from Controls
+screen and keyboard focus: Credits
+back returns from Credits
+screen and keyboard focus: Defeat
+back returns from Defeat
+screen and keyboard focus: Complete
+back returns from Complete
+settings survive reload
+Tab advances focus
+accessibility changes real combat timing
+session resumes world
+movement preserved
+repeat tutorial returns to its first instruction
+dialogue pauses gameplay
+dialogue reveals text at configured speed
+advance first reveals the current page
+dialogue restores gameplay
+automatic dialogue advances after reading time
+long subtitles paginate
+subtitle size remains independent from general text size
+subtitle pages contain at most three lines
+pause locks movement
+confirmation cancellation keeps parent paused
+inspection completes with real mouse adapter: Object_1
+inspection completes with real mouse adapter: Object_2
+inspection completes with real mouse adapter: Object_3
+three discoveries integrated
+map includes every completed discovery
+pause freezes reaction timer
+reaction opens
+reaction opens
+combat and objects unlock existing portals
+travel to world -1
+travel to world 1
+batch has honest unavailable device feedback
+async restart resets slice and resumes gameplay
+no duplicate UI after scene reload
+menu preserves the existence of a session without discoveries
+new game confirms restart even without discoveries
+no runtime errors
