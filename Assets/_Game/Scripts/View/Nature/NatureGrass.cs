@@ -10,16 +10,18 @@ public sealed class NatureGrass : MonoBehaviour
     private const float Cell = 14f;
     private Mesh _mesh;
     private Material _material;
+    private ShadowCastingMode _shadows = ShadowCastingMode.Off;
     private readonly List<(Matrix4x4[] matrices, Bounds bounds)> _batches = new List<(Matrix4x4[], Bounds)>();
 
     public int Count { get; private set; }
 
-    public static NatureGrass Create(Transform parent, string name, Mesh mesh, Material material, IList<Matrix4x4> instances)
+    public static NatureGrass Create(Transform parent, string name, Mesh mesh, Material material, IList<Matrix4x4> instances, bool shadows = false)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         var field = go.AddComponent<NatureGrass>();
         field._mesh = mesh; field._material = material;
+        if (shadows) field._shadows = ShadowCastingMode.On;
         field.Build(instances);
         return field;
     }
@@ -54,7 +56,7 @@ public sealed class NatureGrass : MonoBehaviour
         {
             var rp = new RenderParams(_material)
             {
-                worldBounds = bounds, shadowCastingMode = ShadowCastingMode.Off, receiveShadows = true, layer = gameObject.layer,
+                worldBounds = bounds, shadowCastingMode = _shadows, receiveShadows = true, layer = gameObject.layer,
             };
             Graphics.RenderMeshInstanced(rp, _mesh, 0, matrices);
         }

@@ -124,6 +124,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Start()
     {
         player.GrantDash(1);
+        PlazaGardens.Dress(transform);
         // Story: lines play only while exploring with no menu open (the UI adds its own gate).
         StoryPlayer.Listen();
         StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting && PlazaPieceInspection.Active == null);

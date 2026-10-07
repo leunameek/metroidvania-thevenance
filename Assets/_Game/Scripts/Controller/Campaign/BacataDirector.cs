@@ -38,6 +38,7 @@ public sealed class BacataDirector : MonoBehaviour
         BuildOverlay();
         _world = new GameObject("Bacata_Mundo").transform;
         BuildVillage(); BuildHill(); BuildRefuge(); BuildLagoon();
+        _forest.Build(_world);
         BuildCast();
         bool epilogue = CampaignScenes.NextBacataMode == CampaignScenes.BacataMode.Epilogue
             || CampaignProgress.Has(CampaignFlags.MasksInCustody) && !CampaignProgress.Has(CampaignFlags.CampaignComplete);
@@ -367,6 +368,7 @@ public sealed class BacataDirector : MonoBehaviour
     // ------------------------------------------------------------------ the land
 
     private NatureGround _savanna, _lagoonGround;
+    private readonly NatureTrees.Forest _forest = new NatureTrees.Forest();
 
     // The savanna of Bacatá and the meditation hill share one ground: flat where the scenes are
     // acted, a low mound under the offering stone, rolling pasture beyond the palisade and green
@@ -399,8 +401,8 @@ public sealed class BacataDirector : MonoBehaviour
         return basin + rim + hills + cerros;
     }
 
-    // Trees and bushes of the savanna (Art/Environments/Bacatá, built by BacataModelSetup); a
-    // missing model is simply left out.
+    // Trees and bushes of the savanna, grown from code (NatureTrees); a species without a
+    // generator falls back to its model (Art/Environments/Bacatá, built by BacataModelSetup).
     private static readonly string[] GroveTrees = { "Aliso", "Aliso", "Roble", "Encenillo" };
     private static readonly string[] Bushes = { "Chilco", "Mortino" };
 
@@ -602,9 +604,11 @@ public sealed class BacataDirector : MonoBehaviour
         NatureGrass.Create(_world, name, mesh, material, instances);
     }
 
-    // A tree or bush from Resources/Bacata, planted and swaying (nothing when the model is missing).
+    // A tree or bush grown from code and drawn with the others of its kind; otherwise its model
+    // from Resources/Bacata, planted and swaying (nothing when the model is missing).
     private void Plant(string key, Vector3 at, float yaw, float scale, float wind)
     {
+        if (_forest.Add(key, at - Vector3.up * .05f, yaw, scale)) return;
         var plant = Model(key, at - Vector3.up * .08f, yaw, "Bacata", scale);
         if (plant != null) NatureFoliage.Sway(plant, wind, .02f);
     }

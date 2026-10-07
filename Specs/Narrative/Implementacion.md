@@ -181,15 +181,30 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
   Sky*) con cerros verdes y picos nevados detrás de los cerros de la malla, luz ambiente de tres
   tonos, bruma del color del cielo, y un grado de color suave (tonemapping, calidez, bloom y
   viñeta). Hay tres ambientes: mañana en la sabana, humo del incendio y aire claro del páramo.
-- **Árboles y arbustos**: `BacataModelSetup` ya tiene registrados Aliso, Roble, Encenillo, Sauce,
-  ManoDeOso, Chilco, Mortino y Chusque (carpetas en `Art/Environments/Bacatá/<Nombre>`; también
-  acepta «Mano+de+oso» o «Mortiño»). Después de agregarlos, ejecutar *Nemequene > Campaña > Modelos
-  de Bacatá*: `BacataDirector` los planta en bosquecillos alrededor de la aldea, junto a las
-  casas, en la colina y en la orilla de la laguna, y los mece con el viento. Mientras falten, esos
-  lugares quedan con pasto.
+- **Árboles y arbustos** (`NatureTrees`, *Stylized Tree*): se generan por código, como el pasto.
+  Cada especie tiene su forma: aliso ovalado y alto, roble de copa ancha, encenillo de varios
+  tallos con hojas nuevas rojizas, sauce llorón de ramas colgantes, mano de oso con rosetas de hojas
+  palmeadas, chilco con flores claras, mortiño con bayas rojas y chusque de cañas en arco. Primero
+  se reparte la copa (grupos de hojas dentro de un elipsoide); luego las ramas salen del tronco hacia
+  cada sector y las ramitas llegan a cada grupo. Las normales de las hojas apuntan hacia fuera de la
+  copa, así que se sombrea como una masa suave. Hay tres variantes por especie, dibujadas con
+  instancias y con sombra; el viento mece el árbol desde el pie y las hojas tiemblan solas. Los
+  árboles altos tienen un colisionador en el tronco. Ya no hacen falta modelos: si se agrega uno en
+  `Art/Environments/Bacatá`, solo se usa para una especie que no tenga generador.
 - **Mundo Superior** (`MSGardens`): las matas grises de vegetación baja (E06) se convierten al
   cargar en canteros de pasto y flores que se mecen con el viento de las alturas. La pieza gris
   queda oculta en la escena, así que el inventario del constructor no cambia.
+- **Plaza Núñez** (`PlazaGardens`): el agua de la fuente usa el shader de la laguna (más clara,
+  con ondas finas y espuma donde caen los chorros); la tierra de las cuatro jardineras tiene pasto
+  y flores, y los árboles y arbustos se mecen. La altura y el radio de la tierra se midieron sobre
+  el modelo de la jardinera y quedan como constantes, porque su malla no se puede leer en el juego
+  compilado.
+- **Serpiente y guacamaya** (`tools/Blender/animate_creatures.py`): los cuellos de la serpiente se
+  mueven como cadenas (la onda sube de la base a la cabeza) y cada cabeza se queda de su lado, así
+  ya no se cruzan. Los ataques arman una S, se sostienen en el aviso y salen como un latigazo. La
+  guacamaya aletea de verdad: baja con el ala abierta y sube con la muñeca plegada; al volar se
+  inclina hacia delante, recoge las patas y mantiene la cabeza nivelada, y en el suelo mueve la
+  cabeza a saltos.
 
 ## Ronda de prueba del 2026-10-07
 
