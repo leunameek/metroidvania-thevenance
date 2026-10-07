@@ -211,6 +211,7 @@ public sealed class StoryPlayer : MonoBehaviour
     private void ShowLine()
     {
         var line = _current.Lines[_index];
+        if (_index > 0) GameAudio.UI(UICue.Dialogue);
         _revealed = 0;
         _view.SetLine(line.speaker, line.note, line.text);
         var actor = StoryActor.Find(line.speaker);

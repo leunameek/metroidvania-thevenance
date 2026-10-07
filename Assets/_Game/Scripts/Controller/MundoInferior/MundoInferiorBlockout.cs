@@ -77,7 +77,14 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         StoryPlayer.Listen();
         StoryPlayer.AddGate(this, () => !_paused && !_dead && MIFind.Inspecting == null && (!InFight || (_guardian != null && _guardian.Fighting)));
         EnterRoom(0);
-        MIAudio.Loop(gameObject, "ambiente_caverna", .45f, false);
+        // Cave bed (air, distant water) crossfaded from the plaza; stones settle and a bat passes
+        // far away now and then. Footsteps on wet stone.
+        GameAudio.DefaultSurface = "cueva";
+        GameAudio.Ambience(MIAudio.Folder + "ambiente_caverna", 1f, 2.5f);
+        GameAudio.StopMusic(2.5f);
+        AmbientScatter.On(gameObject)
+            .Add("Ambiente/piedra_asienta", 18f, 42f, 10f, 26f, .5f, 3f)
+            .Add("Criaturas/murcielago_chillido", 28f, 70f, 16f, 30f, .22f, 5f);
         MIProgress.Changed += OnProgress;
         if (MIProgress.FindsCount == 0) Hud.Notify("Mundo inferior", "Encuentra el santuario de raíces siguiendo el camino de piedra.", UIIcon.Objective, UIPalette.GoldLight);
     }
@@ -366,6 +373,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     {
         if (!_paused) return;
         _paused = false; Time.timeScale = 1;
+        GameAudio.UI(UICue.Close);
         Hud.ShowPause(false);
         player.SetInputLocked(false);
     }

@@ -4,6 +4,8 @@ using UnityEditor;
 using UnityEngine;
 
 // Original synthesized Foley and tonal cues. Deterministic, no external samples or downloads.
+// Since the 2026-10-06 audio revision the files hold the organic versions written by
+// tools/audio/generate_game_audio.py: existing files are only re-linked, never overwritten.
 public static class PlazaAudioBuilder
 {
     private const string Folder = "Assets/_Game/Audio/PlazaNunez";
@@ -64,6 +66,7 @@ public static class PlazaAudioBuilder
     private static AudioClip Write(string name, float seconds, bool loop, Func<float, float, float> sample)
     {
         string path = Folder + "/" + name + ".wav";
+        if (File.Exists(path)) return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
         int count = Mathf.RoundToInt(seconds * Rate);
         var random = new System.Random(4721);
         float filtered = 0;

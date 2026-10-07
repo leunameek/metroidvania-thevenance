@@ -3,6 +3,8 @@
 Usage: python tools/audio/generate_mundo_superior_audio.py [output dir]
 Writes 16-bit mono WAV files to Assets/_Game/Resources/MSAudio, read at runtime by
 MSAudio (Prototype.Runtime). Re-running regenerates every clip deterministically (fixed seed).
+After a re-run into the game folder, run `python tools/audio/generate_game_audio.py replace repair`
+(2026-10-06 audio revision: replaced cues and repaired loops, see Specs/Audio/Revision-de-audio.md).
 
 Palette of the guide (section 16): open air instead of the lower world's cavern, light stone,
 warm wood and metal, breathy flutes and hand drums. The music is written for the game and is not

@@ -147,7 +147,12 @@ public sealed class MIHud : MonoBehaviour
     }
 
     public void SetZone(string zone) { _zone.text = zone; _pauseZone.text = zone; }
-    public void SetObjective(string objective) => _objective.text = objective;
+    public void SetObjective(string objective)
+    {
+        // A new objective is heard as well as read (not the first one of the scene).
+        if (!string.IsNullOrEmpty(_objective.text) && objective != _objective.text) GameAudio.UI(UICue.Objective);
+        _objective.text = objective;
+    }
     public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "\n"); }
     public void SetHintsVisible(bool visible) { if (_hints.activeSelf != visible) _hints.SetActive(visible); }
     // Zone, objective and counters step aside while the turn duel screen uses the top band.

@@ -49,7 +49,7 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
             CharacterModels.Hide(body, core);
             _boss = CharacterModels.Spawn("JefeLagartoMurcielago", body, Vector3.zero, Quaternion.identity);
         }
-        _music = MIAudio.Loop(gameObject, "musica_guardian", .55f, false); _music.Stop();
+        _music = MIAudio.Loop(gameObject, "musica_guardian", .95f, false); _music.Stop();
         if (MIProgress.Has(MIProgress.Guardian)) { ShowDefeated(); return; }
         ResetEncounter();
     }
@@ -98,7 +98,9 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         MIProgress.SetCheckpoint(7);
         if (arenaGate != null) arenaGate.SetOpen(false);
         if (_music != null) _music.Play();
-        MIAudio.Play("guardian_despierta", 1f);
+        // C07: the caimán-murciélago wakes with a bellow and its wings (the stone stand-in rumbles).
+        if (_boss != null) GameAudio.PlayAt("Criaturas/caiman_despierta", transform.position + Vector3.up * 3f, 1f, AudioChannel.Voice, 50f);
+        else MIAudio.Play("guardian_despierta", 1f);
         _player.SetInputLocked(true);
         _player.Teleport(transform.TransformPoint(playerMark) + Vector3.up * 1.05f);
         _player.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, Vector3.up));
@@ -132,12 +134,11 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
             _sweepRight = !_sweepRight;
             var marker = _sweepRight ? sweepRight : sweepLeft;
             if (marker != null) marker.gameObject.SetActive(true);
-            MIAudio.PlayAt("guardian_carga", transform.position, .9f);
         }
-        else if (move.Id == "onda") MIAudio.PlayAt("guardian_carga", transform.position, .9f, .8f);
+        else if (move.Id == "onda") MIAudio.PlayAt("guardian_carga", transform.position, .6f, .8f);
         else if (move.Id == "piedras")
         {
-            MIAudio.PlayAt("guardian_carga", transform.position, .8f, 1.2f);
+            MIAudio.PlayAt("estalactita_aviso", transform.TransformPoint(playerMark) + Vector3.up * 6f, 1f);
             MIParticles.Burst(transform.TransformPoint(playerMark) + Vector3.up * 7f, new Color(.6f, .58f, .55f, .8f), 40, 1.5f, .14f, .8f);
         }
     }
@@ -148,7 +149,6 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
         Vector3 mark = transform.TransformPoint(playerMark);
         if (move.Id == "barrido")
         {
-            MIAudio.PlayAt("guardian_barrido", transform.position);
             MIParticles.Burst(mark + Vector3.up * .3f, new Color(.6f, .58f, .55f, .8f), 60, 4f, .16f, 1f);
             if (correct && _player != null) _player.PerformDodge(_sweepRight ? -1 : 1);
         }
@@ -157,8 +157,11 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
             MIAudio.PlayAt("guardian_golpe", transform.position);
             if (wave != null) { wave.gameObject.SetActive(true); DrawWave(6f); }
         }
-        else MIParticles.Burst(mark + Vector3.up * .4f, new Color(.6f, .58f, .55f, .9f), 80, 3f, .2f, 1.1f);
-        if (!correct) MIAudio.Play("dano", .8f);
+        else
+        {
+            MIParticles.Burst(mark + Vector3.up * .4f, new Color(.6f, .58f, .55f, .9f), 80, 3f, .2f, 1.1f);
+            MIAudio.PlayAt("estalactita_golpe", mark + Vector3.up, .8f);
+        }
         _move = null;
     }
 
@@ -166,8 +169,9 @@ public sealed class MIGuardian : MonoBehaviour, IDuelStage
     {
         _flash = 1;
         Vector3 at = core != null ? core.position : transform.position + Vector3.up * 3;
-        if (action == DuelAction.Horn) { MIAudio.Play("cuerno", .9f); return; }
-        MIAudio.PlayAt("golpe_nucleo", at);
+        // The blows, the horn and the jaguar sound from DuelAudio; the crystal core rings softly.
+        if (action == DuelAction.Horn) return;
+        MIAudio.PlayAt("golpe_nucleo", at, .35f);
         if (action == DuelAction.Jaguar)
         {
             // C08 stand-in until the jaguar model exists: a gold burst along the bond.

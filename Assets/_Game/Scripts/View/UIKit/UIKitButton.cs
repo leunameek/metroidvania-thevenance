@@ -28,12 +28,12 @@ namespace Nemequene.UI
             var element = rect.gameObject.AddComponent<LayoutElement>(); element.minHeight = element.preferredHeight = height;
             var style = rect.gameObject.AddComponent<UIKitButton>();
             style._skin = skin; style._label = text; style._button = button; style.primary = primary;
-            button.onClick.AddListener(() => { MIAudio.Play("ui_confirmar", .7f); action?.Invoke(); });
+            button.onClick.AddListener(() => { GameAudio.UI(UICue.Confirm); action?.Invoke(); });
             style.Refresh();
             return button;
         }
 
-        public void OnSelect(BaseEventData e) { _focus = true; Refresh(); MIAudio.Play("ui_foco", .35f); }
+        public void OnSelect(BaseEventData e) { _focus = true; Refresh(); GameAudio.UI(UICue.Focus); }
         public void OnDeselect(BaseEventData e) { _focus = false; Refresh(); }
         public void OnPointerEnter(PointerEventData e) { _hover = true; Refresh(); }
         public void OnPointerExit(PointerEventData e) { _hover = false; Refresh(); }

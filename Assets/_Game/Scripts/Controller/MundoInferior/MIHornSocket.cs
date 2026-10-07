@@ -22,12 +22,13 @@ public sealed class MIHornSocket : MIInteractable
         CharacterActions.Of(player)?.PlayAny(MIProgress.Has(MIProgress.Horn) ? "Button" : "Reach");
         if (!MIProgress.Has(MIProgress.Horn))
         {
-            MIAudio.Play("ui_error", .6f);
+            GameAudio.UI(UICue.Blocked);
             director?.Hud?.Notify("Reja cerrada", "Necesitas el cuerno de la cámara inferior (zona 07).", UIIcon.Lock, UIPalette.Danger);
             return;
         }
         if (!MIProgress.Set(MIProgress.HornGate)) return;
         MIAudio.Play("cuerno", 1f);
+        GameAudio.Caption("Cuerno responde");
         Refresh();
         MIParticles.Burst(transform.position + Vector3.up * 1.3f, new Color(1f, .8f, .45f), 70, 2f, .1f, -.3f);
         director?.Hud?.Notify("La reja se abre", "El cuerno queda registrado; el guardián espera al fondo.", UIIcon.Portal, UIPalette.GoldLight);

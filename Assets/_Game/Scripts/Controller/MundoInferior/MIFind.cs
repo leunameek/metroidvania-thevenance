@@ -128,10 +128,12 @@ public sealed class MIFind : MIInteractable
         }
         item.Rotate(Vector3.up, -turn.x + handYaw, Space.World);
         item.Rotate(_camera.transform.right, turn.y + handPitch, Space.World);
+        // The piece turning in the hands: a soft friction, rate-limited by the mixer.
+        if (Mathf.Abs(turn.x - handYaw) + Mathf.Abs(turn.y + handPitch) > .35f) GameAudio.Play("Foley/objeto_girar", .3f, AudioChannel.Effects, 1f, .06f, .2f, 1);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
         if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
-        else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) Close();
+        else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { GameAudio.Play("Foley/examinar_cerrar", .7f); Close(); }
         else if (natural != null && natural.ConsumeConfirm("Tomar " + displayName.ToLowerInvariant())) Confirm();
         else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();
     }

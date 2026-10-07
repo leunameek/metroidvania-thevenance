@@ -19,6 +19,10 @@ public sealed class CreatureFlight : MonoBehaviour
         if (host._actor == null) { Destroy(host.gameObject); return; }
         host._from = from; host._to = to; host._duration = duration;
         host._actor.PlayAny("Despegue", "Vuelo");
+        // Its call on take-off and its wings along the flight (Criaturas/<key>_grito, _alas).
+        string voice = "Criaturas/" + key.ToLowerInvariant();
+        GameAudio.PlayAt(voice + "_grito", from + Vector3.up, .9f, AudioChannel.Voice, 40f);
+        if (GameAudio.Has(voice + "_alas")) GameAudio.Loop(host.gameObject, voice + "_alas", .55f, true, AudioChannel.Voice, 35f);
         MIBurst.Spawn(from + Vector3.up * .6f, new Color(.95f, .45f, .25f));
     }
 

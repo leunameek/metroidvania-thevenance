@@ -56,7 +56,9 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         _player = player;
         _fighting = true;
         MundoSuperiorDirector.Instance?.BeginCombat(this, playerMark);
-        MSAudio.Play("jefe_despierta", .9f);
+        // C14: the two-headed serpent rises hissing (the stone stand-in keeps its rumble).
+        if (_serpent != null) GameAudio.PlayAt("Criaturas/serpiente_despierta", transform.position + Vector3.up * 3f, 1f, AudioChannel.Voice, 50f);
+        else MSAudio.Play("jefe_despierta", .9f);
         // C14 only on the first attempt.
         if (!StoryPlayer.Trigger(StoryTriggers.Duel("E08", "intro"), StartDuel)) StartDuel();
     }
@@ -98,7 +100,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         _move = move; _moveTime = 0;
         Trigger("Attack");
-        MSAudio.Play("jefe_aviso", .85f, move.Id == "barrido" ? 1.1f : move.Id == "pulso" ? 1.25f : 1f);
+        if (_serpent == null) MSAudio.Play("jefe_aviso", .5f, move.Id == "barrido" ? 1.1f : move.Id == "pulso" ? 1.25f : 1f);
     }
 
     public void OnResolved(DuelMove move, bool correct)
@@ -106,16 +108,14 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (move.Id == "fragmentos")
             for (int i = 0; i < fragments.Length && i < 2; i++)
                 if (fragments[i] != null && playerMark != null) fragments[i].position = playerMark.position + new Vector3(i == 0 ? -1.4f : 1.4f, .4f, i == 0 ? .6f : -.6f);
-        MSAudio.Play("jefe_golpe", .85f);
-        if (correct) MSAudio.Play(move.Id == "barrido" ? "defensa_esquiva" : "defensa_bloqueo", .9f);
-        else MSAudio.Play("defensa_fallida", .8f);
+        if (move.Id == "fragmentos") MSAudio.Play("jefe_golpe", .6f); // the falling stone fragments
         if (correct && move.Id == "barrido" && _player != null) _player.PerformDodge(move.Origin == DuelTarget.HeadA ? 1 : -1);
         _move = null;
     }
 
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
     {
-        MSAudio.Play("golpe_nucleo", .9f);
+        MSAudio.Play("golpe_nucleo", .3f); // the core rings under the blow DuelAudio plays
         Vector3 at = target == DuelTarget.HeadA && leftArm != null ? leftArm.position
             : target == DuelTarget.HeadB && rightArm != null ? rightArm.position
             : core != null ? core.transform.position : transform.position + Vector3.up * 4;

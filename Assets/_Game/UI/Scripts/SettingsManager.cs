@@ -13,6 +13,9 @@ namespace Nemequene.UI
         public bool dialogueAuto, dialogueInstant = true;
         public float dialogueSpeed = 30;
         public float menuMusic = .3f;
+        // 2026-10-06 audio revision: one music slider for the whole game and one for voices
+        // (creatures and characters); menuMusic stays only to migrate older saves.
+        public float music = .6f, voices = .8f;
         public float textScale = 1, subtitleScale = 1, subtitleOpacity = .9f, master = .8f, effects = .7f, ambience = .35f, uiVolume = .3f;
         public float cameraSensitivity = 1, cameraMotion = 1, flashIntensity = .3f, noticeSeconds = 6;
         public float reactionScale = 1, handSensitivity = 1, handSmoothing = .12f, dwellSeconds = 1, handDeadZone = .015f, inputGain = 1;
@@ -26,7 +29,7 @@ namespace Nemequene.UI
         public void Clamp()
         {
             textScale = Mathf.Clamp(textScale, 1, 1.5f); subtitleScale = Mathf.Clamp(subtitleScale, 1, 1.5f);
-            master = Mathf.Clamp01(master); effects = Mathf.Clamp01(effects); ambience = Mathf.Clamp01(ambience); uiVolume = Mathf.Clamp01(uiVolume);
+            master = Mathf.Clamp01(master); music = Mathf.Clamp01(music); voices = Mathf.Clamp01(voices); effects = Mathf.Clamp01(effects); ambience = Mathf.Clamp01(ambience); uiVolume = Mathf.Clamp01(uiVolume);
             subtitleOpacity = Mathf.Clamp(subtitleOpacity, .35f, 1); reactionScale = Mathf.Clamp(reactionScale, 1, 3);
             cameraSensitivity = Mathf.Clamp(cameraSensitivity, .25f, 2); cameraMotion = Mathf.Clamp01(cameraMotion);
             flashIntensity = Mathf.Clamp01(flashIntensity); handSensitivity = Mathf.Clamp(handSensitivity, .5f, 2);
@@ -50,6 +53,8 @@ namespace Nemequene.UI
             catch (Exception) { Values = null; }
             if (Values == null || Values.version != 1) Values = new UISettings();
             else if (!json.Contains("\"menuMusic\"")) Values.menuMusic=.3f;
+            if (Values != null && !string.IsNullOrEmpty(json) && !json.Contains("\"music\"")) Values.music = Mathf.Clamp01(Values.menuMusic * 2f);
+            if (Values != null && !string.IsNullOrEmpty(json) && !json.Contains("\"voices\"")) Values.voices = .8f;
             // 2026-10-06: the game is voice-first. Older settings switch the voice on once and
             // listen without holding Ctrl; the player can change both again in Ajustes.
             if (!string.IsNullOrEmpty(json) && !json.Contains("\"voiceDefaults\""))
@@ -63,6 +68,11 @@ namespace Nemequene.UI
         {
             Values.Clamp();
             AudioListener.volume = Values.master;
+            GameAudio.SetMix(new AudioMixSettings
+            {
+                master = Values.master, effects = Values.effects, ambience = Values.ambience, uiVolume = Values.uiVolume,
+                music = Values.music, voices = Values.voices, menuMusic = Values.menuMusic, soundCaptions = Values.soundCaptions,
+            });
             if (Values.quality >= 0) QualitySettings.SetQualityLevel(Mathf.Clamp(Values.quality, 0, QualitySettings.names.Length - 1));
             QualitySettings.vSyncCount = Values.vSync ? 1 : 0;
             Application.targetFrameRate = Values.frameLimit;

@@ -3,6 +3,8 @@
 Usage: python tools/audio/generate_mundo_inferior_audio.py
 Writes 16-bit mono WAV files to Assets/_Game/Resources/MIAudio, read at runtime by
 MIAudio (Prototype.Runtime). Re-running regenerates every clip deterministically (fixed seed).
+After a re-run into the game folder, run `python tools/audio/generate_game_audio.py replace repair`
+(2026-10-06 audio revision: replaced cues and repaired loops, see Specs/Audio/Revision-de-audio.md).
 """
 import os
 import wave

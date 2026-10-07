@@ -59,9 +59,6 @@ namespace Nemequene.UI
         private int _backFrame = -1;
         private RenderPipelineAsset _originalQualityPipeline;
         private UniversalRenderPipelineAsset _pipeline;
-        private AudioSource _sound;
-        private float _lastSound;
-        private AudioClip _click;
         private float _sessionStartedAt, _previousPlaySeconds, _nextAutoSave;
         private string _lastSavedProgress;
 
@@ -107,8 +104,6 @@ namespace Nemequene.UI
                 var events = new GameObject("UI_EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
                 events.transform.SetParent(transform, false); events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             }
-            _sound = gameObject.AddComponent<AudioSource>(); _sound.playOnAwake = false; _sound.ignoreListenerPause = true;
-            _click = Resources.Load<AudioClip>("Nemequene/UI_Select");
             _originalQualityPipeline = QualitySettings.renderPipeline;
             if (GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset source)
             { _pipeline = Instantiate(source); QualitySettings.renderPipeline = _pipeline; }
@@ -197,8 +192,12 @@ namespace Nemequene.UI
             _pipeline.msaaSampleCount = aa == 4 ? 4 : aa == 2 ? 2 : 1;
             _pipeline.shadowDistance = shadows ? 60 : 0;
         }
+        private UIScreen _lastScreen = UIScreen.None;
         private void OnScreen(UIScreen screen)
         {
+            // A menu opens over the game, closes back to it, or one menu leads to another.
+            GameAudio.UI(screen == UIScreen.None ? UICue.Close : _lastScreen == UIScreen.None ? UICue.Open : UICue.Tab);
+            _lastScreen = screen;
             _backFrame = Time.frameCount; RefreshPause(); _hud.Refresh(); _menu.Refresh(screen);
             Settings.Flush();
             _calibration?.OnScreen(screen); Voice?.OnScreen(screen);
@@ -302,12 +301,9 @@ namespace Nemequene.UI
             if (_priorFocus != null && _priorFocus.activeInHierarchy) EventSystem.current?.SetSelectedGameObject(_priorFocus);
             else Screens.SelectDefault();
         }
-        public void Sound(PlazaSound cue)
-        {
-            if (_sound == null || _click == null || Time.unscaledTime - _lastSound < .12f) return;
-            _lastSound = Time.unscaledTime; _sound.pitch = cue == PlazaSound.Inspect ? 1 : .9f;
-            _sound.PlayOneShot(_click, Settings.Values.uiVolume);
-        }
+        public void Sound(UICue cue) => GameAudio.UI(cue);
+        // Kept for older callers: the inspect cue confirms, the rotate cue is a lighter press.
+        public void Sound(PlazaSound cue) => GameAudio.UI(cue == PlazaSound.Inspect ? UICue.Confirm : UICue.Focus);
         public void ReturnToMenu()
         {
             SaveCurrent();

@@ -35,9 +35,10 @@ namespace Nemequene.UI
             f.Button(groups[0], UIStrings.Get("restart"), () => ui.Confirm("confirm.restart", () => ui.Loading.Restart()));
             menu.Link(groups[0], "credits", UIScreen.Credits);
             Slider(groups[1], "audio.master", 0, 1, () => S.master, v => S.master = v);
-            Slider(groups[1], "title.music", 0, 1, () => S.menuMusic, v => S.menuMusic = v);
+            Slider(groups[1], "audio.music", 0, 1, () => S.music, v => S.music = v);
             Slider(groups[1], "audio.effects", 0, 1, () => S.effects, v => S.effects = v);
             Slider(groups[1], "audio.ambience", 0, 1, () => S.ambience, v => S.ambience = v);
+            Slider(groups[1], "audio.voices", 0, 1, () => S.voices, v => S.voices = v);
             Slider(groups[1], "audio.ui", 0, 1, () => S.uiVolume, v => S.uiVolume = v);
             int[] widths = {1280,1920,2560,1920}; int[] heights = {720,1080,1440,1200}; int resolution = 1;
             f.Choice(groups[2], "graphics.resolution", new[] {"1280 × 720", "1920 × 1080", "2560 × 1440", "1920 × 1200"}, () => resolution, v => resolution = v);

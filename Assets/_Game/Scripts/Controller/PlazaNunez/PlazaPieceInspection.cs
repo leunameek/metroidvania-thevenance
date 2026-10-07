@@ -163,7 +163,7 @@ public sealed class PlazaPieceInspection : MonoBehaviour
 
     public void Back()
     {
-        _demo.Audio?.Play(PlazaSound.Inspect);
+        GameAudio.Play("Foley/examinar_cerrar", .8f);
         Close();
     }
 

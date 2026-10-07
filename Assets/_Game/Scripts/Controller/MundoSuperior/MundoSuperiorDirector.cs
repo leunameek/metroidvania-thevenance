@@ -80,6 +80,10 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         Natural.AddPauseEntries(Hud);
         ReactionMultiplier = Natural.ReactionScale;
         MSAudio.ReadSettings();
+        GameAudio.DefaultSurface = "piedra";
+        // The plaza's bed and music fade out (unclaimed); this world keeps its own layered loops.
+        GameAudio.StopAmbience(2f); GameAudio.StopMusic(2f);
+        AmbientScatter.On(gameObject).Add("Ambiente/ave_lejana", 30f, 65f, 25f, 45f, .3f, 14f);
         _wind = MSAudio.Loop(gameObject, "viento_alturas", .8f, false, MSAudio.Channel.Ambience);
         _music = MSAudio.Loop(gameObject, "musica_exploracion", .7f, false, MSAudio.Channel.Music);
         _drums = MSAudio.Loop(gameObject, "musica_percusion", 0f, false, MSAudio.Channel.Music);
@@ -313,11 +317,12 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         _musicWeight = Mathf.MoveTowards(_musicWeight, _inCombat ? 0f : 1f, step);
         _drumWeight = Mathf.MoveTowards(_drumWeight, _inCombat ? 0f : drums, step);
         _bossWeight = Mathf.MoveTowards(_bossWeight, _inCombat ? 1f : 0f, step);
-        float pause = _paused ? .45f : 1f;
-        MSAudio.SetLoopVolume(_music, .7f * _musicWeight * pause);
-        MSAudio.SetLoopVolume(_drums, .65f * _drumWeight * pause);
-        MSAudio.SetLoopVolume(_bossMusic, .8f * _bossWeight * pause);
-        MSAudio.SetLoopVolume(_wind, _paused ? .45f : .8f);
+        const float pause = 1f; // GameAudioHost applies the pause mix to music and wind
+        // Levels matched to the other worlds' music (about -26 dB RMS at default settings).
+        MSAudio.SetLoopVolume(_music, .45f * _musicWeight * pause);
+        MSAudio.SetLoopVolume(_drums, .45f * _drumWeight * pause);
+        MSAudio.SetLoopVolume(_bossMusic, .6f * _bossWeight * pause);
+        MSAudio.SetLoopVolume(_wind, .8f);
     }
 
     // ------------------------------------------------------------------ combat (guide 7.3)
@@ -414,6 +419,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
     {
         if (!_paused) return;
         _paused = false; Time.timeScale = 1;
+        GameAudio.UI(UICue.Close);
         Hud.ShowPause(false);
         MSAudio.ReadSettings(); // the pause menu may have changed the volumes
         MSAudio.PauseActions(false);

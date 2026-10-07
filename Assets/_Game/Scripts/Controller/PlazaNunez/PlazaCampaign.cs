@@ -121,8 +121,7 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             _demo.SetStatus("Quimue te supera esta vez. Tus máscaras siguen a salvo: vuelve al círculo cuando estés listo.");
             return;
         }
-        CampaignProgress.Set(CampaignFlags.QuimueDefeated);
-        _demo.Audio?.Play(PlazaSound.Complete);
+        CampaignProgress.Set(CampaignFlags.QuimueDefeated); // DuelAudio plays the broken resonance and the release
         _demo.SetStatus("Los lazos de luna y sol se apagan. Habla con Bachué.");
     }
 
@@ -135,7 +134,6 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     public void OnResolved(DuelMove move, bool correct)
     {
         if (_quimueLight != null) _quimueLight.intensity = 2.5f;
-        _demo.Audio?.Play(correct ? PlazaSound.Complete : PlazaSound.Inspect);
     }
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
     {
@@ -226,7 +224,7 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         if (index != EmptyUrn)
         {
             _demo.SetStatus("Aquí permanece una memoria. La devuelves intacta; busca la urna sin restos.");
-            _demo.Audio?.Play(PlazaSound.Inspect);
+            GameAudio.Play("Foley/objeto_soltar", .8f);
             return;
         }
         // The poporo projects the memory of the horn into the empty support; the clouds open and

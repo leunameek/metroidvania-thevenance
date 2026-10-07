@@ -250,7 +250,10 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (NearbyPortal != null)
         {
             if (!NearbyPortal.Available)
+            {
                 Status = NearbyPortal.LockedReason;
+                GameAudio.UI(UICue.Blocked);
+            }
             else Travel(NearbyPortal);
             return;
         }
@@ -339,6 +342,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
             foreach (var renderer in _hiddenPlayerRenderers) if (renderer != null) renderer.enabled = true;
         _hiddenPlayerRenderers = null;
         _inspection.EndInspect();
+        GameAudio.Play("Foley/examinar_cerrar", .8f);
         SetExploration();
     }
     public void SetCombat()
