@@ -226,6 +226,21 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
   el controlador del jugador las muertes ya no vuelven a estar de pie. Nemequene sigue acostado
   sobre la estera en el refugio.
 
+## Compilar el juego (Windows)
+
+- *Nemequene > Compilar > Windows* (o `-executeMethod GameBuild.Windows` en modo batch) compila
+  las escenas activas de *Build Settings* en `Builds/Windows/ElAsedioDeBacata.exe`. `Builds/` no se
+  versiona.
+- Varios materiales se crean en tiempo de ejecución, y Unity solo incluye en el build los shaders
+  y variantes que usa algún material guardado. Por eso existen las plantillas de
+  `Resources/ShaderKeep`, que no se deben borrar:
+  - URP Unlit opaco y transparente: guía de encaje, marcas de aviso, velo del pasaje, dardos.
+  - Pasto y árboles con instancias.
+- En *Graphics Settings*, la niebla se conserva en todos sus modos: la de Bacatá (exponencial al
+  cuadrado) se activa por código y ninguna escena la tiene guardada.
+- El menú de capítulos (F9) solo existe en el editor y en builds de desarrollo; en el build normal
+  no aparece.
+
 ## Sustituir las figuras provisionales
 
 - Personas en la escena de Bacatá: asignar el prefab en el `BacataDirector` (o volver a ejecutar
