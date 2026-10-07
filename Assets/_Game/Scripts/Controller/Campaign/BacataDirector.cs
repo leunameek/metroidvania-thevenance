@@ -8,8 +8,9 @@ using UnityEngine.UI;
 
 // Prologue (H01-H03 / C01-C03) and epilogue (H19-H21 / C19-C21) of the campaign, staged as
 // cinematics in four places built at runtime: Bacatá, the meditation hill, the refuge of Tunja and
-// the lagoon of Iguaque. The places use the models of Resources/Bacata (BacataModelSetup) and keep
-// a block where one is missing; the staff, the poporo, the bow and the arrow are Resources/Props. Fixed camera shots, the story camera frames whoever speaks, fades between
+// the lagoon of Iguaque. The open places stand on painted ground with instanced grass, swaying
+// plants, still water and the Andean sky (Scripts/View/Nature). The places use the models of
+// Resources/Bacata (BacataModelSetup) and keep a block where one is missing; the staff, the poporo, the bow and the arrow are Resources/Props. Fixed camera shots, the story camera frames whoever speaks, fades between
 // places. Characters are provisional figures until their rigged models exist (prefab fields here or
 // Resources/Characters/<Name>). The death is cinematic: no HUD, no command heard, no respawn.
 public sealed class BacataDirector : MonoBehaviour
@@ -48,7 +49,7 @@ public sealed class BacataDirector : MonoBehaviour
 
     private IEnumerator Prologue()
     {
-        SetSky(false);
+        SetSky(NatureAtmosphere.Morning);
         // Morning in Bacatá: wind, leaves, birds; the staff's wooden motif.
         Sound("amb_bacata_manana", "musica_bacata_prologo", .8f);
         AmbientScatter.On(gameObject).Add("Ambiente/ave_canto", 5f, 12f, 8f, 20f, .45f, 5f);
@@ -100,7 +101,7 @@ public sealed class BacataDirector : MonoBehaviour
 
     private IEnumerator Epilogue()
     {
-        SetSky(true);
+        SetSky(NatureAtmosphere.Smoke);
         // C19: the same path in smoke: fire, wind, distant voices; a tense drum.
         Sound("amb_bacata_incendio", "musica_bacata_epilogo", .8f);
         AmbientScatter.On(gameObject).Add("Ambiente/fuego_chasquido", 1.5f, 4f, 4f, 12f, .5f, 1f);
@@ -150,12 +151,12 @@ public sealed class BacataDirector : MonoBehaviour
         GameAudio.Stinger("Musica/estinger_objetivo", .7f);
         yield return Cut("Iguaque");
         Hide(_nemequene);
-        SetSky(false);
+        SetSky(NatureAtmosphere.Paramo);
         // C21: water and wind at the lagoon; the resolved motif.
         Sound("amb_laguna", "musica_legado", .85f);
         Destroy(hearth);
         AmbientScatter.On(gameObject).Add("Ambiente/ave_canto", 6f, 14f, 10f, 24f, .35f, 4f);
-        Place(_tisquesusa, Lagoon + new Vector3(0, 0, -15.5f), Lagoon + new Vector3(0, 0, -8));
+        Place(_tisquesusa, _lagoonGround.On(Lagoon + new Vector3(0, 0, -15.5f)), Lagoon + new Vector3(0, 0, -8));
         if (heirStaff != null) Attach(heirStaff, _tisquesusa, true);
         Place(_furachogua, Lagoon + new Vector3(0, -1.6f, -11), Lagoon + new Vector3(0, 0, -15.5f));
         Shot(Lagoon + new Vector3(5.5f, 2.6f, -20f), Lagoon + new Vector3(0, 1f, -12.5f));
@@ -263,7 +264,7 @@ public sealed class BacataDirector : MonoBehaviour
             }
             yield return null;
         }
-        sun.transform.rotation = rest; sun.color = color; sun.intensity = 1.1f;
+        sun.transform.rotation = rest; sun.color = color; sun.intensity = _sunIntensity;
     }
 
     private int _dayPhase = -1;
@@ -290,15 +291,16 @@ public sealed class BacataDirector : MonoBehaviour
         Destroy(host);
     }
 
-    private void SetSky(bool smoke)
+    // Sky, haze, light and grade of the place (morning savanna, burning village, clear páramo).
+    private void SetSky(NatureAtmosphere.Look look)
     {
-        RenderSettings.fog = true;
-        RenderSettings.fogColor = smoke ? new Color(.32f, .25f, .22f) : new Color(.7f, .78f, .82f);
-        RenderSettings.fogDensity = smoke ? .03f : .006f;
-        RenderSettings.ambientLight = smoke ? new Color(.35f, .25f, .22f) : new Color(.55f, .58f, .6f);
-        if (_camera != null) { _camera.clearFlags = CameraClearFlags.SolidColor; _camera.backgroundColor = RenderSettings.fogColor; }
-        if (sun != null) { sun.color = smoke ? new Color(1f, .55f, .35f) : new Color(1f, .96f, .88f); sun.intensity = smoke ? .7f : 1.1f; }
+        // Morning sun from behind the cameras' right: faces lit, long soft shadows to the left.
+        if (sun != null) sun.transform.rotation = Quaternion.Euler(38, -55, 0);
+        NatureAtmosphere.Apply(look, sun, _camera);
+        _sunIntensity = look.SunIntensity;
     }
+
+    private float _sunIntensity = 1.3f;
 
     // ------------------------------------------------------------------ overlay
 
@@ -362,10 +364,64 @@ public sealed class BacataDirector : MonoBehaviour
         return part;
     }
 
+    // ------------------------------------------------------------------ the land
+
+    private NatureGround _savanna, _lagoonGround;
+
+    // The savanna of Bacatá and the meditation hill share one ground: flat where the scenes are
+    // acted, a low mound under the offering stone, rolling pasture beyond the palisade and green
+    // cerros closing the horizon (the procedural sky adds the far ranges behind them).
+    private static float SavannaHeight(float x, float z)
+    {
+        float village = Vector2.Distance(new Vector2(x, z), new Vector2(Village.x, Village.z + 8));
+        float hill = Vector2.Distance(new Vector2(x, z), new Vector2(Hill.x, Hill.z));
+        float centre = Vector2.Distance(new Vector2(x, z), new Vector2(15, 20));
+        float flat = Mathf.Max(1 - NatureGround.Smooth(26, 58, village), 1 - NatureGround.Smooth(13, 30, hill));
+        float rolling = NatureGround.Rolling(x, z, .016f, 3.1f) * 12f - 2f;
+        float mound = .8f * (1 - NatureGround.Smooth(4.5f, 13f, hill));
+        float cerros = NatureGround.Smooth(95, 175, centre) * (14 + NatureGround.Rolling(x, z, .009f, 7.7f) * 34);
+        return mound + (1 - flat) * rolling + cerros;
+    }
+
+    // Iguaque: a still basin in the páramo, a low rim of mud and stones, hills rising behind the
+    // water (north, where the shot looks) and high cerros all around.
+    private const float LagoonHalfX = 16.5f, LagoonHalfZ = 13f, LagoonLevel = -.05f;
+    private static float LagoonHeight(float x, float z)
+    {
+        float lx = x - Lagoon.x, lz = z - Lagoon.z;
+        float e = Mathf.Sqrt(lx * lx / (LagoonHalfX * LagoonHalfX) + lz * lz / (LagoonHalfZ * LagoonHalfZ));
+        float basin = e < 1 ? -2.4f * Mathf.Pow(1 - e * e, .6f) : 0;
+        float rim = .1f * NatureGround.Smooth(1, 1.35f, e);
+        float d = Mathf.Sqrt(lx * lx + lz * lz);
+        float north = Mathf.Clamp01(lz / Mathf.Max(d, 1f) * .5f + .5f);
+        float hills = NatureGround.Smooth(26, 80, d) * (NatureGround.Rolling(x, z, .02f, 11f) * 12 + 4) * (.35f + .65f * north);
+        float cerros = NatureGround.Smooth(90, 170, d) * (20 + NatureGround.Rolling(x, z, .008f, 4.2f) * 40);
+        return basin + rim + hills + cerros;
+    }
+
+    // Trees and bushes of the savanna (Art/Environments/Bacatá, built by BacataModelSetup); a
+    // missing model is simply left out.
+    private static readonly string[] GroveTrees = { "Aliso", "Aliso", "Roble", "Encenillo" };
+    private static readonly string[] Bushes = { "Chilco", "Mortino" };
+
     private void BuildVillage()
     {
-        Block(PrimitiveType.Plane, Village + new Vector3(0, 0, 10), new Vector3(14, 1, 14), new Color(.42f, .45f, .28f));
-        Block(PrimitiveType.Cube, Village + new Vector3(0, .02f, 4), new Vector3(3, .04f, 26), new Color(.55f, .45f, .32f)); // path
+        _savanna = new NatureGround(SavannaHeight);
+        var g = _savanna;
+        // The path through the village to the zipa's door, the trail to the hill and its climb.
+        g.Path(Village + new Vector3(0, 0, -14), Village + new Vector3(0, 0, 17), 2.6f);
+        g.Path(Village + new Vector3(1, 0, 1), Village + new Vector3(14, 0, 4), 1.4f, .75f);
+        g.Path(Village + new Vector3(14, 0, 4), Hill + new Vector3(0, 0, -11), 1.4f, .75f);
+        g.Path(Hill + new Vector3(0, 0, -11), Hill + new Vector3(0, 0, -1), 1.5f, .9f);
+        g.Path(Village + new Vector3(-1, 0, 4), Village + new Vector3(-12, 0, 4), 1.3f, .7f);
+        g.Clearing(Village + new Vector3(0, 0, 13), 7.5f);
+        g.Clearing(Village + new Vector3(-14, 0, 4), 6.2f, .9f);
+        g.Clearing(Hill, 2.4f, .55f);
+        g.Bare(Village + new Vector3(0, 0, 21), 6.5f);
+        var houses = new[] { new Vector3(9, 0, 6), new Vector3(12, 0, 15), new Vector3(-9, 0, 15), new Vector3(-20, 0, 12), new Vector3(16, 0, -2), new Vector3(-6, 0, -6), new Vector3(7, 0, -9) };
+        foreach (var h in houses) { g.Clearing(Village + h, 3.8f, .75f); g.Bare(Village + h, 2.8f); }
+        g.Build(_world, "Sabana", new Vector3(15, 0, 20), 190f, NatureKit.Savanna);
+
         // The zipa's enclosure with its door toward the path (C01).
         if (Model("CasaZipa", Village + new Vector3(0, 0, 21), 180) == null)
         {
@@ -382,7 +438,6 @@ public sealed class BacataDirector : MonoBehaviour
                 Block(PrimitiveType.Cube, at + Vector3.up * .45f, new Vector3(.9f, .9f, .9f), new Color(.5f, .5f, .48f));
         }
         // Round houses with thatched roofs, their doors toward the path; smoke rises from them in the epilogue.
-        var houses = new[] { new Vector3(9, 0, 6), new Vector3(12, 0, 15), new Vector3(-9, 0, 15), new Vector3(-20, 0, 12), new Vector3(16, 0, -2), new Vector3(-6, 0, -6), new Vector3(7, 0, -9) };
         for (int i = 0; i < houses.Length; i++)
         {
             Vector3 at = Village + houses[i];
@@ -401,30 +456,59 @@ public sealed class BacataDirector : MonoBehaviour
             {
                 float a = Mathf.Lerp(-20f, 200f, i / 39f) * Mathf.Deg2Rad;
                 Vector3 at = Village + new Vector3(Mathf.Cos(a) * 27, 0, 8 + Mathf.Sin(a) * 27);
-                Model("Empalizada", at, -Mathf.Rad2Deg * a);
+                Model("Empalizada", g.On(at), -Mathf.Rad2Deg * a);
             }
-        for (int i = 0; i < 14; i++)
+
+        // Pasture all around, thinning out with distance (the painted ground carries on beyond),
+        // and wild flowers among it.
+        var centre = Village + new Vector3(0, 0, 8);
+        float Meadow(float x, float z) => g.Grassy(x, z) && Vector2.Distance(new Vector2(x, z), new Vector2(Hill.x, Hill.z)) > 19
+            ? 1 - NatureGround.Smooth(30, 48, Vector2.Distance(new Vector2(x, z), new Vector2(centre.x, centre.z))) * .8f : 0;
+        Grass("Pasto", NatureKit.Clump(8, .2f, .46f, .2f, .065f, 11), NatureKit.Savanna,
+            NatureGrass.Scatter(centre, 48, .52f, Meadow, g.Height, new Vector2(.8f, 1.35f), 101), .38f);
+        Grass("Flores", NatureKit.Flowers(4, .18f, .34f, .25f, .045f, 12), NatureKit.Savanna,
+            NatureGrass.Scatter(centre, 40, 1.5f, (x, z) => Meadow(x, z) * .4f, g.Height, new Vector2(.8f, 1.2f), 102), .3f);
+
+        // Groves of alisos and robles on the pasture beyond the palisade, bushes along the houses.
+        var random = new System.Random(7);
+        float R() => (float)random.NextDouble();
+        for (int i = 0; i < 46; i++)
         {
-            float a = i * Mathf.PI * 2 / 14;
-            Block(PrimitiveType.Sphere, Village + new Vector3(Mathf.Cos(a) * 48, 6, 10 + Mathf.Sin(a) * 48), new Vector3(22, 14, 22), new Color(.3f, .38f, .26f));
+            float a = R() * Mathf.PI * 2, r = 31 + R() * 42;
+            var at = centre + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
+            if (Vector3.Distance(at, Hill) < 17 || g.Dirt(at.x, at.z) > .1f) continue;
+            Plant(GroveTrees[i % GroveTrees.Length], g.On(at), R() * 360, .8f + R() * .45f, .045f);
         }
+        for (int i = 0; i < 26; i++)
+        {
+            float a = R() * Mathf.PI * 2, r = 9 + R() * 17;
+            var at = centre + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
+            if (!g.Grassy(at.x, at.z)) continue;
+            Plant(Bushes[i % Bushes.Length], g.On(at), R() * 360, .8f + R() * .5f, .1f);
+        }
+        Plant("ManoDeOso", Village + new Vector3(13.5f, 0, 9.5f), 40, 1f, .06f);
+        Plant("ManoDeOso", Village + new Vector3(-12.5f, 0, 18.5f), 200, .9f, .06f);
     }
 
     private void BuildHill()
     {
-        Block(PrimitiveType.Sphere, Hill + new Vector3(0, -3.2f, 0), new Vector3(16, 8, 16), new Color(.4f, .44f, .27f));
-        // The offering stone where he keeps his vigil (C03), under his knees.
+        var g = _savanna;
+        // The offering stone where he keeps his vigil (C03), under his knees, on top of the mound.
         if (Model("PiedraOfrenda", Hill + new Vector3(0, .74f, 0), 0) == null)
             Block(PrimitiveType.Cylinder, Hill + new Vector3(0, .82f, 0), new Vector3(1.3f, .08f, 1.3f), new Color(.55f, .54f, .5f));
-        Block(PrimitiveType.Cube, Hill + new Vector3(0, .3f, -6), new Vector3(1.5f, .05f, 8), new Color(.55f, .45f, .32f));
-        // Frailejones on the slopes of the páramo.
+        // Frailejones and straw of the páramo on its slopes.
         for (int i = 0; i < 9; i++)
         {
             float a = i * 40f * Mathf.Deg2Rad + .3f;
             float r = 3.2f + (i % 3) * .9f;
-            float y = Mathf.Sqrt(Mathf.Max(0, 1 - (r * r) / 64f)) * 4f - 3.2f;
-            Model("Frailejon", Hill + new Vector3(Mathf.Cos(a) * r, y - .1f, Mathf.Sin(a) * r), i * 33f, "Bacata", .8f + .1f * (i % 4));
+            var plant = Model("Frailejon", g.On(Hill + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r)) - Vector3.up * .05f, i * 33f, "Bacata", .8f + .1f * (i % 4));
+            NatureFoliage.Sway(plant, .03f, .006f);
         }
+        float Straw(float x, float z) => g.Grassy(x, z) ? 1 - NatureGround.Smooth(12, 19, Vector2.Distance(new Vector2(x, z), new Vector2(Hill.x, Hill.z))) : 0;
+        Grass("Pajonal colina", NatureKit.Clump(13, .4f, .8f, .12f, .035f, 21), NatureKit.Paramo,
+            NatureGrass.Scatter(Hill, 19, .75f, Straw, g.Height, new Vector2(.75f, 1.25f), 103), .5f);
+        Plant("Encenillo", g.On(Hill + new Vector3(-7.5f, 0, 5)), 30, 1f, .045f);
+        Plant("Chusque", g.On(Hill + new Vector3(6.5f, 0, 6)), 120, 1f, .12f);
     }
 
     private void BuildRefuge()
@@ -446,29 +530,83 @@ public sealed class BacataDirector : MonoBehaviour
 
     private void BuildLagoon()
     {
-        Block(PrimitiveType.Plane, Lagoon, new Vector3(10, 1, 10), new Color(.46f, .5f, .32f));
-        Block(PrimitiveType.Cylinder, Lagoon + new Vector3(0, .02f, 0), new Vector3(30, .02f, 22), new Color(.22f, .4f, .48f));
-        // Reeds along the water, rocks on the shore and frailejones beyond; the near shore stays
-        // open where Tisquesusa stands (the shot looks across it).
+        _lagoonGround = new NatureGround(LagoonHeight) { ShoreLevel = LagoonLevel };
+        var g = _lagoonGround;
+        // The trail Tisquesusa comes down and the trodden bank where he waits (C21).
+        g.Path(Lagoon + new Vector3(0, 0, -45), Lagoon + new Vector3(0, 0, -15), 1.6f, .7f);
+        g.Clearing(Lagoon + new Vector3(0, 0, -16), 3f, .5f);
+        g.Build(_world, "Paramo", Lagoon, 190f, NatureKit.Paramo);
+
+        // The water: a sheet a little wider than the basin; the rim of the ground draws the shore.
+        var water = new GameObject("Laguna");
+        water.transform.SetParent(_world, false);
+        water.transform.position = Lagoon + Vector3.up * LagoonLevel;
+        water.AddComponent<MeshFilter>().sharedMesh = NatureKit.Ellipse(LagoonHalfX * 1.25f, LagoonHalfZ * 1.25f, 32, 128);
+        var material = NatureKit.Water();
+        if (material != null) water.AddComponent<MeshRenderer>().sharedMaterial = material;
+        else Block(PrimitiveType.Cylinder, Lagoon + new Vector3(0, .02f, 0), new Vector3(30, .02f, 22), new Color(.22f, .4f, .48f));
+
+        // Reeds standing in the shallows, rocks on the shore and frailejones beyond; the near shore
+        // stays open where Tisquesusa stands (the shot looks across it).
         bool reeds = Resources.Load<GameObject>("Bacata/Juncos") != null;
         for (int i = 0; i < 24; i++)
         {
             float a = i * Mathf.PI * 2 / 24;
             Vector3 at = Lagoon + new Vector3(Mathf.Cos(a) * 15.5f, 0, Mathf.Sin(a) * 11.5f);
             bool front = Mathf.Abs(Mathf.Cos(a)) < .35f && Mathf.Sin(a) < 0;
-            if (reeds) { if (!front) Model("Juncos", at, i * 51f, "Bacata", .8f + .15f * (i % 3)); }
-            else Block(PrimitiveType.Cylinder, at + Vector3.up * .5f, new Vector3(.08f, .5f, .08f), new Color(.45f, .55f, .3f));
+            if (front) continue;
+            if (reeds) NatureFoliage.Sway(Model("Juncos", g.On(at), i * 51f, "Bacata", .8f + .15f * (i % 3)), .09f, .01f);
+            else Block(PrimitiveType.Cylinder, g.On(at) + Vector3.up * .5f, new Vector3(.08f, .5f, .08f), new Color(.45f, .55f, .3f));
         }
         for (int i = 0; i < 10; i++)
         {
             float a = (i * 36f + 12f) * Mathf.Deg2Rad;
             Vector3 shore = Lagoon + new Vector3(Mathf.Cos(a) * 17.5f, 0, Mathf.Sin(a) * 13.5f);
             if (Mathf.Abs(Mathf.Cos(a)) < .3f && Mathf.Sin(a) < 0) continue;
-            Model("RocaOrilla" + (1 + i % 3), shore, i * 71f);
-            Model("Frailejon", Lagoon + new Vector3(Mathf.Cos(a + .15f) * 21f, 0, Mathf.Sin(a + .15f) * 16.5f), i * 29f, "Bacata", .9f + .1f * (i % 3));
+            Model("RocaOrilla" + (1 + i % 3), g.On(shore) - Vector3.up * .15f, i * 71f);
+            g.Bare(shore, 1.2f);
+            var plant = Model("Frailejon", g.On(Lagoon + new Vector3(Mathf.Cos(a + .15f) * 21f, 0, Mathf.Sin(a + .15f) * 16.5f)) - Vector3.up * .05f, i * 29f, "Bacata", .9f + .1f * (i % 3));
+            NatureFoliage.Sway(plant, .03f, .006f);
         }
-        for (int i = 0; i < 6; i++)
-            Block(PrimitiveType.Sphere, Lagoon + new Vector3(-50 + i * 20, 8, 55), new Vector3(34, 26, 24), new Color(.36f, .42f, .4f));
+        // More frailejones scattered up the slopes behind the water.
+        var random = new System.Random(19);
+        float R() => (float)random.NextDouble();
+        for (int i = 0; i < 40; i++)
+        {
+            float a = R() * Mathf.PI * 2, r = 24 + R() * 40;
+            var at = Lagoon + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
+            if (g.Dirt(at.x, at.z) > .1f) continue;
+            NatureFoliage.Sway(Model("Frailejon", g.On(at) - Vector3.up * .05f, R() * 360, "Bacata", .8f + R() * .5f), .03f, .006f);
+        }
+        Plant("Sauce", g.On(Lagoon + new Vector3(-19, 0, 8)), 20, 1f, .05f);
+        Plant("Chusque", g.On(Lagoon + new Vector3(18, 0, 9)), 200, 1f, .12f);
+        Plant("Chusque", g.On(Lagoon + new Vector3(-21, 0, -6)), 80, .9f, .12f);
+
+        // Golden straw of the páramo (pajonal) from the bank up the slopes, and a few flowers.
+        float Straw(float x, float z) => g.Grassy(x, z) ? 1 - NatureGround.Smooth(36, 52, Vector2.Distance(new Vector2(x, z), new Vector2(Lagoon.x, Lagoon.z))) : 0;
+        Grass("Pajonal", NatureKit.Clump(13, .4f, .85f, .12f, .035f, 31), NatureKit.Paramo,
+            NatureGrass.Scatter(Lagoon, 52, .62f, Straw, g.Height, new Vector2(.75f, 1.3f), 104), .5f);
+        Grass("Pasto orilla", NatureKit.Clump(8, .15f, .32f, .2f, .06f, 32), NatureKit.Paramo,
+            NatureGrass.Scatter(Lagoon, 30, .55f, (x, z) => Straw(x, z) * .8f, g.Height, new Vector2(.8f, 1.2f), 105), .3f);
+        Grass("Flores paramo", NatureKit.Flowers(3, .15f, .28f, .2f, .04f, 33), NatureKit.Paramo,
+            NatureGrass.Scatter(Lagoon, 40, 2.2f, (x, z) => Straw(x, z) * .35f, g.Height, new Vector2(.8f, 1.2f), 106), .3f);
+    }
+
+    // A grass or flower field with its own material on the given palette.
+    private void Grass(string name, Mesh mesh, NatureKit.Palette palette, List<Matrix4x4> instances, float wind)
+    {
+        var material = NatureKit.Grass();
+        if (material == null || instances.Count == 0) return;
+        NatureKit.Apply(material, palette);
+        material.SetFloat("_WindStrength", wind);
+        NatureGrass.Create(_world, name, mesh, material, instances);
+    }
+
+    // A tree or bush from Resources/Bacata, planted and swaying (nothing when the model is missing).
+    private void Plant(string key, Vector3 at, float yaw, float scale, float wind)
+    {
+        var plant = Model(key, at - Vector3.up * .08f, yaw, "Bacata", scale);
+        if (plant != null) NatureFoliage.Sway(plant, wind, .02f);
     }
 
     // Soft, alpha-blended puffs (the shared particle material is additive: dark smoke vanished in it).

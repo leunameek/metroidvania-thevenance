@@ -155,6 +155,42 @@ cuenta. Ofrendas y runas quedan en su mesa; brazaletes, alas y medallón los tom
 **Acciones a tiempo** (`Controller/PlayerInteraction.cs`): palancas, cuerno, cierre, descansos y
 hallazgos: Nemequene se gira, hace el gesto y el efecto ocurre en el contacto.
 
+## Naturaleza: suelo, pasto, plantas, agua y cielo (2026-10-07)
+
+Bacatá, la colina y la laguna de Iguaque ya no son planos y esferas: se construyen en tiempo de
+ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/Nature`.
+
+- **Suelo** (`NatureGround`, *Stylized Ground*): una malla redonda modelada por una función de
+  altura, plana donde se actúan las escenas, con lomas onduladas después de la empalizada y cerros
+  que cierran el horizonte. Se pinta sin texturas: dos verdes mezclados por ruido, manchas de paja
+  seca, tierra en las pendientes, barro en la orilla, y caminos y claros de tierra (segmentos y
+  círculos declarados en `BacataDirector`). La misma altura sirve para plantar rocas y plantas.
+- **Pasto y flores** (`NatureGrass`, *Stylized Grass*): matas de hojas curvas dibujadas con
+  instancias de GPU, sin un objeto por mata, en celdas que se descartan cuando quedan fuera de
+  cámara. Cada hoja nace del color del suelo y se aclara hacia la punta; el viento las mece en
+  ráfagas y el sol las atraviesa a contraluz. En la sabana, pasto verde con flores; en la colina y
+  el páramo, pajonal dorado alto.
+- **Plantas que se mecen** (`NatureFoliage`, *Stylized Foliage*): juncos, frailejones y los
+  árboles y arbustos usan el mismo viento; el tronco queda quieto y la copa se mueve.
+- **Agua** (*Stylized Water*): la laguna deja ver el fondo, que se dobla con las ondas y pasa a
+  turquesa y luego a azul profundo con la hondura. Refleja el cielo en ángulo rasante, brilla al
+  sol, recibe sombras y hace espuma en la orilla. Usa las texturas de profundidad y de opacos de la
+  cámara (activas en `PC_RPAsset`). La orilla sale de la cuenca del suelo; los juncos se paran en
+  el agua baja.
+- **Cielo y grado de color** (`NatureAtmosphere`): el cielo andino procedural (*Nemequene/Andean
+  Sky*) con cerros verdes y picos nevados detrás de los cerros de la malla, luz ambiente de tres
+  tonos, bruma del color del cielo, y un grado de color suave (tonemapping, calidez, bloom y
+  viñeta). Hay tres ambientes: mañana en la sabana, humo del incendio y aire claro del páramo.
+- **Árboles y arbustos**: `BacataModelSetup` ya tiene registrados Aliso, Roble, Encenillo, Sauce,
+  ManoDeOso, Chilco, Mortino y Chusque (carpetas en `Art/Environments/Bacatá/<Nombre>`; también
+  acepta «Mano+de+oso» o «Mortiño»). Después de agregarlos, ejecutar *Nemequene > Campaña > Modelos
+  de Bacatá*: `BacataDirector` los planta en bosquecillos alrededor de la aldea, junto a las
+  casas, en la colina y en la orilla de la laguna, y los mece con el viento. Mientras falten, esos
+  lugares quedan con pasto.
+- **Mundo Superior** (`MSGardens`): las matas grises de vegetación baja (E06) se convierten al
+  cargar en canteros de pasto y flores que se mecen con el viento de las alturas. La pieza gris
+  queda oculta en la escena, así que el inventario del constructor no cambia.
+
 ## Sustituir las figuras provisionales
 
 - Personas en la escena de Bacatá: asignar el prefab en el `BacataDirector` (o volver a ejecutar

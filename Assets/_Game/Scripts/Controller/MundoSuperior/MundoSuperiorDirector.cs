@@ -77,6 +77,7 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         Hud.Build(_health, Resume, () => Leave(true), () => Leave(false));
         hud.AddComponent<MSFlightMeter>().Build(wings);
         BuildHelp();
+        MSGardens.Dress(transform);
         Natural = WorldNaturalInput.Create(transform);
         Natural.AddPauseEntries(Hud);
         ReactionMultiplier = Natural.ReactionScale;
