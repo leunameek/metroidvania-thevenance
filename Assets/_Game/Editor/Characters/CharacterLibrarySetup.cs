@@ -26,7 +26,8 @@ public static class CharacterLibrarySetup
     private const string Output = "Assets/_Game/Resources/Characters/";
     private const string PlayerController = ArtRoot + "Nemequene/Nemequene_Player.controller";
     private const string PlayerPrefab = ArtRoot + "Nemequene/Nemequene_Player_Visual.prefab";
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v1";
+    // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v2";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
@@ -39,9 +40,10 @@ public static class CharacterLibrarySetup
     // Key = Resources name the game loads. Heights in metres (creatures: standing height).
     private static readonly Cast[] Characters =
     {
-        new Cast("Nemequene", "Nemequene", Kind.Mixamo, 1.78f, true, "tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbx"),
+        new Cast("Nemequene", "Nemequene", Kind.Mixamo, CharacterScale.Nemequene, true, "tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbx"),
         new Cast("Nemequeneniño", "Nemeneque+Niño", Kind.Mixamo, 1.25f, true),
-        new Cast("Tisquesusa", "Tisquesusa", Kind.TripoHuman, 1.74f, true),
+        new Cast("Tisquesusa", "Tisquesusa", Kind.TripoHuman, 1.78f, true),
+        new Cast("Saguanmachica", "Saguanmachica", Kind.Mixamo, 1.72f, true),
         new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true),
         new Cast("Furachogua", "Furachogua", Kind.Mixamo, 1.75f, true),
         new Cast("Invasor", "Invasor+de+plata+y+oro", Kind.Mixamo, 1.85f, false),
@@ -72,6 +74,7 @@ public static class CharacterLibrarySetup
         ("DodgeRight", "Dodging Right", false, false), ("HitLeft", "Standing React Large From Left", false, false),
         ("HitRight", "Standing React Large From Right", false, false), ("HitGut", "Standing React Large Gut", false, false),
         ("Death", "Dying", false, true), ("DeathBack", "Dying Backwards", false, true), ("Land", "Landing", false, false),
+        ("Fly", "Flying", true, true), ("Fall", "Falling Idle", true, true),
     };
 
     // Creature states: state = take name; one-shots return to `next` (default Idle).

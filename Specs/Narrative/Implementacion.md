@@ -110,9 +110,24 @@ centinela de escudo es el hombre-caimán (pierde el escudo al romperlo). Nemeque
 jala la palanca, usa el cuerno y la llave, y se arrodilla en los descansos. En Bacatá: tallado y
 entrega del bastón, meditación, muerte del tío y caída de Nemequene, Tisquesusa arrodillado.
 
-Falta el modelo de **Saguanmachica** (sigue la figura provisional). Los centinelas y vigías comunes
-del inframundo (hombre-caimán, hombre-murciélago) tienen prefab pero aún no comportamiento de combate
-por dash en sus marcas.
+Saguanmachica (`Art/Characters/Saguanmachica`, rig Mixamo) ya está en el prólogo y el epílogo.
+
+**Proporción**: Nemequene mide siempre 1,85 m (`View/CharacterScale.cs`). Cada escena había guardado
+una escala distinta del modelo (2,83 m en la plaza, 1,96 m en los mundos, 1,78 m en Bacatá);
+`PlayerAnimator` mide el cuerpo en su pose base al iniciar y lo ajusta, y el prefab de Bacatá usa
+la misma altura. El resto del elenco se mide igual (Bachué 1,70, Quimue 1,95, Custodio 2,10...).
+
+**Enemigos comunes del inframundo** (`MundoInferior/MIDashEnemy.cs`, se colocan solos en las marcas
+«(personaje pendiente)» del nivel): se pelean con el impulso; cada golpe se marca en el suelo antes
+de llegar y al perder ceden el paso de rodillas (no mueren; queda guardado):
+- E03 Hombre-caimán (03, plataforma tras el pozo): guardia frontal (por delante el impulso hace la
+  mitad, hay que rodearlo), mordida a la marca y coletazo en anillo. Vida 60.
+- Dos centinelas caimán al inicio del patio de 04: solo mordida. Vida 30.
+- E04 Hombre-murciélago vigía (04, entre los pilares): vuela fuera de alcance y dispara dardos (los
+  pilares los detienen); luego cae en picada a la marca y queda en el suelo, expuesto. Vida 40.
+- E05 Hombre-caimán de escudo (04, final): el centinela de escudo (cadena de tres impulsos).
+- E06 Vigía del cuerno (07): grito que crece en anillo (un impulso durante la carga lo interrumpe y lo
+  aturde) y picada. Vida 60.
 
 ## Sustituir las figuras provisionales
 

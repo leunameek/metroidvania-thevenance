@@ -38,6 +38,8 @@ public class PlayerAnimator : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _animator.applyRootMotion = false;
+        // Same height in every scene, whatever scale the scene saved (CharacterScale).
+        CharacterScale.Fit(transform, CharacterScale.Nemequene);
         if (player == null) player = GetComponentInParent<PlayerController>();
         foreach (var parameter in _animator.parameters)
         {

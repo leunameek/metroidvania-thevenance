@@ -121,6 +121,7 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
     private void SpawnStoryPieces()
     {
         SpawnCustodio();
+        SpawnCreatures();
         foreach (var find in FindObjectsByType<MIFind>(FindObjectsSortMode.None))
         {
             if (find.FindId != MIProgress.Bracelets3) continue;
@@ -330,13 +331,52 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
 
     // The guardian's duel or the shield sentinel in sight: a closed fist means a dash.
     private bool InFight => (_guardian != null && _guardian.Fighting)
+        || (MIDashEnemy.Engaged != null && !MIDashEnemy.Engaged.Yielded)
         || (_sentinel != null && _sentinel.isActiveAndEnabled && !_sentinel.Defeated && _room == 3
             && Vector3.Distance(player.transform.position, _sentinel.transform.position) < 16f);
+
+    // The common creatures (E03, E04, E06 and the patio guards) stand on the builder's markers
+    // "(personaje pendiente)"; they are fought with the dash (MIDashEnemy).
+    private void SpawnCreatures()
+    {
+        foreach (var marker in FindObjectsByType<Transform>(FindObjectsSortMode.None))
+        {
+            if (!marker.name.EndsWith("(personaje pendiente)")) continue;
+            int room = RoomOf(marker);
+            string n = marker.name;
+            if (n.StartsWith("C01 Centinela A") || n.StartsWith("C01 Centinela B"))
+                MIDashEnemy.Create(MIDashEnemy.Kind.Guard, marker, room, n.StartsWith("C01 Centinela A") ? "centinela_04a" : "centinela_04b",
+                    "Centinela caimán", 30, "Un centinela cierra el patio. Apártate de su mordida marcada e impúlsate contra él.",
+                    "Se aparta y te deja pasar.");
+            else if (n.StartsWith("C02a Vigía"))
+                MIDashEnemy.Create(MIDashEnemy.Kind.Bat, marker, room, "vigia_04", "Hombre-murciélago vigía", 40,
+                    "«La orden me arrastra.» Escóndete tras los pilares de sus dardos; cuando baje en picada, impúlsate.",
+                    "«El tercer par está antes del escudo.»");
+            else if (n.StartsWith("C01 Centinela") && room == 6)
+                MIDashEnemy.Create(MIDashEnemy.Kind.HornBat, marker, room, "vigia_cuerno", "Vigía del cuerno", 60,
+                    "«La llamada debe quedar aquí.» Su grito se carga en un anillo: impúlsate contra él antes de que estalle.",
+                    "«Debe volver a quien pueda responder.» Baja las alas: la ruta al cuerno queda libre.");
+            else if (n.StartsWith("C01 Centinela"))
+                MIDashEnemy.Create(MIDashEnemy.Kind.Caiman, marker, room, "caiman_03", "Hombre-caimán", 60,
+                    "«Tu bastón no abre una tumba.» Su guardia frontal resiste: rodéalo e impúlsate por un costado.",
+                    "«Entonces no te quedes con lo que no te pertenece.»");
+        }
+    }
+
+    // Room index (0-8) of a builder object: its ancestor "Room_0N_...".
+    private static int RoomOf(Transform t)
+    {
+        for (; t != null; t = t.parent)
+            if (t.name.StartsWith("Room_") && t.name.Length > 7 && int.TryParse(t.name.Substring(5, 2), out int n)) return n - 1;
+        return -1;
+    }
 
     private void UpdateBars()
     {
         if (Hud == null) return;
+        var creature = MIDashEnemy.Engaged;
         if (TurnDuelController.Running) Hud.SetBoss("", 0, false); // the duel screen shows it
+        else if (creature != null && !creature.Yielded) Hud.SetBoss(creature.DisplayName, creature.Health01, true);
         else if (_guardian != null && _guardian.Fighting) Hud.SetBoss(_guardian.DisplayName, _guardian.Health01, true);
         else if (_sentinel != null && _sentinel.isActiveAndEnabled && !_sentinel.Defeated && _room == 3)
             Hud.SetBoss(_sentinel.ShieldUp ? "Centinela de escudo · defensa intacta" : "Centinela de escudo · defensa rota", _sentinel.Health01, Vector3.Distance(player.transform.position, _sentinel.transform.position) < 16f);
