@@ -27,7 +27,8 @@ public static class MSProgress
         public int zones = 1;
     }
 
-    private static readonly HashSet<string> Flags = new HashSet<string>();
+    // The finds live in an InventoryModel (Model); this class only saves and loads it.
+    public static readonly InventoryModel Inventory = new InventoryModel();
     private static int _loadedSlot = int.MinValue;
     public static int Checkpoint { get; private set; }
     public static int ZonesMask { get; private set; } = 1;
@@ -36,13 +37,13 @@ public static class MSProgress
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetSession()
     {
-        Flags.Clear(); Checkpoint = 0; ZonesMask = 1; _loadedSlot = int.MinValue; Changed = null;
+        Inventory.Clear(); Checkpoint = 0; ZonesMask = 1; _loadedSlot = int.MinValue; Changed = null;
     }
 
-    public static bool Has(string id) => !string.IsNullOrEmpty(id) && Flags.Contains(id);
-    public static int FindsCount { get { int n = 0; foreach (var f in Finds) if (Has(f)) n++; return n; } }
+    public static bool Has(string id) => Inventory.Has(id);
+    public static int FindsCount => Inventory.Count(Finds);
     // Guide 6.6: each yopo adds 5 to the base 20, computed from the flags, never accumulated.
-    public static float AttackDamage => 20f + (Has(Yopo1) ? 5f : 0f) + (Has(Yopo2) ? 5f : 0f);
+    public static float AttackDamage => WorldInventoryRules.AttackDamage(Inventory);
     public static int DiscoveredCount { get { int n = 0; for (int i = 0; i < 8; i++) if ((ZonesMask & (1 << i)) != 0) n++; return n; } }
 
     // Reads the slot chosen in the title menu (WorldTravel.SaveSlot); the same slot keeps memory.
@@ -51,7 +52,7 @@ public static class MSProgress
         int slot = WorldTravel.SaveSlot;
         if (slot == _loadedSlot) return;
         _loadedSlot = slot;
-        Flags.Clear(); Checkpoint = 0; ZonesMask = 1;
+        Inventory.Clear(); Checkpoint = 0; ZonesMask = 1;
         if (slot < 0) return;
         string json = PlayerPrefs.GetString(Prefix + slot, "");
         if (string.IsNullOrEmpty(json)) return;
@@ -59,19 +60,20 @@ public static class MSProgress
         {
             var data = JsonUtility.FromJson<Data>(json);
             if (data == null || data.version != 1) return;
-            foreach (var f in data.flags) if (!string.IsNullOrEmpty(f)) Flags.Add(f);
+            var loaded = new List<string>(data.flags);
             Checkpoint = data.checkpoint == Rest04 || data.checkpoint == Rest07 ? data.checkpoint : Rest01;
             ZonesMask = data.zones | 1;
             // Guide 8.4: keep the requirements consistent with what the data says was reached.
-            if (Flags.Contains(LockOpen)) Flags.Add(Key);
-            if (Flags.Contains(Wings)) { Flags.Add(RunePortals); Flags.Add(RuneClimb); }
+            if (loaded.Contains(LockOpen)) loaded.Add(Key);
+            if (loaded.Contains(Wings)) { loaded.Add(RunePortals); loaded.Add(RuneClimb); }
+            Inventory.Load(loaded);
         }
-        catch (Exception) { Flags.Clear(); Checkpoint = 0; ZonesMask = 1; }
+        catch (Exception) { Inventory.Clear(); Checkpoint = 0; ZonesMask = 1; }
     }
 
     public static bool Set(string id)
     {
-        if (string.IsNullOrEmpty(id) || !Flags.Add(id)) return false;
+        if (!Inventory.Add(id)) return false;
         Save(); Changed?.Invoke(id); return true;
     }
     public static void SetCheckpoint(int zone)
@@ -90,7 +92,7 @@ public static class MSProgress
     {
         int slot = WorldTravel.SaveSlot;
         if (slot < 0) return;
-        var data = new Data { checkpoint = Checkpoint, zones = ZonesMask, flags = new List<string>(Flags) };
+        var data = new Data { checkpoint = Checkpoint, zones = ZonesMask, flags = new List<string>(Inventory.All) };
         PlayerPrefs.SetString(Prefix + slot, JsonUtility.ToJson(data));
         PlayerPrefs.Save();
     }
@@ -98,6 +100,6 @@ public static class MSProgress
     public static void Erase(int slot)
     {
         PlayerPrefs.DeleteKey(Prefix + slot); PlayerPrefs.Save();
-        if (slot == _loadedSlot) { Flags.Clear(); Checkpoint = 0; ZonesMask = 1; }
+        if (slot == _loadedSlot) { Inventory.Clear(); Checkpoint = 0; ZonesMask = 1; }
     }
 }

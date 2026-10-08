@@ -43,9 +43,11 @@ public sealed class TurnDuelController : MonoBehaviour
     // Side of the last dodge clip (+1 right, -1 left), for the stage's sidestep.
     public int DodgeSide => _bodies != null ? _bodies.DodgeSide : 1;
     public static bool Running => Current != null && !Current._over;
+    // A duel begins (true) or ends (false): the world HUDs step aside without asking every frame.
+    public static event Action<bool> RunningChanged;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() => Current = null;
+    private static void ResetStatics() { Current = null; RunningChanged = null; }
 
     // ended(true) after victory, ended(false) when the player falls or leaves.
     public static TurnDuelController Run(DuelRules rules, IDuelStage stage, int damageBase, Health playerHealth,
@@ -71,6 +73,7 @@ public sealed class TurnDuelController : MonoBehaviour
         duel._listening = voice;
         if (playerHealth != null) playerHealth.Died += duel.OnPlayerDied;
         Current = duel;
+        RunningChanged?.Invoke(true);
         natural?.ClearPending();
         if (natural == null)
             foreach (var recognizer in FindObjectsByType<VoiceCommandRecognizer>(FindObjectsSortMode.None))
@@ -254,6 +257,7 @@ public sealed class TurnDuelController : MonoBehaviour
         _audio?.Ended(victory); _audio = null;
         _cues?.Dispose(); _cues = null;
         Destroy(gameObject);
+        RunningChanged?.Invoke(false);
         ended?.Invoke(victory);
     }
 }

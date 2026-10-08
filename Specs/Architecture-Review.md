@@ -15,7 +15,7 @@ flowchart TD
     Editor --> Runtime
 ```
 
-- **Model** conserva habilidades, inspección, combate, gestos, objetivos y lecciones. No depende de la interfaz ni de los controladores. Usa matemáticas de Unity; `Health` es un componente y las configuraciones son `ScriptableObject`, por lo que no es una biblioteca completamente independiente del motor.
+- **Model** conserva habilidades, inspección, combate, gestos, objetivos y lecciones. No depende de la interfaz ni de los controladores. Usa matemáticas de Unity y las configuraciones son `ScriptableObject`. Desde el 8 de octubre de 2026 la vida es `HealthModel` puro y el componente `Health` está en Controller (ver [Arquitectura.md](Arquitectura.md)).
 - **Runtime** adapta esas reglas a personajes, cámaras, colisiones y dispositivos. Las vistas del prototipo anterior permanecen aquí porque comparten controladores; la interfaz nueva está separada.
 - **UI** contiene el menú independiente, la presentación de la plaza y los ajustes. Consulta el juego y sus eventos. El juego no referencia este módulo.
 - Los nuevos archivos `.asmdef` hacen cumplir estos límites al compilar. Las herramientas de las carpetas `Editor` quedan fuera del ejecutable. Los tests tienen sus propios ensamblados.

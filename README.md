@@ -42,6 +42,7 @@ y los ajustes en Configuración, con la misma estética del inicio.
 - [Entrega de interfaz: integración, evidencias y pendientes](Assets/_Game/UI/Documentation/ENTREGA.md)
 - [Sistema visual y componentes](DESIGN.md)
 - [Wireframes completos y recorrido en Figma](Specs/UI/Figma/README.md)
+- [Arquitectura MVC: Entrada → Controller → Model → View](Specs/Arquitectura.md)
 - [Arquitectura, límites entre módulos y validación de build](Specs/Architecture-Review.md)
 - [Menú independiente, música y validación](Assets/_Game/UI/Documentation/04-Menu-inicio.md)
 - Ejecutable local, una vez compilado: `Builds/Nemequene/Nemequene.exe`. Conserva la carpeta completa junto al ejecutable.

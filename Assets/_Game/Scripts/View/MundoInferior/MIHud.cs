@@ -282,12 +282,12 @@ public sealed class MIHud : MonoBehaviour
             _healthFill.fillAmount = _healthShown;
             // In a turn duel the same vitality frame sits at the bottom left (TurnDuelHUD).
             var vitality = _healthFill.transform.parent.parent.gameObject;
-            if (vitality.activeSelf == TurnDuelController.Running) vitality.SetActive(!TurnDuelController.Running);
+            if (vitality.activeSelf == _duelRunning) vitality.SetActive(!_duelRunning);
         }
         _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);
         _fade.color = new Color(.031f, .039f, .043f, _fadeValue);
         // Notices wait while the inspection, the pause or a duel holds the screen.
-        bool held = _inspect.activeSelf || _pause.activeSelf || _death.activeSelf || TurnDuelController.Running;
+        bool held = _inspect.activeSelf || _pause.activeSelf || _death.activeSelf || _duelRunning;
         if (held) { if (_toast.activeSelf) _toast.SetActive(false); _toastUntil = 0; }
         else if (Time.unscaledTime >= _toastUntil)
         {
@@ -313,5 +313,10 @@ public sealed class MIHud : MonoBehaviour
         _toastText.rectTransform.offsetMin = new Vector2(92, -50 - body - 4);
     }
 
+    // Told by the duel controller when a turn duel starts and ends.
+    private bool _duelRunning;
+    private void OnEnable() { _duelRunning = TurnDuelController.Running; TurnDuelController.RunningChanged += OnDuel; }
+    private void OnDisable() => TurnDuelController.RunningChanged -= OnDuel;
+    private void OnDuel(bool running) => _duelRunning = running;
     private void OnDestroy() { if (_health != null) _health.HealthChanged -= OnHealth; }
 }

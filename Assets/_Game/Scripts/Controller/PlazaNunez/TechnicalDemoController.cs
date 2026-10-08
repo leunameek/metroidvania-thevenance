@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public enum TechnicalDemoState { Exploration, Analyzing, Combat, Transition }
-
 public sealed class TechnicalDemoController : MonoBehaviour
 {
     [SerializeField] private TechnicalDemoConfig config;
@@ -29,8 +27,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private Color _skyAmbient, _equatorAmbient, _groundAmbient, _sunColor;
     private float _sunIntensity;
     public ExplorationObjectiveModel Objectives { get; private set; }
-    private TechnicalDemoState _state;
-    public TechnicalDemoState State { get => _state; private set { if (_state == value) return; _state = value; ViewChanged?.Invoke(); } }
+    // GameState (Model) holds what the player is doing; the HUD redraws on ViewChanged.
+    public GameState Game { get; } = new GameState();
+    public TechnicalDemoState State { get => Game.Current; private set { if (Game.Set(value)) ViewChanged?.Invoke(); } }
     public event Action ViewChanged;
     public bool ManagedUI { get; set; }
     public AnalyzableObject[] Objects => objects;
@@ -160,6 +159,8 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Update()
     {
         if (_restarting) return;
+        // The plaza's own help panel (without the Nemequene UI, which reads the key itself).
+        if (!ManagedUI && GameBindings.Pressed(GameAction.Help)) SetHelp(!HelpOpen);
         if (StoryPlayer.Active || TurnDuelController.Running || PlazaPieceInspection.Active != null) return;
         if (ManagedUI && HelpOpen) return;
         Keyboard k = Keyboard.current;
@@ -398,9 +399,10 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (combatCompleted) combat.RestoreCompleted();
         ViewChanged?.Invoke();
     }
+    public event Action<bool> HelpChanged;
     public void SetHelp(bool open)
     {
-        HelpOpen = open;
+        if (HelpOpen != open) { HelpOpen = open; HelpChanged?.Invoke(open); }
         player.SetInputLocked(open || State != TechnicalDemoState.Exploration);
         orbitCamera.enabled = !open && State == TechnicalDemoState.Exploration;
     }

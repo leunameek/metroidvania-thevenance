@@ -20,6 +20,7 @@ public sealed class TechnicalDemoHUD : MonoBehaviour
     private void Start()
     {
         if (demo == null) { enabled = false; return; }
+        demo.HelpChanged += ShowHelp;
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         _canvas = new GameObject("UI_PlazaNunez", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         _canvas.transform.SetParent(transform, false);
@@ -164,16 +165,13 @@ public sealed class TechnicalDemoHUD : MonoBehaviour
     }
 
     private string Check(bool value) => value ? "<color=#8DD3AB>✓</color>" : "○";
-    private void SetHelp(bool open)
-    {
-        _helpPanel.SetActive(open);
-        demo.SetHelp(open);
-    }
+    // The controller reads the Help key and owns the state; the panel only follows it.
+    private void SetHelp(bool open) => demo.SetHelp(open);
+    private void ShowHelp(bool open) { if (_helpPanel != null) _helpPanel.SetActive(open); }
+    private void OnDestroy() { if (demo != null) demo.HelpChanged -= ShowHelp; }
     private void Update()
     {
         if (demo.Objectives == null || _title == null) return;
-        if (GameBindings.Pressed(GameAction.Help))
-            SetHelp(!_helpPanel.activeSelf);
         _title.text = "<size=13><color=#DDB45C>NEMEQUENE  /  EL UMBRAL</color></size>\n"
             + (demo.World < 0 ? "Mundo inferior" : demo.World > 0 ? "Mundo superior" : "Plaza Núñez");
         _objectives.text = "<color=#DDB45C>TU RECORRIDO</color>\n\n"

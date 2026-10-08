@@ -4,7 +4,7 @@ using System;
 // Telegraph -> PlayerReact -> Resolve turn loop, dodge-window judging, and the
 // raised-hand-direction geometry rule. No MonoBehaviour/UI dependency - BossFightController
 // applies the actual camera/input/UI/damage side effects in response to these events,
-// mirroring the event-driven pattern Health.cs already uses for HealthChanged/Died.
+// mirroring the event-driven pattern HealthModel already uses for HealthChanged/Died.
 public class BossFightModel
 {
     public enum FightState { Inactive, Telegraph, PlayerReact, Resolve }
