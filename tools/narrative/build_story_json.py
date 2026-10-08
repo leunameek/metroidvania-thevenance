@@ -40,6 +40,7 @@ CUES = {
     "H14": ["alas", "aguila", "aguila", "aguila"],
     "H15": ["placa", "eco", "eco", "llave"],
     "H16": ["intro", "intro", "intro", "liberado", "eco"],
+    "H17": ["llegada"] * 6 + ["despedida"] * 8,
 }
 # D13 belongs to "Revisitar recuerdos", left out of scope on 2026-10-06.
 SKIP = {"D13"}

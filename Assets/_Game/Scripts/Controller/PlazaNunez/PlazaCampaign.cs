@@ -31,6 +31,7 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     // ---------- Quimue (C16, E11, C17) ----------
     private Transform _quimue;
     private Light _quimueLight;
+    private bool _quimueLeaving;
     // Which anchor is active is read from Quimue's glow, not from the HUD: gold for the sun,
     // silver-blue for the moon (2026-10-07 playtest).
     private DuelGlow _originGlow;
@@ -70,9 +71,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
 
     private void RefreshQuimue()
     {
-        if (_quimue == null) return;
+        if (_quimue == null || _quimueLeaving) return;
         var c = CampaignProgress.Model;
-        bool present = c.Has(CampaignFlags.SueReleased) && !c.Has(CampaignFlags.MasksInCustody);
+        // Once he has said goodbye he goes home through his last passage (H17 farewell).
+        bool present = c.Has(CampaignFlags.SueReleased) && !c.Has(CampaignFlags.MasksInCustody)
+            && !CampaignProgress.Has(StoryPlayer.CueKey("H17", "despedida"));
         if (_quimue.gameObject.activeSelf != present) _quimue.gameObject.SetActive(present);
         if (_guardianRenderers == null || _guardianHidden != present)
         {
@@ -106,8 +109,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             && _demo.State == TechnicalDemoState.Exploration)
         {
             _c16Queued = true;
-            StoryPlayer.PlaySequence("H17", () => _demo.SetStatus("Quimue espera en el círculo. Prepárate y acércate cuando quieras."), "Quimue en la plaza");
+            StoryPlayer.PlayCue("H17", "llegada", true, () => _demo.SetStatus("Quimue espera en el círculo. Prepárate y acércate cuando quieras."), "Quimue en la plaza");
         }
+        if (!_farewellQueued && !_finalRunning && c.Has(CampaignFlags.QuimueDefeated) && !c.Has(CampaignFlags.MasksInCustody)
+            && !CampaignProgress.Has(StoryPlayer.CueKey("H17", "despedida")) && _demo.State == TechnicalDemoState.Exploration)
+            QueueFarewell();
     }
 
     private void StartFinal()
@@ -137,7 +143,25 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             return;
         }
         CampaignProgress.Set(CampaignFlags.QuimueDefeated); // DuelAudio plays the broken resonance and the release
-        _demo.SetStatus("Los lazos de luna y sol se apagan. Habla con Bachué.");
+        _demo.SetStatus("Los lazos de luna y sol se apagan.");
+    }
+
+    // On his knees he says goodbye (fear, a promise of refuge in Tunja), then leaves in the light
+    // of the passage he opened: the story closes with him (2026-10-08). From Update, so a save
+    // left between the victory and the farewell still hears it.
+    private bool _farewellQueued;
+    private void QueueFarewell()
+    {
+        _farewellQueued = true;
+        StoryPlayer.PlayCue("H17", "despedida", false, () =>
+        {
+            if (_quimue != null && _quimue.gameObject.activeSelf)
+            {
+                _quimueLeaving = true; // RefreshQuimue leaves him be until the motes are gone
+                CreatureDissolve.Run(_quimue, new Color(.95f, .85f, .6f), .2f, () => _quimueLeaving = false);
+            }
+            _demo.SetStatus("Quimue vuelve a Tunja. Habla con Bachué.");
+        }, "Lo que Quimue temía");
     }
 
     // IDuelStage: the bonds glow with the announced origin; nothing here deals damage.

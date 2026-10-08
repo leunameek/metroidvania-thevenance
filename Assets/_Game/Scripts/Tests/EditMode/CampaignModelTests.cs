@@ -209,7 +209,8 @@ public class StoryScriptTests
             foreach (var cue in trigger.Cues) Assert.IsNotEmpty(sequence.Cue(cue), trigger.Key + " cue " + cue);
         }
         // Every cued line of a sequence is said by some trigger.
-        var duelCues = new HashSet<string>();
+        // H17 is said by the plaza itself: the arrival before the final duel, the farewell after it.
+        var duelCues = new HashSet<string> { "H17/llegada", "H17/despedida" };
         foreach (var s in script.sequences)
             foreach (var line in s.lines)
             {
@@ -224,6 +225,21 @@ public class StoryScriptTests
     {
         var h17 = Load().Get("H17");
         Assert.IsTrue(Array.Exists(h17.lines, l => l.text == "Por eso no me quedaré con su voluntad."));
+    }
+
+    // Quimue's story closes with him (2026-10-08): beaten, he says goodbye and promises Tunja's
+    // refuge, which H20 keeps; his last advice is the one Nemequene leaves Tisquesusa.
+    [Test]
+    public void QuimueSaysGoodbyeAndTheEndingKeepsHisWord()
+    {
+        var script = Load();
+        var farewell = script.Get("H17").Cue("despedida");
+        Assert.GreaterOrEqual(farewell.Count, 4);
+        Assert.IsTrue(farewell.Exists(l => l.speaker == "Quimue" && l.text.Contains("Tunja")));
+        Assert.IsTrue(farewell.Exists(l => l.speaker == "Quimue" && l.text.Contains("antes de nombrar al enemigo")));
+        Assert.IsNotEmpty(script.Get("H17").Cue("llegada"));
+        Assert.IsTrue(Array.Exists(script.Get("H20").lines, l => l.text.Contains("Tunja")));
+        Assert.IsTrue(Array.Exists(script.Get("H20").lines, l => l.text.Contains("antes de nombrar al enemigo")));
     }
 }
 

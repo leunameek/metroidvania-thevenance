@@ -110,6 +110,21 @@ public sealed class StoryPlayer : MonoBehaviour
         });
     }
 
+    // The lines of one cue of a sequence, said at their own moment of play (H17: Quimue's arrival
+    // before the duel, his farewell after it). Once per save; complete = this cue ends the sequence.
+    public static string CueKey(string sequenceId, string cue) => sequenceId + ":" + cue;
+    public static void PlayCue(string sequenceId, string cue, bool complete, Action done = null, string title = null)
+    {
+        var sequence = CampaignProgress.Script.Get(sequenceId);
+        var lines = sequence != null ? sequence.Cue(cue) : null;
+        if (lines == null || lines.Count == 0 || CampaignProgress.Has(CueKey(sequenceId, cue))) { done?.Invoke(); return; }
+        Ensure().Enqueue(new Request
+        {
+            Key = CueKey(sequenceId, cue), Sequence = sequence, Complete = complete, Done = done, Title = title,
+            Lines = new List<StoryLine>(lines),
+        });
+    }
+
     // A contextual question to a guide (D01-D12): the player asks, the guide answers. Repeatable.
     public static void PlayHint(StoryHint hint, string guide, Action done = null)
     {

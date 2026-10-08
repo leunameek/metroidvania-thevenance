@@ -69,7 +69,7 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Quimue toma fuerza de dos mundos. Iré a detenerlo.",
+     "text": "Oro y plata: el sol y la luna que Quimue ata. Iré a detenerlo.",
      "cue": ""
     },
     {
@@ -122,13 +122,19 @@
     {
      "speaker": "Bachué",
      "note": "",
-     "text": "Chía y Sué sostienen dos extremos. Sus máscaras deben responder juntas.",
+     "text": "Chía y Sué sostienen dos extremos, como tu bastón. Sus máscaras deben responder juntas.",
      "cue": ""
     },
     {
      "speaker": "Nemequene",
      "note": "",
      "text": "Volveré con ellas.",
+     "cue": ""
+    },
+    {
+     "speaker": "Bachué",
+     "note": "",
+     "text": "El mapa te llevará a la plaza donde los dos mundos se tocan.",
      "cue": ""
     },
     {
@@ -314,19 +320,19 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Hay un apoyo entre los péndulos.",
+     "text": "Otros cruzaron antes que yo. Dejaron un apoyo entre los péndulos.",
      "cue": "pendulos"
     },
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "La grieta avisa antes de ceder.",
+     "text": "La grieta avisa antes de ceder. Este lugar no quiere matar; quiere que lo escuchen.",
      "cue": "derrumbe"
     },
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Quien vuelva no repetirá el derrumbe.",
+     "text": "Quien venga detrás no repetirá el derrumbe. Así se deja un regreso.",
      "cue": "atajo"
     }
    ]
@@ -346,19 +352,19 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "El cuerno devuelve un sonido.",
+     "text": "El cuerno responde. Alguien lo dejó para pedir paso, no para forzarlo.",
      "cue": "cuerno"
     },
     {
      "speaker": "Custodio de Raíces",
      "note": "",
-     "text": "Tienes su forma, pero el guardián conserva el lazo.",
+     "text": "Ves a Chía, pero el guardián conserva el lazo que la sella.",
      "cue": "soporte"
     },
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Aún no puedo llevar su respuesta.",
+     "text": "Entonces no basta con alcanzarla.",
      "cue": "soporte"
     },
     {
@@ -492,7 +498,7 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Veo dónde termina el vuelo.",
+     "text": "El poporo me muestra el vuelo de quien la dejó. Ya sé adónde lleva.",
      "cue": ""
     }
    ]
@@ -661,7 +667,7 @@
    "id": "H17",
    "title": "Quimue en el hub",
    "place": "Plaza / círculo ampliado",
-   "summary": "Resonancia solar permite que Quimue alcance plaza por su último vínculo. Bachué custodia máscaras; él intenta tomarlas. Duelo con lectura lunar, solar y unión, uso contextual de máscaras y bastón. No roba inventario ni cambia el mapa.",
+   "summary": "Resonancia solar permite que Quimue alcance plaza por su último vínculo. Bachué custodia máscaras; él intenta tomarlas porque teme lo que se acerca. Duelo con lectura lunar, solar y unión, uso contextual de máscaras y bastón. No roba inventario ni cambia el mapa. Vencido, se despide: confiesa su miedo, promete refugio en Tunja y vuelve por el último paso que abrió.",
    "objective": "Vencer antagonista.",
    "storyboard": "C16 / E11 / C17",
    "requires": [
@@ -675,31 +681,85 @@
      "speaker": "Quimue",
      "note": "",
      "text": "Reuniste lo que no pude tomar unido.",
-     "cue": ""
+     "cue": "llegada"
     },
     {
      "speaker": "Nemequene",
      "note": "",
      "text": "Forzaste a quienes guardaban los pasos.",
-     "cue": ""
+     "cue": "llegada"
     },
     {
      "speaker": "Quimue",
      "note": "",
      "text": "Tú también querías más tierra.",
-     "cue": ""
+     "cue": "llegada"
     },
     {
      "speaker": "Nemequene",
      "note": "",
      "text": "Por eso no me quedaré con su voluntad.",
-     "cue": ""
+     "cue": "llegada"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Entonces no entiendes lo que viene. Necesito su fuerza antes de que llegue.",
+     "cue": "llegada"
     },
     {
      "speaker": "Bachué",
      "note": "",
      "text": "Corta el vínculo. Las máscaras sostienen tránsito, no dominio.",
-     "cue": ""
+     "cue": "llegada"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Los lazos callaron. Por primera vez en años, nadie me obedece.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Ahora te escucharán si les hablas, no si los atas.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Até a los guardianes porque vi venir algo que ningún pueblo detendrá solo.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Si es cierto, Bacatá y Tunja tendrán que encontrarse sin cadenas.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Fuimos rivales tanto tiempo que olvidé que pisábamos el mismo suelo.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Si tu gente necesita refugio, Tunja abrirá sus puertas. Te lo prometo por lo que até.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Nemequene",
+     "note": "",
+     "text": "Vuelve con los tuyos. Que te vean llegar sin oro ni plata.",
+     "cue": "despedida"
+    },
+    {
+     "speaker": "Quimue",
+     "note": "",
+     "text": "Ve en paz, Nemequene. Y mira bien antes de nombrar al enemigo. Yo no supe hacerlo.",
+     "cue": "despedida"
     }
    ]
   },
@@ -773,7 +833,7 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "No era Quimue.",
+     "text": "No era Quimue. Era esto lo que él temía.",
      "cue": ""
     },
     {
@@ -788,7 +848,7 @@
    "id": "H20",
    "title": "Transmitir antes de morir",
    "place": "Refugio de Tunja",
-   "summary": "Tisquesusa retira a su tío a refugio de territorios recuperados tras derrota de Quimue. Traslado elidido. Nemequene resume aprendizajes concretos y entrega bastón. Muere sin respawn; sobrino recibe tarea de protección, no mandato de repetir conquista.",
+   "summary": "Tisquesusa retira a su tío a Tunja, que abre sus puertas como Quimue prometió. Traslado elidido. Nemequene resume aprendizajes concretos y entrega bastón. Muere sin respawn; sobrino recibe tarea de protección, no mandato de repetir conquista.",
    "objective": "Muerte y legado.",
    "storyboard": "C20",
    "requires": [
@@ -799,6 +859,12 @@
     "tisquesusa_staff"
    ],
    "lines": [
+    {
+     "speaker": "Tisquesusa",
+     "note": "",
+     "text": "Quimue cumplió su palabra. Tunja nos abrió sus puertas.",
+     "cue": ""
+    },
     {
      "speaker": "Nemequene",
      "note": "",
@@ -814,7 +880,7 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "Mira antes de nombrar al enemigo. Escucha a quienes guardan el camino.",
+     "text": "Mira antes de nombrar al enemigo. Quimue lo aprendió tarde; yo también.",
      "cue": ""
     },
     {
@@ -826,7 +892,7 @@
     {
      "speaker": "Nemequene",
      "note": "",
-     "text": "El tiempo de actuar es ahora. Protege a los que aún pueden llegar.",
+     "text": "Escucha a quienes guardan el camino. Protege a los que aún pueden llegar.",
      "cue": ""
     }
    ]
@@ -866,7 +932,7 @@
     {
      "speaker": "Tisquesusa",
      "note": "",
-     "text": "Llevaré su bastón sin repetir su certeza. Primero reuniré a quienes quedan.",
+     "text": "Llevaré su bastón sin repetir su certeza. Reuniré a quienes quedan, de Bacatá y de Tunja.",
      "cue": ""
     }
    ]
@@ -940,7 +1006,7 @@
    "id": "D10",
    "speaker": "Águila",
    "question": "¿Qué espera arriba?",
-   "answer": "Dos voces atadas. Mira cuál cabeza anuncia el ataque.",
+   "answer": "Dos voces atadas. Golpea la cabeza que brilla; lee el cuerpo de la que ataca.",
    "rule": "Prepara serpiente sin revelar solución completa."
   },
   {
