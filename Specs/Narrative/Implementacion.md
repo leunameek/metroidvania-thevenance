@@ -306,6 +306,12 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
   - Todos miran a Nemequene y él mira a quien le habla.
   - Si quien habla le da la espalda, gira el cuerpo.
   - La cámara encuadra a quien habla desde el lado de su interlocutor.
+  - Al terminar el diálogo, quien se giró vuelve a su orientación anterior, salvo que la escena
+    lo haya movido mientras tanto.
+- **Plataforma móvil del mundo superior:**
+  - Al arrastrar al jugador también lo empuja un poco hacia abajo, así sigue apoyado y puede saltar.
+  - La animación descuenta el arrastre (`PlayerController.Carried`), así que ya no camina solo.
+- **Cierre de la cima:** Nemequene abre la puerta de frente a la pared, no girado hacia el receptáculo.
 - **Saguanmachica:** usa el modelo nuevo (`CharacterLibrary.v5` reconstruye los personajes al abrir
   Unity).
 - **Epílogo:**

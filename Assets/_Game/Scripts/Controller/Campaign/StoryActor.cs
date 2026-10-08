@@ -38,6 +38,11 @@ public sealed class StoryActor : MonoBehaviour
     private Quaternion _faceLocal = Quaternion.identity;
     private float _look;
     private Vector3 _lookAt;
+    // The facing before the body turned to talk, to go back to once the conversation is over
+    // (2026-10-07 playtest: Bachué and Quimue stayed turned after their lines).
+    private bool _turned;
+    private Quaternion _restRotation, _setRotation;
+    private Vector3 _setPosition;
 
     public bool IsHero => speaker == Hero;
 
@@ -63,6 +68,7 @@ public sealed class StoryActor : MonoBehaviour
     {
         var other = LookTarget;
         if (other != null) _lookAt = other.Face;
+        if (other == null && _turned) TurnBack();
         _look = Mathf.MoveTowards(_look, other != null ? 1f : 0f, Time.unscaledDeltaTime * 2.5f);
         if (_look <= 0f) return;
         var head = Head;
@@ -96,7 +102,24 @@ public sealed class StoryActor : MonoBehaviour
         float angle = Vector3.SignedAngle(Vector3.ProjectOnPlane(transform.forward, Vector3.up), to, Vector3.up);
         if (Mathf.Abs(angle) < 20f) return;
         float step = Mathf.Sign(angle) * Mathf.Min(Mathf.Abs(angle) - 15f, Time.unscaledDeltaTime * 150f);
+        // Moved or turned by the scene since our last turn: that is its new resting facing.
+        if (!_turned || Moved()) { _restRotation = transform.rotation; _turned = !IsHero; }
         transform.rotation = Quaternion.AngleAxis(step, Vector3.up) * transform.rotation;
+        Remember();
+    }
+
+    private bool Moved() => Quaternion.Angle(transform.rotation, _setRotation) > 1f || (transform.position - _setPosition).sqrMagnitude > .01f;
+    private void Remember() { _setRotation = transform.rotation; _setPosition = transform.position; }
+
+    // Back to the facing it had before the conversation, unless the scene has placed it since.
+    private void TurnBack()
+    {
+        if (Moved()) { _turned = false; return; }
+        var actions = CharacterActions.Of(this);
+        if (actions != null && actions.Posed) return;
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, _restRotation, Time.unscaledDeltaTime * 150f);
+        Remember();
+        if (Quaternion.Angle(transform.rotation, _restRotation) < .5f) _turned = false;
     }
 
     // Where the shot of this speaker is taken from: in front of them, toward the one they talk to.

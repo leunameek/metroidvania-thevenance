@@ -25,6 +25,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     private PlayerController _player;
     private Coroutine _running;
     private Action _pending;
+    private Vector3? _facing;
 
     public static bool Busy(PlayerController player)
     {
@@ -34,10 +35,14 @@ public sealed class PlayerInteraction : MonoBehaviour
 
     // target may be null (no turn). atContact runs once, even when the character has no clip.
     public static void Perform(PlayerController player, Transform target, Action atContact, params string[] states)
+        => Perform(player, target, null, atContact, states);
+
+    // facing: the way he turns to (a door's wall), instead of toward the target itself.
+    public static void Perform(PlayerController player, Transform target, Vector3? facing, Action atContact, params string[] states)
     {
         if (player == null) { atContact?.Invoke(); return; }
         var p = player.GetComponent<PlayerInteraction>() ?? player.gameObject.AddComponent<PlayerInteraction>();
-        p._player = player;
+        p._player = player; p._facing = facing;
         if (p._running != null) { p.StopCoroutine(p._running); p._running = null; p.Flush(); player.SetInputLocked(false); }
         p._pending = atContact;
         p._running = p.StartCoroutine(p.Run(target, states));
@@ -55,9 +60,9 @@ public sealed class PlayerInteraction : MonoBehaviour
     {
         _player.SetInputLocked(true);
         // Turn to the object (a quick step of the shoulders, not a snap).
-        if (target != null)
+        if (target != null || _facing.HasValue)
         {
-            Vector3 to = target.position - _player.transform.position; to.y = 0;
+            Vector3 to = _facing ?? target.position - _player.transform.position; to.y = 0;
             if (to.sqrMagnitude > .01f)
             {
                 Quaternion from = _player.transform.rotation, look = Quaternion.LookRotation(to.normalized);
