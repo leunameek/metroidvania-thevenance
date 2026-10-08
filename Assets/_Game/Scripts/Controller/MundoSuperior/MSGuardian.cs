@@ -216,7 +216,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (_exposedGlow == null || _glowHead != rules.Vulnerable)
         {
             if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
-            _exposedGlow = DuelGlow.Create("Cabeza_Expuesta", head, Vector3.zero, 4.5f);
+            _exposedGlow = DuelGlow.Create("Cabeza_Expuesta", head, Vector3.zero, 5f).WithHalo(1.3f, 1f, _serpent != null ? _serpent.transform : transform);
             _glowHead = rules.Vulnerable;
             _exposedGlow.Set(new Color(1f, .78f, .3f), 1);
             _exposedGlow.Flash();
@@ -227,28 +227,20 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
         _exposedGlow = null; _glowHead = DuelTarget.None;
     }
-    // Head A is the left one (leftArm on the stand-in): on the rigged serpent, the two head bones
-    // sorted by their side; the stand-in's arms otherwise.
+    // The rigged serpent's two heads by their bones (tools/Blender/animate_creatures.py): neck A
+    // ends in tripo::Head_4, neck B in bone_20; the stand-in's arms otherwise.
     private Transform Head(DuelTarget t)
     {
+        // From the bones the skin actually follows (the model may carry a second, unused
+        // armature with the same names).
         if (_serpent != null && (_headA == null || _headB == null))
-        {
-            var heads = new System.Collections.Generic.List<Transform>();
-            foreach (var b in _serpent.GetComponentsInChildren<Transform>(true))
-            {
-                string n = b.name.ToLowerInvariant();
-                if ((n.Contains("head") || n.Contains("cabeza")) && !n.Contains("end") && !n.Contains("top")) heads.Add(b);
-            }
-            // The outermost head bones (the deepest in each chain) of the two sides.
-            Transform left = null, right = null; float minX = float.MaxValue, maxX = float.MinValue;
-            foreach (var h in heads)
-            {
-                float x = _serpent.transform.InverseTransformPoint(h.position).x;
-                if (x < minX) { minX = x; left = h; }
-                if (x > maxX) { maxX = x; right = h; }
-            }
-            if (left != null && right != null && left != right) { _headA = left; _headB = right; }
-        }
+            foreach (var skin in _serpent.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                foreach (var b in skin.bones)
+                {
+                    if (b == null) continue;
+                    if (_headA == null && b.name.EndsWith("Head_4")) _headA = b;
+                    else if (_headB == null && b.name == "bone_20") _headB = b;
+                }
         if (t == DuelTarget.HeadA) return _headA != null ? _headA : leftArm;
         if (t == DuelTarget.HeadB) return _headB != null ? _headB : rightArm;
         return null;

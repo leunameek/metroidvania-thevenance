@@ -20,13 +20,22 @@ namespace Nemequene.UI
             if (theme == null) return TMP_Settings.defaultFontAsset;
             return display ? theme.Display : theme.bodyFont;
         }
+        // How much the HUDs grow with «Tamaño de texto»: 1.1 at 125 %, 1.2 at 150 % (the whole HUD
+        // at 1.5 left no room between its plates; the menus scale their text to the full value).
+        public static float HudScale => 1f + (NaturalInputPrefs.Load().textScale - 1f) * .4f;
+        // Width of the canvas in its own units (the reference shrinks as the HUD grows).
+        public static float HudWidth => 1920f / HudScale;
+
         public static RectTransform ScreenCanvas(Transform parent, string name, int order)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             var canvas = go.AddComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = order;
             var scaler = go.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080);
+            // The «Tamaño de texto» option enlarges the whole HUD (boxes and text together), so a
+            // larger text never spills out of its plate (2026-10-08: duels and worlds ignored it).
+            float scale = HudScale;
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080) / scale;
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight; scaler.matchWidthOrHeight = .5f;
             return (RectTransform)go.transform;
         }

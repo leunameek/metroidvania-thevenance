@@ -24,6 +24,7 @@ public sealed class TurnDuelHUD
     private readonly Action<int> _target;
     private readonly Action<DuelDefense> _defend;
     private string _signature = "";
+    private readonly float _barWidth;
 
     public TurnDuelHUD(Transform parent, string enemyName, Action<DuelAction> act, Action<int> target, Action<DuelDefense> defend)
     {
@@ -69,7 +70,11 @@ public sealed class TurnDuelHUD
 
         // The choices on one plate at the bottom (right of the vitality): the buttons and, under
         // them, how to answer.
-        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(.5f, 0), new Vector2(240, 44), new Vector2(1260, 150));
+        // Right of the vitality frame (40 + 452) whatever the HUD scale: the bar takes the rest of
+        // the width up to 1260 (2026-10-08: a larger HUD pushed it over the vitality and off screen).
+        _barWidth = Mathf.Min(1260f, UIKit.HudWidth - 40f - 452f - 24f - 40f);
+        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(1, 0), new Vector2(-40, 44), new Vector2(_barWidth, 150));
+        bar.pivot = new Vector2(1, 0); bar.anchoredPosition = new Vector2(-40, 44);
         _actions = UIKit.Rect("Actions", bar); _actions.anchorMin = new Vector2(0, .42f); _actions.offsetMin = new Vector2(30, 0); _actions.offsetMax = new Vector2(-30, -14);
         var row = _actions.gameObject.AddComponent<HorizontalLayoutGroup>();
         row.spacing = 10; row.childAlignment = TextAnchor.MiddleCenter;
@@ -163,7 +168,7 @@ public sealed class TurnDuelHUD
         _signature = signature;
         for (int i = _actions.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(_actions.GetChild(i).gameObject);
         // Each button as wide as its words (with room for the ribbon's ends), all within the bar.
-        float available = 1200 - 10 * (entries.Count - 1);
+        float available = _barWidth - 60 - 10 * (entries.Count - 1);
         var widths = new List<float>(); float total = 0;
         foreach (var (label, _, _) in entries)
         {

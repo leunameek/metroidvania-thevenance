@@ -122,7 +122,7 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         }
         var prefs = NaturalInputPrefs.Load();
         TurnDuelController.Run(new QuimueRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), null, null, prefs.reactionScale, OnFinalEnded);
-        if (_originGlow == null && _quimue != null) _originGlow = DuelGlow.Create("Origen_Quimue", _quimue, Vector3.up * 1.3f, 6f);
+        if (_originGlow == null && _quimue != null) _originGlow = DuelGlow.Create("Origen_Quimue", _quimue, Vector3.up * 1.3f, 6f).WithHalo(1.1f, .7f);
         ShowOrigin(true);
     }
 

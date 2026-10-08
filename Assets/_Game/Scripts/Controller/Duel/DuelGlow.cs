@@ -11,6 +11,9 @@ public sealed class DuelGlow : MonoBehaviour
     private Vector3 _offset;
     private Color _color;
     private float _strength, _shown;
+    private TelegraphMark _halo;
+    private float _haloHeight, _haloRadius;
+    private Transform _haloCentre;
 
     public static DuelGlow Create(string name, Transform follow, Vector3 offset, float range = 5f)
     {
@@ -38,13 +41,28 @@ public sealed class DuelGlow : MonoBehaviour
         return glow;
     }
 
+    // A golden ring floating above the body part, turned to the camera, readable from the high duel camera even
+    // over a bright sky (2026-10-08 playtest: the light alone did not show which head was open).
+    // centre: the ring leans outward from it (to the side of its own head) so two heads that
+    // stand close never share one ring and it stays clear of the HUD above.
+    public DuelGlow WithHalo(float height, float radius, Transform centre = null)
+    {
+        _haloCentre = centre;
+        _haloHeight = height;
+        _halo = TelegraphMark.Create(transform, "Halo");
+        _haloRadius = radius;
+        _halo.Show(transform.position + Vector3.up * height, radius, _color.a > 0 ? _color : new Color(1f, .8f, .3f));
+        return this;
+    }
+
     // strength 0 hides it; 1 is the full reading glow.
     public void Set(Color color, float strength)
     {
         _color = color; _strength = Mathf.Clamp01(strength);
         _light.color = color;
+        if (_halo != null) _halo.Show(transform.position + Vector3.up * _haloHeight, _haloRadius, color);
         var main = _aura.main; main.startColor = new Color(color.r, color.g, color.b, .85f);
-        var emission = _aura.emission; emission.rateOverTime = 28f * _strength;
+        var emission = _aura.emission; emission.rateOverTime = 45f * _strength;
     }
 
     // A moment brighter (the origin just announced itself).
@@ -56,7 +74,24 @@ public sealed class DuelGlow : MonoBehaviour
         transform.position = _follow.position + _offset;
         _shown = Mathf.MoveTowards(_shown, _strength, Time.deltaTime * 1.5f);
         float pulse = .8f + .2f * Mathf.Sin(Time.time * 3.2f);
-        _light.intensity = _shown * 6f * pulse;
+        _light.intensity = _shown * 9f * pulse;
         _light.enabled = _shown > .01f;
+        if (_halo != null)
+        {
+            // Upright toward the camera (a flat ring was seen edge-on from the duel camera).
+            var cam = Camera.main;
+            Vector3 lift = Vector3.up * (_haloHeight + .08f * Mathf.Sin(Time.time * 2.4f));
+            if (cam != null && _haloCentre != null)
+            {
+                float side = Mathf.Sign(Vector3.Dot(transform.position - _haloCentre.position, cam.transform.right));
+                // Around the head itself, nudged a little outward: it never climbs under the HUD.
+                lift = cam.transform.right * side * _haloHeight * .25f;
+            }
+            _halo.transform.position = transform.position + lift;
+            if (cam != null) _halo.transform.rotation = cam.transform.rotation * Quaternion.Euler(-90, 0, 0);
+            _halo.RingOnly(.75f + .25f * pulse); // a crisp ring, not a filled disc (it read as another glowing orb)
+            _halo.transform.localScale = Vector3.one * (.9f + .15f * pulse);
+            _halo.gameObject.SetActive(_shown > .05f);
+        }
     }
 }
