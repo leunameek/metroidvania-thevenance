@@ -302,6 +302,9 @@ public abstract class DuelRules
     public virtual DuelTarget[] Targets => new DuelTarget[0];
     // One line for the HUD under the enemy name (bonds, exposed core, posture...).
     public virtual string Status(TurnDuelModel duel) => "";
+    // The same without what the player should read from the enemy itself (who is exposed, active
+    // or elevated): only the bonds still to cut.
+    public virtual string Progress(TurnDuelModel duel) => "";
 
     public virtual void Begin(TurnDuelModel duel) { }
     public virtual bool IsLegal(TurnDuelModel duel, DuelAction action, ref string reason)

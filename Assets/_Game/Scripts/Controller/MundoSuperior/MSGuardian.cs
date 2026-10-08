@@ -30,6 +30,10 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     public Transform PlayerMark => playerMark;
 
     private CharacterActions _serpent;
+    // The exposed head is read from its gold glow, not from the HUD (2026-10-07 playtest).
+    private DuelGlow _exposedGlow;
+    private DuelTarget _glowHead = DuelTarget.None;
+    private Transform _headA, _headB;
 
     private void Start()
     {
@@ -80,6 +84,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         var director = MundoSuperiorDirector.Instance;
         _duel = TurnDuelController.Run(new SerpentRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), _player.GetComponent<Health>(),
             director != null ? director.Natural : null, director != null ? director.ReactionMultiplier : 1f, OnDuelEnded);
+        ShowExposed();
     }
 
     // Defeat or abandon: no duel, model at rest; the next attempt starts over.
@@ -87,6 +92,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         if (_duel != null) { var d = _duel; _duel = null; d.Abort(); }
         _fighting = false; _move = null;
+        HideExposed();
         Pose(0, 0, 0);
         SetCore(_coreBase, 1);
         foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
@@ -97,6 +103,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     private void OnDuelEnded(bool victory)
     {
         _duel = null;
+        HideExposed();
         if (!victory) return; // the director's defeat flow resets the encounter
         MSProgress.Set(MSProgress.Guardian);
         MSAudio.Play("victoria", 1f);
@@ -122,6 +129,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (move.Id == "fragmentos") MSAudio.Play("jefe_golpe", .6f); // the falling stone fragments
         if (correct && move.Id == "barrido" && _player != null) _player.PerformDodge(move.Origin == DuelTarget.HeadA ? 1 : -1);
         _move = null;
+        ShowExposed();
     }
 
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
@@ -137,6 +145,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
 
     public void OnDecide()
     {
+        ShowExposed();
         foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
         SetCore(_coreBase, 1);
     }
@@ -195,5 +204,53 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (body != null) body.localRotation = Quaternion.Euler(18f, 0, 0);
         Pose(30f, 30f, 0);
         SetCore(new Color(.25f, .22f, .2f), 0);
+    }
+
+    // ---------- exposed head ----------
+    private void ShowExposed()
+    {
+        var rules = _duel != null ? _duel.Model.Rules as SerpentRules : null;
+        if (rules == null) return;
+        var head = Head(rules.Vulnerable);
+        if (head == null) return;
+        if (_exposedGlow == null || _glowHead != rules.Vulnerable)
+        {
+            if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
+            _exposedGlow = DuelGlow.Create("Cabeza_Expuesta", head, Vector3.zero, 4.5f);
+            _glowHead = rules.Vulnerable;
+            _exposedGlow.Set(new Color(1f, .78f, .3f), 1);
+            _exposedGlow.Flash();
+        }
+    }
+    private void HideExposed()
+    {
+        if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
+        _exposedGlow = null; _glowHead = DuelTarget.None;
+    }
+    // Head A is the left one (leftArm on the stand-in): on the rigged serpent, the two head bones
+    // sorted by their side; the stand-in's arms otherwise.
+    private Transform Head(DuelTarget t)
+    {
+        if (_serpent != null && (_headA == null || _headB == null))
+        {
+            var heads = new System.Collections.Generic.List<Transform>();
+            foreach (var b in _serpent.GetComponentsInChildren<Transform>(true))
+            {
+                string n = b.name.ToLowerInvariant();
+                if ((n.Contains("head") || n.Contains("cabeza")) && !n.Contains("end") && !n.Contains("top")) heads.Add(b);
+            }
+            // The outermost head bones (the deepest in each chain) of the two sides.
+            Transform left = null, right = null; float minX = float.MaxValue, maxX = float.MinValue;
+            foreach (var h in heads)
+            {
+                float x = _serpent.transform.InverseTransformPoint(h.position).x;
+                if (x < minX) { minX = x; left = h; }
+                if (x > maxX) { maxX = x; right = h; }
+            }
+            if (left != null && right != null && left != right) { _headA = left; _headB = right; }
+        }
+        if (t == DuelTarget.HeadA) return _headA != null ? _headA : leftArm;
+        if (t == DuelTarget.HeadB) return _headB != null ? _headB : rightArm;
+        return null;
     }
 }

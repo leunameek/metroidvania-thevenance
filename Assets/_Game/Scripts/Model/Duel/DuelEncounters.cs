@@ -41,6 +41,7 @@ public sealed class HybridGuardianRules : DuelRules
 
     public override string Status(TurnDuelModel duel) =>
         $"Ataduras {BondsLeft} / 2   ·   Núcleo {(CoreOpen ? "expuesto" : "cerrado")}";
+    public override string Progress(TurnDuelModel duel) => $"Ataduras {BondsLeft} / 2";
     public bool JaguarBreaksBond(TurnDuelModel duel) =>
         CoreOpen && (BondsLeft == 2 || (BondsLeft == 1 && duel.EnemyHealth <= 80));
 
@@ -112,6 +113,7 @@ public sealed class SerpentRules : DuelRules
     public override bool NeedsTarget(DuelAction action) => action != DuelAction.Horn;
     public override string Status(TurnDuelModel duel) =>
         $"Vulnerable: {TurnDuelModel.TargetName(Vulnerable)}   ·   Vínculo A {BondA}   ·   Vínculo B {BondB}";
+    public override string Progress(TurnDuelModel duel) => $"Vínculo A {BondA}   ·   Vínculo B {BondB}";
     public override void Apply(TurnDuelModel duel, ref DuelHit hit)
     {
         string head = TurnDuelModel.TargetName(hit.Target);
@@ -260,6 +262,7 @@ public sealed class QuimueRules : DuelRules
     public bool AnchorsCut => MoonAnchor == 0 && SunAnchor == 0;
     public override string Status(TurnDuelModel duel) =>
         $"Origen activo: {TurnDuelModel.TargetName(ActiveOrigin)}   ·   Luna {MoonAnchor}   ·   Sol {SunAnchor}";
+    public override string Progress(TurnDuelModel duel) => $"Luna {MoonAnchor}   ·   Sol {SunAnchor}";
     private int _step;
     private bool _unionPending;
 

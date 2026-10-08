@@ -12,6 +12,9 @@ using UnityEngine.UI;
 public sealed class TurnDuelHUD
 {
     private readonly GameObject _root;
+    // The announcement/result plate: only a tutorial (a new signal's card) or the accessibility
+    // option shows it; otherwise the player reads the duel from the world (2026-10-07 playtest).
+    private readonly GameObject _info;
     private readonly TMP_Text _enemy, _status, _banner, _verbs, _message, _concentration, _hint;
     private readonly Image _enemyHealth, _window, _bannerPlate, _playerHealth;
     private readonly TMP_Text _playerValue;
@@ -47,6 +50,7 @@ public sealed class TurnDuelHUD
         _window = UIKit.Bar(windowHolder, new Vector2(520, 14), UIPalette.GoldLight);
         // The announcement and the result on their own plate (they used to float over the sky).
         var info = UIKit.Place(UIKit.HudPanel(canvas, "Info"), new Vector2(.5f, 1), new Vector2(0, -276), new Vector2(1040, 118));
+        _info = info.gameObject;
         _verbs = UIKit.Label(info, "", 26, UIPalette.GoldLight);
         _verbs.rectTransform.anchorMin = new Vector2(0, .52f); _verbs.rectTransform.offsetMin = new Vector2(40, 0); _verbs.rectTransform.offsetMax = new Vector2(-40, -10);
         _verbs.enableAutoSizing = true; _verbs.fontSizeMax = 26; _verbs.fontSizeMin = 18; _verbs.textWrappingMode = TextWrappingModes.NoWrap;
@@ -81,7 +85,11 @@ public sealed class TurnDuelHUD
     public void Refresh(TurnDuelModel m, bool force)
     {
         _enemyHealth.fillAmount = m.EnemyMaxHealth > 0 ? (float)m.EnemyHealth / m.EnemyMaxHealth : 0;
-        _status.text = m.Rules.Status(m);
+        // Who is exposed or active (head, moon/sun, core) is read from the enemy's glow; the line
+        // keeps only the bonds left, unless the player asked to see everything.
+        _status.text = m.ShowAnswers ? m.Rules.Status(m) : m.Rules.Progress(m);
+        bool plate = m.ShowAnswers || !string.IsNullOrEmpty(Lesson);
+        if (_info.activeSelf != plate) _info.SetActive(plate);
         float health = (float)m.PlayerHealth / TurnDuelModel.PlayerMaxHealth;
         _playerShown = _playerShown < 0 ? health : Mathf.MoveTowards(_playerShown, health, Time.unscaledDeltaTime * 1.4f);
         _playerHealth.fillAmount = _playerShown;

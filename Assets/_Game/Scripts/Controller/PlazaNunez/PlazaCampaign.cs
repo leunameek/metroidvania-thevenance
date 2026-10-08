@@ -31,6 +31,18 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     // ---------- Quimue (C16, E11, C17) ----------
     private Transform _quimue;
     private Light _quimueLight;
+    // Which anchor is active is read from Quimue's glow, not from the HUD: gold for the sun,
+    // silver-blue for the moon (2026-10-07 playtest).
+    private DuelGlow _originGlow;
+    private static readonly Color SunGlow = new Color(1f, .74f, .22f), MoonGlow = new Color(.55f, .7f, 1f);
+    private static Color OriginColor(DuelTarget t) => t == DuelTarget.Sun ? SunGlow : MoonGlow;
+    private void ShowOrigin(bool flash = false)
+    {
+        var rules = TurnDuelController.Current != null ? TurnDuelController.Current.Model.Rules as QuimueRules : null;
+        if (_originGlow == null || rules == null) return;
+        _originGlow.Set(OriginColor(rules.ActiveOrigin), rules.AnchorsCut ? 0 : 1);
+        if (flash) _originGlow.Flash();
+    }
     private bool _c16Queued, _finalRunning;
     private System.Collections.Generic.List<Renderer> _guardianRenderers;
     private bool _guardianHidden;
@@ -110,11 +122,14 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         }
         var prefs = NaturalInputPrefs.Load();
         TurnDuelController.Run(new QuimueRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), null, null, prefs.reactionScale, OnFinalEnded);
+        if (_originGlow == null && _quimue != null) _originGlow = DuelGlow.Create("Origen_Quimue", _quimue, Vector3.up * 1.3f, 6f);
+        ShowOrigin(true);
     }
 
     private void OnFinalEnded(bool victory)
     {
         _finalRunning = false;
+        if (_originGlow != null) _originGlow.Set(MoonGlow, 0);
         _demo.Player.SetInputLocked(false);
         if (!victory)
         {
@@ -129,17 +144,19 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     public Transform Focus => _quimue;
     public void OnTelegraph(DuelMove move)
     {
-        if (_quimueLight != null) { _quimueLight.color = move.Origin == DuelTarget.Sun ? new Color(1f, .78f, .3f) : new Color(.6f, .7f, 1f); _quimueLight.intensity = 6f; }
+        if (_quimueLight != null) { _quimueLight.color = OriginColor(move.Origin); _quimueLight.intensity = 6f; }
+        if (_originGlow != null) { _originGlow.Set(OriginColor(move.Origin), 1); _originGlow.Flash(); }
     }
     public void OnResolved(DuelMove move, bool correct)
     {
         if (_quimueLight != null) _quimueLight.intensity = 2.5f;
+        ShowOrigin();
     }
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
     {
         if (_quimue != null) MIBurst.Spawn(_quimue.position + Vector3.up * 1.4f, target == DuelTarget.Sun ? new Color(1f, .8f, .35f) : new Color(.65f, .75f, 1f));
     }
-    public void OnDecide() { }
+    public void OnDecide() => ShowOrigin();
 
     // ---------- Bachué ----------
     private void BuildBachue(Vector3 spawn)
