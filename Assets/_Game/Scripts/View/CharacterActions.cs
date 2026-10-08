@@ -11,8 +11,8 @@ public sealed class CharacterActions : MonoBehaviour
     [Tooltip("State the character rests in (Locomotion for humanoids, Idle for creatures).")]
     public string restState = "Locomotion";
     [SerializeField] private Animator animator;
-    [Tooltip("Half width and half depth of the body around the hips (m, at scale 1); hands are kept outside it. 0 = off.")]
-    [SerializeField] private Vector2 bodyClearance;
+    [Tooltip("Half width at the hips, half depth, and half width at the thighs (a skirt, a robe; 0 = as at the hips), in m at scale 1; hands are kept outside. 0 = off.")]
+    [SerializeField] private Vector3 bodyClearance;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private bool _hasSpeed;
@@ -81,7 +81,7 @@ public sealed class CharacterActions : MonoBehaviour
             _chest = animator.GetBoneTransform(HumanBodyBones.Chest) ?? animator.GetBoneTransform(HumanBodyBones.Spine);
             _leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm); _leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _rightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm); _rightHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
-            if (_hips == null || _chest == null) { bodyClearance = Vector2.zero; return; }
+            if (_hips == null || _chest == null) { bodyClearance = Vector3.zero; return; }
         }
         Clear(_leftArm, _leftHand);
         Clear(_rightArm, _rightHand);
@@ -104,7 +104,9 @@ public sealed class CharacterActions : MonoBehaviour
         if (band <= 0) return;
         Vector3 center = _hips.position + up * y;
         float x = Vector3.Dot(h - center, right), z = Vector3.Dot(h - center, forward);
-        float a = bodyClearance.x * s, b = bodyClearance.y * s;
+        // Wider below the hips when the body flares there (Saguanmachica's robe).
+        float thighs = bodyClearance.z > 0 ? bodyClearance.z : bodyClearance.x;
+        float a = Mathf.Lerp(bodyClearance.x, thighs, Mathf.Clamp01(-y / (.3f * s))) * s, b = bodyClearance.y * s;
         float e = x * x / (a * a) + z * z / (b * b);
         if (e >= 1f) return;
         if (e < 1e-4f) { x = (arm == _leftArm ? -1 : 1) * a * .1f; e = x * x / (a * a); }

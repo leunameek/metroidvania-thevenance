@@ -284,9 +284,11 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
 
 ## Cuarta ronda de prueba del 2026-10-07
 
-- **Bachué:** sus manos ya no atraviesan la cadera ni el vientre. `CharacterActions` aparta el brazo
-  desde el hombro cuando la mano cae dentro del cuerpo (una elipse alrededor de la cadera, medida
-  por personaje en `CharacterLibrarySetup`).
+- **Bachué y Saguanmachica:** sus manos ya no atraviesan el cuerpo. `CharacterActions` aparta el
+  brazo desde el hombro cuando la mano cae dentro de una elipse alrededor de la cadera. La elipse
+  se mide por personaje en `CharacterLibrarySetup`, con un ancho propio en los muslos cuando el
+  cuerpo se abre ahí, como el faldón de Saguanmachica. La versión v6 de la biblioteca reconstruye
+  los personajes.
 - **Mundo inferior:**
   - Los tramos y rellanos de los pasillos entre salas se pisaban a la misma altura y su textura
     parpadeaba. Ahora se dibujan 1,5 cm más abajo por cada pieza que se pisa; la colisión no cambia.
