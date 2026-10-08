@@ -56,6 +56,8 @@ public sealed class MSFind : MIInteractable
     {
         if (halo != null) _haloIntensity = halo.intensity;
         if (Fits && item != null) _fit = new FitPuzzle(item);
+        // It glows, under a column of light, while it waits to be examined.
+        if (item != null) Beacon.Attach(gameObject, item, () => Available);
         Refresh();
     }
 

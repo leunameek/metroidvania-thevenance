@@ -209,6 +209,7 @@ public sealed class StoryPlayer : MonoBehaviour
             if (StoryActor.Find("Nemequene") == null) StoryActor.Ensure(_player.gameObject, "Nemequene", 1.55f);
         }
         Hook();
+        StoryActor.Conversing = true; StoryActor.Partner = null;
         _view.SetTitle(request.Title);
         _view.SetHint(VoicePrompt.Enabled ? "Di «siguiente» (o E)     Mantén Esc · Saltar" : "E / Espacio · Siguiente     Mantén Esc · Saltar");
         _view.Show(true);
@@ -223,6 +224,7 @@ public sealed class StoryPlayer : MonoBehaviour
         _view.SetLine(line.speaker, line.note, line.text);
         var actor = StoryActor.Find(line.speaker);
         StoryActor.Speaking = actor;
+        if (actor != null && !actor.IsHero) StoryActor.Partner = actor;
         // A line about something in the place (the crack, the falling stones) looks at it.
         var focus = StoryFocus.Find(line.cue);
         if (!(focus.HasValue && Frame(actor, focus.Value))) Frame(actor);
@@ -248,7 +250,7 @@ public sealed class StoryPlayer : MonoBehaviour
         if (!done.Repeatable) CampaignProgress.Set(done.Key);
         if (done.Complete && done.Sequence != null) CampaignProgress.CompleteSequence(done.Sequence.id);
         _view.Show(false);
-        StoryActor.Speaking = null;
+        StoryActor.Speaking = null; StoryActor.Partner = null; StoryActor.Conversing = false;
         if (_talking != null && _talking.Talking) _talking.Rest();
         _talking = null;
         RestoreCamera();
@@ -295,12 +297,14 @@ public sealed class StoryPlayer : MonoBehaviour
             }
             _framing = true;
         }
-        // Three-quarter close shot from the side the camera already was. Someone lying is seen
-        // from above, beside them.
+        // Three-quarter close shot from in front of the speaker, on the side of the one they talk
+        // to (they turn to each other), or else from the side the camera already was. Someone
+        // lying is seen from above, beside them.
         Vector3 face = actor.Face;
         bool lying = actor.Lying;
         float distance = lying ? 2.2f : 2.6f, rise = lying ? 1.4f : .3f;
         Vector3 side = _cameraPosition - face; side.y = 0;
+        if (!lying && actor.Facing.HasValue) side = actor.Facing.Value;
         if (side.sqrMagnitude < .01f) side = actor.transform.forward;
         side = side.normalized;
         // First clear three-quarter angle: nobody (the player included) stands between.

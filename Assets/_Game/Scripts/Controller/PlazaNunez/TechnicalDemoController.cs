@@ -130,10 +130,31 @@ public sealed class TechnicalDemoController : MonoBehaviour
         StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting && PlazaPieceInspection.Active == null);
         Campaign = PlazaCampaign.Create(this);
         if (combat != null && combat.Guardian != null) StoryActor.Ensure(combat.Guardian.gameObject, "Guardián de entrenamiento", 1.9f);
+        Guide();
         SyncCampaign();
         StoryPlayer.Trigger(StoryTriggers.PlazaArrival);
         if (WorldTravel.ReturningFrom != 0) ArriveFromWorld(WorldTravel.ReturningFrom);
         WorldTravel.ClearReturn();
+    }
+
+    // What the player should go to next glows and stands under a column of light (2026-10-07
+    // playtest: the stations were not seen): the stations not yet examined, then the training
+    // guardian, then the portal of the world the story sends him to.
+    private void Guide()
+    {
+        bool Exploring() => State == TechnicalDemoState.Exploration && PlazaPieceInspection.Active == null;
+        foreach (var item in objects)
+            if (item != null) { var station = item; Beacon.Attach(station.gameObject, station.transform, () => Exploring() && !station.Completed); }
+        if (combat != null && combat.Guardian != null)
+            Beacon.Attach(combat.gameObject, combat.Guardian, () => Exploring() && Objectives.IsComplete && !combat.Completed
+                && CampaignProgress.Model.Chapter <= CampaignChapter.PlazaTutorial);
+        foreach (var portal in portals)
+        {
+            if (portal == null) continue;
+            var gate = portal;
+            Beacon.Attach(gate.gameObject, gate.transform, () => Exploring() && gate.Available
+                && (gate.world < 0 ? CampaignProgress.Model.Chapter == CampaignChapter.LowerWorld : CampaignProgress.Model.Chapter == CampaignChapter.UpperWorld));
+        }
     }
 
     private void Update()

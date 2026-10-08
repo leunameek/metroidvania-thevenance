@@ -11,6 +11,8 @@ public sealed class CharacterActions : MonoBehaviour
     [Tooltip("State the character rests in (Locomotion for humanoids, Idle for creatures).")]
     public string restState = "Locomotion";
     [SerializeField] private Animator animator;
+    [Tooltip("Half width at the hips, half depth, and half width at the thighs (a skirt, a robe; 0 = as at the hips), in m at scale 1; hands are kept outside. 0 = off.")]
+    [SerializeField] private Vector3 bodyClearance;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private bool _hasSpeed;
@@ -63,6 +65,55 @@ public sealed class CharacterActions : MonoBehaviour
         }
         if (info.shortNameHash != hash) { animator.Play(hash, 0, .99f); animator.speed = 0; return; }
         if (info.normalizedTime >= .97f) animator.speed = 0;
+    }
+
+    // Clips made for a slim body put the hands of a wider one inside it (2026-10-07 playtest: Bachué's
+    // hands went through her hips and belly). After the clip has posed the body, a hand that falls
+    // inside the body (an ellipse around the line from the hips to the chest, from the thighs to the
+    // chest) is carried out to its edge by turning the upper arm at the shoulder.
+    private Transform _hips, _chest, _leftArm, _leftHand, _rightArm, _rightHand;
+    private void LateUpdate()
+    {
+        if (bodyClearance.x <= 0 || animator == null || !animator.isActiveAndEnabled || !animator.isHuman) return;
+        if (_hips == null)
+        {
+            _hips = animator.GetBoneTransform(HumanBodyBones.Hips);
+            _chest = animator.GetBoneTransform(HumanBodyBones.Chest) ?? animator.GetBoneTransform(HumanBodyBones.Spine);
+            _leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm); _leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _rightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm); _rightHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            if (_hips == null || _chest == null) { bodyClearance = Vector3.zero; return; }
+        }
+        Clear(_leftArm, _leftHand);
+        Clear(_rightArm, _rightHand);
+    }
+
+    private void Clear(Transform arm, Transform hand)
+    {
+        if (arm == null || hand == null) return;
+        float s = transform.lossyScale.x;
+        Vector3 up = (_chest.position - _hips.position);
+        float span = up.magnitude;
+        // Someone lying or bent double is left as the clip has them.
+        if (span < .05f * s || Vector3.Dot(up / span, transform.up) < .7f) return;
+        up /= span;
+        Vector3 right = Vector3.ProjectOnPlane(transform.right, up).normalized, forward = Vector3.Cross(right, up);
+        Vector3 h = hand.position;
+        float y = Vector3.Dot(h - _hips.position, up);
+        // From the thighs to the chest, fading at both ends.
+        float band = Mathf.Clamp01((y + .62f * s) / (.12f * s)) * Mathf.Clamp01((span - y) / (.1f * s));
+        if (band <= 0) return;
+        Vector3 center = _hips.position + up * y;
+        float x = Vector3.Dot(h - center, right), z = Vector3.Dot(h - center, forward);
+        // Wider below the hips when the body flares there (Saguanmachica's robe).
+        float thighs = bodyClearance.z > 0 ? bodyClearance.z : bodyClearance.x;
+        float a = Mathf.Lerp(bodyClearance.x, thighs, Mathf.Clamp01(-y / (.3f * s))) * s, b = bodyClearance.y * s;
+        float e = x * x / (a * a) + z * z / (b * b);
+        if (e >= 1f) return;
+        if (e < 1e-4f) { x = (arm == _leftArm ? -1 : 1) * a * .1f; e = x * x / (a * a); }
+        float k = 1f / Mathf.Sqrt(e);
+        Vector3 target = center + right * (x * k) + forward * (z * k);
+        var turn = Quaternion.FromToRotation(h - arm.position, target - arm.position);
+        arm.rotation = Quaternion.Slerp(Quaternion.identity, turn, band) * arm.rotation;
     }
 
     // The nearest acting component of a character: on it, under it, or above it.

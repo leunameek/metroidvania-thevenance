@@ -79,6 +79,11 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         StoryPlayer.Listen();
         StoryPlayer.AddGate(this, () => !_paused && !_dead && MIFind.Inspecting == null && (!InFight || (_guardian != null && _guardian.Fighting)));
         SolidRocks();
+        SeparateFloors();
+        // The shortcut lever of the bracelets gallery opened a door onto nothing (2026-10-07
+        // playtest): it is gone, and its gates stay shut.
+        foreach (var lever in FindObjectsByType<MILever>(FindObjectsSortMode.None))
+            if (lever.name.Contains("Palanca del atajo")) Destroy(lever.gameObject);
         StoryFocus.Register("derrumbe", CrackFocus);
         EnterRoom(0);
         // Cave bed (air, distant water) crossfaded from the plaza; stones settle and a bat passes
@@ -103,6 +108,9 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
         foreach (var r in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
         {
             if (!r.name.StartsWith("T08") || Solid(r.transform)) continue;
+            // The stone bodies of the guardian and the shield sentinel are T08 rocks too, but they
+            // vanish when beaten: a wall for them stayed behind as an invisible block (2026-10-07).
+            if (r.GetComponentInParent<MIGuardian>(true) != null || r.GetComponentInParent<MIShieldSentinel>(true) != null) continue;
             var b = r.bounds;
             var wall = new GameObject("Muro " + r.name).transform;
             wall.gameObject.layer = 2; // Ignore Raycast: it stops him, not the camera or the ground checks
@@ -112,6 +120,88 @@ public sealed class MundoInferiorBlockout : MonoBehaviour
             box.size = new Vector3(b.size.x * .78f, b.size.y + 6f, b.size.z * .78f);
             box.center = Vector3.up * box.size.y * .5f;
         }
+    }
+
+    // The ramps and landings between rooms (Traversal) overlap each other and the room floors at the
+    // same height, and their textures flickered where they met (2026-10-07 playtest). Each piece
+    // that overlaps another at its height is drawn again a little lower (1.5 cm per step, never at
+    // the step of a piece it overlaps); its collider stays where it was. The pieces are static and
+    // batched, so the box is rebuilt (same size, same tiling) instead of moved.
+    private static void SeparateFloors()
+    {
+        var pieces = new System.Collections.Generic.List<(MeshRenderer renderer, BoxCollider box, bool traversal)>();
+        foreach (var r in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+        {
+            var box = r.GetComponent<BoxCollider>();
+            var b = r.bounds;
+            if (box == null || box.isTrigger || !r.enabled || r.sharedMaterials.Length != 2 || b.size.y > 2.2f || b.size.x < .3f || b.size.z < .3f) continue;
+            bool traversal = false;
+            for (var p = r.transform.parent; p != null; p = p.parent) if (p.name == "Traversal") { traversal = true; break; }
+            pieces.Add((r, box, traversal));
+        }
+        pieces.Sort((a, b) => a.traversal.CompareTo(b.traversal));
+        var levels = new int[pieces.Count];
+        for (int i = 0; i < pieces.Count; i++)
+        {
+            if (!pieces[i].traversal) continue;
+            var used = new System.Collections.Generic.HashSet<int>();
+            bool overlaps = false;
+            for (int j = 0; j < pieces.Count; j++)
+            {
+                if (j == i || (j > i && pieces[j].traversal)) continue;
+                Bounds a = pieces[i].renderer.bounds, o = pieces[j].renderer.bounds;
+                if (Mathf.Abs(a.max.y - o.max.y) > .03f) continue;
+                if (Mathf.Min(a.max.x, o.max.x) - Mathf.Max(a.min.x, o.min.x) <= .02f || Mathf.Min(a.max.z, o.max.z) - Mathf.Max(a.min.z, o.min.z) <= .02f) continue;
+                overlaps = true; used.Add(levels[j]);
+            }
+            if (!overlaps) continue;
+            int level = 1; while (used.Contains(level)) level++;
+            levels[i] = level;
+            var source = pieces[i].renderer;
+            var copy = new GameObject(source.name + " (vista)").transform;
+            copy.SetParent(source.transform.parent, false);
+            copy.localPosition = source.transform.localPosition; copy.localRotation = source.transform.localRotation; copy.localScale = source.transform.localScale;
+            copy.position += Vector3.down * (.015f * level);
+            copy.gameObject.AddComponent<MeshFilter>().sharedMesh = FloorBox(pieces[i].box.size);
+            var view = copy.gameObject.AddComponent<MeshRenderer>();
+            view.sharedMaterials = source.sharedMaterials;
+            view.shadowCastingMode = source.shadowCastingMode; view.receiveShadows = source.receiveShadows;
+            source.enabled = false;
+        }
+    }
+
+    // The builder's block (MundoInferiorBlockoutBuilder.BoxMesh): UVs in metres, 2 m per texture
+    // repeat, the top face as submesh 0 and the rest as submesh 1.
+    private static readonly System.Collections.Generic.Dictionary<Vector3, Mesh> FloorBoxes = new System.Collections.Generic.Dictionary<Vector3, Mesh>();
+    private static Mesh FloorBox(Vector3 size)
+    {
+        if (FloorBoxes.TryGetValue(size, out var cached) && cached != null) return cached;
+        var h = size * .5f;
+        var vertices = new System.Collections.Generic.List<Vector3>(); var normals = new System.Collections.Generic.List<Vector3>(); var uvs = new System.Collections.Generic.List<Vector2>();
+        var top = new System.Collections.Generic.List<int>(); var sides = new System.Collections.Generic.List<int>();
+        void Face(Vector3 n, Vector3 u, Vector3 v, float du, float dv, System.Collections.Generic.List<int> tris)
+        {
+            int i = vertices.Count;
+            Vector3 c = Vector3.Scale(n, h);
+            Vector3 hu = u * Vector3.Scale(u, h).magnitude, hv = v * Vector3.Scale(v, h).magnitude;
+            vertices.Add(c - hu - hv); vertices.Add(c - hu + hv); vertices.Add(c + hu + hv); vertices.Add(c + hu - hv);
+            for (int k = 0; k < 4; k++) normals.Add(n);
+            const float tile = .5f;
+            uvs.Add(new Vector2(0, 0)); uvs.Add(new Vector2(0, dv * tile)); uvs.Add(new Vector2(du * tile, dv * tile)); uvs.Add(new Vector2(du * tile, 0));
+            tris.AddRange(new[] { i, i + 1, i + 2, i, i + 2, i + 3 });
+        }
+        Face(Vector3.up, Vector3.right, Vector3.forward, size.x, size.z, top);
+        Face(Vector3.down, Vector3.right, Vector3.back, size.x, size.z, sides);
+        Face(Vector3.forward, Vector3.left, Vector3.up, size.x, size.y, sides);
+        Face(Vector3.back, Vector3.right, Vector3.up, size.x, size.y, sides);
+        Face(Vector3.right, Vector3.forward, Vector3.up, size.z, size.y, sides);
+        Face(Vector3.left, Vector3.back, Vector3.up, size.z, size.y, sides);
+        var mesh = new Mesh { name = "MI_Bloque_vista" };
+        mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetUVs(0, uvs);
+        mesh.subMeshCount = 2; mesh.SetTriangles(top, 0); mesh.SetTriangles(sides, 1);
+        mesh.RecalculateTangents(); mesh.RecalculateBounds();
+        FloorBoxes[size] = mesh;
+        return mesh;
     }
 
     private static bool Solid(Transform t)

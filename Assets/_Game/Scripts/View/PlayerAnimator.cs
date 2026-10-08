@@ -74,7 +74,9 @@ public class PlayerAnimator : MonoBehaviour
 
         float dt = Time.deltaTime;
         Vector3 position = player.transform.position;
-        Vector3 delta = dt > 0f ? (position - _lastPosition) / dt : Vector3.zero;
+        // What a moving platform carried is not his own walking (2026-10-07 playtest).
+        Vector3 delta = dt > 0f ? (position - _lastPosition - player.Carried) / dt : Vector3.zero;
+        player.Carried = Vector3.zero;
         _lastPosition = position;
 
         // Teleports produce huge deltas; ignore them.

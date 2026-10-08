@@ -282,6 +282,48 @@ ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/N
 - **Urnas:** las tres empiezan cerradas e iguales; la vacía se cambia por la abierta cuando se ha
   mirado dentro.
 
+## Cuarta ronda de prueba del 2026-10-07
+
+- **Bachué y Saguanmachica:** sus manos ya no atraviesan el cuerpo. `CharacterActions` aparta el
+  brazo desde el hombro cuando la mano cae dentro de una elipse alrededor de la cadera. La elipse
+  se mide por personaje en `CharacterLibrarySetup`, con un ancho propio en los muslos cuando el
+  cuerpo se abre ahí, como el faldón de Saguanmachica. La versión v6 de la biblioteca reconstruye
+  los personajes.
+- **Mundo inferior:**
+  - Los tramos y rellanos de los pasillos entre salas se pisaban a la misma altura y su textura
+    parpadeaba. Ahora se dibujan 1,5 cm más abajo por cada pieza que se pisa; la colisión no cambia.
+  - Los muros de roca ya no se crean para los cuerpos de piedra del guardián y del centinela: eran
+    la hitbox invisible que quedaba al vencerlos.
+  - Se quitó la palanca del atajo de la galería de brazaletes, porque su puerta daba al vacío.
+- **Encaje:** una pieza plana encaja al acertar la cara y después gira sola hasta la pose exacta
+  del dibujo.
+- **Descanso:** después de arrodillarse en el disco, Nemequene se levanta. Antes la pose quedaba
+  fija.
+- **Serpiente:** la lengua de la cabeza B dependía en parte de la mandíbula de la cabeza A, y se
+  estiraba hacia ella. `animate_creatures.py` ahora deja cada pieza suelta de la malla con una sola
+  cabeza.
+- **Diálogos:**
+  - Todos miran a Nemequene y él mira a quien le habla.
+  - Si quien habla le da la espalda, gira el cuerpo.
+  - La cámara encuadra a quien habla desde el lado de su interlocutor.
+  - Al terminar el diálogo, quien se giró vuelve a su orientación anterior, salvo que la escena
+    lo haya movido mientras tanto.
+- **Plataforma móvil del mundo superior:**
+  - Al arrastrar al jugador también lo empuja un poco hacia abajo, así sigue apoyado y puede saltar.
+  - La animación descuenta el arrastre (`PlayerController.Carried`), así que ya no camina solo.
+- **Cierre de la cima:** Nemequene abre la puerta de frente a la pared, no girado hacia el receptáculo.
+- **Saguanmachica:** usa el modelo nuevo (`CharacterLibrary.v5` reconstruye los personajes al abrir
+  Unity).
+- **Epílogo:**
+  - La flecha se clava en el pecho de Nemequene y cae con él.
+  - La muerte de Saguanmachica se ve de frente, sin Nemequene delante.
+- **Aviso de portal:** el recuadro crece con sus dos líneas.
+- **Brillo guía (`Beacon`):**
+  - Los objetos por hacer brillan en dorado, con una luz suave: las estaciones, el guardián de
+    entrenamiento, el portal al que manda la historia, las urnas, los hallazgos y las ofrendas.
+  - Los principales también tienen una columna de luz con chispas, visible de lejos.
+  - El brillo se apaga cuando el objeto ya está hecho.
+
 ## Compilar el juego (Windows)
 
 - *Nemequene > Compilar > Windows* (o `-executeMethod GameBuild.Windows` en modo batch) compila

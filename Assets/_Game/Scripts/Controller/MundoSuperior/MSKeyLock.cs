@@ -38,7 +38,19 @@ public sealed class MSKeyLock : MIInteractable
         }
         // The medallion goes in, and the leaf swings, when the hands reach the lock.
         _opening = true;
-        PlayerInteraction.Perform(player, transform, () => { _opening = false; Insert(hud); }, "Open", "Reach");
+        PlayerInteraction.Perform(player, transform, WallFacing(player), () => { _opening = false; Insert(hud); }, "Open", "Reach");
+    }
+
+    // He opens facing the wall square on, not turned toward the lock beside the leaf (2026-10-07
+    // playtest: the opening was played 45 degrees askew): the wall runs from the lock to the hinge.
+    private Vector3? WallFacing(PlayerController player)
+    {
+        if (hinge == null) return null;
+        Vector3 along = hinge.position - transform.position; along.y = 0;
+        if (along.sqrMagnitude < .01f) return null;
+        Vector3 normal = Vector3.Cross(Vector3.up, along.normalized);
+        Vector3 toWall = transform.position - player.transform.position; toWall.y = 0;
+        return Vector3.Dot(normal, toWall) < 0 ? -normal : normal;
     }
 
     private void Insert(MIHud hud)

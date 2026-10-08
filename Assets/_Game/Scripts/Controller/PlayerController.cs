@@ -85,11 +85,20 @@ public class PlayerController : MonoBehaviour
         _verticalVelocity = new Vector3(0f, verticalVelocity, 0f);
     }
 
-    // Moving support (transport): its displacement is applied before this frame's locomotion.
+    // Moving support (transport): its displacement is applied before this frame's locomotion. The
+    // move also presses down a little, so the capsule stays grounded on the platform: a sideways
+    // move alone left isGrounded false and the jump was refused (2026-10-07 playtest). The carried
+    // distance is kept apart, so the animation does not take it for walking.
     public void Carry(Vector3 delta)
     {
-        if (_controller.enabled) _controller.Move(delta);
+        if (!_controller.enabled) return;
+        Vector3 before = transform.position;
+        _controller.Move(delta + Vector3.down * .02f);
+        Carried += transform.position - before;
     }
+
+    // Displacement given by moving supports since the animation last read it.
+    public Vector3 Carried { get; set; }
 
     public void RequestDash() => _dashRequested = true;
 
