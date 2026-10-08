@@ -30,7 +30,8 @@ public static class CharacterLibrarySetup
     // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
     // v3: CombatIdle (duel stance) and the reworked creature clips.
     // v5: the new Saguanmachica model (2026-10-07). v6: Saguanmachica's hands kept outside his robe.
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v6";
+    // v7: the new Tisquesusa model, Mixamo-rigged like the rest of the cast (2026-10-07).
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v7";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
@@ -47,7 +48,7 @@ public static class CharacterLibrarySetup
     {
         new Cast("Nemequene", "Nemequene", Kind.Mixamo, CharacterScale.Nemequene, true, "tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbx"),
         new Cast("Nemequeneniño", "Nemeneque+Niño", Kind.Mixamo, 1.25f, true),
-        new Cast("Tisquesusa", "Tisquesusa", Kind.TripoHuman, 1.78f, true),
+        new Cast("Tisquesusa", "Tisquesusa", Kind.Mixamo, 1.78f, true),
         new Cast("Saguanmachica", "Saguanmachica", Kind.Mixamo, 1.72f, true) { Body = new Vector3(.43f, .32f, .56f) },
         new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true) { Body = new Vector3(.42f, .32f, 0) },
         new Cast("Furachogua", "Furachogua", Kind.Mixamo, 1.75f, true),
