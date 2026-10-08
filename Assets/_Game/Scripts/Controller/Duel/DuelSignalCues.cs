@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 // The signal language in the world (DuelSignal), the same in EVERY fight — turn duels, the plaza
@@ -364,45 +363,4 @@ public sealed class SignalPose : MonoBehaviour
         _written = Weight > .001f ? _base * Quaternion.Euler(Euler * Weight) : _base;
         transform.localRotation = _written;
     }
-}
-
-// Which signals this player has already read correctly (all slots: it is the player who learns,
-// not the save). A signal not learned yet gets its one-time card in the duel HUD; the plaza
-// training teaches Front and Sweep.
-public static class DuelSignalMemory
-{
-    private const string Key = "Bacata.DuelSignals.v1";
-    private static HashSet<string> _learned;
-
-    public static IReadOnlyCollection<string> Learned
-    {
-        get
-        {
-            if (_learned != null) return _learned;
-            _learned = new HashSet<string>();
-            foreach (var k in PlayerPrefs.GetString(Key, "").Split(','))
-                if (k.Length > 0) _learned.Add(k);
-            return _learned;
-        }
-    }
-
-    public static void Learn(params string[] keys)
-    {
-        var set = (HashSet<string>)Learned;
-        bool changed = false;
-        foreach (var k in keys) changed |= set.Add(k);
-        if (!changed) return;
-        PlayerPrefs.SetString(Key, string.Join(",", set));
-        PlayerPrefs.Save();
-    }
-
-    public static void Learn(DuelMove move)
-    {
-        if (move == null) return;
-        if (move.Glint) Learn(DuelSignals.Key(move.Signal), DuelSignals.GlintKey);
-        else Learn(DuelSignals.Key(move.Signal));
-    }
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() => _learned = null;
 }

@@ -28,7 +28,7 @@ public sealed class MIDashEnemy : MonoBehaviour
     private string _flag, _name, _greeting, _farewell;
     private float _max, _health, _t, _hover, _engageRange;
     private int _step, _lastDash = -1;
-    private bool _greeted, _guardNoticeShown, _interrupted, _engaged, _groundNoticeShown;
+    private bool _greeted, _guardNoticeShown, _interrupted, _engaged;
     private float _telegraphLength = 1;
     private Phase _phase;
     private Move _move;
@@ -262,11 +262,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         _phase = Phase.Recover;
         // On the ground after a dive the creature is open to the dash; a stunned scream too.
         _t = _move == Move.Dive ? 2.8f : _interrupted ? 2.2f : .6f;
-        if (_move == Move.Dive && !_groundNoticeShown)
-        {
-            _groundNoticeShown = true;
-            MundoInferiorBlockout.Instance?.Hud?.Notify("En el suelo", "El destello dorado es tu momento: impúlsate contra él antes de que vuelva a subir.", UIIcon.Dodge, UIPalette.GoldLight);
-        }
+        // No notice: the golden flare on landing is the signal to dash (taught in the plaza training).
         if (_move == Move.Bite) StartCoroutine(StepBack());
     }
 

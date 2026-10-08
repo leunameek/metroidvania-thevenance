@@ -12,8 +12,8 @@ using UnityEngine.UI;
 public sealed class TurnDuelHUD
 {
     private readonly GameObject _root;
-    // The announcement/result plate: only a tutorial (a new signal's card) or the accessibility
-    // option shows it; otherwise the player reads the duel from the world (2026-10-07 playtest).
+    // The announcement/result plate: only the accessibility option shows it; otherwise the player
+    // reads the duel from the world (2026-10-07/08 playtest).
     private readonly GameObject _info;
     private readonly TMP_Text _enemy, _status, _banner, _verbs, _message, _concentration, _hint;
     private readonly Image _enemyHealth, _window, _bannerPlate, _playerHealth;
@@ -24,8 +24,6 @@ public sealed class TurnDuelHUD
     private readonly Action<int> _target;
     private readonly Action<DuelDefense> _defend;
     private string _signature = "";
-    // The one-time card of a signal the player has not learned yet (DuelSignals.Lesson).
-    public string Lesson { get; set; } = "";
 
     public TurnDuelHUD(Transform parent, string enemyName, Action<DuelAction> act, Action<int> target, Action<DuelDefense> defend)
     {
@@ -90,7 +88,7 @@ public sealed class TurnDuelHUD
         // Who is exposed or active (head, moon/sun, core) is read from the enemy's glow; the line
         // keeps only the bonds left, unless the player asked to see everything.
         _status.text = m.ShowAnswers ? m.Rules.Status(m) : m.Rules.Progress(m);
-        bool plate = m.ShowAnswers || !string.IsNullOrEmpty(Lesson);
+        bool plate = m.ShowAnswers;
         if (_info.activeSelf != plate) _info.SetActive(plate);
         float health = (float)m.PlayerHealth / TurnDuelModel.PlayerMaxHealth;
         _playerShown = _playerShown < 0 ? health : Mathf.MoveTowards(_playerShown, health, Time.unscaledDeltaTime * 1.4f);
@@ -99,16 +97,15 @@ public sealed class TurnDuelHUD
         _concentration.text = $"Concentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
             + (m.Counter == CounterWindow.Reinforced ? "\nContraataque reforzado listo"
                 : m.Counter == CounterWindow.Normal ? "\nContraataque listo" : "");
-        bool warning = m.Phase == DuelPhase.Telegraph || m.Phase == DuelPhase.Respond;
-        _message.text = warning && !string.IsNullOrEmpty(Lesson) ? Lesson : m.Message;
+        _message.text = m.Message;
         switch (m.Phase)
         {
             case DuelPhase.Decide:
                 _banner.text = "TU TURNO"; _verbs.text = "Decide sin prisa"; _window.fillAmount = 0; break;
             case DuelPhase.Telegraph:
-                _banner.text = "PREPARA"; _verbs.text = Announce(m, Lesson); _window.fillAmount = 1; break;
+                _banner.text = "PREPARA"; _verbs.text = Announce(m); _window.fillAmount = 1; break;
             case DuelPhase.Respond:
-                _banner.text = "¡RESPONDE!"; _verbs.text = Announce(m, Lesson);
+                _banner.text = "¡RESPONDE!"; _verbs.text = Announce(m);
                 _window.fillAmount = m.Untimed ? 1 : Mathf.Clamp01(m.Remaining / Mathf.Max(.01f, m.ResponseSeconds)); break;
             case DuelPhase.Won: _banner.text = "PRUEBA SUPERADA"; _verbs.text = ""; break;
             case DuelPhase.Lost: _banner.text = "HAS CAÍDO"; _verbs.text = ""; break;
@@ -118,14 +115,13 @@ public sealed class TurnDuelHUD
         RebuildButtons(m, force);
     }
 
-    // Only who attacks (a tactical fact); what to answer is read from the enemy itself, unless the
-    // player asked to see it (Accesibilidad) or the signal is new to them.
-    private static string Announce(TurnDuelModel m, string lesson)
+    // Only shown with the accessibility option: in every duel the answer is read from the enemy
+    // itself; the explanations live in the plaza training (2026-10-08 playtest).
+    private static string Announce(TurnDuelModel m)
     {
-        if (m.Move == null) return "";
+        if (m.Move == null || !m.ShowAnswers) return "";
         string origin = m.Move.Origin != DuelTarget.None ? TurnDuelModel.TargetName(m.Move.Origin) + " · " : "";
-        if (m.ShowAnswers) return origin + m.Move.Label + "  →  " + m.Move.Verbs;
-        return origin + (string.IsNullOrEmpty(lesson) ? "Lee la señal" : "Señal nueva");
+        return origin + m.Move.Label + "  →  " + m.Move.Verbs;
     }
 
     // Only legal choices are offered; the list is rebuilt when it changes.

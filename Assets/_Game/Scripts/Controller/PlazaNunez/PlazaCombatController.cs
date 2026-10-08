@@ -167,8 +167,6 @@ public sealed class PlazaCombatController : MonoBehaviour
         if (Model.Phase == PlazaCombatPhase.Won)
         {
             Completed = true;
-            // The training taught the two signals of the plaza: the duels do not explain them again.
-            DuelSignalMemory.Learn(DuelSignals.Key(DuelSignal.Front), DuelSignals.Key(DuelSignal.Sweep));
             demo.PlayerHealth.Revive();
             demo.Audio.Play(PlazaSound.Victory);
             demo.SetStatus(demo.PortalsUnlocked ? "Entrenamiento superado. Los dos portales están abiertos." : "Entrenamiento superado. Completa las estaciones de objetos para abrir los portales.");

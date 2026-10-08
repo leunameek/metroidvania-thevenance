@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 
 // The signal language (2026-10-07): the warning never names the answer, the signal alone is
@@ -78,18 +77,5 @@ public class DuelSignalTests
         d.Defend(DuelDefense.Cover);
         StringAssert.Contains("era Bloquear", d.Message);
         StringAssert.Contains("Parar", d.Message, "the glint is explained too");
-    }
-
-    [Test]
-    public void LessonsShowOnlyWhatIsNotLearned()
-    {
-        var d = new TurnDuelModel(new CondorRules());
-        d.Act(DuelAction.Attack); d.Advance();
-        var wing = d.Move;
-        Assert.AreEqual(DuelSignal.Front, wing.Signal);
-        StringAssert.Contains("Bloquear", DuelSignals.Lesson(wing, new List<string>()));
-        string glintOnly = DuelSignals.Lesson(wing, new List<string> { "Front" });
-        Assert.AreEqual(DuelSignals.GlintTell, glintOnly);
-        Assert.IsEmpty(DuelSignals.Lesson(wing, new List<string> { "Front", DuelSignals.GlintKey }));
     }
 }

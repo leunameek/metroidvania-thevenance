@@ -225,15 +225,12 @@ public sealed class TurnDuelController : MonoBehaviour
                 case DuelPhase.Telegraph:
                     _natural?.ClearPending(); _stage?.OnTelegraph(_model.Move); _bodies?.EnemyTelegraph(_model.Move); _audio?.Telegraph(_model.Move);
                     _cues?.Warn(_model.Move);
-                    _hud.Lesson = _model.ShowAnswers ? "" : DuelSignals.Lesson(_model.Move, DuelSignalMemory.Learned);
                     break;
                 case DuelPhase.Respond: _natural?.ClearPending(); _cues?.Open(_model.Move); break;
                 case DuelPhase.Resolve:
-                    _cues?.Clear(); _hud.Lesson = "";
+                    _cues?.Clear();
                     if (previous == DuelPhase.Respond && _model.Move != null)
                     {
-                        // A signal read correctly once is learned: its card does not come back.
-                        if (_model.LastDefenseCorrect) DuelSignalMemory.Learn(_model.Move);
                         _stage?.OnResolved(_model.Move, _model.LastDefenseCorrect); _bodies?.Resolved(_model.LastDefenseCorrect);
                         _audio?.Resolved(_model.LastDefenseCorrect);
                     }
