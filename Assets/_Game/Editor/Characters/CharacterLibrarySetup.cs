@@ -29,12 +29,15 @@ public static class CharacterLibrarySetup
     private const string PlayerPrefab = ArtRoot + "Nemequene/Nemequene_Player_Visual.prefab";
     // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
     // v3: CombatIdle (duel stance) and the reworked creature clips.
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v4";
+    // v5: the new Saguanmachica model (2026-10-07).
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v5";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
     {
         public string Key, Folder, Model; public Kind Kind; public float Height; public bool Calm; public float Yaw;
+        // Half width and depth of the body around the hips, for the hands to stay outside (CharacterActions).
+        public Vector2 Body;
         public Cast(string key, string folder, Kind kind, float height, bool calm, string model = null, float yaw = 0)
         { Key = key; Folder = folder; Kind = kind; Height = height; Calm = calm; Model = model; Yaw = yaw; }
     }
@@ -46,7 +49,7 @@ public static class CharacterLibrarySetup
         new Cast("Nemequeneniño", "Nemeneque+Niño", Kind.Mixamo, 1.25f, true),
         new Cast("Tisquesusa", "Tisquesusa", Kind.TripoHuman, 1.78f, true),
         new Cast("Saguanmachica", "Saguanmachica", Kind.Mixamo, 1.72f, true),
-        new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true),
+        new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true) { Body = new Vector2(.42f, .32f) },
         new Cast("Furachogua", "Furachogua", Kind.Mixamo, 1.75f, true),
         new Cast("Invasor", "Invasor+de+plata+y+oro", Kind.Mixamo, 1.85f, false),
         new Cast("Quimue", "Quimue", Kind.Mixamo, 1.95f, false),
@@ -318,6 +321,7 @@ public static class CharacterLibrarySetup
             actions.restState = rest;
             var so = new SerializedObject(actions);
             so.FindProperty("animator").objectReferenceValue = animator;
+            so.FindProperty("bodyClearance").vector2Value = c.Body;
             so.ApplyModifiedPropertiesWithoutUndo();
             PrefabUtility.SaveAsPrefabAsset(root, Output + c.Key + ".prefab");
             return c.Key + ": ok (" + Path.GetFileName(modelPath) + ", " + c.Height + " m)";

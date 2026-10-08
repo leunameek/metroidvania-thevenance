@@ -37,7 +37,8 @@ public sealed class FitPuzzle
     public Vector3 FramePoint => Vector3.Lerp(Hover, _slot, .45f);
 
     // item: the piece at its authored pose on the table (call before it starts to float and spin).
-    public FitPuzzle(Transform item)
+    // slot: where it rests, when its table has no collider to find it (the bracelets' cradle).
+    public FitPuzzle(Transform item, Vector3? slot = null)
     {
         _item = item;
         _rest = item.rotation;
@@ -55,6 +56,7 @@ public sealed class FitPuzzle
         // of them: its cradle, not a lower step or the floor beneath the table between them.
         Vector3 offset = item.position - bounds.center;
         _slot = item.position;
+        if (slot.HasValue) { _slot = slot.Value; return; }
         float surface = float.MinValue;
         foreach (var r in item.GetComponentsInChildren<Renderer>())
         {
@@ -115,12 +117,10 @@ public sealed class FitPuzzle
             MIParticles.Burst(_slot + Vector3.up * .05f, new Color(1f, .85f, .5f, .8f), 18, 1f, .05f, -.3f);
         }
         _near = near;
-        // A seated piece is drawn into place (the face, for a flat one; the whole pose otherwise).
-        if (Seated)
-        {
-            Quaternion target = _flat ? Quaternion.FromToRotation(_item.rotation * _faceLocal, _rest * _faceLocal) * _item.rotation : _rest;
-            _item.rotation = Quaternion.Slerp(_item.rotation, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 12f));
-        }
+        // A seated piece is drawn into the very pose of its sketch: a flat one seats as soon as its
+        // face is right, then turns about that face until it matches the drawing (2026-10-07
+        // playtest: pieces seated turned otherwise than the sketch showed).
+        if (Seated) _item.rotation = Quaternion.Slerp(_item.rotation, _rest, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 9f));
         Guide(!Seated);
         // The light warms as the piece nears its place; each 20° closer, a soft resonance.
         if (glow != null) glow.intensity = baseGlow * Mathf.Lerp(.35f, 2.4f, Seated ? 1f : Closeness * Closeness);

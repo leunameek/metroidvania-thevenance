@@ -210,6 +210,7 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             var urn = StoryProps.Build("UrnaMemoria", transform, at);
             urn.rotation = Quaternion.LookRotation(toSpawn);
             _urns[i] = urn;
+            GuideTo(urn, index);
             PlazaStoryPoint.Create("Urna " + (i + 1), transform, at, 1.4f,
                 () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, _urns[index]));
         }
@@ -242,8 +243,16 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         var open = StoryProps.Build("UrnaVacia", transform, closed.position);
         open.rotation = closed.rotation;
         _urns[index] = open;
+        GuideTo(open, index);
         MIBurst.Spawn(open.position + Vector3.up * .6f, new Color(1f, .85f, .5f));
         Destroy(closed.gameObject);
+    }
+
+    // The urns glow while one is to be found; once the empty one is known, only it does.
+    private void GuideTo(Transform urn, int index)
+    {
+        Beacon.Attach(urn.gameObject, urn, () => CampaignProgress.Chapter == CampaignChapter.Urn && PlazaPieceInspection.Active == null
+            && (!_emptyFound || index == EmptyUrn), beam: false);
     }
 
     private void UseUrn(int index)

@@ -100,6 +100,53 @@ def export(arm, folder, name):
     print("CREATURE_OK", out, [a.name for a in bpy.data.actions])
 
 
+def one_head_per_piece(chain_a, chain_b, largest=1000):
+    """Each small loose piece of the mesh (a tongue, a fang) follows one head only: weights it had
+    on the other head's bones are dropped and the rest renormalised. Tripo had tied part of head B's
+    tongue to head A's jaw, so it stretched across to the other head when they parted (2026-10-07)."""
+    import bmesh
+    for ob in [o for o in bpy.data.objects if o.type == "MESH"]:
+        names = {g.index: g.name for g in ob.vertex_groups}
+        bm = bmesh.new(); bm.from_mesh(ob.data); bm.verts.ensure_lookup_table()
+        seen, islands = set(), []
+        for v in bm.verts:
+            if v.index in seen: continue
+            stack, comp = [v], []
+            seen.add(v.index)
+            while stack:
+                a = stack.pop(); comp.append(a.index)
+                for e in a.link_edges:
+                    o = e.other_vert(a)
+                    if o.index not in seen: seen.add(o.index); stack.append(o)
+            islands.append(comp)
+        bm.free()
+        verts = ob.data.vertices
+        fixed = 0
+        for comp in islands:
+            if len(comp) > largest: continue
+            wa = sum(g.weight for i in comp for g in verts[i].groups if names[g.group] in chain_a)
+            wb = sum(g.weight for i in comp for g in verts[i].groups if names[g.group] in chain_b)
+            if wa == wb: continue
+            own, other = (chain_a, chain_b) if wa > wb else (chain_b, chain_a)
+            # The bone of its own head that carries most of the piece takes the parts tied only
+            # to the other head.
+            totals = {}
+            for i in comp:
+                for g in verts[i].groups:
+                    if names[g.group] in own: totals[names[g.group]] = totals.get(names[g.group], 0) + g.weight
+            carrier = max(totals, key=totals.get)
+            for i in comp:
+                groups = [(names[g.group], g.weight) for g in verts[i].groups if g.weight > 0]
+                keep = [(n, w) for n, w in groups if n not in other]
+                if len(keep) == len(groups): continue
+                if not keep: keep = [(carrier, 1.0)]
+                total = sum(w for _, w in keep)
+                for n, _ in groups: ob.vertex_groups[n].remove([i])
+                for n, w in keep: ob.vertex_groups[n].add([i], w / total, "REPLACE")
+                fixed += 1
+        print("ONE_HEAD", ob.name, "islands", len(islands), "fixed verts", fixed)
+
+
 # ---------------------------------------------------------------- serpiente bicéfala
 def serpent():
     """Two necks moved as chains: every motion travels from the base to the head a little later
@@ -281,6 +328,7 @@ def serpent():
                              ("GolpeB", 18, hit(False)), ("Liberada", 60, released), ("Reposo", 90, rest),
                              ("Emerger", 50, emerge)]:
         Clip(arm, name, length).sample(fn)
+    one_head_per_piece(set(A + [head_a, jaw, "tripo::Head_5", "tripo::Head_6"]), set(B))
     export(arm, folder, "Serpiente")
 
 

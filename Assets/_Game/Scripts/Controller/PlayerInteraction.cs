@@ -87,6 +87,9 @@ public sealed class PlayerInteraction : MonoBehaviour
         }
         Flush();
         if (played != null) yield return new WaitForSeconds(length * (.85f - ContactOf(played)));
+        // A gesture is not a pose: he gets up again (2026-10-07 playtest: after kneeling at a rest
+        // disc the kneel was held as a final pose and he never stood up).
+        if (played != null && actions != null && actions.Current == played) actions.Rest(.3f);
         _running = null;
         // Lines started by the effect keep the player still; they release the lock when they end.
         if (!StoryPlayer.Active) _player.SetInputLocked(false);

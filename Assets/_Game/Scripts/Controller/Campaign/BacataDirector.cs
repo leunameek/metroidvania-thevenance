@@ -119,11 +119,14 @@ public sealed class BacataDirector : MonoBehaviour
         yield return FadeIn("La verdadera imagen");
         Shot(Village + new Vector3(4, 2.2f, 3.5f), Village + new Vector3(0, 1.1f, 10.5f));
         yield return Lines("H19", 0, 2, false);
+        // His fall is seen from the front-left, clear of Nemequene, who stood between the old shot
+        // and him (2026-10-07 playtest).
+        Shot(Village + new Vector3(-2.9f, 1.5f, 8.1f), Village + new Vector3(-.8f, .6f, 12));
         yield return Fall(_saguanmachica, 1.2f, "Death");
         Show(_invader);
         Shot(Village + new Vector3(-2.5f, 2f, 6.5f), Village + new Vector3(7, 1.6f, 15));
         yield return Lines("H19", 2, 1, false);
-        yield return Arrow(_invader.position + Vector3.up * 1.5f, _nemequene.position + Vector3.up * 1.3f);
+        yield return Arrow(_invader.position + Vector3.up * 1.5f, _nemequene);
         yield return Fall(_nemequene, .8f, "DeathBack");
         Shot(Village + new Vector3(-3.5f, 2f, 3f), Village + new Vector3(0, .8f, 9));
         yield return Lines("H19", 3, 1, true);
@@ -229,19 +232,40 @@ public sealed class BacataDirector : MonoBehaviour
         actor.position = end;
     }
 
-    private IEnumerator Arrow(Vector3 from, Vector3 to)
+    // The arrow flies to the chest and stays in it: it is fixed to the chest bone, so it falls with
+    // the body (2026-10-07 playtest: it hung in the air where he had stood).
+    private IEnumerator Arrow(Vector3 from, Transform target)
     {
+        Transform chest = null;
+        foreach (var animator in target.GetComponentsInChildren<Animator>())
+            if (animator.isHuman) { chest = animator.GetBoneTransform(HumanBodyBones.UpperChest) ?? animator.GetBoneTransform(HumanBodyBones.Chest); if (chest != null) break; }
+        Vector3 to = chest != null ? chest.position : target.position + Vector3.up * 1.3f;
+        Vector3 direction = (to - from).normalized;
         // The arrow model lies along its X (point at +X); the block stands in without it.
         var arrow = Model("Flecha", from, 0, "Props");
-        if (arrow != null) arrow.rotation = Quaternion.LookRotation(to - from) * Quaternion.Euler(0, -90, 0);
+        if (arrow != null) arrow.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
         else
         {
             arrow = StoryProps.Part(PrimitiveType.Cylinder, _world, from, new Vector3(.04f, .45f, .04f), new Color(.75f, .72f, .6f));
-            arrow.rotation = Quaternion.FromToRotation(Vector3.up, to - from);
+            arrow.rotation = Quaternion.FromToRotation(Vector3.up, direction);
         }
+        // Where it stops: its point a hand inside the chest, the shaft out in front.
+        float tip = 0;
+        foreach (var r in arrow.GetComponentsInChildren<Renderer>())
+        {
+            var b = r.bounds;
+            for (int i = 0; i < 8; i++)
+            {
+                var corner = b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                tip = Mathf.Max(tip, Vector3.Dot(corner - arrow.position, direction));
+            }
+        }
+        Vector3 stop = to - direction * Mathf.Max(0, tip - .12f);
+        Vector3 start = from;
         GameAudio.PlayAt("Combate/baston_aire", from, .9f, AudioChannel.Effects, 40f, 1.6f, 0f);
-        for (float t = 0; t < .45f; t += Time.deltaTime) { arrow.position = Vector3.Lerp(from, to, t / .45f); yield return null; }
-        arrow.position = to;
+        for (float t = 0; t < .45f; t += Time.deltaTime) { arrow.position = Vector3.Lerp(start, stop, t / .45f); yield return null; }
+        arrow.position = stop;
+        if (chest != null) arrow.SetParent(chest, true);
         GameAudio.PlayAt("Combate/impacto_criatura", to, .9f, AudioChannel.Effects, 40f);
     }
 
