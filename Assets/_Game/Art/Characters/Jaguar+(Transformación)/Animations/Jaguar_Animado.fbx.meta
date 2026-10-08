@@ -36,7 +36,7 @@ ModelImporter:
       takeName: Armature|Caminar
       internalID: -6479106223124399930
       firstFrame: 0
-      lastFrame: 30
+      lastFrame: 32
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -65,7 +65,7 @@ ModelImporter:
       takeName: Armature|Correr
       internalID: -414807830312781855
       firstFrame: 0
-      lastFrame: 18
+      lastFrame: 16
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -94,7 +94,7 @@ ModelImporter:
       takeName: Armature|Embestida
       internalID: 4656710151570670258
       firstFrame: 0
-      lastFrame: 36
+      lastFrame: 40
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -152,7 +152,7 @@ ModelImporter:
       takeName: Armature|Idle
       internalID: -8945691123924629249
       firstFrame: 0
-      lastFrame: 90
+      lastFrame: 120
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -181,7 +181,7 @@ ModelImporter:
       takeName: Armature|Rugido
       internalID: -176099638577039676
       firstFrame: 0
-      lastFrame: 45
+      lastFrame: 44
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
