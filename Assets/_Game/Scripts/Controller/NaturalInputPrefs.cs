@@ -12,6 +12,8 @@ public sealed class NaturalInputPrefs
     public bool voiceEnabled;
     public int confidence = 1;
     public float dwellSeconds = 1, handSensitivity = 1, reactionScale = 1;
+    // Accesibilidad: the duels name the right defense instead of leaving it to the signals.
+    public bool combatAnswers;
     public string camera = "";
 
     public static NaturalInputPrefs Load()

@@ -238,7 +238,7 @@ BACHUÉ: Examina las tres piezas. Después el círculo enseñará a decidir cuan
 
 **Lugar:** Plaza / tutorial
 
-Vasija enseña giro horizontal, disco inclinación y figura congelación. Tres ataques y dos defensas completan el duelo. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.
+Vasija enseña giro horizontal, disco inclinación y figura congelación. Cinco ataques y cuatro defensas completan el duelo: dos se explican y dos se leen en el cuerpo del guardián. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.
 
 BACHUÉ, VASIJA: Gira para encontrar lo que el frente oculta.
 
@@ -248,7 +248,7 @@ BACHUÉ, FIGURA: Mantén ambos ejes quietos.
 
 GUARDIÁN: Di atacar cuando decidas. Esperaré.
 
-GUARDIÁN: Esquiva el directo. Bloquea la onda cuando abra la señal.
+GUARDIÁN: No te diré qué golpe viene. Mira mi cuerpo y escucha: si barro de lado, esquiva; si voy de frente, bloquea.
 
 BACHUÉ: La máscara lunar está en las raíces. Su camino debe abrir primero.
 

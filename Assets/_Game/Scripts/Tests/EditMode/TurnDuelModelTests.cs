@@ -283,7 +283,7 @@ public class TurnDuelModelTests
     }
 
     // A simple player who reads the HUD: the action a human would pick from the script's tips.
-    private static DuelInput Choose(TurnDuelModel d)
+    internal static DuelInput Choose(TurnDuelModel d)
     {
         switch (d.Rules)
         {

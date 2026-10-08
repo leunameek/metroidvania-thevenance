@@ -15,6 +15,7 @@ namespace Nemequene.UI
             _ui.Demo.Audio.SetVolumes(s.effects, s.ambience);
             _ui.Demo.ConfigurePresentation(s.cameraSensitivity, s.invertY, s.cameraMotion, s.handSensitivity, s.reducedMotion);
             _ui.Demo.Combat.Model.SetReactionScale(s.reactionScale);
+            _ui.Demo.Combat.Model.ShowAnswers = s.combatAnswers;
             _ui.Demo.Combat.FlashIntensity = s.flashIntensity;
         }
         public void Dispose() { _ui.Settings.Changed -= Apply; }

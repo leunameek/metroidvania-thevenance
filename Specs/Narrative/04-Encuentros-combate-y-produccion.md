@@ -32,7 +32,28 @@ Sin coincidencia no dispara una acción aleatoria. Motor no disponible o micróf
 
 ## Órdenes anticipadas
 
-Durante aviso solo se explica qué viene, sin ejecutar defensa. El HUD muestra PREPARA y luego RESPONDE. Si el recognizer entrega una frase iniciada antes de la apertura y no ofrece marca de tiempo fiable, descartar con mensaje Repite al abrir la señal; no presumir latencia compensada. Para voz, calibrar y ofrecer modo sin tiempo evita castigo. No aceptar frases en pausa ni arrastrarlas al reanudar.
+Durante el aviso no se ejecuta ninguna defensa. El HUD muestra PREPARA y luego RESPONDE, pero no nombra el golpe ni la defensa (ver Lenguaje de señales). Si el recognizer entrega una frase iniciada antes de la apertura y no ofrece marca de tiempo fiable, descartar con mensaje Repite al abrir la señal; no presumir latencia compensada. Para voz, calibrar y ofrecer modo sin tiempo evita castigo. No aceptar frases en pausa ni arrastrarlas al reanudar.
+
+
+## Lenguaje de señales (revisión 7 oct 2026)
+
+El jugador interpreta al enemigo; la pantalla no le dice qué hacer. Cada defensa tiene una sola señal, igual en todos los duelos y redundante en cuerpo, sonido y suelo, más un subtítulo de sonido para jugar sin audio:
+
+| Defensa | Señal | Cuerpo / suelo | Sonido (subtítulo) |
+|---|---|---|---|
+| Bloquear | Golpe de frente | Se planta y echa el peso atrás; polvo de sus pies hacia Nemequene | Tambor grave doble (Tambor grave) |
+| Esquivar | Golpe que barre o embiste | Recoge el golpe a un lado; estela de aire que cruza a Nemequene | Silbido que sube (Silbido de lado) |
+| Cubrir | Algo cae desde arriba | Sombra que crece bajo los pies; arenilla que cae | Crujido arriba (Crujido arriba) |
+| Parar (además) | Golpe físico | Destello dorado de tumbaga en el enemigo al abrirse la respuesta | Campanilla de oro (Destello dorado) |
+
+La señal sale de la respuesta principal de cada ficha (`DuelMove.Signal`); el destello, de golpes físicos que aceptan Parar (`DuelMove.Glint`). Los efectos propios de cada escenario (piedras de MI09, cabezas, luna/sol) se suman, no la sustituyen.
+
+- **Aviso:** solo dice quién ataca (cabeza A/B, luna/sol), que es información táctica. Parar se ofrece siempre que haya concentración; contra un golpe sin destello es una defensa equivocada, no un rechazo que delate el golpe.
+- **Error:** el mensaje explica la señal que había («Se plantó de frente con el tambor grave: era Bloquear»). En el entrenamiento el resultado se mantiene 2,8 s para leerlo.
+- **Primera vez:** una señal que el jugador aún no leyó bien muestra una tarjeta «Señal nueva» con su descripción y respuesta; desaparece tras el primer acierto (`DuelSignalMemory`, por jugador, no por partida). El entrenamiento enseña frente y barrido; cubrir y el destello se enseñan así la primera vez que aparecen (E07).
+- **Entrenamiento (E01):** cinco ataques y cuatro defensas. Las dos primeras se explican (cuerpo, sonido y respuesta); las dos siguientes (frente y luego barrido) se leen sin ayuda. Al vencer, el panel resume el lenguaje completo.
+- **Sin ritmo estricto:** la voz y las manos mantienen la ventana amplia; interpretar es obligatorio, acertar el instante no.
+- **Accesibilidad:** «Mostrar la defensa correcta en combate» vuelve a nombrar la respuesta en duelos y entrenamiento.
 
 
 ## Recursos de combate propuestos

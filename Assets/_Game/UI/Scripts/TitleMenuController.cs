@@ -244,6 +244,7 @@ namespace Nemequene.UI
             Toggle(access,"access.speakers",()=>Settings.Values.speakerNames,v=>Settings.Values.speakerNames=v);
             Toggle(access,"access.captions",()=>Settings.Values.soundCaptions,v=>Settings.Values.soundCaptions=v);
             Slider(access,"access.reaction",1,3,()=>Settings.Values.reactionScale,v=>Settings.Values.reactionScale=v);
+            Toggle(access,"access.combatAnswers",()=>Settings.Values.combatAnswers,v=>Settings.Values.combatAnswers=v);
             Slider(access,"access.camera",0,1,()=>Settings.Values.cameraMotion,v=>Settings.Values.cameraMotion=v);
             Slider(access,"access.flash",0,1,()=>Settings.Values.flashIntensity,v=>Settings.Values.flashIntensity=v);
             new DevicesPage(_factory,Settings).Build(access);

@@ -11,6 +11,11 @@ public enum DuelDefense { Block, Dodge, Cover, Parry }
 public enum DuelTarget { None, HeadA, HeadB, Moon, Sun }
 public enum DuelInput { Accepted, WrongPhase, TooEarly, NotLegal, NeedsTarget }
 public enum CounterWindow { None, Normal, Reinforced }
+// The shared language of the warnings (2026-10-07: the player reads the enemy instead of being
+// told the answer). Each defense has one signal in every duel: a blow that comes straight on is
+// blocked, one that sweeps or rushes is dodged, one that falls from above is covered; a golden
+// glint of tumbaga marks a physical blow that can also be parried.
+public enum DuelSignal { Front, Sweep, Above }
 
 public sealed class DuelMove
 {
@@ -22,6 +27,20 @@ public sealed class DuelMove
     public DuelTarget Origin;          // head or moon/sun that announces it
     public bool Wind;                  // nullified by a previous Anclar
     public bool Charge;                // cancelled by Interrumpir
+
+    // The signal follows the main answer (the first one that is not Parar).
+    public DuelSignal Signal
+    {
+        get
+        {
+            foreach (var d in Answers)
+                if (d == DuelDefense.Block) return DuelSignal.Front;
+                else if (d == DuelDefense.Dodge) return DuelSignal.Sweep;
+                else if (d == DuelDefense.Cover) return DuelSignal.Above;
+            return DuelSignal.Front;
+        }
+    }
+    public bool Glint => Physical && Array.IndexOf(Answers, DuelDefense.Parry) >= 0;
 
     public bool Accepts(DuelDefense defense)
     {
@@ -61,6 +80,8 @@ public sealed class TurnDuelModel
     public float Remaining { get; private set; }
     public float ResponseSeconds { get; set; } = KeyboardWindow;
     public bool Untimed { get; set; }
+    // Accessibility option: the warning names the answer instead of leaving it to the signals.
+    public bool ShowAnswers { get; set; }
     public int Turn { get; private set; }
     public int Round { get; private set; }
     public bool LastDefenseCorrect { get; private set; }
@@ -164,12 +185,14 @@ public sealed class TurnDuelModel
     {
         if (Phase == DuelPhase.Telegraph) { Message = "Repite al abrir la señal."; Changed?.Invoke(); return DuelInput.TooEarly; }
         if (Phase != DuelPhase.Respond) return DuelInput.WrongPhase;
-        if (defense == DuelDefense.Parry && (Concentration < 1 || !Move.Accepts(DuelDefense.Parry)))
-        { Message = "Parar no sirve contra este ataque."; Changed?.Invoke(); return DuelInput.NotLegal; }
+        // Parar needs concentration; against a blow without the glint it is simply a wrong answer
+        // (refusing it would tell the player what the blow was).
+        if (defense == DuelDefense.Parry && Concentration < 1)
+        { Message = "Sin concentración para Parar."; Changed?.Invoke(); return DuelInput.NotLegal; }
         Resolve(defense);
         return DuelInput.Accepted;
     }
-    public bool ParryOffered => Move != null && Move.Physical && Move.Accepts(DuelDefense.Parry) && Concentration >= 1;
+    public bool ParryOffered => Move != null && Concentration >= 1;
 
     private void Resolve(DuelDefense? defense)
     {
@@ -189,7 +212,7 @@ public sealed class TurnDuelModel
         {
             Counter = CounterWindow.None;
             PlayerHealth = Math.Max(0, PlayerHealth - Move.FailDamage);
-            Message = (defense.HasValue ? "Defensa equivocada" : "Sin respuesta") + $": -{Move.FailDamage} vida. Era {Move.Verbs}.";
+            Message = (defense.HasValue ? "Defensa equivocada" : "Sin respuesta") + $": -{Move.FailDamage} vida. " + DuelSignals.Reading(Move);
         }
         Rules.OnResolved(this, Move, correct);
         if (PlayerHealth <= 0) { Phase = DuelPhase.Lost; Message = "Has caído. Tus hallazgos se conservan."; Changed?.Invoke(); return; }
@@ -230,7 +253,9 @@ public sealed class TurnDuelModel
         {
             Message = why; Set(DuelPhase.Resolve, ResolveSeconds); return;
         }
-        Message = (move.Origin != DuelTarget.None ? TargetName(move.Origin) + ": " : "") + move.Label + ". Prepara: " + move.Verbs + ".";
+        string origin = move.Origin != DuelTarget.None ? TargetName(move.Origin) + ": " : "";
+        Message = ShowAnswers ? origin + move.Label + ". Prepara: " + move.Verbs + "."
+            : origin + "prepara un golpe. Lee su cuerpo y escucha.";
         Set(DuelPhase.Telegraph, TelegraphSeconds);
     }
 

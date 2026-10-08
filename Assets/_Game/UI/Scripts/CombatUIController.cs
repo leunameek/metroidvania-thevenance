@@ -30,9 +30,10 @@ namespace Nemequene.UI
             enemyName.alignment = TextAlignmentOptions.BottomRight;
             _guardian = f.Bar(enemy, "GuardianResistance", new Vector2(.12f, .22f), new Vector2(1, .52f), UIPalette.Crimson);
             var inner = _guardian.transform.parent;
-            for (int i = 1; i < 3; i++)
+            int segments = PlazaCombatModel.AttacksToWin;
+            for (int i = 1; i < segments; i++)
             {
-                var notch = f.Rect("Segment", inner, new Vector2(i / 3f, 0), new Vector2(i / 3f, 1));
+                var notch = f.Rect("Segment", inner, new Vector2(i / (float)segments, 0), new Vector2(i / (float)segments, 1));
                 notch.sizeDelta = new Vector2(3, 0); notch.gameObject.AddComponent<Image>().color = UIPalette.Charcoal;
             }
             _enemy = UIFactory.Shadow(UIFactory.Tone(f.Label(enemy, "", new Vector2(.12f, -.12f), new Vector2(1, .22f), 18), UITone.Muted));
@@ -90,25 +91,31 @@ namespace Nemequene.UI
             _root.SetActive(_ui.Demo.State == TechnicalDemoState.Combat && _ui.Screens.Current == UIScreen.None);
             if (!_root.activeSelf) return;
             _turn.text = UIStrings.Get("combat.phase." + model.Phase);
-            int resistance = Mathf.Clamp(3 - model.Hits, 0, 3);
-            _enemy.text = resistance + " / 3"; UIFactory.Fill(_guardian, resistance / 3f);
+            int total = PlazaCombatModel.AttacksToWin;
+            int resistance = Mathf.Clamp(total - model.Hits, 0, total);
+            _enemy.text = resistance + " / " + total; UIFactory.Fill(_guardian, resistance / (float)total);
             // Voice first: each action names its word («atacar»), or its key with the voice off.
             Label(_attack, "combat.attack", "atacar", GameBindings.Cap(GameAction.Attack)); Label(_dodge, "combat.dodge", "esquivar", GameBindings.Cap(GameAction.Dodge));
             Label(_block, "combat.block", "bloquear", GameBindings.Cap(GameAction.Guard)); Label(_return, "combat.return", "volver", GameBindings.Cap(GameAction.Attack));
             _body.text = UIStrings.Get("combat.body." + model.Phase);
-            if (model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React)
-                _body.text += "\n\n" + (model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", GameAction.Dodge))
-                    : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", GameAction.Guard)));
-            if (model.Phase == PlazaCombatPhase.Feedback) _body.text = UIStrings.Get(model.LastDefenseSucceeded ? "combat.success" : "combat.retry");
+            // The first two blows are explained (what the body shows and the answer); the next two
+            // are only read, as in every duel. After a mistake the panel says what the signal was.
+            bool warning = model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React;
+            string answer = model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", GameAction.Dodge))
+                : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", GameAction.Guard));
+            if (warning && model.Guided) _body.text = UIStrings.Get("combat.guided", model.Tell) + "\n\n" + answer;
+            else if (warning) _body.text = UIStrings.Get("combat.read." + model.Phase) + (model.ShowAnswers ? "\n\n" + answer : "");
+            if (model.Phase == PlazaCombatPhase.Feedback) _body.text = model.LastDefenseSucceeded ? UIStrings.Get("combat.success") : model.Reading;
             _attack.gameObject.SetActive(model.Phase == PlazaCombatPhase.Attack);
             _dodge.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
             _block.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
             _return.gameObject.SetActive(model.Phase == PlazaCombatPhase.Won);
             _progress.transform.parent.parent.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
-            if (model.Phase == PlazaCombatPhase.React) _body.text = UIStrings.Get(model.Expected == PlazaDefense.Dodge ? "combat.promptDodge" : "combat.promptBlock");
-            if (model.Phase == PlazaCombatPhase.Won) _body.text = UIStrings.Get(_ui.Demo.Objectives.IsComplete ? "hud.portals" : "combat.body.Won");
+            if (model.Phase == PlazaCombatPhase.React && model.Guided) _body.text = model.Tell + "\n\n" + UIStrings.Get(model.Expected == PlazaDefense.Dodge ? "combat.promptDodge" : "combat.promptBlock");
+            if (model.Phase == PlazaCombatPhase.Won) _body.text = UIStrings.Get("combat.signals") + "\n\n" + UIStrings.Get(_ui.Demo.Objectives.IsComplete ? "hud.portals" : "combat.body.Won");
+            // Focus never points at the answer of a blow the player has to read.
             var focus = model.Phase == PlazaCombatPhase.Attack ? _attack : model.Phase == PlazaCombatPhase.Won ? _return
-                : model.Phase == PlazaCombatPhase.React ? model.Expected == PlazaDefense.Dodge ? _dodge : _block : null;
+                : model.Phase == PlazaCombatPhase.React && model.ShowsAnswer ? model.Expected == PlazaDefense.Dodge ? _dodge : _block : null;
             UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(focus != null ? focus.gameObject : null);
         }
         public void Tick()

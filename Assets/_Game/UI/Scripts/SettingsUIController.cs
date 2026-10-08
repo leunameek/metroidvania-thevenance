@@ -71,6 +71,7 @@ namespace Nemequene.UI
             Toggle(access, "access.speakers", () => S.speakerNames, v => S.speakerNames = v);
             Toggle(access, "access.captions", () => S.soundCaptions, v => S.soundCaptions = v);
             Slider(access, "access.reaction", 1, 3, () => S.reactionScale, v => S.reactionScale = v);
+            Toggle(access, "access.combatAnswers", () => S.combatAnswers, v => S.combatAnswers = v);
             Toggle(access, "settings.objectives", () => S.showObjectives, v => S.showObjectives = v);
             Slider(access, "hands.dwell", .5f, 3, () => S.dwellSeconds, v => S.dwellSeconds = v);
             // Camera and microphone of this PC; a running hand session switches camera at once.

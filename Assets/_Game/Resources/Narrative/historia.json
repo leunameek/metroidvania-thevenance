@@ -177,7 +177,7 @@
    "id": "H05",
    "title": "Manos y voz",
    "place": "Plaza / tutorial",
-   "summary": "Vasija enseña giro horizontal, disco inclinación y figura congelación. Tres ataques y dos defensas completan el duelo. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.",
+   "summary": "Vasija enseña giro horizontal, disco inclinación y figura congelación. Cinco ataques y cuatro defensas completan el duelo: dos se explican y dos se leen en el cuerpo del guardián. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.",
    "objective": "Tutorial y primer portal.",
    "storyboard": "O-P01-O-P03 / E01 / C05",
    "requires": [
@@ -212,7 +212,7 @@
     {
      "speaker": "Guardián de entrenamiento",
      "note": "",
-     "text": "Esquiva el directo. Bloquea la onda cuando abra la señal.",
+     "text": "No te diré qué golpe viene. Mira mi cuerpo y escucha: si barro de lado, esquiva; si voy de frente, bloquea.",
      "cue": "duelo_defensa"
     },
     {

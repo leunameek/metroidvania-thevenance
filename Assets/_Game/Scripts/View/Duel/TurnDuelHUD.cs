@@ -21,6 +21,8 @@ public sealed class TurnDuelHUD
     private readonly Action<int> _target;
     private readonly Action<DuelDefense> _defend;
     private string _signature = "";
+    // The one-time card of a signal the player has not learned yet (DuelSignals.Lesson).
+    public string Lesson { get; set; } = "";
 
     public TurnDuelHUD(Transform parent, string enemyName, Action<DuelAction> act, Action<int> target, Action<DuelDefense> defend)
     {
@@ -87,15 +89,16 @@ public sealed class TurnDuelHUD
         _concentration.text = $"Concentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
             + (m.Counter == CounterWindow.Reinforced ? "\nContraataque reforzado listo"
                 : m.Counter == CounterWindow.Normal ? "\nContraataque listo" : "");
-        _message.text = m.Message;
+        bool warning = m.Phase == DuelPhase.Telegraph || m.Phase == DuelPhase.Respond;
+        _message.text = warning && !string.IsNullOrEmpty(Lesson) ? Lesson : m.Message;
         switch (m.Phase)
         {
             case DuelPhase.Decide:
                 _banner.text = "TU TURNO"; _verbs.text = "Decide sin prisa"; _window.fillAmount = 0; break;
             case DuelPhase.Telegraph:
-                _banner.text = "PREPARA"; _verbs.text = Announce(m); _window.fillAmount = 1; break;
+                _banner.text = "PREPARA"; _verbs.text = Announce(m, Lesson); _window.fillAmount = 1; break;
             case DuelPhase.Respond:
-                _banner.text = "¡RESPONDE!"; _verbs.text = Announce(m);
+                _banner.text = "¡RESPONDE!"; _verbs.text = Announce(m, Lesson);
                 _window.fillAmount = m.Untimed ? 1 : Mathf.Clamp01(m.Remaining / Mathf.Max(.01f, m.ResponseSeconds)); break;
             case DuelPhase.Won: _banner.text = "PRUEBA SUPERADA"; _verbs.text = ""; break;
             case DuelPhase.Lost: _banner.text = "HAS CAÍDO"; _verbs.text = ""; break;
@@ -105,11 +108,14 @@ public sealed class TurnDuelHUD
         RebuildButtons(m, force);
     }
 
-    private static string Announce(TurnDuelModel m)
+    // Only who attacks (a tactical fact); what to answer is read from the enemy itself, unless the
+    // player asked to see it (Accesibilidad) or the signal is new to them.
+    private static string Announce(TurnDuelModel m, string lesson)
     {
         if (m.Move == null) return "";
         string origin = m.Move.Origin != DuelTarget.None ? TurnDuelModel.TargetName(m.Move.Origin) + " · " : "";
-        return origin + m.Move.Label + "  →  " + m.Move.Verbs;
+        if (m.ShowAnswers) return origin + m.Move.Label + "  →  " + m.Move.Verbs;
+        return origin + (string.IsNullOrEmpty(lesson) ? "Lee la señal" : "Señal nueva");
     }
 
     // Only legal choices are offered; the list is rebuilt when it changes.

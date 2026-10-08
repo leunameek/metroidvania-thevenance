@@ -145,7 +145,7 @@ public static class PlazaValidation
         Check(demo.Combat.Model.Phase == PlazaCombatPhase.React, "enemy telegraph opens reaction window");
         Keys(Key.F); yield return 0.1; Keys();
         Check(demo.Combat.Model.Mistakes == 1, "wrong defense gives feedback");
-        yield return 3.1;
+        yield return 4.7;
         Check(demo.Combat.Model.Phase == PlazaCombatPhase.React, "missed defense repeats");
         Keys(Key.Space); yield return 0.1; Keys();
         Check(demo.Combat.Model.LastDefenseSucceeded, "space dodges direct attack");
@@ -153,8 +153,15 @@ public static class PlazaValidation
         Keys(Key.E); yield return 0.1; Keys(); yield return 1.9;
         Check(demo.Combat.Model.Expected == PlazaDefense.Guard, "second enemy lesson requires guard");
         Keys(Key.F); yield return 0.1; Keys(); yield return 1.3;
+        // Two blows to read without the answer on screen: front (guard), then sweep (dodge).
+        Keys(Key.E); yield return 0.1; Keys(); yield return 1.9;
+        Check(!demo.Combat.Model.ShowsAnswer && demo.Combat.Model.Expected == PlazaDefense.Guard, "third blow is read, not told");
+        Keys(Key.F); yield return 0.1; Keys(); yield return 1.3;
+        Keys(Key.E); yield return 0.1; Keys(); yield return 1.9;
+        Check(demo.Combat.Model.Expected == PlazaDefense.Dodge, "fourth blow is a sweep");
+        Keys(Key.Space); yield return 0.1; Keys(); yield return 1.3;
         Keys(Key.E); yield return 0.1; Keys();
-        Check(demo.Combat.Completed && demo.Combat.Model.Phase == PlazaCombatPhase.Won, "three strikes plus dodge and guard win training");
+        Check(demo.Combat.Completed && demo.Combat.Model.Phase == PlazaCombatPhase.Won, "five strikes plus two guided and two read defenses win training");
         Check(demo.PortalsUnlocked, "all requirements unlock both portals");
         yield return 0.5;
         Keys(Key.E); yield return 0.2; Keys();

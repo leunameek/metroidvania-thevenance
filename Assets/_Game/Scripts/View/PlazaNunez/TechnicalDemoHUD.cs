@@ -234,25 +234,27 @@ public sealed class TechnicalDemoHUD : MonoBehaviour
         if (model.Phase == PlazaCombatPhase.Attack)
         {
             title = "TU TURNO";
-            body = "Pulsa E para golpear.\nNo hay límite de tiempo.\n\nEl guardián responderá después.\nObserva el círculo y espera la señal.";
+            body = "Pulsa E para golpear.\nNo hay límite de tiempo.\n\nEl guardián responderá después.\nMira su cuerpo y escucha: así avisa.";
         }
         else if (model.Phase == PlazaCombatPhase.Telegraph)
         {
             title = "PREPÁRATE";
-            body = model.Expected == PlazaDefense.Dodge
-                ? "El guardián prepara un golpe directo.\n\nEspera ¡AHORA! y pulsa ESPACIO\npara esquivar hacia un lado."
-                : "El guardián prepara una onda amplia.\n\nEspera ¡AHORA! y pulsa F\npara bloquear el impacto.";
+            // Two guided blows explain the signal; the next two have to be read.
+            body = !model.ShowsAnswer ? "Ahora sin ayuda: lee su cuerpo y escucha.\n¿Qué golpe prepara?"
+                : (model.Guided ? "Mira: " + model.Tell + "\n\n" : "")
+                  + (model.Expected == PlazaDefense.Dodge ? "Espera ¡AHORA! y pulsa ESPACIO\npara esquivar." : "Espera ¡AHORA! y pulsa F\npara bloquear.");
         }
         else if (model.Phase == PlazaCombatPhase.React)
         {
             title = "¡AHORA!";
-            body = model.Expected == PlazaDefense.Dodge ? "<size=28>ESPACIO · ESQUIVAR</size>" : "<size=28>F · BLOQUEAR</size>";
+            body = !model.ShowsAnswer ? "<size=28>ESPACIO esquivar · F bloquear</size>"
+                : model.Expected == PlazaDefense.Dodge ? "<size=28>ESPACIO · ESQUIVAR</size>" : "<size=28>F · BLOQUEAR</size>";
             body += "\n\nTiempo para responder: " + model.Remaining.ToString("0.0") + " s";
         }
         else if (model.Phase == PlazaCombatPhase.Won)
         {
             title = "PRUEBA SUPERADA";
-            body = "Aprendiste a atacar, esquivar y bloquear.\n\n"
+            body = "Así avisan todos los enemigos:\nde frente → bloquear · barriendo → esquivar\nsombra bajo tus pies → cubrir · destello dorado → parar\n\n"
                 + (demo.PortalsUnlocked ? "Ambos portales están abiertos.\nElige tu próximo destino." : "Completa las tres estaciones de objetos\npara abrir los dos portales.")
                 + "\n\nE para regresar a la plaza.";
         }
@@ -260,17 +262,18 @@ public sealed class TechnicalDemoHUD : MonoBehaviour
         {
             title = model.LastDefenseSucceeded ? "¡BIEN HECHO!" : "INTÉNTALO OTRA VEZ";
             body = model.LastDefenseSucceeded ? "Defensa correcta.\nAhora puedes contraatacar."
-                : "Espera la señal y usa la tecla indicada.\nRepetimos esta defensa.\n\nLa práctica no termina por un error.";
+                : model.Reading + "\n\nLa práctica no termina por un error.";
         }
         _detail.text = "<color=#DDB45C>DUELO DE ENTRENAMIENTO</color>\n\n<size=28>" + title + "</size>\n\n"
-            + body + "\n\n<color=#DDB45C>Guardián</color>  " + (3 - model.Hits) + " / 3\n"
+            + body + "\n\n<color=#DDB45C>Guardián</color>  " + (PlazaCombatModel.AttacksToWin - model.Hits) + " / " + PlazaCombatModel.AttacksToWin + "\n"
             + "<size=16>Tu energía  " + demo.PlayerHealth.CurrentHealth.ToString("0") + " / 100</size>";
         float progress = model.Phase == PlazaCombatPhase.React ? model.Remaining / model.ReactionSeconds
-            : model.Phase == PlazaCombatPhase.Telegraph ? model.Remaining / model.TelegraphSeconds : model.Hits / 3f;
+            : model.Phase == PlazaCombatPhase.Telegraph ? model.Remaining / model.TelegraphSeconds : model.Hits / (float)PlazaCombatModel.AttacksToWin;
         _progress.rectTransform.sizeDelta = new Vector2(348 * Mathf.Clamp01(progress), 6);
         _prompt.text = model.Phase == PlazaCombatPhase.Attack ? "[ E ] atacar   ·   [ ESC ] salir del entrenamiento"
             : model.Phase == PlazaCombatPhase.Won ? "[ E ] volver a la plaza"
-            : model.Phase == PlazaCombatPhase.React ? model.Expected == PlazaDefense.Dodge ? "[ ESPACIO ] esquivar ahora" : "[ F ] bloquear ahora"
+            : model.Phase == PlazaCombatPhase.React ? !model.ShowsAnswer ? "[ ESPACIO ] esquivar   ·   [ F ] bloquear"
+                : model.Expected == PlazaDefense.Dodge ? "[ ESPACIO ] esquivar ahora" : "[ F ] bloquear ahora"
             : "[ ESC ] salir del entrenamiento";
         _controls.text = "COMBATE POR TURNOS     E  atacar     ESPACIO  esquivar     F  bloquear     ESC  salir     H  ayuda";
     }

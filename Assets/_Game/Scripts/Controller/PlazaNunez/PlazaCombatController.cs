@@ -15,6 +15,12 @@ public sealed class PlazaCombatController : MonoBehaviour
     private int _previousMistakes;
     private float _flash;
     private int _beginFrame;
+    // The same signal language as the duels (DuelSignalCues): dust and drum for a blow from the
+    // front, a streak of air and a whistle for a sweep; the guardian's body leans into it.
+    private DuelSignalCues _cues;
+    private float _sweepSide = 1;
+    private static readonly DuelMove SweepBlow = new DuelMove { Id = "barrido", Label = "Barrido", Answers = new[] { DuelDefense.Dodge } };
+    private static readonly DuelMove FrontBlow = new DuelMove { Id = "frente", Label = "Golpe de frente", Answers = new[] { DuelDefense.Block } };
     public PlazaCombatModel Model { get; private set; }
     public bool Completed { get; private set; }
     public float FlashIntensity { get; set; } = 1;
@@ -142,7 +148,14 @@ public sealed class PlazaCombatController : MonoBehaviour
     {
         // A new turn or window: gestures started before it do not answer it.
         if (demo.Hands != null && demo.Hands.Tracker != null) demo.Hands.Tracker.Gestures.ClearPending();
-        if (Model.Phase == PlazaCombatPhase.Telegraph) demo.Audio.Play(PlazaSound.Warning, 0.55f);
+        if (Model.Phase == PlazaCombatPhase.Telegraph)
+        {
+            demo.Audio.Play(PlazaSound.Warning, 0.55f);
+            _cues ??= new DuelSignalCues(demo.Player.transform, guardian);
+            _cues.Warn(Model.Signal == DuelSignal.Sweep ? SweepBlow : FrontBlow);
+            _sweepSide = _cues.SweepSide; // the body winds toward the side the air comes from
+        }
+        else if (Model.Phase != PlazaCombatPhase.React) _cues?.Clear();
         if (Model.Phase == PlazaCombatPhase.React) GameAudio.Play("Combate/turno_jugador", 0.7f, AudioChannel.Effects, 1.1f, 0f, .3f, 1);
         if (Model.Mistakes > _previousMistakes)
         {
@@ -150,11 +163,13 @@ public sealed class PlazaCombatController : MonoBehaviour
             demo.PlayerHealth.TakeDamage(10);
             if (demo.PlayerHealth.CurrentHealth <= 30) demo.PlayerHealth.Revive();
             GameAudio.Play("Combate/dano_recibido", 0.8f);
-            demo.SetStatus("No pasa nada. Repetimos la misma defensa; espera el aviso y pulsa la tecla indicada.");
+            demo.SetStatus("No pasa nada. " + Model.Reading);
         }
         if (Model.Phase == PlazaCombatPhase.Won)
         {
             Completed = true;
+            // The training taught the two signals of the plaza: the duels do not explain them again.
+            DuelSignalMemory.Learn(DuelSignals.Key(DuelSignal.Front), DuelSignals.Key(DuelSignal.Sweep));
             demo.PlayerHealth.Revive();
             demo.Audio.Play(PlazaSound.Victory);
             demo.SetStatus(demo.PortalsUnlocked ? "Entrenamiento superado. Los dos portales están abiertos." : "Entrenamiento superado. Completa las estaciones de objetos para abrir los portales.");
@@ -170,14 +185,27 @@ public sealed class PlazaCombatController : MonoBehaviour
         _properties.SetColor("_BaseColor", color);
         _properties.SetColor("_EmissionColor", color * (Active ? 0.7f + _flash * 3 * FlashIntensity : 0.12f));
         warningRing.SetPropertyBlock(_properties);
-        if (guardian != null && Active && Model.Phase == PlazaCombatPhase.Telegraph)
-            guardian.localRotation = Quaternion.Euler(-Mathf.Sin(Time.time * 9) * 3, 180, 0);
-        else if (guardian != null) guardian.localRotation = Quaternion.Euler(0, 180, 0);
+        if (guardian == null) return;
+        // The body is the signal: for a sweep it winds to one side, for a blow from the front it
+        // plants and leans back. It builds during the warning and holds while the answer is open.
+        bool warning = Active && (Model.Phase == PlazaCombatPhase.Telegraph || Model.Phase == PlazaCombatPhase.React);
+        if (warning)
+        {
+            float k = Model.Phase == PlazaCombatPhase.React ? 1f : Mathf.Clamp01(1f - Model.Remaining / Model.TelegraphSeconds);
+            k = Mathf.SmoothStep(0, 1, Mathf.Min(1f, k * 1.6f));
+            float tremble = Mathf.Sin(Time.time * 9) * 1.5f;
+            guardian.localRotation = Model.Signal == DuelSignal.Sweep
+                ? Quaternion.Euler(tremble, 180 + 32 * _sweepSide * k, -7 * _sweepSide * k)
+                : Quaternion.Euler(-13 * k + tremble, 180, 0);
+            _cues?.Progress(Model.Phase == PlazaCombatPhase.React ? 1f - .5f * Model.Remaining / Model.ReactionSeconds : .5f * k);
+        }
+        else guardian.localRotation = Quaternion.Euler(0, 180, 0);
     }
     public void Cancel()
     {
         if (!Active) return;
         StopAllCoroutines();
+        _cues?.Clear();
         Model.Cancel();
         guardian.position = _guardianHome;
         demo.Player.Teleport(_returnPosition);
@@ -185,5 +213,5 @@ public sealed class PlazaCombatController : MonoBehaviour
         demo.PlayerHealth.Revive();
         demo.SetExploration();
     }
-    private void OnDestroy() { if (Model != null) Model.Changed -= OnPhase; }
+    private void OnDestroy() { if (Model != null) Model.Changed -= OnPhase; _cues?.Dispose(); }
 }

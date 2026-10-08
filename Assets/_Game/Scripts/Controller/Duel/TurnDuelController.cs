@@ -29,6 +29,7 @@ public sealed class TurnDuelController : MonoBehaviour
     private TurnDuelHUD _hud;
     private DuelAnimation _bodies;
     private DuelAudio _audio;
+    private DuelSignalCues _cues;
     private bool _listening;
     private Action<bool> _ended;
     private DuelPhase _lastPhase = (DuelPhase)(-1);
@@ -60,10 +61,13 @@ public sealed class TurnDuelController : MonoBehaviour
         // The plaza has no world input: its voice setting decides the longer window there.
         bool voice = natural != null ? natural.VoiceOn : VoicePrompt.Enabled;
         duel._model.ResponseSeconds = (voice ? TurnDuelModel.VoiceWindow : TurnDuelModel.KeyboardWindow) * Mathf.Clamp(reactionScale, 1f, 3f);
+        duel._model.ShowAnswers = NaturalInputPrefs.Load().combatAnswers;
         duel._stage = stage; duel._health = playerHealth; duel._natural = natural; duel._ended = ended;
         duel._hud = new TurnDuelHUD(go.transform, rules.Name, duel.Act, duel.Target, duel.Defend);
         duel._bodies = new DuelAnimation(stage);
         duel._audio = new DuelAudio(rules.Id, stage?.Focus, playerHealth != null);
+        var player = FindFirstObjectByType<PlayerController>();
+        duel._cues = new DuelSignalCues(player != null ? player.transform : playerHealth != null ? playerHealth.transform : null, stage?.Focus);
         duel._listening = voice;
         if (playerHealth != null) playerHealth.Died += duel.OnPlayerDied;
         Current = duel;
@@ -102,6 +106,10 @@ public sealed class TurnDuelController : MonoBehaviour
         int before = _model.PlayerHealth;
         _model.Tick(Time.deltaTime);
         Present(before);
+        if (_model.Phase == DuelPhase.Telegraph)
+            _cues?.Progress(.5f * (1f - _model.Remaining / TurnDuelModel.TelegraphSeconds));
+        else if (_model.Phase == DuelPhase.Respond)
+            _cues?.Progress(_model.Untimed ? .5f : 1f - .5f * _model.Remaining / Mathf.Max(.01f, _model.ResponseSeconds));
     }
 
     private void ReadInput()
@@ -142,7 +150,7 @@ public sealed class TurnDuelController : MonoBehaviour
                 break;
             case DuelPhase.Telegraph:
             case DuelPhase.Respond:
-                _natural?.SetContext(NaturalContext.Defend, _model.Move != null ? _model.Move.Verbs : "");
+                _natural?.SetContext(NaturalContext.Defend);
                 DuelDefense? defense = null;
                 if (k != null)
                 {
@@ -214,11 +222,18 @@ public sealed class TurnDuelController : MonoBehaviour
             _lastPhase = _model.Phase; _lastRound = _model.Round;
             switch (_model.Phase)
             {
-                case DuelPhase.Telegraph: _natural?.ClearPending(); _stage?.OnTelegraph(_model.Move); _bodies?.EnemyTelegraph(_model.Move); _audio?.Telegraph(_model.Move); break;
-                case DuelPhase.Respond: _natural?.ClearPending(); break;
+                case DuelPhase.Telegraph:
+                    _natural?.ClearPending(); _stage?.OnTelegraph(_model.Move); _bodies?.EnemyTelegraph(_model.Move); _audio?.Telegraph(_model.Move);
+                    _cues?.Warn(_model.Move);
+                    _hud.Lesson = _model.ShowAnswers ? "" : DuelSignals.Lesson(_model.Move, DuelSignalMemory.Learned);
+                    break;
+                case DuelPhase.Respond: _natural?.ClearPending(); _cues?.Open(_model.Move); break;
                 case DuelPhase.Resolve:
+                    _cues?.Clear(); _hud.Lesson = "";
                     if (previous == DuelPhase.Respond && _model.Move != null)
                     {
+                        // A signal read correctly once is learned: its card does not come back.
+                        if (_model.LastDefenseCorrect) DuelSignalMemory.Learn(_model.Move);
                         _stage?.OnResolved(_model.Move, _model.LastDefenseCorrect); _bodies?.Resolved(_model.LastDefenseCorrect);
                         _audio?.Resolved(_model.LastDefenseCorrect);
                     }
@@ -240,6 +255,7 @@ public sealed class TurnDuelController : MonoBehaviour
         var ended = _ended; _ended = null;
         _bodies?.Ended(victory);
         _audio?.Ended(victory); _audio = null;
+        _cues?.Dispose(); _cues = null;
         Destroy(gameObject);
         ended?.Invoke(victory);
     }

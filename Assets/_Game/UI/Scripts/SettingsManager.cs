@@ -18,6 +18,8 @@ namespace Nemequene.UI
         public float music = .6f, voices = .8f;
         public float textScale = 1, subtitleScale = 1, subtitleOpacity = .9f, master = .8f, effects = .7f, ambience = .35f, uiVolume = .3f;
         public float cameraSensitivity = 1, cameraMotion = 1, flashIntensity = .3f, noticeSeconds = 6;
+        // Accesibilidad: show the right defense in combat (off: the player reads the signals).
+        public bool combatAnswers;
         public float reactionScale = 1, handSensitivity = 1, handSmoothing = .12f, dwellSeconds = 1, handDeadZone = .015f, inputGain = 1;
         public int confidence = 1, quality = -1, frameLimit = 60, aa = 2;
         // 1 once the voice-first defaults (voice on, always listening) were applied.
@@ -109,7 +111,7 @@ namespace Nemequene.UI
             var d = new UISettings();
             Values.textScale = d.textScale; Values.highContrast = false; Values.reducedMotion = false; Values.readableFont = false;
             Values.subtitleScale = 1; Values.subtitleOpacity = .9f; Values.subtitles = Values.speakerNames = Values.soundCaptions = true;
-            Values.reactionScale = 1; Values.cameraMotion = 1; Values.flashIntensity = .3f; Values.dwellSeconds = 1;
+            Values.reactionScale = 1; Values.combatAnswers = false; Values.cameraMotion = 1; Values.flashIntensity = .3f; Values.dwellSeconds = 1;
             Values.handSensitivity = 1; Values.toggleTalk = false; Apply();
         }
     }

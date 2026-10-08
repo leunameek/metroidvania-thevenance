@@ -146,7 +146,7 @@
     },
     {
       "key": "controls.body",
-      "value": "EXPLORACIÓN\n[[Move]] · Caminar\n[[Sprint]] · Correr\n[[Jump]] · Saltar\n[[Dash]] · Dash\n[[Interact]] · Interactuar o agarrar\n[[Wings]] · Alas (Mundo Superior)   [[Jump]] / [[Descend]] · Subir o bajar en vuelo\n[[Journal]] · Diario\n[[Help]] · Ayuda\n[[Mute]] · Silenciar\n[[Restart]] · Reiniciar (con confirmación)\nEsc · Pausa\n\nVOZ (español o inglés)\nEXAMINAR, HABLAR, ENTRAR, USAR · Interactuar\nSIGUIENTE · Avanzar un diálogo\nTOMAR / SALIR · Tomar o devolver una pieza\nPalma abierta quieta · Interactuar con las manos\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\n[[Hands]] · Activar o pausar cámara\n[[InputMode]] · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\n[[Attack]], puño o ATACAR · Atacar en tu turno\n[[Dodge]], barrido lateral o ESQUIVAR · Esquivar\n[[Guard]], dos palmas arriba o BLOQUEAR · Bloquear\nEsc · Pausa\n\nDUELOS POR TURNOS\nATACAR, CONTRAATACAR, JAGUAR, CUERNO, ANCLAR, INTERRUMPIR, VINCULAR · Acción (o 1-7)\nBLOQUEAR, ESQUIVAR, CUBRIR, PARAR · Defensa (o [[Guard]], [[Dodge]], [[Cover]], [[Parry]])\nIZQUIERDA / DERECHA, LUNA / SOL · Objetivo (o Z / X)\nLa voz escucha sola; en Ajustes puedes pedir [[Talk]] para hablar\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica. En los mundos, [[Hands]] activa la cámara y la voz se cambia desde la pausa."
+      "value": "EXPLORACIÓN\n[[Move]] · Caminar\n[[Sprint]] · Correr\n[[Jump]] · Saltar\n[[Dash]] · Dash\n[[Interact]] · Interactuar o agarrar\n[[Wings]] · Alas (Mundo Superior)   [[Jump]] / [[Descend]] · Subir o bajar en vuelo\n[[Journal]] · Diario\n[[Help]] · Ayuda\n[[Mute]] · Silenciar\n[[Restart]] · Reiniciar (con confirmación)\nEsc · Pausa\n\nVOZ (español o inglés)\nEXAMINAR, HABLAR, ENTRAR, USAR · Interactuar\nSIGUIENTE · Avanzar un diálogo\nTOMAR / SALIR · Tomar o devolver una pieza\nPalma abierta quieta · Interactuar con las manos\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\n[[Hands]] · Activar o pausar cámara\n[[InputMode]] · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\n[[Attack]], puño o ATACAR · Atacar en tu turno\n[[Dodge]], barrido lateral o ESQUIVAR · Esquivar\n[[Guard]], dos palmas arriba o BLOQUEAR · Bloquear\nEsc · Pausa\n\nDUELOS POR TURNOS\nATACAR, CONTRAATACAR, JAGUAR, CUERNO, ANCLAR, INTERRUMPIR, VINCULAR · Acción (o 1-7)\nBLOQUEAR, ESQUIVAR, CUBRIR, PARAR · Defensa (o [[Guard]], [[Dodge]], [[Cover]], [[Parry]])\nIZQUIERDA / DERECHA, LUNA / SOL · Objetivo (o Z / X)\nLa voz escucha sola; en Ajustes puedes pedir [[Talk]] para hablar\n\nLa defensa se realiza cuando aparece ¡AHORA! Nadie te dice cuál: lee al enemigo (de frente → bloquear · barriendo → esquivar · sombra que crece bajo tus pies → cubrir · destello dorado → también parar). Los errores repiten la práctica. En los mundos, [[Hands]] activa la cámara y la voz se cambia desde la pausa."
     },
     {
       "key": "tutorial.repeat",
@@ -350,7 +350,7 @@
     },
     {
       "key": "combat.body.Telegraph",
-      "value": "Espera la señal."
+      "value": "Observa al guardián."
     },
     {
       "key": "combat.body.React",
@@ -375,6 +375,22 @@
     {
       "key": "combat.retry",
       "value": "Espera la señal y repite la defensa."
+    },
+    {
+      "key": "combat.guided",
+      "value": "Mira al guardián: {0}"
+    },
+    {
+      "key": "combat.read.Telegraph",
+      "value": "Ahora sin ayuda: lee su cuerpo y escucha. ¿Qué golpe prepara?"
+    },
+    {
+      "key": "combat.read.React",
+      "value": "¡Responde! ¿Viene barriendo o de frente?"
+    },
+    {
+      "key": "combat.signals",
+      "value": "Así avisan todos los enemigos, sin decírtelo:\nde frente (tambor grave) → Bloquear · barriendo (silbido) → Esquivar\nuna sombra crece bajo tus pies → Cubrir · destello dorado → también Parar"
     },
     {
       "key": "combat.seconds",
@@ -639,6 +655,10 @@
     {
       "key": "access.reaction",
       "value": "Tiempo de reacción (multiplicador)"
+    },
+    {
+      "key": "access.combatAnswers",
+      "value": "Mostrar la defensa correcta en combate"
     },
     {
       "key": "access.fallback",
