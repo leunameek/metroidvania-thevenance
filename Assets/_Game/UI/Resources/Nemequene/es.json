@@ -390,7 +390,7 @@
     },
     {
       "key": "combat.signals",
-      "value": "Así avisan todos los enemigos, sin decírtelo:\nde frente (tambor grave) → Bloquear · barriendo (silbido) → Esquivar\nuna sombra crece bajo tus pies → Cubrir · destello dorado → también Parar"
+      "value": "Así avisan todos los enemigos, sin decírtelo:\nde frente (tambor grave) → Bloquear · barriendo (silbido) → Esquivar\nuna sombra crece bajo tus pies → Cubrir · destello dorado → también Parar\nEn los combates libres: sal del carril, de la franja o de la sombra; el dorado es tu momento de impulsarte."
     },
     {
       "key": "combat.seconds",

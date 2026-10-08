@@ -54,6 +54,8 @@ La señal sale de la respuesta principal de cada ficha (`DuelMove.Signal`); el d
 - **Entrenamiento (E01):** cinco ataques y cuatro defensas. Las dos primeras se explican (cuerpo, sonido y respuesta); las dos siguientes (frente y luego barrido) se leen sin ayuda. Al vencer, el panel resume el lenguaje completo.
 - **Sin ritmo estricto:** la voz y las manos mantienen la ventana amplia; interpretar es obligatorio, acertar el instante no.
 - **Accesibilidad:** «Mostrar la defensa correcta en combate» vuelve a nombrar la respuesta en duelos y entrenamiento.
+- **Intensidad (playtest 7 oct):** cada señal dura todo el aviso y crece hasta el golpe: carril de chevrones naranjas del enemigo a Nemequene con polvo continuo (frente), franja de chevrones celestes que lo cruza con estelas de aire (barrido), sombra oscura con borde violeta y escombros que caen (arriba); luz del color de la señal, el cuerpo del enemigo se inclina (atrás, de lado o hacia delante) y el sonido se repite al abrir la respuesta. El destello es una llamarada dorada con luz.
+- **Todos los combates:** además de duelos y entrenamiento, las criaturas del inframundo y el centinela de escudo usan las mismas señales: mordida, dardo, grito y pulso = frente; coletazo = barrido; picada = arriba; los anillos de alcance toman el color de la señal. En tiempo real la respuesta es moverse fuera del carril, la franja o la sombra; el dorado marca el momento de impulsarse (grito interrumpible, criatura en el suelo tras la picada). Los enemigos de la escena Dev/Movement no son alcanzables en el juego y quedan fuera.
 
 
 ## Recursos de combate propuestos
