@@ -60,6 +60,10 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         var root = body != null ? body.parent : null;
         if (root == null || !CharacterModels.Exists("Serpiente")) return;
         CharacterModels.Hide(root, core != null ? core.transform : null);
+        // The training-guardian stand-in was only hidden and stayed loaded under the serpent
+        // (2026-10-08 review): it goes, so one model is left in the arena.
+        foreach (Transform child in root)
+            if (child.name.StartsWith("Modelo provisional") && child.GetComponentInChildren<Collider>(true) == null) Destroy(child.gameObject);
         _serpent = CharacterModels.Spawn("Serpiente", root, Vector3.zero, Quaternion.identity);
         animator = null;
         if (_serpent != null) _serpent.PlayAny("Emerger");

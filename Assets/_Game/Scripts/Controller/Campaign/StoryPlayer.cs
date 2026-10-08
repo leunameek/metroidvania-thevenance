@@ -222,6 +222,8 @@ public sealed class StoryPlayer : MonoBehaviour
         if (_index > 0) GameAudio.UI(UICue.Dialogue);
         _revealed = 0;
         _view.SetLine(line.speaker, line.note, line.text);
+        // Zelda-style: each speaker opens the line with a short voiced sound of their own (2026-10-08).
+        StoryVoice.Say(line.speaker, line.text, _index);
         var actor = StoryActor.Find(line.speaker);
         StoryActor.Speaking = actor;
         if (actor != null && !actor.IsHero) StoryActor.Partner = actor;
