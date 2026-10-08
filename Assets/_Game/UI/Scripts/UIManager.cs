@@ -257,6 +257,9 @@ namespace Nemequene.UI
             var layout = body.GetComponent<VerticalLayoutGroup>(); layout.childAlignment = TextAnchor.MiddleCenter;
             _modalIcon = Factory.Icon(body, UIIcon.Alert, 60, UIPalette.GoldLight);
             _modalText = Factory.Text(body, "", 40, true); _modalText.alignment = TextAlignmentOptions.Center;
+            // At most two lines: a long question shrinks instead of pushing the buttons off the sheet.
+            _modalText.enableAutoSizing = true; _modalText.fontSizeMax = 40; _modalText.fontSizeMin = 20;
+            _modalText.gameObject.AddComponent<LayoutElement>().preferredHeight = 112;
             UIFactory.Tone(_modalText, UITone.Gold);
             _modalDetail = Factory.Text(body, "", 24); _modalDetail.alignment = TextAlignmentOptions.Center;
             var actions = Factory.Column(body, "Actions", 10); actions.gameObject.AddComponent<LayoutElement>().minHeight = 128;

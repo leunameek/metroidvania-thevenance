@@ -157,11 +157,15 @@ namespace Nemequene.UI
                 layout.padding=new RectOffset(0,0,8,8);
                 layout.childControlWidth=layout.childControlHeight=true; layout.childForceExpandWidth=true; layout.childForceExpandHeight=true;
                 _slotButtons[i]=Button(row,"save.empty",()=>SelectSlot(slot),false,24);
+                // Two lines (place, then progress and date): a framed tile the height of the row
+                // instead of a one-line ribbon they spilled out of (2026-10-07 audit).
+                _slotButtons[i].GetComponent<TitleMenuButton>().slot=true;
                 _deleteButtons[i]=Button(row,"save.delete",()=>Confirm("save.deleteConfirm",()=>{GameSaveStore.Delete(slot);RefreshSaves();}),false,22);
                 _deleteButtons[i].GetComponent<LayoutElement>().preferredWidth=220;
                 _deleteButtons[i].GetComponent<LayoutElement>().flexibleWidth=0;
                 _deleteButtons[i].GetComponent<TitleMenuButton>().danger=true;
                 UIFactory.Center(_deleteButtons[i]);
+                var deletePad=_deleteButtons[i].GetComponent<HorizontalLayoutGroup>(); deletePad.padding.left=deletePad.padding.right=28;
             }
             var side=_factory.Column(_saves.transform,"InputMode",12); side.anchorMin=new Vector2(.68f,.30f); side.anchorMax=new Vector2(.94f,.74f);
             side.GetComponent<VerticalLayoutGroup>().childAlignment=TextAnchor.UpperLeft;

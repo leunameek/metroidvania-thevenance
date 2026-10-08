@@ -74,11 +74,13 @@ public sealed class MIHud : MonoBehaviour
 
         // Inspection of a find (screens 10-12): the piece keeps the left, the panel the right.
         _inspect = UIKit.Rect("Inspection", canvas).gameObject;
-        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .11f); panel.anchorMax = new Vector2(.94f, .76f);
+        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .26f); panel.anchorMax = new Vector2(.94f, .83f); // clear of the hands/voice plate
         var bg = panel.gameObject.AddComponent<Image>(); bg.color = UIPalette.Stone; bg.raycastTarget = false;
         if (UIBacata.Available) UIBacata.Frame(panel.gameObject, .6f, true, true);
         _inspectName = UIKit.Label(panel, "", 44, UIPalette.GoldText, true); _inspectName.alignment = TextAlignmentOptions.TopLeft;
         Inset(_inspectName.rectTransform, 60, 60, 84, -1, 64);
+        // A long name shrinks to its band instead of running into the kind line below (2026-10-07 audit).
+        _inspectName.enableAutoSizing = true; _inspectName.fontSizeMax = 44; _inspectName.fontSizeMin = 24;
         _inspectKind = UIKit.Label(panel, "", 20, UIPalette.Jade); _inspectKind.alignment = TextAlignmentOptions.TopLeft; _inspectKind.characterSpacing = 2;
         _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 150, -1, 30);
         _inspectBody = UIKit.Label(panel, "", 24, UIPalette.Ivory); _inspectBody.alignment = TextAlignmentOptions.TopLeft;
@@ -174,7 +176,13 @@ public sealed class MIHud : MonoBehaviour
         _objective.text = objective;
     }
     public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "\n"); }
-    public void SetHintsVisible(bool visible) { if (_hints.activeSelf != visible) _hints.SetActive(visible); }
+    // The exploration hints («Esc Pausa», «Impulso») hide under the pause, which draws its own in
+    // the same corners (2026-10-07 audit: «Pausa» and «Continuar» were printed over each other).
+    public void SetHintsVisible(bool visible)
+    {
+        visible &= !_pause.activeSelf;
+        if (_hints.activeSelf != visible) _hints.SetActive(visible);
+    }
     // Zone, objective and counters step aside while the turn duel screen uses the top band.
     public void SetHeaderVisible(bool visible)
     {
@@ -237,6 +245,7 @@ public sealed class MIHud : MonoBehaviour
 
     public void ShowPause(bool open)
     {
+        if (open) _hints.SetActive(false);
         _pause.SetActive(open);
         if (open) Relabel();
         if (open && EventSystem.current != null) { EventSystem.current.SetSelectedGameObject(null); EventSystem.current.SetSelectedGameObject(_resume.gameObject); }

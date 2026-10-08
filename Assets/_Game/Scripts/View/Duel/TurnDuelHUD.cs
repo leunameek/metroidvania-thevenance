@@ -36,11 +36,13 @@ public sealed class TurnDuelHUD
 
         var top = UIKit.Place(UIKit.HudPanel(canvas, "Enemy"), new Vector2(.5f, 1), new Vector2(0, -28), new Vector2(760, 124));
         _enemy = UIKit.Label(top, enemyName, 28, UIPalette.GoldLight, true);
-        _enemy.rectTransform.anchorMin = new Vector2(0, .62f); _enemy.rectTransform.anchorMax = new Vector2(1, .96f);
-        var barHolder = UIKit.Rect("Bar", top); barHolder.anchorMin = new Vector2(.08f, .38f); barHolder.anchorMax = new Vector2(.92f, .58f);
+        // Inside the plate's carved top rim (2026-10-07 audit: the name sat on it).
+        _enemy.rectTransform.anchorMin = new Vector2(.04f, .56f); _enemy.rectTransform.anchorMax = new Vector2(.96f, .86f);
+        _enemy.enableAutoSizing = true; _enemy.fontSizeMax = 28; _enemy.fontSizeMin = 18; _enemy.textWrappingMode = TextWrappingModes.NoWrap;
+        var barHolder = UIKit.Rect("Bar", top); barHolder.anchorMin = new Vector2(.08f, .36f); barHolder.anchorMax = new Vector2(.92f, .52f);
         _enemyHealth = UIKit.Bar(barHolder, new Vector2(620, 18), UIPalette.Crimson);
         _status = UIKit.Label(top, "", 19, UIPalette.Muted);
-        _status.rectTransform.anchorMin = new Vector2(0, .04f); _status.rectTransform.anchorMax = new Vector2(1, .34f);
+        _status.rectTransform.anchorMin = new Vector2(.04f, .1f); _status.rectTransform.anchorMax = new Vector2(.96f, .34f);
 
         var banner = UIKit.Place(UIKit.Ribbon(canvas, "Turn"), new Vector2(.5f, 1), new Vector2(0, -176), new Vector2(620, 70));
         _bannerPlate = banner.GetComponent<Image>();

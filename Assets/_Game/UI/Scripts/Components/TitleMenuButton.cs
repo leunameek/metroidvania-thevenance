@@ -52,7 +52,7 @@ namespace Nemequene.UI
         public void Initialize(bool main)
         {
             primary = main;
-            if (_button != null) { GetComponent<HorizontalLayoutGroup>().padding.left=main?64:52; Refresh(); return; }
+            if (_button != null) { GetComponent<HorizontalLayoutGroup>().padding.left=main?74:66; Refresh(); return; }
             _button=GetComponent<Button>(); _button.transition=Selectable.Transition.None;
             _surface=GetComponent<Image>(); _label=GetComponentInChildren<TMP_Text>();
             _outline=GetComponent<Outline>(); _outline.effectDistance=new Vector2(2,-2);
@@ -67,7 +67,7 @@ namespace Nemequene.UI
             rect.sizeDelta=new Vector2(12,12); rect.anchoredPosition=new Vector2(27,0); rect.localRotation=Quaternion.Euler(0,0,45);
             mark.GetComponent<Image>().color=UIPalette.GoldLight; mark.GetComponent<Image>().raycastTarget=false;
             (mark.GetComponent<LayoutElement>()??mark.AddComponent<LayoutElement>()).ignoreLayout=true;
-            _mark=mark; GetComponent<HorizontalLayoutGroup>().padding.left=main?64:52;
+            _mark=mark; GetComponent<HorizontalLayoutGroup>().padding.left=main?74:66;
             Refresh();
         }
         public void Refresh()

@@ -11,7 +11,7 @@ namespace Nemequene.UI
         private readonly GameObject _root;
         private readonly TMP_Text _turn, _body, _enemy, _timer, _voice, _hands;
         private readonly Image _progress, _guardian;
-        private readonly RectTransform _commands;
+        private readonly RectTransform _commands, _content;
         private readonly Button _attack, _dodge, _block, _return;
         private float _next;
         public CombatUIController(UIManager ui)
@@ -41,7 +41,7 @@ namespace Nemequene.UI
             var commands = f.Panel("Commands", _root.transform, new Vector2(.24f, .04f), new Vector2(.76f, .31f), true, true, false);
             _commands = commands;
             // Pixel insets keep reading text clear of the rim and the emblem.
-            var body = f.Scroll(commands, Vector2.zero, Vector2.one);
+            var body = f.Scroll(commands, Vector2.zero, Vector2.one); _content = body;
             ((RectTransform)body.parent.parent).Inset(56, 66, 56, 60);
             body.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperCenter;
             _body = f.Text(body, "", 24); _body.alignment = TextAlignmentOptions.Center;
@@ -123,8 +123,11 @@ namespace Nemequene.UI
             if (!_root.activeSelf || Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + .05f;
             var m = _ui.Demo.Combat.Model;
-            _commands.anchorMax = new Vector2(.76f, .31f + (_ui.Settings.Values.textScale - 1) * .22f
-                + (_ui.Settings.Values.voiceEnabled ? .04f : 0) + (_ui.Demo.Hands.Live ? .08f : 0));
+            // The panel grows to what it holds (instruction, timer, actions, voice and hands lines)
+            // instead of a fixed height that cut them at 150 % text (2026-10-07 audit).
+            float canvas = Mathf.Max(1, ((RectTransform)_root.transform).rect.height);
+            float need = LayoutUtility.GetPreferredHeight(_content) + 66 + 60 + 8;
+            _commands.anchorMax = new Vector2(.76f, Mathf.Clamp(.04f + need / canvas, .22f, .80f));
             _timer.gameObject.SetActive(m.Phase == PlazaCombatPhase.React);
             _voice.text = _ui.Settings.Values.voiceEnabled && _ui.Voice != null ? _ui.Voice.StatusText : "";
             _voice.gameObject.SetActive(_voice.text.Length > 0 && _ui.Voice.State != VoiceState.Inactive);

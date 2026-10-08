@@ -120,9 +120,10 @@ namespace Nemequene.UI
             fill.sprite = UIBacata.Get("Controls/Bar_Fill") ?? WhiteSprite(); fill.color = UIPalette.Crimson; fill.raycastTarget = false;
             fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal; fill.fillOrigin = (int)Image.OriginHorizontal.Left;
             var name = Shadow(Label(root, caption, 22, UIPalette.Ivory)); name.fontStyle = FontStyles.Bold;
-            name.alignment = TextAlignmentOptions.BottomLeft; name.rectTransform.anchorMin = new Vector2(.34f, .64f); name.rectTransform.anchorMax = new Vector2(.70f, .98f);
+            name.alignment = TextAlignmentOptions.BottomLeft; name.rectTransform.anchorMin = new Vector2(.39f, .72f); name.rectTransform.anchorMax = new Vector2(.64f, 1.04f);
             value = Shadow(Label(root, "", 20, UIPalette.Muted));
-            value.alignment = TextAlignmentOptions.BottomRight; value.rectTransform.anchorMin = new Vector2(.62f, .64f); value.rectTransform.anchorMax = new Vector2(.90f, .98f);
+            value.alignment = TextAlignmentOptions.BottomRight; value.rectTransform.anchorMin = new Vector2(.62f, .72f); value.rectTransform.anchorMax = new Vector2(.90f, 1.04f);
+            // Clear of the bar's carved rim (2026-10-07 audit: «Vida» and «100 / 100» sat on it).
             return fill;
         }
         // Key hint in a safe-area corner ("Esc  Pausa"): key cap first, then the action.
