@@ -31,7 +31,8 @@ public static class CharacterLibrarySetup
     // v3: CombatIdle (duel stance) and the reworked creature clips.
     // v5: the new Saguanmachica model (2026-10-07). v6: Saguanmachica's hands kept outside his robe.
     // v7: the new Tisquesusa model, Mixamo-rigged like the rest of the cast (2026-10-07).
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v7";
+    // v8: the new Quimue model (2026-10-07).
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v8";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
