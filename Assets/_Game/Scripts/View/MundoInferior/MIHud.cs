@@ -140,7 +140,7 @@ public sealed class MIHud : MonoBehaviour
 
         _hints = UIKit.Rect("Hints", canvas).gameObject;
         UIKit.Hint(_hints.transform, "Esc", "Pausa", Vector2.zero);
-        UIKit.Hint(_hints.transform, VoicePrompt.Cap("impulso", "Q"), "Impulso", Vector2.right);
+        UIKit.Hint(_hints.transform, VoicePrompt.Cap("impulso", GameAction.Dash), "Impulso", Vector2.right);
 
         var fade = UIKit.Rect("Fade", canvas); _fade = fade.gameObject.AddComponent<Image>();
         _fade.color = new Color(.031f, .039f, .043f, 0); _fade.raycastTarget = false;
@@ -195,8 +195,12 @@ public sealed class MIHud : MonoBehaviour
     }
     public void HideInspection() { _inspect.SetActive(false); _fitStatus = null; _guide = null; }
 
-    private const string InspectionKeys = "E · Tomar     Esc · Devolver al altar\nRatón o A / D · Girar";
-    private const string FitKeys = "E · Encajar     Esc · Devolver al altar\nRatón, A / D y W / S · Girar";
+    // The keys follow the Controles page (GameBindings).
+    private static string InspectionKeys => GameBindings.Cap(GameAction.Interact) + " · Tomar     Esc · Devolver al altar\nRatón o "
+        + GameBindings.Cap(GameAction.MoveLeft) + " / " + GameBindings.Cap(GameAction.MoveRight) + " · Girar";
+    private static string FitKeys => GameBindings.Cap(GameAction.Interact) + " · Encajar     Esc · Devolver al altar\nRatón, "
+        + GameBindings.Cap(GameAction.MoveLeft) + " / " + GameBindings.Cap(GameAction.MoveRight) + " y "
+        + GameBindings.Cap(GameAction.MoveForward) + " / " + GameBindings.Cap(GameAction.MoveBack) + " · Girar";
     private string _fitStatus, _guide;
     // Hands or voice on: the words and gestures come first, the keys after them. A piece to fit
     // in its table puts its status (turning, seated, not yet) above them, in gold.

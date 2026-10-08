@@ -142,12 +142,12 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (StoryPlayer.Active || TurnDuelController.Running || PlazaPieceInspection.Active != null) return;
         if (ManagedUI && HelpOpen) return;
         Keyboard k = Keyboard.current;
-        if (k != null && k.vKey.wasPressedThisFrame) _audio.ToggleMute();
-        if (k != null && k.cKey.wasPressedThisFrame) _hands.Toggle();
-        if (k != null && k.mKey.wasPressedThisFrame) ToggleInputMode();
+        if (k != null && GameBindings.Pressed(GameAction.Mute)) _audio.ToggleMute();
+        if (k != null && GameBindings.Pressed(GameAction.Hands)) _hands.Toggle();
+        if (k != null && GameBindings.Pressed(GameAction.InputMode)) ToggleInputMode();
         if (HelpOpen) return;
         if (State == TechnicalDemoState.Transition) return;
-        if (!ManagedUI && k != null && k.rKey.wasPressedThisFrame) { Restart(); return; }
+        if (!ManagedUI && k != null && GameBindings.Pressed(GameAction.Restart)) { Restart(); return; }
         if (player.transform.position.y < config.fallThreshold)
         {
             if (State == TechnicalDemoState.Combat) combat.Cancel();
@@ -160,7 +160,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (State == TechnicalDemoState.Analyzing)
         {
             if (k != null && k.escapeKey.wasPressedThisFrame) { EndAnalysis(); return; }
-            if (k != null && k.eKey.wasPressedThisFrame)
+            if (k != null && GameBindings.Pressed(GameAction.Interact))
             {
                 if (Lesson.Complete) EndAnalysis();
                 else Status = "Completa el gesto indicado. Esc permite salir y continuar después.";
@@ -173,7 +173,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         }
         SyncCampaign();
         FindNearby();
-        if (Time.frameCount > _ignoreInteractionFrame && k != null && k.eKey.wasPressedThisFrame) Interact();
+        if (Time.frameCount > _ignoreInteractionFrame && k != null && GameBindings.Pressed(GameAction.Interact)) Interact();
     }
 
     // Being in the plaza means the prologue is behind; lessons and training feed the story.

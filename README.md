@@ -26,6 +26,15 @@ R solicita confirmación antes de reiniciar la visita completa. Los ajustes de v
 texto, contraste, gráficos y dispositivos están en los menús de configuración.
 El combate muestra sus controles propios: E atacar, Espacio esquivar y F bloquear.
 
+Todas esas teclas son las predeterminadas: en Configuración > Controles cada acción (moverse,
+saltar, correr, dash, agarrar/interactuar, alas, combate, sistema) admite dos teclas y el cambio vale
+en la plaza y en los dos mundos (`GameBindings`). Accesibilidad incluye la elección de cámara y
+micrófono con vista previa y medidor. Gráficos aplica de verdad modo de pantalla, resolución (prueba
+de 15 s), tasa de refresco, escala de render con FSR 1.0 o STP, V-Sync, límite de FPS, preajustes,
+sombras, SSAO, reflejos, texturas, anisotrópico, distancia, antialiasing, efectos, latencia, HDR,
+brillo y gamma en todas las escenas (`GraphicsRuntime`). Los créditos se editan en
+`Assets/_Game/UI/Resources/Nemequene/credits.json` (los nombres «Por confirmar» están pendientes).
+
 La interfaz muestra las ayudas solo cuando hacen falta: interacción por proximidad, vida durante
 el combate o con daño y objetivos breves al cambiar. La pausa reúne las consultas en Diario
 y los ajustes en Configuración, con la misma estética del inicio.

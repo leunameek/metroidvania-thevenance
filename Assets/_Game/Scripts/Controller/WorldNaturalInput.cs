@@ -184,7 +184,7 @@ public sealed class WorldNaturalInput : MonoBehaviour
     private void Update()
     {
         var keyboard = Keyboard.current;
-        if (keyboard != null && keyboard.cKey.wasPressedThisFrame && Time.timeScale > 0) _hands.Toggle();
+        if (keyboard != null && GameBindings.Pressed(GameAction.Hands) && Time.timeScale > 0) _hands.Toggle();
         if (Time.unscaledTime >= _nextPrefsCheck)
         {
             _nextPrefsCheck = Time.unscaledTime + 1;

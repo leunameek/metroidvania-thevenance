@@ -189,5 +189,5 @@ public sealed class TurnDuelHUD
         }
     }
     private static string Key(DuelDefense d) =>
-        d == DuelDefense.Block ? "F" : d == DuelDefense.Dodge ? "Espacio" : d == DuelDefense.Cover ? "G" : "R";
+        GameBindings.Cap(d == DuelDefense.Block ? GameAction.Guard : d == DuelDefense.Dodge ? GameAction.Dodge : d == DuelDefense.Cover ? GameAction.Cover : GameAction.Parry);
 }

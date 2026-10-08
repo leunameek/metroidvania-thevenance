@@ -33,7 +33,7 @@ namespace Nemequene.UI
         private readonly Button[] _slotButtons = new Button[GameSaveStore.SlotCount];
         private readonly Button[] _deleteButtons = new Button[GameSaveStore.SlotCount];
         private bool _newSaveMode;
-        private TMP_Text _loadStatus, _resolutionLabel, _savesTitle, _savesSubtitle;
+        private TMP_Text _loadStatus, _savesTitle, _savesSubtitle;
         private TMP_Text _continueHint;
         private Image _progress;
         private TitleMenuBackdrop _shade;
@@ -44,11 +44,6 @@ namespace Nemequene.UI
         private CanvasGroup _homeFade;
         private float _entered, _lastCue, _muteRestore=.3f;
         private int _changedFrame=-1, _section;
-        private bool _resolutionPreview;
-        private float _resolutionUntil;
-        private int _oldWidth, _oldHeight, _requestedWidth=1920, _requestedHeight=1080;
-        private FullScreenMode _oldMode;
-        private bool _requestedFullscreen;
         private Action _confirmAction;
         private TMP_Text _confirmText;
         private TitleView _beforeConfirm;
@@ -75,9 +70,8 @@ namespace Nemequene.UI
             _music=gameObject.AddComponent<AudioSource>(); _music.playOnAwake=false; _music.loop=true; _music.volume=0;
             _music.clip=Resources.Load<AudioClip>("Nemequene/Menu_Bruma");
             if (_music.clip!=null) _music.Play();
+            // The stored screen mode and size were applied at startup (GraphicsRuntime).
             Settings.Changed+=ApplyPresentation; Settings.Apply(false);
-            if (!Application.isBatchMode && Settings.Values.screenWidth>=800 && Settings.Values.screenHeight>=600)
-                Screen.SetResolution(Settings.Values.screenWidth,Settings.Values.screenHeight,Settings.Values.fullscreen?FullScreenMode.FullScreenWindow:FullScreenMode.Windowed);
             _entered=Time.unscaledTime; ShowHome();
         }
         private void BuildBackdrop()
@@ -252,6 +246,7 @@ namespace Nemequene.UI
             Slider(access,"access.reaction",1,3,()=>Settings.Values.reactionScale,v=>Settings.Values.reactionScale=v);
             Slider(access,"access.camera",0,1,()=>Settings.Values.cameraMotion,v=>Settings.Values.cameraMotion=v);
             Slider(access,"access.flash",0,1,()=>Settings.Values.flashIntensity,v=>Settings.Values.flashIntensity=v);
+            new DevicesPage(_factory,Settings).Build(access);
             Button(access,"access.reset",()=>Confirm("confirm.access",Settings.ResetAccessibility));
             var audio=_groups[1];
             Slider(audio,"audio.master",0,1,()=>Settings.Values.master,v=>Settings.Values.master=v);
@@ -260,24 +255,11 @@ namespace Nemequene.UI
             Slider(audio,"audio.ambience",0,1,()=>Settings.Values.ambience,v=>Settings.Values.ambience=v);
             Slider(audio,"audio.voices",0,1,()=>Settings.Values.voices,v=>Settings.Values.voices=v);
             Slider(audio,"audio.ui",0,1,()=>Settings.Values.uiVolume,v=>Settings.Values.uiVolume=v);
-            var graphics=_groups[2];
-            int[] widths={1280,1920,2560,1920}; int[] heights={720,1080,1440,1200};
-            int resolution=1;
-            for(int i=0;i<widths.Length;i++) if(widths[i]==Settings.Values.screenWidth&&heights[i]==Settings.Values.screenHeight) resolution=i;
-            _requestedWidth=widths[resolution]; _requestedHeight=heights[resolution]; _requestedFullscreen=Settings.Values.fullscreen;
-            Choice(graphics,"graphics.resolution",new[]{"1280 × 720","1920 × 1080","2560 × 1440","1920 × 1200"},()=>resolution,v=>{resolution=v;_requestedWidth=widths[v];_requestedHeight=heights[v];});
-            Toggle(graphics,"graphics.fullscreen",()=>_requestedFullscreen,v=>_requestedFullscreen=v);
-            Button(graphics,"graphics.apply",PreviewResolution);
-            _resolutionLabel=_factory.Text(graphics,UIStrings.Get("title.resolutionNote"),22);
-            Toggle(graphics,"graphics.vsync",()=>Settings.Values.vSync,v=>Settings.Values.vSync=v);
-            Choice(graphics,"graphics.quality",QualitySettings.names,()=>Settings.Values.quality<0?QualitySettings.GetQualityLevel():Settings.Values.quality,v=>Settings.Values.quality=v);
-            int[] fps={30,60,120,-1}; Choice(graphics,"graphics.fps",new[]{"30","60","120",UIStrings.Get("unlimited")},()=>Mathf.Max(0,Array.IndexOf(fps,Settings.Values.frameLimit)),v=>Settings.Values.frameLimit=fps[v]);
+            new GraphicsPage(_factory,Settings).Build(_groups[2]);
             var controls=_groups[3];
-            _factory.Text(controls,UIStrings.Get("title.controlsIntro"),24);
-            _factory.Text(controls,UIStrings.Get("controls.body"),24);
             Toggle(controls,"settings.tutorials",()=>Settings.Values.tutorials,v=>Settings.Values.tutorials=v);
-            _factory.Text(_groups[4],UIStrings.Get("credits.body"),24);
-            _factory.Text(_groups[4],UIStrings.Get("title.credits"),22);
+            new ControlsPage(_factory,Settings,Confirm).Build(controls);
+            new CreditsPage(_factory,Settings).Build(_groups[4]);
             _back=_factory.FooterButton(_settings.transform,UIStrings.Get("footer.back"),BackToHome,Vector2.zero);
             _factory.Hint(_settings.transform,UIStrings.Get("footer.change"),Vector2.right);
             SelectSection(0);
@@ -384,7 +366,6 @@ namespace Nemequene.UI
         public void CancelConfirmation() { _confirmAction=null;CloseConfirmation(true); }
         private void CloseConfirmation(bool cancelled)
         {
-            if(cancelled&&_resolutionPreview) RestoreResolution();
             SetView(_beforeConfirm,_beforeConfirmFocus!=null?_beforeConfirmFocus:(_beforeConfirm==TitleView.Settings?_tabs[_section].gameObject:_newGame.gameObject));
         }
         private void ApplyPresentation()
@@ -442,21 +423,14 @@ namespace Nemequene.UI
             IsLoading=false; _loadStatus.text=UIStrings.Get("loading.error"); _loadingBack.gameObject.SetActive(true);
             SetView(TitleView.Loading,_loadingBack.gameObject);
         }
-        private void PreviewResolution()
-        {
-            _oldWidth=Screen.width;_oldHeight=Screen.height;_oldMode=Screen.fullScreenMode;
-            Screen.SetResolution(_requestedWidth,_requestedHeight,_requestedFullscreen?FullScreenMode.FullScreenWindow:FullScreenMode.Windowed);
-            _resolutionPreview=true;_resolutionUntil=Time.unscaledTime+15;
-            Confirm("graphics.keep",()=>{_resolutionPreview=false;Settings.Values.screenWidth=_requestedWidth;Settings.Values.screenHeight=_requestedHeight;Settings.Values.fullscreen=_requestedFullscreen;Settings.Apply();Settings.Flush();});
-        }
-        private void RestoreResolution() {Screen.SetResolution(_oldWidth,_oldHeight,_oldMode);_resolutionPreview=false;}
         private void Update()
         {
             if(Settings==null)return;
             var keyboard=Keyboard.current;
             if(!IsLoading&&Time.frameCount>_changedFrame)
             {
-                bool back=(keyboard!=null&&keyboard.escapeKey.wasPressedThisFrame)||(Gamepad.current!=null&&Gamepad.current.buttonEast.wasPressedThisFrame);
+                // While the Controles page waits for a new key, Esc only cancels that wait.
+            bool back=!GameBindings.Listening&&((keyboard!=null&&keyboard.escapeKey.wasPressedThisFrame)||(Gamepad.current!=null&&Gamepad.current.buttonEast.wasPressedThisFrame));
                 if(back)
                 {
                     if(CurrentView==TitleView.Quit)CancelConfirmation();
@@ -464,12 +438,10 @@ namespace Nemequene.UI
                     else if(CurrentView==TitleView.Saves)ShowHome();
                     else if(CurrentView==TitleView.Home)RequestQuit();
                 }
-                if(keyboard!=null&&keyboard.mKey.wasPressedThisFrame&&CurrentView==TitleView.Home)
+                if(keyboard!=null&&!GameBindings.Listening&&keyboard.mKey.wasPressedThisFrame&&CurrentView==TitleView.Home)
                 {if(Settings.Values.music>.001f){_muteRestore=Settings.Values.music;Settings.Values.music=0;}else Settings.Values.music=_muteRestore;Settings.Apply();}
-                if(keyboard!=null&&keyboard.tabKey.wasPressedThisFrame)NavigateTab(keyboard.shiftKey.isPressed);
+                if(keyboard!=null&&!GameBindings.Listening&&keyboard.tabKey.wasPressedThisFrame)NavigateTab(keyboard.shiftKey.isPressed);
             }
-            if(_resolutionPreview&&Time.unscaledTime>=_resolutionUntil)CancelConfirmation();
-            if(_resolutionPreview)_confirmText.text=UIStrings.Get("graphics.keep")+"\n"+UIStrings.Get("title.revert",Mathf.CeilToInt(_resolutionUntil-Time.unscaledTime));
             // The music slider sets the menu piece like the rest of the game's music (about -26 dB RMS).
             if(_music!=null)_music.volume=Mathf.MoveTowards(_music.volume,IsLoading?0:Settings.Values.music,Time.unscaledDeltaTime*.45f);
             _homeFade.alpha=Settings.Values.reducedMotion?1:Mathf.Clamp01((Time.unscaledTime-_entered)/.45f);
@@ -495,7 +467,6 @@ namespace Nemequene.UI
         {
             if(Settings!=null){Settings.Changed-=ApplyPresentation;Settings.Flush();}
             if(_music!=null)_music.Stop();
-            if(_resolutionPreview)RestoreResolution();
             if(Instance==this)Instance=null;
         }
     }

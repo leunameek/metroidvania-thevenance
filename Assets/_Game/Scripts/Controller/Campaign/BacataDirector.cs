@@ -346,7 +346,7 @@ public sealed class BacataDirector : MonoBehaviour
         while (Time.time < until)
         {
             var k = UnityEngine.InputSystem.Keyboard.current;
-            if (Time.time > until - 6f && k != null && (k.eKey.wasPressedThisFrame || k.escapeKey.wasPressedThisFrame || k.enterKey.wasPressedThisFrame)) break;
+            if (Time.time > until - 6f && k != null && (GameBindings.Pressed(GameAction.Interact) || k.escapeKey.wasPressedThisFrame || k.enterKey.wasPressedThisFrame)) break;
             yield return null;
         }
         SceneLoader.Load(CampaignScenes.Title);

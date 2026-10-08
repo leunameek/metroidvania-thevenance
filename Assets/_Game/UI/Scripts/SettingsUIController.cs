@@ -40,19 +40,9 @@ namespace Nemequene.UI
             Slider(groups[1], "audio.ambience", 0, 1, () => S.ambience, v => S.ambience = v);
             Slider(groups[1], "audio.voices", 0, 1, () => S.voices, v => S.voices = v);
             Slider(groups[1], "audio.ui", 0, 1, () => S.uiVolume, v => S.uiVolume = v);
-            int[] widths = {1280,1920,2560,1920}; int[] heights = {720,1080,1440,1200}; int resolution = 1;
-            f.Choice(groups[2], "graphics.resolution", new[] {"1280 × 720", "1920 × 1080", "2560 × 1440", "1920 × 1200"}, () => resolution, v => resolution = v);
-            bool fullscreen = Screen.fullScreen;
-            f.Toggle(groups[2], "graphics.fullscreen", () => fullscreen, v => fullscreen = v);
-            f.Button(groups[2], UIStrings.Get("graphics.apply"), () => _ui.Loading.PreviewResolution(widths[resolution], heights[resolution], fullscreen));
-            f.Choice(groups[2], "graphics.quality", QualitySettings.names, () => Mathf.Max(0, S.quality), v => { S.quality = v; Apply(); });
-            Toggle(groups[2], "graphics.vsync", () => S.vSync, v => S.vSync = v);
-            Toggle(groups[2], "graphics.shadows", () => S.shadows, v => S.shadows = v);
-            f.Choice(groups[2], "graphics.aa", new[] { "1×", "2×", "4×" }, () => S.aa == 4 ? 2 : S.aa == 2 ? 1 : 0, v => { S.aa = v == 2 ? 4 : v == 1 ? 2 : 1; Apply(); });
-            int[] fps = {30,60,120,-1}; f.Choice(groups[2], "graphics.fps", new[] {"30", "60", "120", UIStrings.Get("unlimited")}, () => Math.Max(0, Array.IndexOf(fps, S.frameLimit)), v => { S.frameLimit = fps[v]; Apply(); });
-            f.Text(groups[2], UIStrings.Get("graphics.limitations"), 20);
-            f.Text(groups[3], UIStrings.Get("controls.body"));
+            new GraphicsPage(f, ui.Settings).Build(groups[2]);
             f.Button(groups[3], UIStrings.Get("tutorial.repeat"), ui.RepeatTutorial);
+            new ControlsPage(f, ui.Settings, ui.Confirm).Build(groups[3]);
             Toggle(groups[4], "voice.enable", () => S.voiceEnabled, v => S.voiceEnabled = v);
             Toggle(groups[4], "voice.ptt", () => S.pushToTalk, v => S.pushToTalk = v);
             Toggle(groups[4], "voice.toggle", () => S.toggleTalk, v => S.toggleTalk = v);
@@ -83,6 +73,8 @@ namespace Nemequene.UI
             Slider(access, "access.reaction", 1, 3, () => S.reactionScale, v => S.reactionScale = v);
             Toggle(access, "settings.objectives", () => S.showObjectives, v => S.showObjectives = v);
             Slider(access, "hands.dwell", .5f, 3, () => S.dwellSeconds, v => S.dwellSeconds = v);
+            // Camera and microphone of this PC; a running hand session switches camera at once.
+            new DevicesPage(f, ui.Settings, name => { if (!string.IsNullOrEmpty(name)) ui.Demo.Hands.SelectCamera(name); }, () => ui.Demo.Hands.Requested).Build(access);
             f.Button(access, UIStrings.Get("access.reset"), () => ui.Confirm("confirm.access", ui.Settings.ResetAccessibility));
             ui.Screens.Register(UIScreen.Accessibility, body.GetComponentInParent<TitleMenuBackdrop>(true).gameObject);
             ui.Screens.Changed += screen => { if (screen == UIScreen.Accessibility) select(6); };

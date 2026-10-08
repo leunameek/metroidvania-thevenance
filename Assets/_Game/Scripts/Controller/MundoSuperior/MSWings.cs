@@ -85,7 +85,7 @@ public sealed class MSWings : MonoBehaviour, IPlayerMotor, IPlayerMotorPose
         if (!Owned || _player == null) return;
         var keyboard = Keyboard.current;
         var director = MundoSuperiorDirector.Instance;
-        if (keyboard == null || !keyboard.fKey.wasPressedThisFrame) return;
+        if (keyboard == null || !GameBindings.Pressed(GameAction.Wings)) return;
         if (_player.InputLocked || (director != null && (director.Busy || director.InCombat))) return;
         if (_flying) Close(false);
         else if (!_player.HasMotor && _remaining > .05f) Open();
@@ -129,10 +129,9 @@ public sealed class MSWings : MonoBehaviour, IPlayerMotor, IPlayerMotorPose
         float x = 0, z = 0, y = 0;
         if (keyboard != null)
         {
-            if (keyboard.aKey.isPressed) x -= 1; if (keyboard.dKey.isPressed) x += 1;
-            if (keyboard.wKey.isPressed) z += 1; if (keyboard.sKey.isPressed) z -= 1;
-            if (keyboard.spaceKey.isPressed) y += 1;
-            if (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) y -= 1;
+            x = GameBindings.Axis(GameAction.MoveLeft, GameAction.MoveRight);
+            z = GameBindings.Axis(GameAction.MoveBack, GameAction.MoveForward);
+            y = GameBindings.Axis(GameAction.Descend, GameAction.Jump);
         }
         Vector3 forward = movementReference != null ? Vector3.ProjectOnPlane(movementReference.forward, Vector3.up).normalized : Vector3.forward;
         Vector3 right = Vector3.Cross(Vector3.up, forward);

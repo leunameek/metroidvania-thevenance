@@ -55,15 +55,15 @@ public sealed class PlazaCombatController : MonoBehaviour
         if (!demo.ManagedUI && k != null && k.escapeKey.wasPressedThisFrame) { Cancel(); return; }
         if (Model.Phase == PlazaCombatPhase.Won)
         {
-            if (k != null && k.eKey.wasPressedThisFrame) Cancel();
+            if (k != null && GameBindings.Pressed(GameAction.Attack)) Cancel();
             else UpdateGestures();
             return;
         }
         // Tick before input so a key at the end of the reaction window cannot arrive late.
         Model.Tick(Time.deltaTime);
-        if (k != null && k.eKey.wasPressedThisFrame) Attack();
-        if (k != null && k.spaceKey.wasPressedThisFrame) Defend(PlazaDefense.Dodge);
-        if (k != null && k.fKey.wasPressedThisFrame) Defend(PlazaDefense.Guard);
+        if (k != null && GameBindings.Pressed(GameAction.Attack)) Attack();
+        if (k != null && GameBindings.Pressed(GameAction.Dodge)) Defend(PlazaDefense.Dodge);
+        if (k != null && GameBindings.Pressed(GameAction.Guard)) Defend(PlazaDefense.Guard);
         UpdateGestures();
     }
 

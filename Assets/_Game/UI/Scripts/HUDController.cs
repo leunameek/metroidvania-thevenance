@@ -120,11 +120,11 @@ namespace Nemequene.UI
             _hints.SetActive(exploration);
             _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             // Voice first: the cap names the word to say, or the key while the voice is off.
-            string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName, VoicePrompt.Cap("examinar", "E"))
-                : d.NearbyStory != null ? VoicePrompt.Cap(VoicePrompt.InteractWord(d.NearbyStory.Prompt), "E") + " · " + d.NearbyStory.Prompt
-                : d.NearbyPortal != null ? d.NearbyPortal.Available ? UIStrings.Get("hud.travel", d.NearbyPortal.destinationName, VoicePrompt.Cap("entrar", "E"))
+            string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName, VoicePrompt.Cap("examinar", GameAction.Interact))
+                : d.NearbyStory != null ? VoicePrompt.Cap(VoicePrompt.InteractWord(d.NearbyStory.Prompt), GameAction.Interact) + " · " + d.NearbyStory.Prompt
+                : d.NearbyPortal != null ? d.NearbyPortal.Available ? UIStrings.Get("hud.travel", d.NearbyPortal.destinationName, VoicePrompt.Cap("entrar", GameAction.Interact))
                     : UIStrings.Get("hud.blocked", d.NearbyPortal.destinationName, d.NearbyPortal.LockedReason)
-                : d.NearCombat ? UIStrings.Get("hud.startCombat", VoicePrompt.Cap("enfrentar", "E")) : "";
+                : d.NearCombat ? UIStrings.Get("hud.startCombat", VoicePrompt.Cap("enfrentar", GameAction.Interact)) : "";
             _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false)); if (_prompt.text != prompt) _prompt.text = prompt;
             // Camera, the open-palm hint while something can be used, and the microphone.
             string devices = d.Hands.Requested ? UIStrings.Get("hud.cameraActive") : "";

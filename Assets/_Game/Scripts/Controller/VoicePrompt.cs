@@ -20,6 +20,7 @@ public static class VoicePrompt
 
     // Key cap content: the word when the voice listens, the key otherwise.
     public static string Cap(string word, string key) => Enabled ? Word(word) : key;
+    public static string Cap(string word, GameAction action) => Cap(word, GameBindings.Cap(action));
 
     // The interaction word a prompt starts with («Hablar con Bachué» → hablar), or «usar».
     public static string InteractWord(string prompt)

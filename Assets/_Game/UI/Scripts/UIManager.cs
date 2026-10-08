@@ -57,8 +57,6 @@ namespace Nemequene.UI
         private float _priorTimeScale = 1;
         private bool _paused, _ready;
         private int _backFrame = -1;
-        private RenderPipelineAsset _originalQualityPipeline;
-        private UniversalRenderPipelineAsset _pipeline;
         private float _sessionStartedAt, _previousPlaySeconds, _nextAutoSave;
         private string _lastSavedProgress;
 
@@ -84,6 +82,8 @@ namespace Nemequene.UI
             StoryPlayer.AddGate(this, () => SessionStarted && Screens != null && Screens.Current == UIScreen.None && !ModalOpen && !(Dialogue?.Active ?? false));
             Instance = this; Demo = demo; Demo.ManagedUI = true;
             Settings = new SettingsManager(); Screens = new ScreenManager();
+            // The camera chosen in Accesibilidad is the one the hands open in this session.
+            if (!string.IsNullOrEmpty(Settings.Values.camera)) HandTrackingSession.LastCamera = Settings.Values.camera;
             Theme = Resources.Load<UITheme>("Nemequene/Theme");
             if (Theme == null || Theme.bodyFont == null || Theme.titleFont == null)
             {
@@ -104,9 +104,6 @@ namespace Nemequene.UI
                 var events = new GameObject("UI_EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
                 events.transform.SetParent(transform, false); events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             }
-            _originalQualityPipeline = QualitySettings.renderPipeline;
-            if (GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset source)
-            { _pipeline = Instantiate(source); QualitySettings.renderPipeline = _pipeline; }
             _hud = new HUDController(this);
             _inspection = new InspectionUIController(this);
             _combat = new CombatUIController(this);
@@ -128,8 +125,6 @@ namespace Nemequene.UI
             _accessibility = new AccessibilityManager(this);
             Screens.Changed += OnScreen; Settings.Apply(false);
             _ready = true;
-            if (!Application.isBatchMode && Settings.Values.screenWidth >= 800 && Settings.Values.screenHeight >= 600)
-                Screen.SetResolution(Settings.Values.screenWidth, Settings.Values.screenHeight, Settings.Values.fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
             EnterGameplayOnLoad = false; StartSession();
             if (GameSaveStore.LoadOnNextScene && GameSaveStore.TryRead(GameSaveStore.ActiveSlot, out var loaded))
             {
@@ -185,13 +180,6 @@ namespace Nemequene.UI
             Settings.Values.tutorials = true; Settings.Apply();
             _tutorial.Reset(); Screens.Show(UIScreen.None, false);
         }
-        public void ApplyGraphics(int aa, bool shadows)
-        {
-            if (_pipeline == null) return;
-            QualitySettings.renderPipeline = _pipeline;
-            _pipeline.msaaSampleCount = aa == 4 ? 4 : aa == 2 ? 2 : 1;
-            _pipeline.shadowDistance = shadows ? 60 : 0;
-        }
         private UIScreen _lastScreen = UIScreen.None;
         private void OnScreen(UIScreen screen)
         {
@@ -218,8 +206,9 @@ namespace Nemequene.UI
             // A story line owns Esc (hold to skip) and the keys while it plays.
             // The microphone keeps listening for «siguiente».
             if (StoryPlayer.Active) { _hud.Tick(); Voice.Tick(); return; }
-            bool back = k != null && k.escapeKey.wasPressedThisFrame
-                || Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
+            // While the Controles page waits for a new key, Esc only cancels that wait.
+            bool back = !GameBindings.Listening && (k != null && k.escapeKey.wasPressedThisFrame
+                || Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame);
             if (back && _backFrame != Time.frameCount)
             {
                 if (ModalOpen) CloseConfirmation();
@@ -231,9 +220,9 @@ namespace Nemequene.UI
             if (k != null && !ModalOpen && !Dialogue.Active && Screens.Current == UIScreen.None && Demo.State == TechnicalDemoState.Exploration
                 && PlazaPieceInspection.Active == null)
             {
-                if (k.tabKey.wasPressedThisFrame) Screens.Show(UIScreen.Map);
-                else if (k.hKey.wasPressedThisFrame) Screens.Show(UIScreen.Controls);
-                else if (k.rKey.wasPressedThisFrame) Confirm("confirm.restart", () => Loading.Restart());
+                if (GameBindings.Pressed(GameAction.Journal)) Screens.Show(UIScreen.Map);
+                else if (GameBindings.Pressed(GameAction.Help)) Screens.Show(UIScreen.Controls);
+                else if (GameBindings.Pressed(GameAction.Restart)) Confirm("confirm.restart", () => Loading.Restart());
             }
             NavigateTab(k);
             _hud.Tick(); _inspection.Tick(); _combat.Tick(); Voice.Tick(); Hands.Tick(); _calibration.Tick();
@@ -248,7 +237,7 @@ namespace Nemequene.UI
         }
         private void NavigateTab(Keyboard k)
         {
-            if (k == null || !k.tabKey.wasPressedThisFrame || Screens.Current == UIScreen.None && !ModalOpen && !Dialogue.Active || EventSystem.current == null || _backFrame == Time.frameCount) return;
+            if (k == null || GameBindings.Listening || !k.tabKey.wasPressedThisFrame || Screens.Current == UIScreen.None && !ModalOpen && !Dialogue.Active || EventSystem.current == null || _backFrame == Time.frameCount) return;
             var controls = new List<Selectable>();
             foreach (var c in GetComponentsInChildren<Selectable>()) if (c.IsInteractable() && (!ModalOpen || c.transform.IsChildOf(_modal.transform))) controls.Add(c);
             if (controls.Count == 0) return;
@@ -330,11 +319,6 @@ namespace Nemequene.UI
             foreach (var subscription in _subscriptions) subscription.Dispose();
             if (Demo != null && Demo.PlayerHealth != null) Demo.PlayerHealth.Died -= OnDeath;
             if (_paused) Time.timeScale = _priorTimeScale;
-            if (_pipeline != null)
-            {
-                if (QualitySettings.renderPipeline == _pipeline) QualitySettings.renderPipeline = _originalQualityPipeline;
-                Destroy(_pipeline);
-            }
             if (Instance == this) Instance = null;
         }
     }

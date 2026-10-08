@@ -1,0 +1,81 @@
+{
+  "game": "El asedio de Bacatá",
+  "tagline": "Un juego de exploración y memoria en el territorio muisca",
+  "placeholder": "Por confirmar",
+  "sections": [
+    {
+      "title": "Equipo de desarrollo",
+      "entries": [
+        { "role": "Dirección del proyecto", "names": ["Por confirmar"] },
+        { "role": "Diseño de juego", "names": ["Por confirmar"] },
+        { "role": "Programación", "names": ["Por confirmar"] },
+        { "role": "Arte, modelado 3D y animación", "names": ["Por confirmar"] },
+        { "role": "Narrativa y guion", "names": ["Por confirmar"] },
+        { "role": "Diseño de interfaz y experiencia de usuario", "names": ["Por confirmar"] },
+        { "role": "Interacción natural (manos y voz)", "names": ["Por confirmar"] },
+        { "role": "Investigación cultural", "names": ["Por confirmar"] }
+      ]
+    },
+    {
+      "title": "Audio y música",
+      "entries": [
+        { "role": "Música original", "names": ["Por confirmar"] },
+        { "role": "Diseño sonoro", "names": ["Por confirmar"] },
+        { "role": "Banco de sonido", "names": ["Síntesis procedimental original del proyecto, sin muestras de terceros"] },
+        { "role": "Actores de voz", "names": ["Por confirmar (personaje y actor)"] },
+        { "role": "Músicos invitados", "names": ["Por confirmar"] }
+      ]
+    },
+    {
+      "title": "Aseguramiento de calidad y pruebas",
+      "entries": [
+        { "role": "Pruebas de juego", "names": ["Por confirmar"] },
+        { "role": "Retroalimentación y reporte de errores", "names": ["Por confirmar"] }
+      ]
+    },
+    {
+      "title": "Herramientas, motor y software",
+      "entries": [
+        { "role": "Motor", "names": ["Unity 6 con Universal Render Pipeline"] },
+        { "role": "Entrada", "names": ["Unity Input System"] },
+        { "role": "Texto", "names": ["TextMesh Pro"] },
+        { "role": "Seguimiento de manos", "names": ["Google MediaPipe", "MediaPipe Unity Plugin, de homuler"] },
+        { "role": "Reconocimiento de voz", "names": ["Reconocimiento de voz de Windows"] },
+        { "role": "Modelos 3D", "names": ["Tripo AI", "Blender"] },
+        { "role": "Animación de personajes", "names": ["Adobe Mixamo"] },
+        { "role": "Interfaz", "names": ["Figma"] },
+        { "role": "Audio y recursos procedimentales", "names": ["Python y NumPy"] },
+        { "role": "Control de versiones", "names": ["Git, Git LFS y GitHub"] }
+      ]
+    },
+    {
+      "title": "Activos de terceros y licencias",
+      "entries": [
+        { "role": "Tipografía Cinzel", "names": ["The Cinzel Project Authors · SIL Open Font License 1.1"] },
+        { "role": "Tipografías Noto Sans y Noto Serif", "names": ["The Noto Project Authors · SIL Open Font License 1.1"] },
+        { "role": "MediaPipe", "names": ["Google LLC · Apache License 2.0"] },
+        { "role": "MediaPipe Unity Plugin", "names": ["homuler · MIT License"] },
+        { "role": "Modelos generados con Tripo AI", "names": ["Usados según los términos de servicio de Tripo"] },
+        { "role": "Animaciones de Mixamo", "names": ["Adobe · uso libre de regalías según los términos de Mixamo"] },
+        { "role": "Portada y emblema del menú", "names": ["Paisaje de fantasía generado y emblema adaptado de la referencia visual del proyecto"] }
+      ]
+    },
+    {
+      "title": "Contexto cultural",
+      "text": "La plaza, los mundos y las piezas son interpretaciones artísticas inspiradas en la cultura muisca. No son reproducciones arqueológicas ni descripciones históricas validadas, y la música del juego no reconstruye la música muisca."
+    },
+    {
+      "title": "Agradecimientos especiales",
+      "entries": [
+        { "role": "Familias y amigos", "names": ["Por confirmar"] },
+        { "role": "Docentes y universidad", "names": ["Por confirmar"] },
+        { "role": "Comunidades y patrocinadores", "names": ["Por confirmar"] }
+      ],
+      "text": "Y a todas las personas que jugaron las versiones de prueba."
+    }
+  ],
+  "legal": [
+    "© 2026 Por confirmar (nombre del estudio). Todos los derechos reservados.",
+    "Unity es una marca de Unity Technologies. MediaPipe es una marca de Google LLC. Mixamo es una marca de Adobe. Las demás marcas pertenecen a sus respectivos propietarios."
+  ]
+}

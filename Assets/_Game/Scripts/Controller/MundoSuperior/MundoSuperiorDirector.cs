@@ -281,9 +281,9 @@ public sealed class MundoSuperiorDirector : MonoBehaviour
         var target = canInteract ? MIInteractable.Nearest(player.transform.position) : null;
         if (target != null)
         {
-            UIWorldPrompt.Show(this, VoicePrompt.Cap(VoicePrompt.InteractWord(target.Prompt), "E"), target.Prompt);
+            UIWorldPrompt.Show(this, VoicePrompt.Cap(VoicePrompt.InteractWord(target.Prompt), GameAction.Interact), target.Prompt);
             Natural.SetContext(NaturalContext.Interact, target.Prompt);
-            if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
+            if ((keyboard != null && GameBindings.Pressed(GameAction.Interact)) || Natural.ConsumeInteract(target.Prompt)) target.Interact(player);
         }
         else UIWorldPrompt.Hide(this);
         DevKeys(keyboard);

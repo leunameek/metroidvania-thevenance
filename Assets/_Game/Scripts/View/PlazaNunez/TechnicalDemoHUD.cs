@@ -172,7 +172,7 @@ public sealed class TechnicalDemoHUD : MonoBehaviour
     private void Update()
     {
         if (demo.Objectives == null || _title == null) return;
-        if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame)
+        if (GameBindings.Pressed(GameAction.Help))
             SetHelp(!_helpPanel.activeSelf);
         _title.text = "<size=13><color=#DDB45C>NEMEQUENE  /  EL UMBRAL</color></size>\n"
             + (demo.World < 0 ? "Mundo inferior" : demo.World > 0 ? "Mundo superior" : "Plaza Núñez");

@@ -93,12 +93,12 @@ namespace Nemequene.UI
             int resistance = Mathf.Clamp(3 - model.Hits, 0, 3);
             _enemy.text = resistance + " / 3"; UIFactory.Fill(_guardian, resistance / 3f);
             // Voice first: each action names its word («atacar»), or its key with the voice off.
-            Label(_attack, "combat.attack", "atacar", "E"); Label(_dodge, "combat.dodge", "esquivar", "Espacio");
-            Label(_block, "combat.block", "bloquear", "F"); Label(_return, "combat.return", "volver", "E");
+            Label(_attack, "combat.attack", "atacar", GameBindings.Cap(GameAction.Attack)); Label(_dodge, "combat.dodge", "esquivar", GameBindings.Cap(GameAction.Dodge));
+            Label(_block, "combat.block", "bloquear", GameBindings.Cap(GameAction.Guard)); Label(_return, "combat.return", "volver", GameBindings.Cap(GameAction.Attack));
             _body.text = UIStrings.Get("combat.body." + model.Phase);
             if (model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React)
-                _body.text += "\n\n" + (model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", "Espacio"))
-                    : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", "F")));
+                _body.text += "\n\n" + (model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", GameAction.Dodge))
+                    : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", GameAction.Guard)));
             if (model.Phase == PlazaCombatPhase.Feedback) _body.text = UIStrings.Get(model.LastDefenseSucceeded ? "combat.success" : "combat.retry");
             _attack.gameObject.SetActive(model.Phase == PlazaCombatPhase.Attack);
             _dodge.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);

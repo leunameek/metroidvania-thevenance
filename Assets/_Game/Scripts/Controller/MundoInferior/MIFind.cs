@@ -151,10 +151,10 @@ public sealed class MIFind : MIInteractable
         if (mouse != null && mouse.leftButton.isPressed) turn += mouse.delta.ReadValue() * .35f;
         if (keyboard != null)
         {
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) turn.x -= 140 * Time.unscaledDeltaTime;
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) turn.x += 140 * Time.unscaledDeltaTime;
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveLeft) || keyboard.leftArrowKey.isPressed) turn.x -= 140 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveRight) || keyboard.rightArrowKey.isPressed) turn.x += 140 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveForward) || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveBack) || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
         }
         // Hands as in the first prototype: the open left hand turns the piece, the open right hand
         // tilts it, two fists hold it still and a held fist takes it; words too.
@@ -178,7 +178,7 @@ public sealed class MIFind : MIInteractable
         if (Mathf.Abs(turn.x - handYaw) + Mathf.Abs(turn.y + handPitch) > .35f) GameAudio.Play("Foley/objeto_girar", .3f, AudioChannel.Effects, 1f, .06f, .2f, 1);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
-        if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
+        if (keyboard != null && (GameBindings.Pressed(GameAction.Interact) || keyboard.enterKey.wasPressedThisFrame)) Confirm();
         else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { GameAudio.Play("Foley/examinar_cerrar", .7f); Close(); }
         else if (natural != null && natural.ConsumeConfirm((_fit != null ? "Encajar " : "Tomar ") + displayName.ToLowerInvariant())) Confirm();
         else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();

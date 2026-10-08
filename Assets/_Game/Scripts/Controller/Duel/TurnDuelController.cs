@@ -146,10 +146,10 @@ public sealed class TurnDuelController : MonoBehaviour
                 DuelDefense? defense = null;
                 if (k != null)
                 {
-                    if (k.fKey.wasPressedThisFrame) defense = DuelDefense.Block;
-                    else if (k.spaceKey.wasPressedThisFrame) defense = DuelDefense.Dodge;
-                    else if (k.gKey.wasPressedThisFrame) defense = DuelDefense.Cover;
-                    else if (k.rKey.wasPressedThisFrame) defense = DuelDefense.Parry;
+                    if (GameBindings.Pressed(GameAction.Guard)) defense = DuelDefense.Block;
+                    else if (GameBindings.Pressed(GameAction.Dodge)) defense = DuelDefense.Dodge;
+                    else if (GameBindings.Pressed(GameAction.Cover)) defense = DuelDefense.Cover;
+                    else if (GameBindings.Pressed(GameAction.Parry)) defense = DuelDefense.Parry;
                 }
                 if (defense == null && _heard.HasValue)
                 {

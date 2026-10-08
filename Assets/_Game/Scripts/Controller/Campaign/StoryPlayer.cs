@@ -188,7 +188,7 @@ public sealed class StoryPlayer : MonoBehaviour
         int length = line.text.Length;
         if (_revealed < length) { _revealed += Time.unscaledDeltaTime * RevealPerSecond; _view.Reveal(Mathf.Min(length, (int)_revealed)); }
         bool next = _voiceNext
-            || keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
+            || keyboard != null && (GameBindings.Pressed(GameAction.Interact) || keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
             || mouse != null && mouse.leftButton.wasPressedThisFrame;
         _voiceNext = false;
         if (!next) return;

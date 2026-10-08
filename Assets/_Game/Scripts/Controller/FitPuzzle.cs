@@ -255,7 +255,7 @@ public sealed class FitPuzzle
 public static class FitView
 {
     public static string Status(bool seated) => seated
-        ? "Encaja: está en su posición. " + (VoicePrompt.Enabled ? "Di «tomar» o pulsa E para encajarla en su mesa." : "Pulsa E para encajarla en su mesa.")
+        ? "Encaja: está en su posición. " + (VoicePrompt.Enabled ? "Di «tomar» o pulsa " + GameBindings.Cap(GameAction.Interact) + " para encajarla en su mesa." : "Pulsa " + GameBindings.Cap(GameAction.Interact) + " para encajarla en su mesa.")
         : "Gírala hasta que coincida con el dibujo dorado de su mesa: brilla más al acercarte y encaja sola al final.";
 
     public static void NotYet(MIHud hud)

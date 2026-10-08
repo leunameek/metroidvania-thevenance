@@ -109,10 +109,10 @@ public sealed class PlazaPieceInspection : MonoBehaviour
         if (mouse != null && mouse.leftButton.isPressed) { Vector2 d = mouse.delta.ReadValue() * .3f; yaw -= d.x; pitch += d.y; }
         if (keyboard != null)
         {
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) yaw += 120 * Time.unscaledDeltaTime;
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) yaw -= 120 * Time.unscaledDeltaTime;
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) pitch += 90 * Time.unscaledDeltaTime;
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) pitch -= 90 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveLeft) || keyboard.leftArrowKey.isPressed) yaw += 120 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveRight) || keyboard.rightArrowKey.isPressed) yaw -= 120 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveForward) || keyboard.upArrowKey.isPressed) pitch += 90 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveBack) || keyboard.downArrowKey.isPressed) pitch -= 90 * Time.unscaledDeltaTime;
         }
         var hands = _demo.Hands;
         bool live = hands != null && hands.Live;
@@ -122,7 +122,7 @@ public sealed class PlazaPieceInspection : MonoBehaviour
         Refresh(live);
 
         if (Time.frameCount <= _openFrame + 1) return; // the E that opened it does not choose
-        if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
+        if (keyboard != null && (GameBindings.Pressed(GameAction.Interact) || keyboard.enterKey.wasPressedThisFrame)) Confirm();
         else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) Back();
         else if (live && Seen && hands.Tracker.ConsumeGesture(HandGesture.Grab)) Confirm();
     }
@@ -145,7 +145,7 @@ public sealed class PlazaPieceInspection : MonoBehaviour
         string words = VoicePrompt.Enabled
             ? (seen ? "Di «tomar» para " + _useLabel.ToLowerInvariant() + " o «salir» para devolverla." : "Di «salir» para devolverla.")
             : "";
-        string keys = (seen ? "E · " + _useLabel + "     " : "") + "Esc · Devolver     Ratón o A / D, W / S · Girar";
+        string keys = (seen ? GameBindings.Cap(GameAction.Interact) + " · " + _useLabel + "     " : "") + "Esc · Devolver     Ratón o " + GameBindings.Cap(GameAction.MoveLeft) + " / " + GameBindings.Cap(GameAction.MoveRight) + ", " + GameBindings.Cap(GameAction.MoveForward) + " / " + GameBindings.Cap(GameAction.MoveBack) + " · Girar";
         string gestures = live ? HandInspection.Guide + (seen ? " · puño sostenido: " + _useLabel.ToLowerInvariant() : "")
             : "Con la cámara (C) puedes girarla con las manos.";
         string guide = (words.Length > 0 ? words + "\n" : "") + gestures + "\n" + keys;

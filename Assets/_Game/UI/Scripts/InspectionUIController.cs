@@ -82,7 +82,7 @@ namespace Nemequene.UI
             _progressText.text = lesson.Complete ? UIStrings.Get("inspection.complete") : UIStrings.Get("inspection.progress", Mathf.RoundToInt(lesson.Progress * 100));
             // Set only when it changes: the key-cap helper splits the label once per change, so
             // rewriting it each tick showed the key twice («Cerrar · Esc» beside its cap).
-            string close = lesson.Complete ? UIStrings.Get("inspection.return", VoicePrompt.Cap("volver", "E"))
+            string close = lesson.Complete ? UIStrings.Get("inspection.return", VoicePrompt.Cap("volver", GameAction.Interact))
                 : UIStrings.Get("inspection.close", VoicePrompt.Cap("salir", "Esc"));
             if (close != _closeText) { _closeText = close; _close.GetComponentInChildren<TMP_Text>().text = close; }
             UIFactory.Fill(_progress, lesson.Progress);
