@@ -56,7 +56,7 @@ public class InspectablePickup : MonoBehaviour
         switch (_inspection.CurrentState)
         {
             case InspectionModel.State.World:
-                if (_playerInRange && keyboard.eKey.wasPressedThisFrame)
+                if (_playerInRange && GameBindings.Pressed(GameAction.Interact))
                     BeginInspect();
                 break;
 
@@ -66,7 +66,7 @@ public class InspectablePickup : MonoBehaviour
 
             case InspectionModel.State.Inspecting:
                 UpdateInspectRotation();
-                if (keyboard.eKey.wasPressedThisFrame) Claim();
+                if (GameBindings.Pressed(GameAction.Interact)) Claim();
                 else if (keyboard.escapeKey.wasPressedThisFrame) EndInspect();
                 break;
         }

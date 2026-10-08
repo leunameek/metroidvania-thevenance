@@ -12,6 +12,7 @@ namespace Nemequene.UI
         private readonly GameObject _root, _healthPanel, _objectivePanel, _promptPanel, _zonePanel, _devicesPanel, _hints, _headerScrim;
         private readonly TMP_Text _health, _objective, _zone, _prompt, _devices;
         private readonly Image _healthFill, _fade;
+        private readonly RectTransform _promptRow;
         private float _healthTarget = 1, _healthShown = 1, _next, _zoneUntil, _objectiveUntil;
         private int _world = int.MinValue;
         private string _previousObjective;
@@ -51,9 +52,12 @@ namespace Nemequene.UI
             _objectivePanel = f.Rect("Objective", _root.transform, new Vector2(.50f, .835f), new Vector2(.96f, .885f)).gameObject;
             _objective = UIFactory.Shadow(Fit(f.Label(_objectivePanel.transform, "", Vector2.zero, Vector2.one, 24)));
             _objective.alignment = TextAlignmentOptions.TopRight;
-            _promptPanel = f.Rect("UI_Indicator_Interaction", _root.transform, new Vector2(.32f, .17f), new Vector2(.68f, .235f)).gameObject;
+            // The ribbon grows with its text (2026-10-07 playtest: the two lines of a blocked portal
+            // spilled out of it); see FitPrompt.
+            _promptPanel = f.Rect("UI_Indicator_Interaction", _root.transform, new Vector2(.5f, .2025f), new Vector2(.5f, .2025f)).gameObject;
+            ((RectTransform)_promptPanel.transform).sizeDelta = new Vector2(691, 70);
             UIBacata.Skin(_promptPanel.transform, "Controls/Ribbon");
-            var promptRow = f.Row(_promptPanel.transform, "PromptRow", 14);
+            var promptRow = f.Row(_promptPanel.transform, "PromptRow", 14); _promptRow = promptRow;
             promptRow.offsetMin = new Vector2(80, 4); promptRow.offsetMax = new Vector2(-80, -4);
             var promptLayout = promptRow.GetComponent<HorizontalLayoutGroup>(); promptLayout.childForceExpandWidth = false;
             _prompt = f.Text(promptRow, "", 26); _prompt.alignment = TextAlignmentOptions.Midline; _prompt.fontStyle = FontStyles.Bold;
@@ -77,6 +81,14 @@ namespace Nemequene.UI
         {
             text.textWrappingMode = TextWrappingModes.NoWrap; text.enableAutoSizing = true;
             text.fontSizeMax = text.fontSize; text.fontSizeMin = 14; return text;
+        }
+        // The interaction ribbon takes the width and height of what it says, within the screen.
+        private void FitPrompt()
+        {
+            var size = _prompt.GetPreferredValues(_prompt.text, 4000, 1000);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_promptRow);
+            float row = Mathf.Max(LayoutUtility.GetPreferredWidth(_promptRow), size.x);
+            ((RectTransform)_promptPanel.transform).sizeDelta = new Vector2(Mathf.Clamp(row + 200, 691, 1720), Mathf.Max(70, size.y + 34));
         }
         private void MarkDirty() { _dirty = true; }
         private void Screen(UIScreen s) { MarkDirty(); }
@@ -120,12 +132,13 @@ namespace Nemequene.UI
             _hints.SetActive(exploration);
             _objectivePanel.SetActive(exploration && d.World == 0 && _ui.Settings.Values.showObjectives);
             // Voice first: the cap names the word to say, or the key while the voice is off.
-            string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName, VoicePrompt.Cap("examinar", "E"))
-                : d.NearbyStory != null ? VoicePrompt.Cap(VoicePrompt.InteractWord(d.NearbyStory.Prompt), "E") + " · " + d.NearbyStory.Prompt
-                : d.NearbyPortal != null ? d.NearbyPortal.Available ? UIStrings.Get("hud.travel", d.NearbyPortal.destinationName, VoicePrompt.Cap("entrar", "E"))
+            string prompt = d.Nearby != null ? UIStrings.Get("hud.inspect", d.Nearby.Data.displayName, VoicePrompt.Cap("examinar", GameAction.Interact))
+                : d.NearbyStory != null ? VoicePrompt.Cap(VoicePrompt.InteractWord(d.NearbyStory.Prompt), GameAction.Interact) + " · " + d.NearbyStory.Prompt
+                : d.NearbyPortal != null ? d.NearbyPortal.Available ? UIStrings.Get("hud.travel", d.NearbyPortal.destinationName, VoicePrompt.Cap("entrar", GameAction.Interact))
                     : UIStrings.Get("hud.blocked", d.NearbyPortal.destinationName, d.NearbyPortal.LockedReason)
-                : d.NearCombat ? UIStrings.Get("hud.startCombat", VoicePrompt.Cap("enfrentar", "E")) : "";
-            _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false)); if (_prompt.text != prompt) _prompt.text = prompt;
+                : d.NearCombat ? UIStrings.Get("hud.startCombat", VoicePrompt.Cap("enfrentar", GameAction.Interact)) : "";
+            _promptPanel.SetActive(exploration && prompt.Length > 0 && !(_ui.Subtitles?.Active ?? false));
+            if (_prompt.text != prompt) { _prompt.text = prompt; FitPrompt(); }
             // Camera, the open-palm hint while something can be used, and the microphone.
             string devices = d.Hands.Requested ? UIStrings.Get("hud.cameraActive") : "";
             if (d.Hands.Live && exploration && prompt.Length > 0 && !d.MouseMode) devices += " · " + UIStrings.Get("hud.handsHold");

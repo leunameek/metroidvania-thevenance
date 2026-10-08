@@ -28,7 +28,7 @@ public sealed class MIDashEnemy : MonoBehaviour
     private string _flag, _name, _greeting, _farewell;
     private float _max, _health, _t, _hover, _engageRange;
     private int _step, _lastDash = -1;
-    private bool _greeted, _guardNoticeShown, _interrupted, _engaged, _groundNoticeShown;
+    private bool _greeted, _guardNoticeShown, _interrupted, _engaged;
     private float _telegraphLength = 1;
     private Phase _phase;
     private Move _move;
@@ -38,6 +38,11 @@ public sealed class MIDashEnemy : MonoBehaviour
     private CapsuleCollider _hit;
     private TelegraphMark _warning;
     private PlayerController _player;
+    // The signal language of every fight (DuelSignalCues): a bite, a dart and a scream come
+    // straight on (Front), the tail sweeps (Sweep), the dive falls from above (Above); a golden
+    // flare marks the moment to dash into it (a scream that can be interrupted, a creature on the
+    // ground after its dive).
+    private DuelSignalCues _cues;
 
     public string DisplayName => _name;
     public float Health01 => _max > 0 ? Mathf.Clamp01(_health / _max) : 0;
@@ -77,6 +82,7 @@ public sealed class MIDashEnemy : MonoBehaviour
     private void Start()
     {
         _player = FindFirstObjectByType<PlayerController>();
+        if (_player != null) _cues = new DuelSignalCues(_player.transform, transform);
         MundoInferiorBlockout.AttemptReset += Disengage;
         MundoInferiorBlockout.DefeatReset += ResetEncounter;
         if (MIProgress.Has(_flag)) { Yield(true); return; }
@@ -86,6 +92,7 @@ public sealed class MIDashEnemy : MonoBehaviour
     {
         MundoInferiorBlockout.AttemptReset -= Disengage;
         MundoInferiorBlockout.DefeatReset -= ResetEncounter;
+        _cues?.Dispose();
     }
 
     // Defeat of Nemequene: the creature is whole again.
@@ -103,6 +110,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         if (_phase == Phase.Yielded) return;
         StopAllCoroutines();
         _phase = Phase.Idle; _t = 0; _interrupted = false; _engaged = false;
+        _cues?.Clear();
         _hover = IsFlyer ? HoverHeight : 0;
         transform.SetPositionAndRotation(_home + Vector3.up * _hover, _homeRotation);
         ShowWarning(false);
@@ -177,13 +185,19 @@ public sealed class MIDashEnemy : MonoBehaviour
             case Move.Scream: _t = 1.6f; Warn(Ground(transform.position), .5f); _actor?.PlayAny("PowerUp"); MIAudio.PlayAt("guardian_carga", transform.position, .9f, 1.4f); break;
         }
         _telegraphLength = Mathf.Max(.1f, _t);
+        _cues?.Warn(Signal);
+        if (_move == Move.Scream) _cues?.Open(true, false); // gold from the start: a dash interrupts it
     }
+
+    private DuelSignal Signal => _move == Move.Tail ? DuelSignal.Sweep : _move == Move.Dive ? DuelSignal.Above : DuelSignal.Front;
+    private Color SignalColor => Signal == DuelSignal.Front ? new Color(1f, .45f, .12f) : Signal == DuelSignal.Sweep ? new Color(.62f, .9f, 1f) : new Color(.62f, .38f, 1f);
 
     private void UpdateTelegraph()
     {
         // The fill closes on the ring as the blow approaches; the scream ring also widens toward its
         // reach. The dive mark follows nothing (it was announced).
         float k = 1 - Mathf.Clamp01(_t / _telegraphLength);
+        _cues?.Progress(k);
         if (_warning == null || !_warning.Visible) return;
         if (_move == Move.Scream) _warning.SetRadius(Mathf.Lerp(.5f, 4.5f, k));
         _warning.SetProgress(k);
@@ -196,10 +210,10 @@ public sealed class MIDashEnemy : MonoBehaviour
         {
             case Move.Bite: _t = .3f; _actor?.PlayAny("Attack"); break;
             case Move.Tail: _t = .35f; _actor?.PlayAny("Spin", "Attack"); break;
-            case Move.Shoot: _t = .2f; _actor?.PlayAny("Attack"); MIProjectile.Fire(transform.position + Vector3.up * 1.4f, _player, FailDamage); break;
+            case Move.Shoot: _t = .2f; _cues?.Clear(); _actor?.PlayAny("Attack"); MIProjectile.Fire(transform.position + Vector3.up * 1.4f, _player, FailDamage); break;
             case Move.Dive: _t = .4f; _actor?.PlayAny("Fall", "Attack"); break;
             case Move.Scream:
-                _t = .2f; ShowWarning(false);
+                _t = .2f; ShowWarning(false); _cues?.Clear();
                 if (_interrupted) break;
                 _actor?.PlayAny("Spin", "Attack");
                 MIAudio.PlayAt("guardian_golpe", transform.position, 1f, 1.5f);
@@ -226,6 +240,9 @@ public sealed class MIDashEnemy : MonoBehaviour
         }
         if (_t > 0) return;
         ShowWarning(false);
+        // Landed after a dive: the golden flare says it is open to the dash now.
+        if (_move == Move.Dive) _cues?.Open(true, false);
+        _cues?.Clear();
         switch (_move)
         {
             case Move.Bite: if (PlayerWithin(transform.position, 1.6f)) Hurt(); MIAudio.PlayAt("guardian_golpe", transform.position, .7f); break;
@@ -245,11 +262,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         _phase = Phase.Recover;
         // On the ground after a dive the creature is open to the dash; a stunned scream too.
         _t = _move == Move.Dive ? 2.8f : _interrupted ? 2.2f : .6f;
-        if (_move == Move.Dive && !_groundNoticeShown)
-        {
-            _groundNoticeShown = true;
-            MundoInferiorBlockout.Instance?.Hud?.Notify("En el suelo", "Ahora está a tu alcance: impúlsate contra él antes de que vuelva a subir.", UIIcon.Dodge, UIPalette.GoldLight);
-        }
+        // No notice: the golden flare on landing is the signal to dash (taught in the plaza training).
         if (_move == Move.Bite) StartCoroutine(StepBack());
     }
 
@@ -304,6 +317,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         StopAllCoroutines();
         _phase = Phase.Yielded; _hover = 0;
         ShowWarning(false);
+        _cues?.Clear();
         if (_hit != null) _hit.enabled = false;
         if (Engaged == this) Engaged = null;
         if (loaded) { HideBody(); YieldedEvent?.Invoke(this); return; }
@@ -351,7 +365,7 @@ public sealed class MIDashEnemy : MonoBehaviour
         foreach (var r in GetComponentsInChildren<Renderer>()) r.enabled = false;
     }
 
-    private void Warn(Vector3 at, float radius) { if (_warning != null) _warning.Show(at, radius); }
+    private void Warn(Vector3 at, float radius) { if (_warning != null) _warning.Show(at, radius, SignalColor); }
 
     private void ShowWarning(bool visible) { if (_warning != null && !visible) _warning.Hide(); }
 }

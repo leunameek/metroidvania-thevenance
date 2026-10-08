@@ -85,11 +85,20 @@ public class PlayerController : MonoBehaviour
         _verticalVelocity = new Vector3(0f, verticalVelocity, 0f);
     }
 
-    // Moving support (transport): its displacement is applied before this frame's locomotion.
+    // Moving support (transport): its displacement is applied before this frame's locomotion. The
+    // move also presses down a little, so the capsule stays grounded on the platform: a sideways
+    // move alone left isGrounded false and the jump was refused (2026-10-07 playtest). The carried
+    // distance is kept apart, so the animation does not take it for walking.
     public void Carry(Vector3 delta)
     {
-        if (_controller.enabled) _controller.Move(delta);
+        if (!_controller.enabled) return;
+        Vector3 before = transform.position;
+        _controller.Move(delta + Vector3.down * .02f);
+        Carried += transform.position - before;
     }
+
+    // Displacement given by moving supports since the animation last read it.
+    public Vector3 Carried { get; set; }
 
     public void RequestDash() => _dashRequested = true;
 
@@ -149,16 +158,13 @@ public class PlayerController : MonoBehaviour
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        float x = 0f;
-        float z = 0f;
-        if (keyboard.aKey.isPressed) x -= 1f;
-        if (keyboard.dKey.isPressed) x += 1f;
-        if (keyboard.wKey.isPressed) z += 1f;
-        if (keyboard.sKey.isPressed) z -= 1f;
+        // Keys come from GameBindings (Controles page); the defaults are WASD, Shift, Q and Space.
+        float x = GameBindings.Axis(GameAction.MoveLeft, GameAction.MoveRight);
+        float z = GameBindings.Axis(GameAction.MoveBack, GameAction.MoveForward);
 
-        if (!enableSprint && keyboard.leftShiftKey.wasPressedThisFrame)
+        if (!enableSprint && (GameBindings.Pressed(GameAction.Sprint) || GameBindings.Pressed(GameAction.Dash)))
             HandleDashPress(x, z);
-        else if (enableSprint && enableExplorationDash && keyboard.qKey.wasPressedThisFrame)
+        else if (enableSprint && enableExplorationDash && GameBindings.Pressed(GameAction.Dash))
             HandleDashPress(x, z);
         else if (dashRequested)
             HandleDashPress(x, z);
@@ -197,13 +203,13 @@ public class PlayerController : MonoBehaviour
             if (_verticalVelocity.y < 0f) _verticalVelocity.y = -groundStickSpeed;
             _abilities.OnGrounded();
 
-            if (keyboard.spaceKey.wasPressedThisFrame)
+            if (GameBindings.Pressed(GameAction.Jump))
             {
                 _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                 Jumped?.Invoke(false);
             }
         }
-        else if (keyboard.spaceKey.wasPressedThisFrame && _abilities.TryConsumeAirJump())
+        else if (GameBindings.Pressed(GameAction.Jump) && _abilities.TryConsumeAirJump())
         {
             _verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             Jumped?.Invoke(true);
@@ -211,7 +217,7 @@ public class PlayerController : MonoBehaviour
 
         _verticalVelocity.y += gravity * Time.deltaTime;
 
-        float speed = moveSpeed * (enableSprint && keyboard.leftShiftKey.isPressed ? sprintMultiplier : 1f);
+        float speed = moveSpeed * (enableSprint && GameBindings.Held(GameAction.Sprint) ? sprintMultiplier : 1f);
         Vector3 motion = move * speed + Vector3.up * _verticalVelocity.y;
         _controller.Move(motion * Time.deltaTime);
     }

@@ -155,6 +155,190 @@ cuenta. Ofrendas y runas quedan en su mesa; brazaletes, alas y medallón los tom
 **Acciones a tiempo** (`Controller/PlayerInteraction.cs`): palancas, cuerno, cierre, descansos y
 hallazgos: Nemequene se gira, hace el gesto y el efecto ocurre en el contacto.
 
+## Naturaleza: suelo, pasto, plantas, agua y cielo (2026-10-07)
+
+Bacatá, la colina y la laguna de Iguaque ya no son planos y esferas: se construyen en tiempo de
+ejecución con los shaders de `Resources/Nature` y el código de `Scripts/View/Nature`.
+
+- **Suelo** (`NatureGround`, *Stylized Ground*): una malla redonda modelada por una función de
+  altura, plana donde se actúan las escenas, con lomas onduladas después de la empalizada y cerros
+  que cierran el horizonte. Se pinta sin texturas: dos verdes mezclados por ruido, manchas de paja
+  seca, tierra en las pendientes, barro en la orilla, y caminos y claros de tierra (segmentos y
+  círculos declarados en `BacataDirector`). La misma altura sirve para plantar rocas y plantas.
+- **Pasto y flores** (`NatureGrass`, *Stylized Grass*): matas de hojas curvas dibujadas con
+  instancias de GPU, sin un objeto por mata, en celdas que se descartan cuando quedan fuera de
+  cámara. Cada hoja nace del color del suelo y se aclara hacia la punta; el viento las mece en
+  ráfagas y el sol las atraviesa a contraluz. En la sabana, pasto verde con flores; en la colina y
+  el páramo, pajonal dorado alto.
+- **Plantas que se mecen** (`NatureFoliage`, *Stylized Foliage*): juncos, frailejones y los
+  árboles y arbustos usan el mismo viento; el tronco queda quieto y la copa se mueve.
+- **Agua** (*Stylized Water*): la laguna deja ver el fondo, que se dobla con las ondas y pasa a
+  turquesa y luego a azul profundo con la hondura. Refleja el cielo en ángulo rasante, brilla al
+  sol, recibe sombras y hace espuma en la orilla. Usa las texturas de profundidad y de opacos de la
+  cámara (activas en `PC_RPAsset`). La orilla sale de la cuenca del suelo; los juncos se paran en
+  el agua baja.
+- **Cielo y grado de color** (`NatureAtmosphere`): el cielo andino procedural (*Nemequene/Andean
+  Sky*) con cerros verdes y picos nevados detrás de los cerros de la malla, luz ambiente de tres
+  tonos, bruma del color del cielo, y un grado de color suave (tonemapping, calidez, bloom y
+  viñeta). Hay tres ambientes: mañana en la sabana, humo del incendio y aire claro del páramo.
+- **Árboles y arbustos** (`NatureTrees`, *Stylized Tree*): se generan por código, como el pasto.
+  Cada especie tiene su forma: aliso ovalado y alto, roble de copa ancha, encenillo de varios
+  tallos con hojas nuevas rojizas, sauce llorón de ramas colgantes, mano de oso con rosetas de hojas
+  palmeadas, chilco con flores claras, mortiño con bayas rojas y chusque de cañas en arco. Primero
+  se reparte la copa (grupos de hojas dentro de un elipsoide); luego las ramas salen del tronco hacia
+  cada sector y las ramitas llegan a cada grupo. Las normales de las hojas apuntan hacia fuera de la
+  copa, así que se sombrea como una masa suave. Hay tres variantes por especie, dibujadas con
+  instancias y con sombra; el viento mece el árbol desde el pie y las hojas tiemblan solas. Los
+  árboles altos tienen un colisionador en el tronco. Ya no hacen falta modelos: si se agrega uno en
+  `Art/Environments/Bacatá`, solo se usa para una especie que no tenga generador.
+- **Mundo Superior** (`MSGardens`): las matas grises de vegetación baja (E06) se convierten al
+  cargar en canteros de pasto y flores que se mecen con el viento de las alturas. La pieza gris
+  queda oculta en la escena, así que el inventario del constructor no cambia.
+- **Plaza Núñez** (`PlazaGardens`): el agua de la fuente usa el shader de la laguna (más clara,
+  con ondas finas y espuma donde caen los chorros); la tierra de las cuatro jardineras tiene pasto
+  y flores, y los árboles y arbustos se mecen. La altura y el radio de la tierra se midieron sobre
+  el modelo de la jardinera y quedan como constantes, porque su malla no se puede leer en el juego
+  compilado.
+- **Serpiente y guacamaya** (`tools/Blender/animate_creatures.py`): los cuellos de la serpiente se
+  mueven como cadenas (la onda sube de la base a la cabeza) y cada cabeza se queda de su lado, así
+  ya no se cruzan. Los ataques arman una S, se sostienen en el aviso y salen como un latigazo. La
+  guacamaya aletea de verdad: baja con el ala abierta y sube con la muñeca plegada; al volar se
+  inclina hacia delante, recoge las patas y mantiene la cabeza nivelada, y en el suelo mueve la
+  cabeza a saltos.
+
+## Ronda de prueba del 2026-10-07
+
+- **Guardián caimán-murciélago:** el modelo mira a la arena (girado 180°) y ya no muestra la roca
+  del núcleo ni el ídolo de piedra; queda la luz del núcleo en su pecho. Durante el duelo la cámara
+  pasa a una vista 3/4 (`Controller/Duel/DuelCamera.cs`), a un lado y detrás de Nemequene, y
+  vuelve a la cámara de exploración al terminar.
+- **Encaje con guía:** junto a la pieza aparece una figura dorada translúcida con la posición que
+  debe tomar; se oculta cuando la pieza asienta.
+- **Mujer-cóndor y mujer-águila:** flotan sobre el borde del fondo de su terraza, frente a la
+  cámara. La mujer-cóndor no está antes de la Runa 2: al tomarla, desciende del cielo con su
+  llamado y un aviso.
+- **Bloqueo al tomar objetos:** si el efecto del gesto inicia un diálogo, al terminar el diálogo
+  se libera el control (antes quedaba bloqueado hasta abrir la pausa).
+- **Plaza Núñez:** «Muévete con WASD» y «Comenzar entrenamiento» solo durante el tutorial.
+- **Duelos por turnos:** la vida usa el mismo marco del HUD de exploración, abajo a la izquierda.
+- **Muerte en el epílogo:** los clips que llevan el cuerpo al suelo (morir, arrodillarse, sentarse,
+  rezar, agacharse, recoger) se importan con la altura en la pose, así el cuerpo llega al piso; en
+  el controlador del jugador las muertes ya no vuelven a estar de pie. Nemequene sigue acostado
+  sobre la estera en el refugio.
+
+## Segunda ronda de prueba del 2026-10-07
+
+- **Encaje:**
+  - El dibujo dorado de la pieza (contorno brillante con relleno de vidrio, shader
+    `Resources/Effects/FitSketch`) se dibuja en su mesa, en el lugar y la posición exactos donde
+    debe quedar.
+  - Durante la inspección, la pieza se sostiene justo encima de la mesa y la cámara encuadra las
+    dos.
+  - Encaja con más margen. Cerca de su posición, la pieza se atrae sola y el dibujo brilla más; al
+    entrar en esa zona suena un aviso claro y hay un destello.
+- **Diálogos:**
+  - La cámara toma la cara del hueso de la cabeza: a alguien acostado o arrodillado se le encuadra
+    donde de verdad está su cara.
+  - La cara queda en el tercio superior de la pantalla, encima del cuadro de diálogo; a quien está
+    acostado se le ve desde arriba.
+  - Una línea puede mirar un lugar en vez de a quien habla (`StoryFocus`, por la `cue` de
+    historia.json). Con «La grieta avisa antes de ceder», la estalactita más cercana de la galería
+    avisa y cae mientras la cámara la mira.
+- **Mundo inferior:**
+  - La palanca muestra solo el modelo; el mango dorado provisional se oculta.
+  - Las rocas de las paredes (T08) tienen colisión.
+- **Poses finales:** acostado, arrodillado o agachado se quedan en el último cuadro aunque el
+  controlador tenga una salida (Nemequene ya no se levanta en el refugio).
+- **Jefes:** al liberarse el guardián o la serpiente, se apagan los colisionadores de su figura
+  provisional; no queda una pared invisible.
+
+## Tercera ronda de prueba del 2026-10-07
+
+- **Bastón:** se sostiene vertical en el puño (`HeldUpright`), sin importar cómo gire la mano en el
+  clip; al caer Nemequene, cae con él.
+- **Piedra de la colina:** tiene colisión, y Nemequene se arrodilla sobre ella, a la altura medida
+  del modelo.
+- **Plaza Núñez:**
+  - Se quitaron el pasto y el viento de las jardineras; ahí aparecían destellos blancos. Queda solo
+    el agua de la fuente.
+  - Los shaders de naturaleza normalizan con seguridad y limitan el color final, así un valor
+    inválido no se vuelve un destello del bloom.
+- **Interfaces:**
+  - El panel de las lecciones se ve completo, sin desplazar; si no cabe, el texto se achica.
+  - La placa del nombre en los diálogos crece con el nombre (hasta 640 px) y achica el texto si
+    hace falta.
+  - El aviso de interacción del mundo crece con su texto.
+  - Con la voz activa, los botones del duelo de entrenamiento dicen su palabra una sola vez
+    («Atacar»).
+- **Encaje:** el dibujo se apoya en la superficie más alta bajo la pieza (su cuna) y es más tenue.
+  La semilla del santuario mide la mitad y se apoya más cerca del altar.
+- **Coca:**
+  - Aparece donde estaba el centinela de escudo, después de derrotarlo.
+  - El objetivo pide primero romper el escudo y luego recoger la coca.
+- **Criaturas de impulso:** tienen unas 1,7 veces más vida (centinela 55, murciélago 70, vigía del
+  cuerno y hombre-caimán 100).
+- **Rocas T08:** sus muros invisibles suben 6 m sobre la roca, así el doble salto no las pasa.
+- **Diálogos:** quien habla gira la cabeza (y algo el cuello) hacia la cámara, con un límite.
+- **Urnas:** las tres empiezan cerradas e iguales; la vacía se cambia por la abierta cuando se ha
+  mirado dentro.
+
+## Cuarta ronda de prueba del 2026-10-07
+
+- **Bachué y Saguanmachica:** sus manos ya no atraviesan el cuerpo. `CharacterActions` aparta el
+  brazo desde el hombro cuando la mano cae dentro de una elipse alrededor de la cadera. La elipse
+  se mide por personaje en `CharacterLibrarySetup`, con un ancho propio en los muslos cuando el
+  cuerpo se abre ahí, como el faldón de Saguanmachica. La versión v6 de la biblioteca reconstruye
+  los personajes.
+- **Mundo inferior:**
+  - Los tramos y rellanos de los pasillos entre salas se pisaban a la misma altura y su textura
+    parpadeaba. Ahora se dibujan 1,5 cm más abajo por cada pieza que se pisa; la colisión no cambia.
+  - Los muros de roca ya no se crean para los cuerpos de piedra del guardián y del centinela: eran
+    la hitbox invisible que quedaba al vencerlos.
+  - Se quitó la palanca del atajo de la galería de brazaletes, porque su puerta daba al vacío.
+- **Encaje:** una pieza plana encaja al acertar la cara y después gira sola hasta la pose exacta
+  del dibujo.
+- **Descanso:** después de arrodillarse en el disco, Nemequene se levanta. Antes la pose quedaba
+  fija.
+- **Serpiente:** la lengua de la cabeza B dependía en parte de la mandíbula de la cabeza A, y se
+  estiraba hacia ella. `animate_creatures.py` ahora deja cada pieza suelta de la malla con una sola
+  cabeza.
+- **Diálogos:**
+  - Todos miran a Nemequene y él mira a quien le habla.
+  - Si quien habla le da la espalda, gira el cuerpo.
+  - La cámara encuadra a quien habla desde el lado de su interlocutor.
+  - Al terminar el diálogo, quien se giró vuelve a su orientación anterior, salvo que la escena
+    lo haya movido mientras tanto.
+- **Plataforma móvil del mundo superior:**
+  - Al arrastrar al jugador también lo empuja un poco hacia abajo, así sigue apoyado y puede saltar.
+  - La animación descuenta el arrastre (`PlayerController.Carried`), así que ya no camina solo.
+- **Cierre de la cima:** Nemequene abre la puerta de frente a la pared, no girado hacia el receptáculo.
+- **Saguanmachica:** usa el modelo nuevo (`CharacterLibrary.v5` reconstruye los personajes al abrir
+  Unity).
+- **Epílogo:**
+  - La flecha se clava en el pecho de Nemequene y cae con él.
+  - La muerte de Saguanmachica se ve de frente, sin Nemequene delante.
+- **Aviso de portal:** el recuadro crece con sus dos líneas.
+- **Brillo guía (`Beacon`):**
+  - Los objetos por hacer brillan en dorado, con una luz suave: las estaciones, el guardián de
+    entrenamiento, el portal al que manda la historia, las urnas, los hallazgos y las ofrendas.
+  - Los principales también tienen una columna de luz con chispas, visible de lejos.
+  - El brillo se apaga cuando el objeto ya está hecho.
+
+## Compilar el juego (Windows)
+
+- *Nemequene > Compilar > Windows* (o `-executeMethod GameBuild.Windows` en modo batch) compila
+  las escenas activas de *Build Settings* en `Builds/Windows/ElAsedioDeBacata.exe`. `Builds/` no se
+  versiona.
+- Varios materiales se crean en tiempo de ejecución, y Unity solo incluye en el build los shaders
+  y variantes que usa algún material guardado. Por eso existen las plantillas de
+  `Resources/ShaderKeep`, que no se deben borrar:
+  - URP Unlit opaco y transparente: guía de encaje, marcas de aviso, velo del pasaje, dardos.
+  - Pasto y árboles con instancias.
+- En *Graphics Settings*, la niebla se conserva en todos sus modos: la de Bacatá (exponencial al
+  cuadrado) se activa por código y ninguna escena la tiene guardada.
+- El menú de capítulos (F9) solo existe en el editor y en builds de desarrollo; en el build normal
+  no aparece.
+
 ## Sustituir las figuras provisionales
 
 - Personas en la escena de Bacatá: asignar el prefab en el `BacataDirector` (o volver a ejecutar

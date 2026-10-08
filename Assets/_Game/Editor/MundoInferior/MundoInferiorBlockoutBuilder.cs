@@ -203,8 +203,7 @@ public static class MundoInferiorBlockoutBuilder
         Find(t, "Altar brazaletes 1", new Vector3(-3, 0, 5), 90, "O04b", MIProgress.Bracelets1, MIFind.Kind.Bracelets, "Brazaletes", null, 0,
             "Par de brazaletes de impulso. Pieza de fantasía del juego: concentran el empuje del primer impulso.",
             "Impulso nivel 1", "Pulsa Q para impulsarte hacia donde te mueves. Ensáyalo sobre el hueco.");
-        Lever(t, "H05 Palanca del atajo", new Vector3(-4, 0, 8), 90, MIProgress.Shortcut03, "Atajo abierto",
-            "La puerta del umbral también se abrió: el corredor alto une 03 y 01.");
+        // No shortcut lever (2026-10-07 playtest: its door opened onto nothing); the gate stays shut.
         Gate(t, "A02 Acceso del atajo", new Vector3(-5, 0, 9), 90, MIProgress.Shortcut03, false);
         Kit("A05", t, "A05 Boca del atajo", new Vector3(-8.6f, 0, 9), -90, new Vector3(5, 5, 0), Anchor.Bottom);
         Mark(t, "C01 Centinela (personaje pendiente)", new Vector3(0, 0, 16));

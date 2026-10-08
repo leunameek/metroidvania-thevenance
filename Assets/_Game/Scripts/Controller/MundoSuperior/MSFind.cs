@@ -44,6 +44,9 @@ public sealed class MSFind : MIInteractable
     // stay there; the wings and the medallion are taken once fitted (he wears and uses them).
     public bool Fits => findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb || findId == MSProgress.Wings || findId == MSProgress.Key;
     private bool Stays => _fit != null && (findId == MSProgress.RunePortals || findId == MSProgress.RuneClimb);
+    // The inspection looks at the piece, or at the piece held over its table and the table.
+    private Vector3 Focus => _fit != null ? _fit.FramePoint : _itemPosition;
+    private float Distance => _fit != null ? 1.9f : 1.5f;
     private bool ItemShown => (!Collected || Stays) && RequirementsMet && TrialMet;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -53,6 +56,8 @@ public sealed class MSFind : MIInteractable
     {
         if (halo != null) _haloIntensity = halo.intensity;
         if (Fits && item != null) _fit = new FitPuzzle(item);
+        // It glows, under a column of light, while it waits to be examined.
+        if (item != null) Beacon.Attach(gameObject, item, () => Available);
         Refresh();
     }
 
@@ -117,7 +122,7 @@ public sealed class MSFind : MIInteractable
         if (_orbit != null) _orbit.enabled = false;
         _cameraPosition = _camera.transform.position; _cameraRotation = _camera.transform.rotation;
         _itemPosition = item.position; _itemRotation = item.rotation;
-        _frameSide = InspectionFraming.ClearSide(_itemPosition, _cameraPosition, 1.5f, item, player.transform);
+        _frameSide = InspectionFraming.ClearSide(Focus, _cameraPosition, Distance, item, player.transform);
         var floating = item.GetComponent<MIFloat>(); if (floating != null) floating.enabled = false;
         player.SetInputLocked(true);
         WorldNaturalInput.Instance?.ConsumeHandTurn(out _, out _); // movement from before does not count
@@ -140,20 +145,22 @@ public sealed class MSFind : MIInteractable
         Vector3 toCamera = _frameSide;
         if (toCamera.sqrMagnitude < .01f) toCamera = -transform.forward;
         Vector3 side = Vector3.Cross(Vector3.up, toCamera.normalized);
-        Vector3 framed = _itemPosition + toCamera.normalized * 1.5f + Vector3.up * .2f - side * .5f;
-        Quaternion look = Quaternion.LookRotation(_itemPosition - side * .5f - framed);
+        Vector3 framed = Focus + toCamera.normalized * Distance + Vector3.up * (_fit != null ? .55f : .2f) - side * .5f;
+        Quaternion look = Quaternion.LookRotation(Focus - side * .5f - framed);
         float t = Mathf.SmoothStep(0, 1, _blend);
         _camera.transform.SetPositionAndRotation(Vector3.Lerp(_cameraPosition, framed, t), Quaternion.Slerp(_cameraRotation, look, t));
+        // A piece to fit is held just above its table, where its sketch is drawn.
+        if (_fit != null) item.position = Vector3.Lerp(_itemPosition, _fit.Hover, t);
 
         var mouse = Mouse.current; var keyboard = Keyboard.current;
         Vector2 turn = Vector2.zero;
         if (mouse != null && mouse.leftButton.isPressed) turn += mouse.delta.ReadValue() * .35f;
         if (keyboard != null)
         {
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) turn.x -= 140 * Time.unscaledDeltaTime;
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) turn.x += 140 * Time.unscaledDeltaTime;
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveLeft) || keyboard.leftArrowKey.isPressed) turn.x -= 140 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveRight) || keyboard.rightArrowKey.isPressed) turn.x += 140 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveForward) || keyboard.upArrowKey.isPressed) turn.y += 100 * Time.unscaledDeltaTime;
+            if (GameBindings.Held(GameAction.MoveBack) || keyboard.downArrowKey.isPressed) turn.y -= 100 * Time.unscaledDeltaTime;
         }
         // Hands as in the first prototype: the open left hand turns the piece, the open right hand
         // tilts it, two fists hold it still and a held fist takes it; words too.
@@ -177,7 +184,7 @@ public sealed class MSFind : MIInteractable
         if (Mathf.Abs(turn.x - handYaw) + Mathf.Abs(turn.y + handPitch) > .35f) GameAudio.Play("Foley/objeto_girar", .3f, AudioChannel.Effects, 1f, .06f, .2f, 1);
 
         if (_confirmFrame) { _confirmFrame = false; return; } // the E that opened it does not confirm
-        if (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)) Confirm();
+        if (keyboard != null && (GameBindings.Pressed(GameAction.Interact) || keyboard.enterKey.wasPressedThisFrame)) Confirm();
         else if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { GameAudio.Play("Foley/examinar_cerrar", .7f); Close(); }
         else if (natural != null && natural.ConsumeConfirm((_fit != null ? "Encajar " : "Tomar ") + displayName.ToLowerInvariant())) Confirm();
         else if (natural != null && natural.ConsumeBack("Devolver al altar")) Close();
@@ -220,6 +227,7 @@ public sealed class MSFind : MIInteractable
     {
         if (Inspecting != this) return;
         Inspecting = null;
+        _fit?.HideGuide();
         FitView.ShowPlayer(_hiddenPlayer); _hiddenPlayer = null;
         if (item != null && !keepItem)
         {

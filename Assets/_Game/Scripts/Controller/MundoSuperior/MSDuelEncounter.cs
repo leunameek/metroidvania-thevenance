@@ -3,8 +3,10 @@ using UnityEngine;
 
 // The two trials of the upper world that the script adds (guion E09 mujer-cóndor after Runa 2 at
 // MS03, E10 mujer-águila on the key terrace of MS06). Built at runtime next to their terraces so
-// the hand-edited scene stays untouched: an E mark on the terrace edge and the creature hovering
-// beyond it. The figure is a provisional silhouette until the rigged model is added under
+// the hand-edited scene stays untouched: an E mark on the terrace and the creature hovering over
+// the back edge, in front of the exploration camera (2026-10-07 playtest: behind the camera she
+// could not be found). She is not there before her trial is ready: when it is (Runa 2 taken, for
+// the condor), she comes down from the sky over the terrace with a call and a notice. The figure is a provisional silhouette until the rigged model is added under
 // Resources/Characters/<model> (it is used instead when present). A victory is recognition: the
 // creature says its last line (D09 / D10) and goes out in motes, leaving nothing on the terrace.
 public sealed class MSDuelEncounter : MIInteractable, IDuelStage
@@ -18,10 +20,13 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
     private bool _fighting;
     private PlayerController _player;
     private Vector3 _home;
+    // Arrival: -1 not yet (hidden), 0..1 coming down, 1 there.
+    private float _arrival = -1;
+    private const float ArrivalHeight = 9f, ArrivalSeconds = 2.6f;
 
     public bool Fighting => _fighting;
     public bool Resolved => MSProgress.Has(_flag);
-    public override bool Available => base.Available && !_fighting && !Resolved && Ready && !StoryPlayer.Pending;
+    public override bool Available => base.Available && !_fighting && !Resolved && Ready && _arrival >= 1 && !StoryPlayer.Pending;
     public override string Prompt => "Responder a la prueba de la " + _speaker.ToLowerInvariant();
     public Transform Focus => _figure;
     // E09 waits for Runa 2; E10 for the arrival on the key terrace (always true there).
@@ -36,7 +41,7 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         var root = new GameObject("Encuentro_" + encounter);
         root.transform.SetParent(zone.transform, false);
         root.transform.localPosition = mark;
-        root.transform.localRotation = Quaternion.LookRotation(perch - mark);
+        root.transform.localRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(perch - mark, Vector3.up));
         var e = root.AddComponent<MSDuelEncounter>();
         e._encounter = encounter; e._flag = flag; e._speaker = speaker; e._modelPath = modelPath; e._plumage = plumage;
         e.range = 3f; e.displayName = speaker;
@@ -47,6 +52,8 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         e.BuildFigure(zone.transform.TransformPoint(perch));
         StoryActor.Ensure(e._figure.gameObject, speaker, 1.7f);
         if (e.Resolved) CreatureDissolve.HideNow(e._figure);
+        else if (e.Ready) e._arrival = 1;
+        else e._figure.gameObject.SetActive(false);
         return e;
     }
 
@@ -55,7 +62,7 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         _figure = new GameObject(_speaker).transform;
         _figure.SetParent(transform, true);
         _figure.position = position; _home = position;
-        _figure.rotation = Quaternion.LookRotation(transform.position - position);
+        _figure.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - position, Vector3.up));
         var prefab = Resources.Load<GameObject>(_modelPath);
         if (prefab != null) { Instantiate(prefab, _figure, false); return; }
         // Provisional silhouette: body, head and two wings that beat (form, not colour, tells the move).
@@ -146,9 +153,31 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
     }
     public void OnDecide() { }
 
+    // She comes down over the terrace, wings beating, with her call and a notice.
+    private void Arrive()
+    {
+        _arrival = 0;
+        _figure.gameObject.SetActive(true);
+        _figure.position = _home + Vector3.up * ArrivalHeight;
+        GameAudio.PlayAt("Criaturas/" + (_encounter == CondorRules.EncounterId ? "condor_aviso" : "aguila_grito"), _home + Vector3.up * 4f, 1f, AudioChannel.Voice, 60f);
+        MundoSuperiorDirector.Instance?.Hud?.Notify(_speaker, "Desciende sobre la terraza. Acércate a la marca para responder a su prueba.", UIIcon.Guardian, UIPalette.GoldLight);
+    }
+
     private void Update()
     {
         if (_figure == null) return;
+        if (_arrival < 0)
+        {
+            if (Ready && !Resolved) Arrive();
+            return;
+        }
+        if (_arrival < 1)
+        {
+            _arrival = Mathf.Min(1, _arrival + Time.deltaTime / ArrivalSeconds);
+            float k = 1 - Mathf.Pow(1 - _arrival, 3);
+            _figure.position = Vector3.Lerp(_home + Vector3.up * ArrivalHeight, _home + Vector3.up * 1.2f, k);
+            if (_arrival >= 1) MIBurst.Spawn(_figure.position + Vector3.up * 1.4f, new Color(1f, .9f, .6f));
+        }
         _time += Time.deltaTime;
         bool folded = Resolved && !_fighting;
         float beat = folded ? 0 : Mathf.Sin(_time * (_move != null ? 9f : 3f)) * 25f;
@@ -164,7 +193,7 @@ public sealed class MSDuelEncounter : MIInteractable, IDuelStage
         // The eagle stands high until Interrumpir grounds her (EagleRules.Elevated).
         var eagle = _duel != null ? _duel.Model.Rules as EagleRules : null;
         float lift = folded ? 0 : (eagle == null || eagle.Elevated ? 1.2f : -.4f) + Mathf.Sin(_time * 1.7f) * .15f;
-        _figure.position = Vector3.Lerp(_figure.position, _home + Vector3.up * lift, Time.deltaTime * 4f);
+        if (_arrival >= 1) _figure.position = Vector3.Lerp(_figure.position, _home + Vector3.up * lift, Time.deltaTime * 4f);
     }
 
     private void ShowResolved()

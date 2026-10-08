@@ -19,6 +19,8 @@ public sealed class MIStalactite : MonoBehaviour
     private PlayerController _player;
     private Renderer _shadowRenderer;
     public bool Busy => _state != State.Armed;
+    // Between the rock and the floor it will strike: what the story camera looks at.
+    public Vector3 Focus => rock != null ? Vector3.Lerp(transform.position, rock.position, .45f) : transform.position + Vector3.up * 2f;
 
     private void Start()
     {

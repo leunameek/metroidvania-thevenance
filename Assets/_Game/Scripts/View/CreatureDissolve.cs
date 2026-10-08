@@ -16,6 +16,14 @@ public sealed class CreatureDissolve : MonoBehaviour
         host.StartCoroutine(host.Play(root, color, delay, done));
     }
 
+    // A freed creature leaves no invisible wall: every solid collider of its figure goes off
+    // (2026-10-07 playtest: the great guardians left a hitbox where they stood).
+    public static void Unblock(Transform root)
+    {
+        if (root == null) return;
+        foreach (var c in root.GetComponentsInChildren<Collider>(true)) if (!c.isTrigger) c.enabled = false;
+    }
+
     // Hides at once (a creature already beaten when the scene loads).
     public static void HideNow(Transform root) { if (root != null) root.gameObject.SetActive(false); }
 

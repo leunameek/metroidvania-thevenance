@@ -6,7 +6,7 @@ using UnityEngine;
 // Legacy keep their own rules):
 //  - Mixamo-rigged models (bones "mixamorig:*") import as Humanoid, so they all share Nemequene's
 //    Mixamo clips through Bacata_Humanoid.controller.
-//  - Tripo humanoid rigs (Tisquesusa, mujer-cóndor: Hip/Pelvis/L_Thigh...) import as Generic; the
+//  - Tripo humanoid rigs (mujer-cóndor: Hip/Pelvis/L_Thigh...) import as Generic; the
 //    library setup builds their Humanoid avatar with an explicit bone map (CharacterLibrarySetup).
 //  - The three creatures use Animations/<Name>_Animado.fbx (tools/Blender/animate_creatures.py):
 //    Generic, takes renamed to the clip name after the last "|", idles and gaits looping.
@@ -16,7 +16,7 @@ public class CharacterImportSettings : AssetPostprocessor
     public const string Root = "Assets/_Game/Art/Characters/";
     private static readonly string[] Own = { Root + "Nemequene/", Root + "Legacy/" };
     // Folders whose model has the Tripo humanoid rig instead of Mixamo's.
-    public static readonly string[] TripoHumanoids = { "Tisquesusa", "Mujer+condor" };
+    public static readonly string[] TripoHumanoids = { "Mujer+condor" };
     public static readonly string[] Creatures = { "Serpiente+Bicéfala", "Jaguar+(Transformación)", "Guacamaya+(Transformación)" };
     private static readonly string[] LoopingTakes = { "Idle", "Caminar", "Correr", "Vuelo", "Planeo", "Reposo" };
 

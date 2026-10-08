@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public enum TechnicalDemoState { Exploration, Analyzing, Combat, Transition }
-
 public sealed class TechnicalDemoController : MonoBehaviour
 {
     [SerializeField] private TechnicalDemoConfig config;
@@ -29,8 +27,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private Color _skyAmbient, _equatorAmbient, _groundAmbient, _sunColor;
     private float _sunIntensity;
     public ExplorationObjectiveModel Objectives { get; private set; }
-    private TechnicalDemoState _state;
-    public TechnicalDemoState State { get => _state; private set { if (_state == value) return; _state = value; ViewChanged?.Invoke(); } }
+    // GameState (Model) holds what the player is doing; the HUD redraws on ViewChanged.
+    public GameState Game { get; } = new GameState();
+    public TechnicalDemoState State { get => Game.Current; private set { if (Game.Set(value)) ViewChanged?.Invoke(); } }
     public event Action ViewChanged;
     public bool ManagedUI { get; set; }
     public AnalyzableObject[] Objects => objects;
@@ -61,7 +60,9 @@ public sealed class TechnicalDemoController : MonoBehaviour
     public PlazaStoryPoint NearbyStory { get; private set; }
     public bool HasInteraction => Nearby != null || NearbyStory != null || NearbyPortal != null || NearCombat;
     public PlazaCampaign Campaign { get; private set; }
-    public bool NearCombat => combat != null && Vector3.Distance(player.transform.position, combat.EntryPosition) < 3.2f;
+    // The training circle belongs to the tutorial: once the story moves on it is no longer offered.
+    public bool NearCombat => combat != null && CampaignProgress.Model.Chapter <= CampaignChapter.PlazaTutorial
+        && Vector3.Distance(player.transform.position, combat.EntryPosition) < 3.2f;
     public float Fade { get; private set; }
     public int World { get; private set; }
     public bool HelpOpen { get; private set; }
@@ -122,29 +123,53 @@ public sealed class TechnicalDemoController : MonoBehaviour
     private void Start()
     {
         player.GrantDash(1);
+        PlazaGardens.Dress(transform);
         // Story: lines play only while exploring with no menu open (the UI adds its own gate).
         StoryPlayer.Listen();
         StoryPlayer.AddGate(this, () => State == TechnicalDemoState.Exploration && !HelpOpen && !_restarting && PlazaPieceInspection.Active == null);
         Campaign = PlazaCampaign.Create(this);
         if (combat != null && combat.Guardian != null) StoryActor.Ensure(combat.Guardian.gameObject, "Guardián de entrenamiento", 1.9f);
+        Guide();
         SyncCampaign();
         StoryPlayer.Trigger(StoryTriggers.PlazaArrival);
         if (WorldTravel.ReturningFrom != 0) ArriveFromWorld(WorldTravel.ReturningFrom);
         WorldTravel.ClearReturn();
     }
 
+    // What the player should go to next glows and stands under a column of light (2026-10-07
+    // playtest: the stations were not seen): the stations not yet examined, then the training
+    // guardian, then the portal of the world the story sends him to.
+    private void Guide()
+    {
+        bool Exploring() => State == TechnicalDemoState.Exploration && PlazaPieceInspection.Active == null;
+        foreach (var item in objects)
+            if (item != null) { var station = item; Beacon.Attach(station.gameObject, station.transform, () => Exploring() && !station.Completed); }
+        if (combat != null && combat.Guardian != null)
+            Beacon.Attach(combat.gameObject, combat.Guardian, () => Exploring() && Objectives.IsComplete && !combat.Completed
+                && CampaignProgress.Model.Chapter <= CampaignChapter.PlazaTutorial);
+        foreach (var portal in portals)
+        {
+            if (portal == null) continue;
+            var gate = portal;
+            Beacon.Attach(gate.gameObject, gate.transform, () => Exploring() && gate.Available
+                && (gate.world < 0 ? CampaignProgress.Model.Chapter == CampaignChapter.LowerWorld : CampaignProgress.Model.Chapter == CampaignChapter.UpperWorld));
+        }
+    }
+
     private void Update()
     {
         if (_restarting) return;
+        // The plaza's own help panel (without the Nemequene UI, which reads the key itself).
+        if (!ManagedUI && GameBindings.Pressed(GameAction.Help)) SetHelp(!HelpOpen);
         if (StoryPlayer.Active || TurnDuelController.Running || PlazaPieceInspection.Active != null) return;
         if (ManagedUI && HelpOpen) return;
         Keyboard k = Keyboard.current;
-        if (k != null && k.vKey.wasPressedThisFrame) _audio.ToggleMute();
-        if (k != null && k.cKey.wasPressedThisFrame) _hands.Toggle();
-        if (k != null && k.mKey.wasPressedThisFrame) ToggleInputMode();
+        if (k != null && GameBindings.Pressed(GameAction.Mute)) _audio.ToggleMute();
+        if (k != null && GameBindings.Pressed(GameAction.Hands)) _hands.Toggle();
+        if (k != null && GameBindings.Pressed(GameAction.InputMode)) ToggleInputMode();
         if (HelpOpen) return;
         if (State == TechnicalDemoState.Transition) return;
-        if (!ManagedUI && k != null && k.rKey.wasPressedThisFrame) { Restart(); return; }
+        if (!ManagedUI && k != null && GameBindings.Pressed(GameAction.Restart)) { Restart(); return; }
         if (player.transform.position.y < config.fallThreshold)
         {
             if (State == TechnicalDemoState.Combat) combat.Cancel();
@@ -157,7 +182,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (State == TechnicalDemoState.Analyzing)
         {
             if (k != null && k.escapeKey.wasPressedThisFrame) { EndAnalysis(); return; }
-            if (k != null && k.eKey.wasPressedThisFrame)
+            if (k != null && GameBindings.Pressed(GameAction.Interact))
             {
                 if (Lesson.Complete) EndAnalysis();
                 else Status = "Completa el gesto indicado. Esc permite salir y continuar después.";
@@ -170,7 +195,7 @@ public sealed class TechnicalDemoController : MonoBehaviour
         }
         SyncCampaign();
         FindNearby();
-        if (Time.frameCount > _ignoreInteractionFrame && k != null && k.eKey.wasPressedThisFrame) Interact();
+        if (Time.frameCount > _ignoreInteractionFrame && k != null && GameBindings.Pressed(GameAction.Interact)) Interact();
     }
 
     // Being in the plaza means the prologue is behind; lessons and training feed the story.
@@ -374,9 +399,10 @@ public sealed class TechnicalDemoController : MonoBehaviour
         if (combatCompleted) combat.RestoreCompleted();
         ViewChanged?.Invoke();
     }
+    public event Action<bool> HelpChanged;
     public void SetHelp(bool open)
     {
-        HelpOpen = open;
+        if (HelpOpen != open) { HelpOpen = open; HelpChanged?.Invoke(open); }
         player.SetInputLocked(open || State != TechnicalDemoState.Exploration);
         orbitCamera.enabled = !open && State == TechnicalDemoState.Exploration;
     }

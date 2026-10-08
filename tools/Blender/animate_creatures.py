@@ -100,66 +100,235 @@ def export(arm, folder, name):
     print("CREATURE_OK", out, [a.name for a in bpy.data.actions])
 
 
+def one_head_per_piece(chain_a, chain_b, largest=1000):
+    """Each small loose piece of the mesh (a tongue, a fang) follows one head only: weights it had
+    on the other head's bones are dropped and the rest renormalised. Tripo had tied part of head B's
+    tongue to head A's jaw, so it stretched across to the other head when they parted (2026-10-07)."""
+    import bmesh
+    for ob in [o for o in bpy.data.objects if o.type == "MESH"]:
+        names = {g.index: g.name for g in ob.vertex_groups}
+        bm = bmesh.new(); bm.from_mesh(ob.data); bm.verts.ensure_lookup_table()
+        seen, islands = set(), []
+        for v in bm.verts:
+            if v.index in seen: continue
+            stack, comp = [v], []
+            seen.add(v.index)
+            while stack:
+                a = stack.pop(); comp.append(a.index)
+                for e in a.link_edges:
+                    o = e.other_vert(a)
+                    if o.index not in seen: seen.add(o.index); stack.append(o)
+            islands.append(comp)
+        bm.free()
+        verts = ob.data.vertices
+        fixed = 0
+        for comp in islands:
+            if len(comp) > largest: continue
+            wa = sum(g.weight for i in comp for g in verts[i].groups if names[g.group] in chain_a)
+            wb = sum(g.weight for i in comp for g in verts[i].groups if names[g.group] in chain_b)
+            if wa == wb: continue
+            own, other = (chain_a, chain_b) if wa > wb else (chain_b, chain_a)
+            # The bone of its own head that carries most of the piece takes the parts tied only
+            # to the other head.
+            totals = {}
+            for i in comp:
+                for g in verts[i].groups:
+                    if names[g.group] in own: totals[names[g.group]] = totals.get(names[g.group], 0) + g.weight
+            carrier = max(totals, key=totals.get)
+            for i in comp:
+                groups = [(names[g.group], g.weight) for g in verts[i].groups if g.weight > 0]
+                keep = [(n, w) for n, w in groups if n not in other]
+                if len(keep) == len(groups): continue
+                if not keep: keep = [(carrier, 1.0)]
+                total = sum(w for _, w in keep)
+                for n, _ in groups: ob.vertex_groups[n].remove([i])
+                for n, w in keep: ob.vertex_groups[n].add([i], w / total, "REPLACE")
+                fixed += 1
+        print("ONE_HEAD", ob.name, "islands", len(islands), "fixed verts", fixed)
+
+
 # ---------------------------------------------------------------- serpiente bicéfala
 def serpent():
+    """Two necks moved as chains: every motion travels from the base to the head a little later
+    in each bone (overlap), the heads keep their gaze while the neck sways, and each head stays
+    on its own side so they never cross (2026-10-07: the first clips turned the necks as rigid
+    pieces and the heads passed through each other). Strikes cock the neck into an S, hold
+    there (the duel's warning stops at 32 %) and whip out base-first."""
     folder = "Serpiente+Bicéfala"
     arm = load(folder)
     A = ["tripo::Head_0", "tripo::Head_1", "tripo::Head_2", "tripo::Head_3"]
+    head_a = "tripo::Head_4"
     B = ["bone_17", "bone_18", "bone_19", "bone_20"]
     C = ["tripo::Tail_%d" % i for i in range(8)]
-    jaw = "bone_6"
+    jaw, root = "bone_6", "tripo::Root"
+    root_rest = arm.data.bones[root].matrix_local.to_3x3().inverted()
+    # Head A sits on the right (+X) and head B on the left (-X): each sways around its own side.
+    SIDE_A, SIDE_B = 6, -7
 
-    def neck(chain, fwd, side, weights=(.5, .8, 1, .7)):
-        return [(b, X, fwd * w) for b, w in zip(chain, weights)] + [(b, Y, side * w) for b, w in zip(chain, weights)]
+    def chain(bones, fwd, side):
+        """fwd(i), side(i) in degrees per bone; +fwd leans toward the front (-Y), +side toward +X."""
+        out = []
+        for i, b in enumerate(bones):
+            out += [(b, X, fwd(i)), (b, Y, side(i))]
+        return out
 
-    def idle(t):  # two necks breathing on different rhythms (2 and 3 cycles), coils swelling
-        a = math.sin(t * 2 * math.pi * 2); b = math.sin(t * 2 * math.pi * 3 + 1)
-        items = neck(A, 5 * a, 4 * math.cos(t * 2 * math.pi * 2)) + neck(B, 6 * b, -5 * math.cos(t * 2 * math.pi * 3))
-        items += [(c, X, 1.5 * math.sin(t * 2 * math.pi * 2 + i * .7)) for i, c in enumerate(C)]
-        items += [(jaw, X, 4 + 3 * max(0, a))]
-        return combine(arm, items), None
+    def steady(bones, head, fwd, side, keep=.65):
+        """The head turns back part of what the neck below it turned, so its gaze stays."""
+        f = sum(fwd(i) for i in range(len(bones))); s = sum(side(i) for i in range(len(bones)))
+        return [(head, X, -keep * f), (head, Y, -keep * s)] if head else []
 
-    def attack_a(t):  # head A rears back (aviso), then strikes forward and recovers
-        f = -28 * pulse(t, 0, .45) + 46 * pulse(t, .4, .8)
-        items = neck(A, f, 0) + neck(B, -6 * pulse(t, .3, .9), 4) + [(jaw, X, 25 * pulse(t, .35, .75))]
-        return combine(arm, items), None
+    def lag(t, i, d=.035):
+        return t - i * d
 
-    def shake_a(t):  # head A shakes off fragments
-        items = neck(A, 10 * pulse(t, 0, 1), 18 * math.sin(t * 2 * math.pi * 4) * pulse(t, 0, 1))
-        return combine(arm, items), None
+    def coils(t, tight=0.0, cycles=1, amp=1.5):
+        return [(c, X, -tight * (1 - i / len(C)) + amp * math.sin(t * 2 * math.pi * cycles + i * .7)) for i, c in enumerate(C)]
 
-    def attack_b(t):  # head B: long lateral sweep
-        s = 30 * pulse(t, 0, .4) - 55 * pulse(t, .35, .85)
-        items = neck(B, 18 * pulse(t, .3, .9), s, (.6, .9, 1, .8))
-        return combine(arm, items), None
+    def body(turn=0.0, lean=0.0, lift=0.0, slide=0.0):
+        items = [(root, Z, turn), (root, X, lean)]
+        loc = {root: root_rest @ Vector((0, -slide, lift))} if lift or slide else None
+        return items, loc
 
-    def pulse_b(t):  # head B throat pulse: rises, holds, pushes
-        items = neck(B, -20 * pulse(t, 0, .5) + 30 * pulse(t, .5, .9), 0)
-        return combine(arm, items), None
+    def pose(items, loc=None):
+        return combine(arm, items), loc
 
-    def hit(chain):
-        return lambda t: (combine(arm, neck(chain, -30 * pulse(t, 0, 1), 12 * pulse(t, 0, .6))), None)
+    W = (.55, .85, 1, .8)  # how much each neck bone takes of a sway
 
-    def released(t):  # both necks lower away from the altar and come to rest
-        k = ramp(t, 0, .8)
-        items = neck(A, 32 * k, 10 * k) + neck(B, 32 * k, -10 * k) + [(c, X, -3 * k) for c in C]
-        return combine(arm, items), None
+    # ------------------------------------------------------------ loops
+    def idle(t):
+        p = t * 2 * math.pi
+        fa = lambda i: W[i] * 4 * math.sin(2 * p + 1 - i * .7)
+        sa = lambda i: W[i] * (SIDE_A + 7 * math.sin(2 * p - i * .8))
+        fb = lambda i: W[i] * 4.5 * math.sin(3 * p - i * .7)
+        sb = lambda i: W[i] * (SIDE_B + 7 * math.sin(3 * p + 2 - i * .8))
+        items = chain(A, fa, sa) + steady(A, head_a, fa, sa) + chain(B, fb, sb)
+        # The tongue-flick of the jaw: two quick openings per loop.
+        items += [(jaw, X, 3 + 9 * pulse(t, .38, .46) + 7 * pulse(t, .84, .9))] + coils(t)
+        b, loc = body(turn=3 * math.sin(p), lift=.006 * math.sin(2 * p))
+        return pose(items + b, loc)
 
-    def rest(t):  # looping calm after the release
-        k = 1 + .05 * math.sin(t * 2 * math.pi)
-        items = neck(A, 32 * k, 10) + neck(B, 32 * k, -10) + [(c, X, -3) for c in C]
-        return combine(arm, items), None
+    # ------------------------------------------------------------ head A
+    def attack_a(t):
+        cock = ramp(t, 0, .28) * (1 - ramp(t, .34, .44))
+        rec = ramp(t, .62, 1)
+        CP, SP = (-22, -16, 12, 26), (30, 26, 16, 6)
+        def fa(i):
+            s = ramp(lag(t, i, .03), .34, .48) * (1 - rec)
+            return cock * CP[i] + s * SP[i] + 8 * pulse(lag(t, i, .04), .5, .78) * i / 3
+        sa = lambda i: W[i] * SIDE_A * (1 - .5 * cock)
+        away = pulse(t, .2, .95)
+        fb = lambda i: -9 * away * W[i]
+        sb = lambda i: W[i] * (SIDE_B - 10 * away)
+        items = chain(A, fa, sa) + [(head_a, X, -8 * cock)] + chain(B, fb, sb)
+        items += [(jaw, X, 10 * cock + 34 * pulse(t, .33, .64))] + coils(t, tight=5 * cock + 3 * pulse(t, .34, .7))
+        strike = ramp(t, .34, .46) * (1 - rec)
+        b, loc = body(lean=7 * strike - 4 * cock, slide=.05 * strike - .02 * cock)
+        return pose(items + b, loc)
 
-    def emerge(t):  # coiled down -> both heads rise
-        k = 1 - ramp(t, 0, .9)
-        items = neck(A, 70 * k, 0) + neck(B, 70 * k, 0) + [(c, X, -6 * k) for c in C]
-        return combine(arm, items), None
+    def shake_a(t):
+        rise = ramp(t, 0, .28)
+        thrash = ramp(t, .3, .4) * (1 - ramp(t, .82, 1))
+        def sa(i):
+            w = math.sin(2 * math.pi * 4.5 * lag(t, i, .05)) * thrash * (8 + 7 * i)
+            return W[i] * SIDE_A + w
+        fa = lambda i: -14 * rise * W[i] * (1 - thrash) + 6 * thrash * W[i]
+        away = pulse(t, .15, 1)
+        items = chain(A, fa, sa) + [(head_a, X, 10 * rise)] + chain(B, lambda i: -7 * away * W[i], lambda i: W[i] * (SIDE_B - 12 * away))
+        items += [(jaw, X, 4 + 20 * thrash)] + coils(t, tight=4 * thrash, cycles=3, amp=2.5 * thrash)
+        b, loc = body(turn=5 * math.sin(2 * math.pi * 4.5 * t) * thrash)
+        return pose(items + b, loc)
+
+    # ------------------------------------------------------------ head B
+    def attack_b(t):
+        cock = ramp(t, 0, .28) * (1 - ramp(t, .34, .44))
+        rec = ramp(t, .7, 1)
+        def sb(i):
+            sweep = ramp(lag(t, i, .04), .34, .58) * (1 - rec)
+            return W[i] * SIDE_B - 34 * cock * W[i] + 52 * sweep * W[i] * (1 - .6 * pulse(t, .55, .8))
+        def fb(i):
+            return -10 * cock * W[i] + 32 * ramp(lag(t, i, .03), .34, .5) * (1 - rec) * W[i]
+        duck = pulse(t, .3, .85)  # head A rears up and out of the sweep
+        fa = lambda i: -20 * duck * W[i]
+        sa = lambda i: W[i] * (SIDE_A + 14 * duck)
+        items = chain(B, fb, sb) + chain(A, fa, sa) + steady(A, head_a, fa, sa, .4)
+        items += [(jaw, X, 3 + 6 * duck)] + coils(t, tight=4 * cock)
+        b, loc = body(turn=-6 * cock + 10 * pulse(t, .36, .8), lean=4 * pulse(t, .36, .7))
+        return pose(items + b, loc)
+
+    def pulse_b(t):
+        rise = ramp(t, 0, .3) * (1 - ramp(t, .48, .58))
+        push = pulse(t, .5, .9)
+        tremble = math.sin(2 * math.pi * 9 * t) * pulse(t, .15, .5)
+        fb = lambda i: (-24 if i < 2 else -8) * rise + 3 * tremble + 30 * W[i] * ramp(lag(t, i, .03), .5, .6) * (1 - ramp(t, .75, 1))
+        sb = lambda i: W[i] * (SIDE_B - 4 * rise)
+        away = pulse(t, .1, 1)
+        fa = lambda i: -6 * away * W[i]
+        sa = lambda i: W[i] * (SIDE_A + 8 * away)
+        items = chain(B, fb, sb) + chain(A, fa, sa) + steady(A, head_a, fa, sa, .5)
+        items += [(jaw, X, 3)] + coils(t, tight=6 * rise - 3 * push, cycles=4, amp=1.2 * rise)
+        b, loc = body(lean=-4 * rise + 6 * push, lift=.02 * rise, slide=.03 * push)
+        return pose(items + b, loc)
+
+    # ------------------------------------------------------------ hits
+    def hit(first):
+        def fn(t):
+            def recoil(i): return pulse(lag(t, i, .05), 0, .75)
+            f = lambda i: -26 * recoil(i) * W[i]
+            out = 16 if first else -16  # thrown outward, away from the other head
+            s = lambda i: W[i] * ((SIDE_A if first else SIDE_B) + out * recoil(i))
+            other_f = lambda i: -5 * pulse(t, .1, .8) * W[i]
+            other_s = lambda i: W[i] * ((SIDE_B if first else SIDE_A) + (-6 if first else 6) * pulse(t, .1, .8))
+            if first:
+                items = chain(A, f, s) + [(head_a, X, 14 * recoil(4))] + chain(B, other_f, other_s) + [(jaw, X, 18 * pulse(t, 0, .6))]
+            else:
+                items = chain(B, f, s) + chain(A, other_f, other_s) + steady(A, head_a, other_f, other_s, .4) + [(jaw, X, 6)]
+            items += coils(t, tight=4 * pulse(t, 0, .6))
+            b, loc = body(turn=(-5 if first else 5) * pulse(t, 0, .7), lean=-4 * pulse(t, 0, .6), slide=-.025 * pulse(t, 0, .6))
+            return pose(items + b, loc)
+        return fn
+
+    # ------------------------------------------------------------ release
+    RF = (34, 30, 22, 10)
+
+    def lowered(k, breath=0.0):
+        fa = lambda i: RF[i] * k * (1 + breath)
+        sa = lambda i: W[i] * (SIDE_A + 8 * k)
+        fb = lambda i: RF[i] * k * (1 + breath)
+        sb = lambda i: W[i] * (SIDE_B - 8 * k)
+        return chain(A, fa, sa) + [(head_a, X, -12 * k)] + chain(B, fb, sb)
+
+    def released(t):
+        # The necks sink one bone after the other, sway once as they settle, and the jaw closes.
+        k = sum(ramp(lag(t, i, .06), 0, .75) for i in range(4)) / 4
+        settle = math.sin(2 * math.pi * 1.5 * t) * pulse(t, .3, 1) * .08
+        items = lowered(k, settle) + [(jaw, X, 12 * pulse(t, 0, .6))] + [(c, X, -3 * k) for c in C]
+        b, loc = body(lift=-.02 * k)
+        return pose(items + b, loc)
+
+    def rest(t):
+        breath = .05 * math.sin(t * 2 * math.pi)
+        items = lowered(1, breath) + [(c, X, -3 + .8 * math.sin(t * 2 * math.pi + i * .5)) for i, c in enumerate(C)]
+        b, loc = body(lift=-.02)
+        return pose(items + b, loc)
+
+    def emerge(t):
+        # From coiled low, the body unwinds and the necks rise base-first, swaying as they come up.
+        def k(i): return 1 - ramp(lag(t, i, .07), .05, .85)
+        sway = lambda i: 10 * math.sin(2 * math.pi * 1.5 * t - i * .9) * (1 - ramp(t, .6, 1))
+        fa = lambda i: 70 * k(i) * W[i]
+        sa = lambda i: W[i] * SIDE_A + sway(i)
+        fb = lambda i: 70 * k(i) * W[i]
+        sb = lambda i: W[i] * SIDE_B - sway(i)
+        items = chain(A, fa, sa) + chain(B, fb, sb) + [(jaw, X, 22 * pulse(t, .7, .95))]
+        items += [(c, X, -8 * (1 - ramp(t, 0, .7))) for c in C]
+        b, loc = body(turn=-20 * (1 - ramp(t, 0, .8)), lift=-.04 * (1 - ramp(t, 0, .6)))
+        return pose(items + b, loc)
 
     for name, length, fn in [("Idle", 90, idle), ("AtaqueA", 42, attack_a), ("SacudidaA", 36, shake_a),
-                             ("AtaqueB", 42, attack_b), ("PulsoB", 40, pulse_b), ("GolpeA", 18, hit(A)),
-                             ("GolpeB", 18, hit(B)), ("Liberada", 60, released), ("Reposo", 90, rest),
+                             ("AtaqueB", 42, attack_b), ("PulsoB", 40, pulse_b), ("GolpeA", 18, hit(True)),
+                             ("GolpeB", 18, hit(False)), ("Liberada", 60, released), ("Reposo", 90, rest),
                              ("Emerger", 50, emerge)]:
         Clip(arm, name, length).sample(fn)
+    one_head_per_piece(set(A + [head_a, jaw, "tripo::Head_5", "tripo::Head_6"]), set(B))
     export(arm, folder, "Serpiente")
 
 
@@ -342,58 +511,110 @@ class QuadrupedRig:
 
 # ---------------------------------------------------------------- guacamaya
 def macaw():
+    """A real wingbeat (2026-10-07: the first one swung flat paddles): the downstroke drives with
+    the wing open and the tip bending up under the air, the upstroke folds the wrist in and lifts
+    it back; the body rises on each downstroke and leans forward to fly, the head stays level,
+    the legs tuck. On the ground the wings lie folded along the back and the head moves in quick
+    turns and holds, like a parrot's."""
     folder = "Guacamaya+(Transformación)"
     arm = load(folder)
-    right = ["bone_14", "bone_15", "bone_16", "bone_17"]
-    left = ["bone_23", "bone_24", "bone_25", "bone_26"]
+    R = ["bone_14", "bone_15", "bone_16", "bone_17"]
+    L = ["bone_23", "bone_24", "bone_25", "bone_26"]
     legs = ["tripo::0_Left_Limb_0", "tripo::0_Right_Limb_0"]
     shins = ["tripo::0_Left_Limb_1", "tripo::0_Right_Limb_1"]
     tail = ["bone_3", "tripo::Tail_0"]
-    head = "tripo::Head_0"
+    neck, head, root = "tripo::Spine_0", "tripo::Head_0", "tripo::Root"
+    root_rest = arm.data.bones[root].matrix_local.to_3x3().inverted()
+    pivot = arm.data.bones[root].head_local.copy()
+    centre = Vector((0, -.03, .36))
 
-    def wings(down, sweep=0, lag=0, outer=1.0):
-        # down: + lowers both wings (the right one turns about +Y, the left one mirrored); sweep folds them back.
-        items = []
-        for i, (r, l) in enumerate(zip(right, left)):
-            d = down if i == 0 else lag * (outer if i > 1 else .6)
-            items += [(r, Y, d), (l, Y, -d), (r, Z, sweep if i == 0 else 0), (l, Z, -sweep if i == 0 else 0)]
-        return items
+    def wing(joint, axis, deg):
+        """Both wings: the left one mirrors the right (turns about Y and Z change sign)."""
+        return [(R[joint], axis, deg), (L[joint], axis, deg if axis == X else -deg)]
 
-    folded = lambda: wings(78, 40, 25)
-    tucked = lambda k: [(b, X, 60 * k) for b in legs] + [(b, X, -70 * k) for b in shins]
+    def folded(k=1.0):
+        return wing(0, Y, 80 * k) + wing(0, Z, 30 * k) + wing(1, Z, 20 * k)
 
-    def idle(t):  # on the ground: wings folded, head bobs and turns, tail sways
+    def tucked(k):
+        return [(b, X, 60 * k) for b in legs] + [(b, X, -70 * k) for b in shins]
+
+    def beat(ph, amp, bias=0.0):
+        """One wingbeat at phase ph (0 top, .5 bottom): shoulder sweep, wrist fold on the way up,
+        tip bent up by the air on the way down, the feathers twisting with the stroke."""
+        s = math.sin(ph * 2 * math.pi)
+        down = bias - amp * math.cos(ph * 2 * math.pi)
+        fold = max(0.0, -s)  # upstroke
+        push = max(0.0, s)   # downstroke
+        items = wing(0, Y, down) + wing(0, X, 9 * s)
+        items += wing(1, Z, 42 * fold) + wing(1, Y, -14 * fold) + wing(2, Z, -36 * fold)
+        items += wing(3, Y, -14 * push + 6 * fold)
+        return items, s
+
+    def body(pitch=0.0, roll=0.0, lift=0.0, fwd=0.0):
+        """Pitch/roll about the middle of the body (not the feet), plus a world offset."""
+        q = Quaternion(X, math.radians(pitch)) @ Quaternion(Y, math.radians(roll))
+        off = Vector((0, -fwd, lift)) - ((q @ (centre - pivot)) - (centre - pivot))
+        return [(root, X, pitch), (root, Y, roll)], {root: root_rest @ off}
+
+    def level(pitch):
+        """The neck and head take back most of the body's lean, so the bird looks ahead."""
+        return [(neck, X, -.45 * pitch), (head, X, -.35 * pitch)]
+
+    def snap(t, keys):
+        """Held values that change quickly: keys = [(time, value)], each change takes .05."""
+        v = keys[0][1]
+        for (t0, a), (t1, b) in zip(keys, keys[1:]):
+            if t >= t1 - .05: v = b
+            if t1 - .05 <= t < t1: v = a + (b - a) * ease((t - (t1 - .05)) / .05)
+        return v
+
+    FLY = 38  # forward lean in flight
+
+    def idle(t):
         p = t * 2 * math.pi
-        items = folded() + [(head, X, 8 * max(0, math.sin(p * 3))), (head, Z, 14 * math.sin(p))]
-        items += [(b, Z, 6 * math.sin(p * 2)) for b in tail]
-        return combine(arm, items), None
-
-    def flap(t, cycles, amp, bias):
-        p = t * 2 * math.pi * cycles
-        return wings(bias + amp * math.sin(p), 0, amp * .5 * math.sin(p - 1.0))
+        turn = snap(t, [(0, 0), (.12, 28), (.3, 28), (.34, -12), (.55, -12), (.6, 14), (.78, 14), (.82, 0), (1, 0)])
+        tilt = snap(t, [(0, 0), (.12, 12), (.3, 12), (.34, -4), (.55, -4), (.6, 0), (1, 0)])
+        ruffle = pulse(t, .4, .52)
+        items = folded(1 - .35 * ruffle) + [(head, Z, turn), (head, Y, tilt), (neck, Z, .3 * turn)]
+        items += [(neck, X, 3 * math.sin(p * 3)), (head, X, 10 * pulse(t, .64, .72))]
+        items += [(b, X, -12 * pulse(t, .86, .94)) for b in tail] + [(b, Z, 4 * math.sin(p * 2)) for b in tail]
+        b, loc = body(roll=2.5 * math.sin(p), lift=.003 * math.sin(p * 3))
+        return combine(arm, items + b), loc
 
     def fly(t):
-        items = flap(t, 2, 48, 5) + tucked(1) + [(b, X, -10) for b in tail] + [(head, X, -8)]
-        return combine(arm, items), {"tripo::Root": Vector((0, 0, .03 * math.sin(t * 4 * math.pi + 1.5)))}
+        ph = (t * 2) % 1.0
+        w, s = beat(ph, 52, 2)
+        items = w + tucked(1) + level(FLY) + [(b, X, -14) for b in tail] + [(b, Z, 3 * s) for b in tail]
+        b, loc = body(pitch=FLY + 3 * s, lift=.03 * s)
+        return combine(arm, items + b), loc
 
     def glide(t):
         p = t * 2 * math.pi
-        items = wings(8 + 4 * math.sin(p), 0, 3 * math.sin(p)) + tucked(1) + [(b, X, -12) for b in tail] + [(head, X, -10)]
-        return combine(arm, items), None
+        items = wing(0, Y, -7 + 3 * math.sin(p)) + wing(3, Y, -6 + 2 * math.sin(p * 3))
+        items += tucked(1) + level(FLY - 6) + [(b, X, -16) for b in tail] + [(b, Z, 5 * math.sin(p)) for b in tail]
+        b, loc = body(pitch=FLY - 6, roll=6 * math.sin(p), lift=.01 * math.sin(p))
+        return combine(arm, items + b), loc
 
-    def takeoff(t):  # folded -> wings up -> strong downbeats, legs tuck
-        open_ = ramp(t, 0, .3)
-        beat = flap(t, 2.5, 55 * ramp(t, .2, .4), 0)
-        items = [(b, a, d * (1 - open_)) for b, a, d in folded()] + [(b, a, d * open_) for b, a, d in beat]
-        items += tucked(ramp(t, .4, .9)) + [(head, X, -10 * open_)]
-        return combine(arm, items), {"tripo::Root": Vector((0, 0, .25 * ramp(t, .3, 1)))}
+    def takeoff(t):
+        # Crouch and open (to .3), spring with strong beats as the body leans forward and leaves the ground.
+        crouch = pulse(t, 0, .34)
+        open_ = ramp(t, .08, .3)
+        power = ramp(t, .22, .4)
+        w, s = beat((t * 2.5 + .5) % 1.0, 58 * power, 0)
+        items = [(bn, a, d * (1 - open_)) for bn, a, d in folded()] + [(bn, a, d * open_) for bn, a, d in w]
+        items += tucked(ramp(t, .45, .9)) + level(FLY * ramp(t, .3, .8)) + [(b, X, -14 * open_) for b in tail]
+        b, loc = body(pitch=FLY * ramp(t, .3, .8) + 6 * crouch, lift=-.03 * crouch + .3 * ramp(t, .3, 1) + .03 * s * power)
+        return combine(arm, items + b), loc
 
-    def land(t):  # beats slow down, legs reach, wings fold
-        fold = ramp(t, .55, 1)
-        beat = flap(t, 2, 50 * (1 - ramp(t, .3, .7)), 0)
-        items = [(b, a, d * (1 - fold)) for b, a, d in beat] + [(b, a, d * fold) for b, a, d in folded()]
-        items += tucked(1 - ramp(t, .2, .6)) + [(head, X, 10 * pulse(t, .6, 1))]
-        return combine(arm, items), {"tripo::Root": Vector((0, 0, .25 * (1 - ramp(t, 0, .7))))}
+    def land(t):
+        # Beats slow and brake with the body rising upright (the flare), legs reach, wings fold.
+        fold = ramp(t, .62, 1)
+        w, s = beat((t * 2) % 1.0, 50 * (1 - ramp(t, .35, .65)), -8 * pulse(t, .3, .7))
+        items = [(bn, a, d * (1 - fold)) for bn, a, d in w] + [(bn, a, d * fold) for bn, a, d in folded()]
+        flare = FLY * (1 - ramp(t, 0, .45)) - 14 * pulse(t, .3, .75)
+        items += tucked(1 - ramp(t, .15, .5)) + level(flare) + [(b, X, -18 * pulse(t, .3, .8)) for b in tail]
+        b, loc = body(pitch=flare, lift=.3 * (1 - ramp(t, 0, .62)) - .025 * pulse(t, .6, .85))
+        return combine(arm, items + b), loc
 
     for name, length, fn in [("Idle", 90, idle), ("Despegue", 36, takeoff), ("Vuelo", 30, fly),
                              ("Planeo", 60, glide), ("Aterrizaje", 36, land)]:

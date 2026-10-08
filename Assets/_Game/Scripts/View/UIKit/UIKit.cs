@@ -20,13 +20,22 @@ namespace Nemequene.UI
             if (theme == null) return TMP_Settings.defaultFontAsset;
             return display ? theme.Display : theme.bodyFont;
         }
+        // How much the HUDs grow with «Tamaño de texto»: 1.1 at 125 %, 1.2 at 150 % (the whole HUD
+        // at 1.5 left no room between its plates; the menus scale their text to the full value).
+        public static float HudScale => 1f + (NaturalInputPrefs.Load().textScale - 1f) * .4f;
+        // Width of the canvas in its own units (the reference shrinks as the HUD grows).
+        public static float HudWidth => 1920f / HudScale;
+
         public static RectTransform ScreenCanvas(Transform parent, string name, int order)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             var canvas = go.AddComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = order;
             var scaler = go.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080);
+            // The «Tamaño de texto» option enlarges the whole HUD (boxes and text together), so a
+            // larger text never spills out of its plate (2026-10-08: duels and worlds ignored it).
+            float scale = HudScale;
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080) / scale;
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight; scaler.matchWidthOrHeight = .5f;
             return (RectTransform)go.transform;
         }
@@ -120,9 +129,10 @@ namespace Nemequene.UI
             fill.sprite = UIBacata.Get("Controls/Bar_Fill") ?? WhiteSprite(); fill.color = UIPalette.Crimson; fill.raycastTarget = false;
             fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal; fill.fillOrigin = (int)Image.OriginHorizontal.Left;
             var name = Shadow(Label(root, caption, 22, UIPalette.Ivory)); name.fontStyle = FontStyles.Bold;
-            name.alignment = TextAlignmentOptions.BottomLeft; name.rectTransform.anchorMin = new Vector2(.34f, .64f); name.rectTransform.anchorMax = new Vector2(.70f, .98f);
+            name.alignment = TextAlignmentOptions.BottomLeft; name.rectTransform.anchorMin = new Vector2(.39f, .72f); name.rectTransform.anchorMax = new Vector2(.64f, 1.04f);
             value = Shadow(Label(root, "", 20, UIPalette.Muted));
-            value.alignment = TextAlignmentOptions.BottomRight; value.rectTransform.anchorMin = new Vector2(.62f, .64f); value.rectTransform.anchorMax = new Vector2(.90f, .98f);
+            value.alignment = TextAlignmentOptions.BottomRight; value.rectTransform.anchorMin = new Vector2(.62f, .72f); value.rectTransform.anchorMax = new Vector2(.90f, 1.04f);
+            // Clear of the bar's carved rim (2026-10-07 audit: «Vida» and «100 / 100» sat on it).
             return fill;
         }
         // Key hint in a safe-area corner ("Esc  Pausa"): key cap first, then the action.

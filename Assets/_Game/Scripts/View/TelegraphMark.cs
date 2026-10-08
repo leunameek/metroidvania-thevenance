@@ -49,6 +49,13 @@ public sealed class TelegraphMark : MonoBehaviour
         _fillRenderer.material.color = fill;
     }
 
+    // Only the outer ring, fully opaque (a marker above a body part, not a reach on the floor).
+    public void RingOnly(float alpha = 1f)
+    {
+        _fill.gameObject.SetActive(false);
+        var ring = _color; ring.a = alpha; _ringRenderer.material.color = ring;
+    }
+
     // Grows the whole mark (the scream ring that widens toward its reach).
     public void SetRadius(float radius)
     {

@@ -301,6 +301,32 @@ def build_combat():
     out("Combate", "jaguar_embestida", layer((paws, 1), (whoosh(.7, 300, 1500, 1.0, .7), .8), (src.creature(.35, 110, 80, "felino", 1.2, .6, 28, .4), .5, .55)), "combat")
 
 
+def build_signals():
+    """The signal language of the duels (DuelSignalCues), the same for every enemy: what each
+    warning sounds like, so the ear can answer without any text."""
+    # Front: two low frame-drum beats, the weight planted before a straight blow.
+    seeded("senal_frente")
+    x = layer((src.frame_drum(62, .9, .35, 1.1), 1), (src.frame_drum(58, .9, .3, 1.3), .85, .26),
+              (lowpass(noise(.5), 180) * env(n_of(.5), .02, .4), .5, .2))
+    out("Combate", "senal_frente", space(x, "open_air", .12, .5), "combat")
+    # Sweep: air drawn to one side, rising, with a light rattle of the arm winding back.
+    seeded("senal_barrido")
+    x = layer((whoosh(.75, 600, 3600, .7, .8), 1), (whoosh(.5, 900, 2600, .9, .7), .4, .15),
+              (src.seed_shaker(.18, 5200), .2, .05))
+    out("Combate", "senal_barrido", x, "combat")
+    # Above: a creak overhead and grit trickling down before the fall.
+    seeded("senal_arriba")
+    n = n_of(1.1)
+    creak = bandpass(noise(1.1), 450, 1800) * (np.abs(np.sin(phase(7, n))) ** 6) * env(n, .1, .5)
+    x = layer((creak, .8), (rattle(.9, 120, 2600, .5), .5, .2), (body("stone", 210, .4, .5, 1.6), .35, .05))
+    out("Combate", "senal_arriba", space(x, "stone_room", .15, .5), "combat")
+    # Glint: a bright tumbaga chime, short, gold over silver (a physical blow that can be parried).
+    seeded("senal_destello")
+    x = layer((body("gold", 1320, 1.0, .8, .9), 1), (body("silver", 1980, .7, .6, 1.1), .45, .03),
+              (highpass(noise(.03), 5000) * decay(n_of(.03), 90), .4))
+    out("Combate", "senal_destello", space(x, "open_air", .1, .5), "combat")
+
+
 # ======================================================================== creatures
 
 def build_creatures():
@@ -688,7 +714,7 @@ def build_repairs():
         write(path, loop_crossfade(x, .5 if name != "viento_alturas" else 1.5)); WRITTEN.append(path)
 
 
-GROUPS = {"ui": build_ui, "foley": build_foley, "combat": build_combat, "creatures": build_creatures,
+GROUPS = {"ui": build_ui, "foley": build_foley, "combat": build_combat, "signals": build_signals, "creatures": build_creatures,
           "ambience": build_ambience, "music": build_music, "replace": build_replacements, "repair": build_repairs}
 
 if __name__ == "__main__":

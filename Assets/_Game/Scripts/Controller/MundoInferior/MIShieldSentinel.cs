@@ -18,6 +18,8 @@ public sealed class MIShieldSentinel : MonoBehaviour
     private int _lastDash = -1;
     private float _lastBlockedNotice = -99;
     private PlayerController _player;
+    // Its pulse is a wave along the ground toward Nemequene: the Front signal of every fight.
+    private DuelSignalCues _cues;
     private Vector3 _bodyHome;
 
     public bool Defeated => _dead;
@@ -27,6 +29,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
     private void Start()
     {
         _player = FindFirstObjectByType<PlayerController>();
+        if (_player != null) _cues = new DuelSignalCues(_player.transform, transform);
         if (body != null) _bodyHome = body.localPosition;
         MundoInferiorBlockout.AttemptReset += OnAttemptReset;
         MundoInferiorBlockout.DefeatReset += OnDefeatReset;
@@ -54,6 +57,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
     {
         MundoInferiorBlockout.AttemptReset -= OnAttemptReset;
         MundoInferiorBlockout.DefeatReset -= OnDefeatReset;
+        _cues?.Dispose();
     }
     // A fall only cancels the pulse in progress; the broken shield and the wounds stay. A defeat
     // of Nemequene makes it whole again.
@@ -62,6 +66,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
         if (_dead) return;
         _timer = 0; _pulseT = -1;
         if (pulseRing != null) pulseRing.gameObject.SetActive(false);
+        _cues?.Clear();
     }
     private void OnDefeatReset() { if (!_dead) ResetEncounter(); }
 
@@ -82,7 +87,7 @@ public sealed class MIShieldSentinel : MonoBehaviour
         if (core != null) core.intensity = Mathf.Lerp(core.intensity, (_pulseT >= 0 ? 6f : 2.2f) + _flash * 8f, Time.deltaTime * 10f);
         _flash = Mathf.MoveTowards(_flash, 0, Time.deltaTime * 3f);
         if (body != null) body.localPosition = _bodyHome + (_flash > 0 ? Random.insideUnitSphere * .04f * _flash : Vector3.zero);
-        if (!PlayerHere) { _timer = 0; return; }
+        if (!PlayerHere) { _timer = 0; if (_pulseT >= 0) { _pulseT = -1; _cues?.Clear(); if (pulseRing != null) pulseRing.gameObject.SetActive(false); } return; }
         if (_pulseT < 0)
         {
             _timer += Time.deltaTime;
@@ -93,15 +98,18 @@ public sealed class MIShieldSentinel : MonoBehaviour
                 if (pulseRing != null) { pulseRing.gameObject.SetActive(true); pulseRing.localScale = Vector3.one * .2f; }
                 Actor?.PlayAny("PowerUp", "Attack");
                 MIAudio.PlayAt("guardian_carga", transform.position, .8f);
+                _cues?.Warn(DuelSignal.Front);
             }
         }
         else
         {
             _pulseT += Time.deltaTime;
             if (pulseRing != null) pulseRing.localScale = Vector3.one * Mathf.Lerp(.2f, pulseRadius, Mathf.Clamp01(_pulseT / pulseWarning));
+            _cues?.Progress(_pulseT / pulseWarning);
             if (_pulseT >= pulseWarning)
             {
                 _pulseT = -1;
+                _cues?.Clear();
                 if (core != null) core.color = new Color(.45f, .8f, 1f);
                 if (pulseRing != null) pulseRing.gameObject.SetActive(false);
                 MIAudio.PlayAt("guardian_golpe", transform.position);

@@ -51,7 +51,7 @@ public sealed class MIPortal : MonoBehaviour
         var keyboard = Keyboard.current;
         var natural = WorldNaturalInput.Instance;
         if (_near && Active && !_player.InputLocked
-            && (keyboard != null && keyboard.eKey.wasPressedThisFrame || natural != null && natural.ConsumeInteract("Regresar a Plaza Núñez"))
+            && (keyboard != null && GameBindings.Pressed(GameAction.Interact) || natural != null && natural.ConsumeInteract("Regresar a Plaza Núñez"))
             && (MundoInferiorBlockout.Instance == null || !MundoInferiorBlockout.Instance.Busy))
         {
             _player.SetInputLocked(true);
@@ -64,7 +64,7 @@ public sealed class MIPortal : MonoBehaviour
     {
         // Screen 18: the portal names its destination on the interaction ribbon.
         if (_near && (MundoInferiorBlockout.Instance == null || !MundoInferiorBlockout.Instance.Busy))
-            UIWorldPrompt.Show(this, Active ? VoicePrompt.Cap("entrar", "E") : null, Active ? "Regresar a Plaza Núñez" : "El portal se activará al vencer al guardián");
+            UIWorldPrompt.Show(this, Active ? VoicePrompt.Cap("entrar", GameAction.Interact) : null, Active ? "Regresar a Plaza Núñez" : "El portal se activará al vencer al guardián");
         else UIWorldPrompt.Hide(this);
     }
 

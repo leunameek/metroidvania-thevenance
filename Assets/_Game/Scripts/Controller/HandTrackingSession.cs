@@ -32,7 +32,7 @@ public class HandTrackingSession : MonoBehaviour
     public event System.Action RequestedChanged;
     // How the current scene works without the camera (plaza: mouse; worlds: keyboard).
     protected virtual string Fallback => "puedes seguir con el teclado";
-    protected virtual string ToggleKey => "C";
+    protected virtual string ToggleKey => GameBindings.Cap(GameAction.Hands);
 
     private void SetRequested(bool value)
     {

@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Prototype.Runtime::CharacterActions
   restState: Locomotion
   animator: {fileID: 8163597710990492676}
+  bodyClearance: {x: 0, y: 0, z: 0}
 --- !u!1001 &2314983749454363029
 PrefabInstance:
   m_ObjectHideFlags: 0

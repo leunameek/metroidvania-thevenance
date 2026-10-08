@@ -59,7 +59,7 @@ public class PlazaTutorialTests
         var model = new PlazaCombatModel(); model.Start(); model.Attack();
         model.Tick(2); model.Tick(3);
         Assert.AreEqual(1, model.Mistakes);
-        model.Tick(2);
+        model.Tick(3);
         Assert.AreEqual(PlazaCombatPhase.Telegraph, model.Phase);
         Assert.AreEqual(1, model.Hits);
         Assert.AreEqual(PlazaDefense.Dodge, model.Expected);
@@ -68,22 +68,47 @@ public class PlazaTutorialTests
     public void WrongDefenseCannotAdvanceTraining()
     {
         var model = new PlazaCombatModel(); model.Start(); model.Attack(); model.Tick(2);
-        Assert.IsTrue(model.Defend(PlazaDefense.Guard)); model.Tick(2);
+        Assert.IsTrue(model.Defend(PlazaDefense.Guard)); model.Tick(3);
         Assert.AreEqual(PlazaCombatPhase.Telegraph, model.Phase);
         Assert.AreEqual(1, model.Mistakes);
     }
     [Test]
-    public void VictoryRequiresThreeAttacksAndBothDefenses()
+    public void TwoGuidedBlowsThenTwoToReadWinTraining()
     {
-        var model = new PlazaCombatModel(); model.Start(); model.Attack(); model.Tick(2);
-        model.Defend(PlazaDefense.Dodge); model.Tick(2); model.Attack(); model.Tick(2);
-        Assert.AreEqual(PlazaDefense.Guard, model.Expected);
-        model.Defend(PlazaDefense.Guard); model.Tick(2); model.Attack();
+        var model = new PlazaCombatModel(); model.Start();
+        var expected = new[] { PlazaDefense.Dodge, PlazaDefense.Guard, PlazaDefense.Guard, PlazaDefense.Dodge };
+        for (int i = 0; i < expected.Length; i++)
+        {
+            Assert.IsTrue(model.Attack()); model.Tick(2);
+            Assert.AreEqual(PlazaCombatPhase.React, model.Phase);
+            Assert.AreEqual(expected[i], model.Expected);
+            Assert.AreEqual(i < PlazaCombatModel.GuidedLessons, model.ShowsAnswer, "blow " + (i + 1));
+            Assert.AreEqual(expected[i] == PlazaDefense.Dodge ? DuelSignal.Sweep : DuelSignal.Front, model.Signal);
+            Assert.IsTrue(model.Defend(expected[i])); model.Tick(2);
+            Assert.AreEqual(PlazaCombatPhase.Attack, model.Phase);
+        }
+        Assert.IsTrue(model.Attack());
         Assert.AreEqual(PlazaCombatPhase.Won, model.Phase);
+        Assert.AreEqual(5, PlazaCombatModel.AttacksToWin);
         Assert.IsFalse(model.Attack());
         model.Start();
         Assert.AreEqual(0, model.Hits);
         Assert.AreEqual(PlazaCombatPhase.Attack, model.Phase);
         model.Cancel(); Assert.IsFalse(model.IsActive);
+    }
+    [Test]
+    public void AccessibilityShowsTheAnswerOfTheBlowsToRead()
+    {
+        var model = new PlazaCombatModel { ShowAnswers = true }; model.Start();
+        for (int i = 0; i < 3; i++) { model.Attack(); model.Tick(2); model.Defend(model.Expected); model.Tick(2); }
+        Assert.IsFalse(model.Guided);
+        Assert.IsTrue(model.ShowsAnswer);
+    }
+    [Test]
+    public void AMistakeExplainsWhatTheGuardianShowed()
+    {
+        var model = new PlazaCombatModel(); model.Start(); model.Attack(); model.Tick(2);
+        model.Defend(PlazaDefense.Guard);
+        StringAssert.Contains("era Esquivar", model.Reading);
     }
 }

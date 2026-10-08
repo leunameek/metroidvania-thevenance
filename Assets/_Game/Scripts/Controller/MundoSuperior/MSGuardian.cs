@@ -30,6 +30,10 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     public Transform PlayerMark => playerMark;
 
     private CharacterActions _serpent;
+    // The exposed head is read from its gold glow, not from the HUD (2026-10-07 playtest).
+    private DuelGlow _exposedGlow;
+    private DuelTarget _glowHead = DuelTarget.None;
+    private Transform _headA, _headB;
 
     private void Start()
     {
@@ -43,6 +47,8 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         Transform shape = _serpent != null ? _serpent.transform : body;
         if (core != null) core.gameObject.SetActive(false);
+        // The stand-in pieces kept their colliders under the model: they go too.
+        CreatureDissolve.Unblock(body != null ? body.parent : null);
         if (instant) { CreatureDissolve.HideNow(shape); return; }
         CreatureDissolve.Run(shape, new Color(.95f, .85f, .55f), .3f);
     }
@@ -54,6 +60,10 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         var root = body != null ? body.parent : null;
         if (root == null || !CharacterModels.Exists("Serpiente")) return;
         CharacterModels.Hide(root, core != null ? core.transform : null);
+        // The training-guardian stand-in was only hidden and stayed loaded under the serpent
+        // (2026-10-08 review): it goes, so one model is left in the arena.
+        foreach (Transform child in root)
+            if (child.name.StartsWith("Modelo provisional") && child.GetComponentInChildren<Collider>(true) == null) Destroy(child.gameObject);
         _serpent = CharacterModels.Spawn("Serpiente", root, Vector3.zero, Quaternion.identity);
         animator = null;
         if (_serpent != null) _serpent.PlayAny("Emerger");
@@ -78,6 +88,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         var director = MundoSuperiorDirector.Instance;
         _duel = TurnDuelController.Run(new SerpentRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), _player.GetComponent<Health>(),
             director != null ? director.Natural : null, director != null ? director.ReactionMultiplier : 1f, OnDuelEnded);
+        ShowExposed();
     }
 
     // Defeat or abandon: no duel, model at rest; the next attempt starts over.
@@ -85,6 +96,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     {
         if (_duel != null) { var d = _duel; _duel = null; d.Abort(); }
         _fighting = false; _move = null;
+        HideExposed();
         Pose(0, 0, 0);
         SetCore(_coreBase, 1);
         foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
@@ -95,6 +107,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
     private void OnDuelEnded(bool victory)
     {
         _duel = null;
+        HideExposed();
         if (!victory) return; // the director's defeat flow resets the encounter
         MSProgress.Set(MSProgress.Guardian);
         MSAudio.Play("victoria", 1f);
@@ -120,6 +133,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (move.Id == "fragmentos") MSAudio.Play("jefe_golpe", .6f); // the falling stone fragments
         if (correct && move.Id == "barrido" && _player != null) _player.PerformDodge(move.Origin == DuelTarget.HeadA ? 1 : -1);
         _move = null;
+        ShowExposed();
     }
 
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
@@ -135,6 +149,7 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
 
     public void OnDecide()
     {
+        ShowExposed();
         foreach (var f in fragments) if (f != null) f.gameObject.SetActive(false);
         SetCore(_coreBase, 1);
     }
@@ -193,5 +208,45 @@ public sealed class MSGuardian : MIInteractable, IDuelStage
         if (body != null) body.localRotation = Quaternion.Euler(18f, 0, 0);
         Pose(30f, 30f, 0);
         SetCore(new Color(.25f, .22f, .2f), 0);
+    }
+
+    // ---------- exposed head ----------
+    private void ShowExposed()
+    {
+        var rules = _duel != null ? _duel.Model.Rules as SerpentRules : null;
+        if (rules == null) return;
+        var head = Head(rules.Vulnerable);
+        if (head == null) return;
+        if (_exposedGlow == null || _glowHead != rules.Vulnerable)
+        {
+            if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
+            _exposedGlow = DuelGlow.Create("Cabeza_Expuesta", head, Vector3.zero, 5f).WithHalo(1.3f, 1f, _serpent != null ? _serpent.transform : transform);
+            _glowHead = rules.Vulnerable;
+            _exposedGlow.Set(new Color(1f, .78f, .3f), 1);
+            _exposedGlow.Flash();
+        }
+    }
+    private void HideExposed()
+    {
+        if (_exposedGlow != null) Destroy(_exposedGlow.gameObject);
+        _exposedGlow = null; _glowHead = DuelTarget.None;
+    }
+    // The rigged serpent's two heads by their bones (tools/Blender/animate_creatures.py): neck A
+    // ends in tripo::Head_4, neck B in bone_20; the stand-in's arms otherwise.
+    private Transform Head(DuelTarget t)
+    {
+        // From the bones the skin actually follows (the model may carry a second, unused
+        // armature with the same names).
+        if (_serpent != null && (_headA == null || _headB == null))
+            foreach (var skin in _serpent.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                foreach (var b in skin.bones)
+                {
+                    if (b == null) continue;
+                    if (_headA == null && b.name.EndsWith("Head_4")) _headA = b;
+                    else if (_headB == null && b.name == "bone_20") _headB = b;
+                }
+        if (t == DuelTarget.HeadA) return _headA != null ? _headA : leftArm;
+        if (t == DuelTarget.HeadB) return _headB != null ? _headB : rightArm;
+        return null;
     }
 }

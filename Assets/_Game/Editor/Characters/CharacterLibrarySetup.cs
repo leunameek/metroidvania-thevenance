@@ -11,7 +11,8 @@ using UnityEngine;
 //    Block, Death...) made of Nemequene's Mixamo clips, shared by every humanoid through
 //    Humanoid retargeting; a "calm" override swaps the combat idle for Breathing Idle.
 //  - Serpiente / Jaguar / Guacamaya controllers from their *_Animado.fbx takes.
-//  - The same acting states added to Nemequene_Player.controller (they return to locomotion).
+//  - The same acting states added to Nemequene_Player.controller (they return to locomotion,
+//    except the deaths, which hold).
 //  - One prefab per character in Assets/_Game/Resources/Characters/<Key>.prefab: root at the
 //    feet facing +Z, the model scaled to its height, URP material from the .fbm textures,
 //    Animator and CharacterActions. The scenes already load these keys (StoryProps.Figure,
@@ -28,12 +29,17 @@ public static class CharacterLibrarySetup
     private const string PlayerPrefab = ArtRoot + "Nemequene/Nemequene_Player_Visual.prefab";
     // v2: Saguanmachica and the canonical Nemequene height (CharacterScale).
     // v3: CombatIdle (duel stance) and the reworked creature clips.
-    private const string AutoRunKey = "Bacata.CharacterLibrary.v3";
+    // v5: the new Saguanmachica model (2026-10-07). v6: Saguanmachica's hands kept outside his robe.
+    // v7: the new Tisquesusa model, Mixamo-rigged like the rest of the cast (2026-10-07).
+    // v8: the new Quimue model (2026-10-07).
+    private const string AutoRunKey = "Bacata.CharacterLibrary.v8";
 
     private enum Kind { Mixamo, TripoHuman, Creature }
     private sealed class Cast
     {
         public string Key, Folder, Model; public Kind Kind; public float Height; public bool Calm; public float Yaw;
+        // Half width and depth of the body around the hips, for the hands to stay outside (CharacterActions).
+        public Vector3 Body;
         public Cast(string key, string folder, Kind kind, float height, bool calm, string model = null, float yaw = 0)
         { Key = key; Folder = folder; Kind = kind; Height = height; Calm = calm; Model = model; Yaw = yaw; }
     }
@@ -43,9 +49,9 @@ public static class CharacterLibrarySetup
     {
         new Cast("Nemequene", "Nemequene", Kind.Mixamo, CharacterScale.Nemequene, true, "tripo_convert_d15b6933-3dfe-4830-bee3-862d8d530ca7.fbx"),
         new Cast("Nemequeneniño", "Nemeneque+Niño", Kind.Mixamo, 1.25f, true),
-        new Cast("Tisquesusa", "Tisquesusa", Kind.TripoHuman, 1.78f, true),
-        new Cast("Saguanmachica", "Saguanmachica", Kind.Mixamo, 1.72f, true),
-        new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true),
+        new Cast("Tisquesusa", "Tisquesusa", Kind.Mixamo, 1.78f, true),
+        new Cast("Saguanmachica", "Saguanmachica", Kind.Mixamo, 1.72f, true) { Body = new Vector3(.43f, .32f, .56f) },
+        new Cast("Bachue", "Bachué", Kind.Mixamo, 1.7f, true) { Body = new Vector3(.42f, .32f, 0) },
         new Cast("Furachogua", "Furachogua", Kind.Mixamo, 1.75f, true),
         new Cast("Invasor", "Invasor+de+plata+y+oro", Kind.Mixamo, 1.85f, false),
         new Cast("Quimue", "Quimue", Kind.Mixamo, 1.95f, false),
@@ -227,6 +233,10 @@ public static class CharacterLibrarySetup
         var sm = controller.layers[0].stateMachine;
         var locomotion = sm.states.First(s => s.state.name == "Locomotion").state;
         AddActions(sm, locomotion, holdPoses: false);
+        // Dying is final: the body stays on the ground (the epilogue holds it into the refuge).
+        foreach (var child in sm.states)
+            if (child.state.name == "Death" || child.state.name == "DeathBack")
+                foreach (var t in child.state.transitions.ToArray()) child.state.RemoveTransition(t);
         EditorUtility.SetDirty(controller);
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefab);
         if (prefab != null && prefab.GetComponent<CharacterActions>() == null)
@@ -313,6 +323,7 @@ public static class CharacterLibrarySetup
             actions.restState = rest;
             var so = new SerializedObject(actions);
             so.FindProperty("animator").objectReferenceValue = animator;
+            so.FindProperty("bodyClearance").vector3Value = c.Body;
             so.ApplyModifiedPropertiesWithoutUndo();
             PrefabUtility.SaveAsPrefabAsset(root, Output + c.Key + ".prefab");
             return c.Key + ": ok (" + Path.GetFileName(modelPath) + ", " + c.Height + " m)";

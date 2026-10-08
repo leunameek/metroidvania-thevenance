@@ -31,6 +31,19 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
     // ---------- Quimue (C16, E11, C17) ----------
     private Transform _quimue;
     private Light _quimueLight;
+    private bool _quimueLeaving;
+    // Which anchor is active is read from Quimue's glow, not from the HUD: gold for the sun,
+    // silver-blue for the moon (2026-10-07 playtest).
+    private DuelGlow _originGlow;
+    private static readonly Color SunGlow = new Color(1f, .74f, .22f), MoonGlow = new Color(.55f, .7f, 1f);
+    private static Color OriginColor(DuelTarget t) => t == DuelTarget.Sun ? SunGlow : MoonGlow;
+    private void ShowOrigin(bool flash = false)
+    {
+        var rules = TurnDuelController.Current != null ? TurnDuelController.Current.Model.Rules as QuimueRules : null;
+        if (_originGlow == null || rules == null) return;
+        _originGlow.Set(OriginColor(rules.ActiveOrigin), rules.AnchorsCut ? 0 : 1);
+        if (flash) _originGlow.Flash();
+    }
     private bool _c16Queued, _finalRunning;
     private System.Collections.Generic.List<Renderer> _guardianRenderers;
     private bool _guardianHidden;
@@ -58,9 +71,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
 
     private void RefreshQuimue()
     {
-        if (_quimue == null) return;
+        if (_quimue == null || _quimueLeaving) return;
         var c = CampaignProgress.Model;
-        bool present = c.Has(CampaignFlags.SueReleased) && !c.Has(CampaignFlags.MasksInCustody);
+        // Once he has said goodbye he goes home through his last passage (H17 farewell).
+        bool present = c.Has(CampaignFlags.SueReleased) && !c.Has(CampaignFlags.MasksInCustody)
+            && !CampaignProgress.Has(StoryPlayer.CueKey("H17", "despedida"));
         if (_quimue.gameObject.activeSelf != present) _quimue.gameObject.SetActive(present);
         if (_guardianRenderers == null || _guardianHidden != present)
         {
@@ -94,8 +109,11 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             && _demo.State == TechnicalDemoState.Exploration)
         {
             _c16Queued = true;
-            StoryPlayer.PlaySequence("H17", () => _demo.SetStatus("Quimue espera en el círculo. Prepárate y acércate cuando quieras."), "Quimue en la plaza");
+            StoryPlayer.PlayCue("H17", "llegada", true, () => _demo.SetStatus("Quimue espera en el círculo. Prepárate y acércate cuando quieras."), "Quimue en la plaza");
         }
+        if (!_farewellQueued && !_finalRunning && c.Has(CampaignFlags.QuimueDefeated) && !c.Has(CampaignFlags.MasksInCustody)
+            && !CampaignProgress.Has(StoryPlayer.CueKey("H17", "despedida")) && _demo.State == TechnicalDemoState.Exploration)
+            QueueFarewell();
     }
 
     private void StartFinal()
@@ -110,11 +128,14 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         }
         var prefs = NaturalInputPrefs.Load();
         TurnDuelController.Run(new QuimueRules(), this, Mathf.RoundToInt(MSProgress.AttackDamage), null, null, prefs.reactionScale, OnFinalEnded);
+        if (_originGlow == null && _quimue != null) _originGlow = DuelGlow.Create("Origen_Quimue", _quimue, Vector3.up * 1.3f, 6f).WithHalo(1.1f, .7f);
+        ShowOrigin(true);
     }
 
     private void OnFinalEnded(bool victory)
     {
         _finalRunning = false;
+        if (_originGlow != null) _originGlow.Set(MoonGlow, 0);
         _demo.Player.SetInputLocked(false);
         if (!victory)
         {
@@ -122,24 +143,44 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
             return;
         }
         CampaignProgress.Set(CampaignFlags.QuimueDefeated); // DuelAudio plays the broken resonance and the release
-        _demo.SetStatus("Los lazos de luna y sol se apagan. Habla con Bachué.");
+        _demo.SetStatus("Los lazos de luna y sol se apagan.");
+    }
+
+    // On his knees he says goodbye (fear, a promise of refuge in Tunja), then leaves in the light
+    // of the passage he opened: the story closes with him (2026-10-08). From Update, so a save
+    // left between the victory and the farewell still hears it.
+    private bool _farewellQueued;
+    private void QueueFarewell()
+    {
+        _farewellQueued = true;
+        StoryPlayer.PlayCue("H17", "despedida", false, () =>
+        {
+            if (_quimue != null && _quimue.gameObject.activeSelf)
+            {
+                _quimueLeaving = true; // RefreshQuimue leaves him be until the motes are gone
+                CreatureDissolve.Run(_quimue, new Color(.95f, .85f, .6f), .2f, () => _quimueLeaving = false);
+            }
+            _demo.SetStatus("Quimue vuelve a Tunja. Habla con Bachué.");
+        }, "Lo que Quimue temía");
     }
 
     // IDuelStage: the bonds glow with the announced origin; nothing here deals damage.
     public Transform Focus => _quimue;
     public void OnTelegraph(DuelMove move)
     {
-        if (_quimueLight != null) { _quimueLight.color = move.Origin == DuelTarget.Sun ? new Color(1f, .78f, .3f) : new Color(.6f, .7f, 1f); _quimueLight.intensity = 6f; }
+        if (_quimueLight != null) { _quimueLight.color = OriginColor(move.Origin); _quimueLight.intensity = 6f; }
+        if (_originGlow != null) { _originGlow.Set(OriginColor(move.Origin), 1); _originGlow.Flash(); }
     }
     public void OnResolved(DuelMove move, bool correct)
     {
         if (_quimueLight != null) _quimueLight.intensity = 2.5f;
+        ShowOrigin();
     }
     public void OnPlayerAction(DuelAction action, DuelTarget target, string result)
     {
         if (_quimue != null) MIBurst.Spawn(_quimue.position + Vector3.up * 1.4f, target == DuelTarget.Sun ? new Color(1f, .8f, .35f) : new Color(.65f, .75f, 1f));
     }
-    public void OnDecide() { }
+    public void OnDecide() => ShowOrigin();
 
     // ---------- Bachué ----------
     private void BuildBachue(Vector3 spawn)
@@ -205,22 +246,54 @@ public sealed class PlazaCampaign : MonoBehaviour, IDuelStage
         {
             int index = i;
             Vector3 at = Ground(portal + toSpawn * 3.5f + side * (4.5f + 1.8f * i));
-            var urn = StoryProps.Build(index == EmptyUrn ? "UrnaVacia" : "UrnaMemoria", transform, at);
+            // All three look alike, closed (2026-10-07 playtest): which one is empty is found by
+            // looking inside, and only then it shows open.
+            var urn = StoryProps.Build("UrnaMemoria", transform, at);
             urn.rotation = Quaternion.LookRotation(toSpawn);
+            _urns[i] = urn;
+            GuideTo(urn, index);
             PlazaStoryPoint.Create("Urna " + (i + 1), transform, at, 1.4f,
-                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, urn));
+                () => CampaignProgress.Chapter == CampaignChapter.Urn, () => "Examinar la urna " + (index + 1), () => InspectUrn(index, _urns[index]));
         }
     }
+
+    private readonly Transform[] _urns = new Transform[3];
+    private bool _emptyFound;
 
     // O-N06: each urn is taken in the hands and turned to look inside; only then it can be used.
     private void InspectUrn(int index, Transform urn)
     {
         bool empty = index == EmptyUrn;
+        if (empty && !_emptyFound) StartCoroutine(RevealWhenSeen(index));
         PlazaPieceInspection.Open(_demo, urn, "Urna " + (index + 1),
             "Una urna de barro de las que guardan a los antepasados, junto al portal superior.",
             () => empty ? "Está vacía y liviana: no guarda restos. El soporte de su interior tiene la forma del cuerno."
                 : "Dentro reposan restos y ofrendas de alguien querido. Esta memoria debe quedarse aquí.",
             empty ? "Usar el poporo" : "Devolverla", () => UseUrn(index));
+    }
+
+    // Once its inside has been seen and the urn is put down, the empty one is the open urn.
+    private System.Collections.IEnumerator RevealWhenSeen(int index)
+    {
+        bool seen = false;
+        yield return null;
+        while (PlazaPieceInspection.Active != null) { seen |= PlazaPieceInspection.Seen; yield return null; }
+        if (!seen || _emptyFound || _urns[index] == null) yield break;
+        _emptyFound = true;
+        var closed = _urns[index];
+        var open = StoryProps.Build("UrnaVacia", transform, closed.position);
+        open.rotation = closed.rotation;
+        _urns[index] = open;
+        GuideTo(open, index);
+        MIBurst.Spawn(open.position + Vector3.up * .6f, new Color(1f, .85f, .5f));
+        Destroy(closed.gameObject);
+    }
+
+    // The urns glow while one is to be found; once the empty one is known, only it does.
+    private void GuideTo(Transform urn, int index)
+    {
+        Beacon.Attach(urn.gameObject, urn, () => CampaignProgress.Chapter == CampaignChapter.Urn && PlazaPieceInspection.Active == null
+            && (!_emptyFound || index == EmptyUrn), beam: false);
     }
 
     private void UseUrn(int index)

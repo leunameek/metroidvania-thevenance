@@ -12,6 +12,10 @@ public sealed class NaturalInputPrefs
     public bool voiceEnabled;
     public int confidence = 1;
     public float dwellSeconds = 1, handSensitivity = 1, reactionScale = 1;
+    // Accesibilidad: the duels name the right defense instead of leaving it to the signals.
+    public bool combatAnswers;
+    // Accesibilidad «Tamaño de texto» (1, 1.25 or 1.5): the HUDs built with UIKit scale with it.
+    public float textScale = 1;
     public string camera = "";
 
     public static NaturalInputPrefs Load()
@@ -26,6 +30,7 @@ public sealed class NaturalInputPrefs
         prefs.dwellSeconds = Mathf.Clamp(prefs.dwellSeconds, .5f, 3);
         prefs.handSensitivity = Mathf.Clamp(prefs.handSensitivity, .5f, 2);
         prefs.reactionScale = Mathf.Clamp(prefs.reactionScale, 1, 3);
+        prefs.textScale = Mathf.Clamp(prefs.textScale, 1, 1.5f);
         return prefs;
     }
 }

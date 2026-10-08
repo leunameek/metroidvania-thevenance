@@ -7,18 +7,24 @@ using UnityEngine.UI;
 
 // Turn duel screen of the Bacatá kit (guion 07): enemy name, health and bond status at the top;
 // the turn banner (TU TURNO / PREPARA / RESPONDE) with the window bar in the middle; on the left
-// the player's concentration and counter chance; at the bottom only the legal actions as buttons
-// with their key and spoken word. Form, name and verb always accompany the colour.
+// the player's concentration and counter chance; the usual vitality frame at the bottom left; at
+// the bottom only the legal actions as buttons with their key and spoken word. Form, name and verb always accompany the colour.
 public sealed class TurnDuelHUD
 {
     private readonly GameObject _root;
+    // The announcement/result plate: only the accessibility option shows it; otherwise the player
+    // reads the duel from the world (2026-10-07/08 playtest).
+    private readonly GameObject _info;
     private readonly TMP_Text _enemy, _status, _banner, _verbs, _message, _concentration, _hint;
-    private readonly Image _enemyHealth, _window, _bannerPlate;
+    private readonly Image _enemyHealth, _window, _bannerPlate, _playerHealth;
+    private readonly TMP_Text _playerValue;
+    private float _playerShown = -1;
     private readonly RectTransform _actions;
     private readonly Action<DuelAction> _act;
     private readonly Action<int> _target;
     private readonly Action<DuelDefense> _defend;
     private string _signature = "";
+    private readonly float _barWidth;
 
     public TurnDuelHUD(Transform parent, string enemyName, Action<DuelAction> act, Action<int> target, Action<DuelDefense> defend)
     {
@@ -29,11 +35,13 @@ public sealed class TurnDuelHUD
 
         var top = UIKit.Place(UIKit.HudPanel(canvas, "Enemy"), new Vector2(.5f, 1), new Vector2(0, -28), new Vector2(760, 124));
         _enemy = UIKit.Label(top, enemyName, 28, UIPalette.GoldLight, true);
-        _enemy.rectTransform.anchorMin = new Vector2(0, .62f); _enemy.rectTransform.anchorMax = new Vector2(1, .96f);
-        var barHolder = UIKit.Rect("Bar", top); barHolder.anchorMin = new Vector2(.08f, .38f); barHolder.anchorMax = new Vector2(.92f, .58f);
+        // Inside the plate's carved top rim (2026-10-07 audit: the name sat on it).
+        _enemy.rectTransform.anchorMin = new Vector2(.04f, .56f); _enemy.rectTransform.anchorMax = new Vector2(.96f, .86f);
+        _enemy.enableAutoSizing = true; _enemy.fontSizeMax = 28; _enemy.fontSizeMin = 18; _enemy.textWrappingMode = TextWrappingModes.NoWrap;
+        var barHolder = UIKit.Rect("Bar", top); barHolder.anchorMin = new Vector2(.08f, .36f); barHolder.anchorMax = new Vector2(.92f, .52f);
         _enemyHealth = UIKit.Bar(barHolder, new Vector2(620, 18), UIPalette.Crimson);
         _status = UIKit.Label(top, "", 19, UIPalette.Muted);
-        _status.rectTransform.anchorMin = new Vector2(0, .04f); _status.rectTransform.anchorMax = new Vector2(1, .34f);
+        _status.rectTransform.anchorMin = new Vector2(.04f, .1f); _status.rectTransform.anchorMax = new Vector2(.96f, .34f);
 
         var banner = UIKit.Place(UIKit.Ribbon(canvas, "Turn"), new Vector2(.5f, 1), new Vector2(0, -176), new Vector2(620, 70));
         _bannerPlate = banner.GetComponent<Image>();
@@ -43,6 +51,7 @@ public sealed class TurnDuelHUD
         _window = UIKit.Bar(windowHolder, new Vector2(520, 14), UIPalette.GoldLight);
         // The announcement and the result on their own plate (they used to float over the sky).
         var info = UIKit.Place(UIKit.HudPanel(canvas, "Info"), new Vector2(.5f, 1), new Vector2(0, -276), new Vector2(1040, 118));
+        _info = info.gameObject;
         _verbs = UIKit.Label(info, "", 26, UIPalette.GoldLight);
         _verbs.rectTransform.anchorMin = new Vector2(0, .52f); _verbs.rectTransform.offsetMin = new Vector2(40, 0); _verbs.rectTransform.offsetMax = new Vector2(-40, -10);
         _verbs.enableAutoSizing = true; _verbs.fontSizeMax = 26; _verbs.fontSizeMin = 18; _verbs.textWrappingMode = TextWrappingModes.NoWrap;
@@ -54,8 +63,18 @@ public sealed class TurnDuelHUD
         _concentration = UIKit.Label(left, "", 22, UIPalette.Ivory);
         _concentration.margin = new Vector4(18, 8, 18, 8);
 
-        // The choices on one plate at the bottom: the buttons and, under them, how to answer.
-        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(.5f, 0), new Vector2(0, 44), new Vector2(1260, 150));
+        // The player's vitality, the same frame as in exploration, moved to the bottom left.
+        _playerHealth = UIKit.HealthFrame(canvas, "Vida", out _playerValue);
+        _playerValue.color = UIPalette.Ivory;
+        UIKit.Place((RectTransform)_playerHealth.transform.parent.parent, new Vector2(0, 0), new Vector2(40, 40), new Vector2(452, 138));
+
+        // The choices on one plate at the bottom (right of the vitality): the buttons and, under
+        // them, how to answer.
+        // Right of the vitality frame (40 + 452) whatever the HUD scale: the bar takes the rest of
+        // the width up to 1260 (2026-10-08: a larger HUD pushed it over the vitality and off screen).
+        _barWidth = Mathf.Min(1260f, UIKit.HudWidth - 40f - 452f - 24f - 40f);
+        var bar = UIKit.Place(UIKit.HudPanel(canvas, "ActionBar"), new Vector2(1, 0), new Vector2(-40, 44), new Vector2(_barWidth, 150));
+        bar.pivot = new Vector2(1, 0); bar.anchoredPosition = new Vector2(-40, 44);
         _actions = UIKit.Rect("Actions", bar); _actions.anchorMin = new Vector2(0, .42f); _actions.offsetMin = new Vector2(30, 0); _actions.offsetMax = new Vector2(-30, -14);
         var row = _actions.gameObject.AddComponent<HorizontalLayoutGroup>();
         row.spacing = 10; row.childAlignment = TextAnchor.MiddleCenter;
@@ -71,8 +90,16 @@ public sealed class TurnDuelHUD
     public void Refresh(TurnDuelModel m, bool force)
     {
         _enemyHealth.fillAmount = m.EnemyMaxHealth > 0 ? (float)m.EnemyHealth / m.EnemyMaxHealth : 0;
-        _status.text = m.Rules.Status(m);
-        _concentration.text = $"Vida {m.PlayerHealth}\nConcentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
+        // Who is exposed or active (head, moon/sun, core) is read from the enemy's glow; the line
+        // keeps only the bonds left, unless the player asked to see everything.
+        _status.text = m.ShowAnswers ? m.Rules.Status(m) : m.Rules.Progress(m);
+        bool plate = m.ShowAnswers;
+        if (_info.activeSelf != plate) _info.SetActive(plate);
+        float health = (float)m.PlayerHealth / TurnDuelModel.PlayerMaxHealth;
+        _playerShown = _playerShown < 0 ? health : Mathf.MoveTowards(_playerShown, health, Time.unscaledDeltaTime * 1.4f);
+        _playerHealth.fillAmount = _playerShown;
+        _playerValue.text = m.PlayerHealth + " / " + TurnDuelModel.PlayerMaxHealth;
+        _concentration.text = $"Concentración {m.Concentration} / {TurnDuelModel.MaxConcentration}"
             + (m.Counter == CounterWindow.Reinforced ? "\nContraataque reforzado listo"
                 : m.Counter == CounterWindow.Normal ? "\nContraataque listo" : "");
         _message.text = m.Message;
@@ -93,9 +120,11 @@ public sealed class TurnDuelHUD
         RebuildButtons(m, force);
     }
 
+    // Only shown with the accessibility option: in every duel the answer is read from the enemy
+    // itself; the explanations live in the plaza training (2026-10-08 playtest).
     private static string Announce(TurnDuelModel m)
     {
-        if (m.Move == null) return "";
+        if (m.Move == null || !m.ShowAnswers) return "";
         string origin = m.Move.Origin != DuelTarget.None ? TurnDuelModel.TargetName(m.Move.Origin) + " · " : "";
         return origin + m.Move.Label + "  →  " + m.Move.Verbs;
     }
@@ -139,7 +168,7 @@ public sealed class TurnDuelHUD
         _signature = signature;
         for (int i = _actions.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(_actions.GetChild(i).gameObject);
         // Each button as wide as its words (with room for the ribbon's ends), all within the bar.
-        float available = 1200 - 10 * (entries.Count - 1);
+        float available = _barWidth - 60 - 10 * (entries.Count - 1);
         var widths = new List<float>(); float total = 0;
         foreach (var (label, _, _) in entries)
         {
@@ -177,5 +206,5 @@ public sealed class TurnDuelHUD
         }
     }
     private static string Key(DuelDefense d) =>
-        d == DuelDefense.Block ? "F" : d == DuelDefense.Dodge ? "Espacio" : d == DuelDefense.Cover ? "G" : "R";
+        GameBindings.Cap(d == DuelDefense.Block ? GameAction.Guard : d == DuelDefense.Dodge ? GameAction.Dodge : d == DuelDefense.Cover ? GameAction.Cover : GameAction.Parry);
 }

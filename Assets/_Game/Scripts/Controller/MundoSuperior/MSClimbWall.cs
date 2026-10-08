@@ -86,9 +86,9 @@ public sealed class MSClimbWall : MonoBehaviour, IPlayerMotor, IPlayerMotorPose
             case State.Climb:
             {
                 if (keyboard == null) return;
-                if (keyboard.spaceKey.wasPressedThisFrame) { End(0f); return; }
-                float v = (keyboard.wKey.isPressed ? 1f : 0f) - (keyboard.sKey.isPressed ? 1f : 0f);
-                float h = (keyboard.dKey.isPressed ? 1f : 0f) - (keyboard.aKey.isPressed ? 1f : 0f);
+                if (GameBindings.Pressed(GameAction.Jump)) { End(0f); return; }
+                float v = GameBindings.Axis(GameAction.MoveBack, GameAction.MoveForward);
+                float h = GameBindings.Axis(GameAction.MoveLeft, GameAction.MoveRight);
                 // The camera faces the wall, so screen right is the negative side axis.
                 _lateral = Mathf.Clamp(_lateral - h * 1.5f * dt, -lateralLimit, lateralLimit);
                 float y = Mathf.Clamp(feet.y + v * speed * dt, bottom.position.y, top.position.y);

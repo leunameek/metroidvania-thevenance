@@ -6,6 +6,7 @@ using UnityEngine;
 // guardians, the safe checkpoint and the discovered rooms. Written to the active save slot
 // immediately on every change; with no slot (editor test of the scene) it lives in memory.
 // The player's abilities are derived from it, never accumulated, so a find counts once.
+// The finds themselves live in an InventoryModel (Model); this class only saves and loads it.
 public static class MIProgress
 {
     public const string Seed = "semilla", Bracelets1 = "brazaletes1", Bracelets2 = "brazaletes2", Bracelets3 = "brazaletes3";
@@ -33,7 +34,7 @@ public static class MIProgress
         public int rooms = 1;
     }
 
-    private static readonly HashSet<string> Flags = new HashSet<string>();
+    public static readonly InventoryModel Inventory = new InventoryModel();
     private static int _loadedSlot = int.MinValue;
     public static int Checkpoint { get; private set; }
     public static int RoomsMask { get; private set; } = 1;
@@ -42,20 +43,16 @@ public static class MIProgress
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetSession()
     {
-        Flags.Clear(); Checkpoint = 0; RoomsMask = 1; _loadedSlot = int.MinValue; Changed = null;
+        Inventory.Clear(); Checkpoint = 0; RoomsMask = 1; _loadedSlot = int.MinValue; Changed = null;
     }
 
-    public static bool Has(string id) => !string.IsNullOrEmpty(id) && Flags.Contains(id);
-    public static bool HasDoubleJump => Has(Seed);
+    public static bool Has(string id) => Inventory.Has(id);
+    public static bool HasDoubleJump => WorldInventoryRules.DoubleJump(Inventory);
     // Each find guarantees a minimum level; picking them in any order never exceeds three.
-    public static int DashTier => Has(Bracelets3) ? 3 : Has(Bracelets2) ? 2 : Has(Bracelets1) ? 1 : 0;
-    public static int FindsCount => (Has(Seed) ? 1 : 0) + (Has(Bracelets1) ? 1 : 0) + (Has(Bracelets2) ? 1 : 0)
-        + (Has(Bracelets3) ? 1 : 0) + (Has(Horn) ? 1 : 0);
-    public static int OfferingsCount
-    {
-        get { int n = 0; foreach (var f in Flags) if (f.StartsWith(OfferingPrefix, StringComparison.Ordinal)) n++; return n; }
-    }
-    public static IEnumerable<string> All => Flags;
+    public static int DashTier => WorldInventoryRules.DashTier(Inventory);
+    public static int FindsCount => Inventory.Count(WorldInventoryRules.LowerFinds);
+    public static int OfferingsCount => Inventory.CountPrefix(OfferingPrefix);
+    public static IEnumerable<string> All => Inventory.All;
     public static int DiscoveredCount
     {
         get { int n = 0; for (int i = 0; i < 9; i++) if ((RoomsMask & (1 << i)) != 0) n++; return n; }
@@ -67,7 +64,7 @@ public static class MIProgress
         int slot = WorldTravel.SaveSlot;
         if (slot == _loadedSlot) return;
         _loadedSlot = slot;
-        Flags.Clear(); Checkpoint = 0; RoomsMask = 1;
+        Inventory.Clear(); Checkpoint = 0; RoomsMask = 1;
         if (slot < 0) return;
         string json = PlayerPrefs.GetString(Prefix + slot, "");
         if (string.IsNullOrEmpty(json)) return;
@@ -75,15 +72,15 @@ public static class MIProgress
         {
             var data = JsonUtility.FromJson<Data>(json);
             if (data == null || data.version != 1) return;
-            foreach (var f in data.flags) if (!string.IsNullOrEmpty(f)) Flags.Add(f);
+            Inventory.Load(data.flags);
             Checkpoint = Mathf.Clamp(data.checkpoint, 0, 8); RoomsMask = data.rooms | 1;
         }
-        catch (Exception) { Flags.Clear(); }
+        catch (Exception) { Inventory.Clear(); }
     }
 
     public static bool Set(string id)
     {
-        if (string.IsNullOrEmpty(id) || !Flags.Add(id)) return false;
+        if (!Inventory.Add(id)) return false;
         Save(); Changed?.Invoke(id); return true;
     }
     public static void SetCheckpoint(int room)
@@ -102,7 +99,7 @@ public static class MIProgress
     {
         int slot = WorldTravel.SaveSlot;
         if (slot < 0) return;
-        var data = new Data { checkpoint = Checkpoint, rooms = RoomsMask, flags = new List<string>(Flags) };
+        var data = new Data { checkpoint = Checkpoint, rooms = RoomsMask, flags = new List<string>(Inventory.All) };
         PlayerPrefs.SetString(Prefix + slot, JsonUtility.ToJson(data));
         PlayerPrefs.Save();
     }
@@ -110,6 +107,6 @@ public static class MIProgress
     public static void Erase(int slot)
     {
         PlayerPrefs.DeleteKey(Prefix + slot); PlayerPrefs.Save();
-        if (slot == _loadedSlot) { Flags.Clear(); Checkpoint = 0; RoomsMask = 1; }
+        if (slot == _loadedSlot) { Inventory.Clear(); Checkpoint = 0; RoomsMask = 1; }
     }
 }

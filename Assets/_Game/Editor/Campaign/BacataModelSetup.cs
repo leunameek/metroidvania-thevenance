@@ -10,12 +10,14 @@ using UnityEngine;
 //  - Resources/Props/<Key>: coca, masks, urns, yopo, poporo, staff, bow and arrow (StoryProps).
 // Each prefab: root at the base centre (the masks at their centre), the model scaled to its real
 // size, a URP material from the textures beside it, no colliders (they are scenery of cinematics).
-// Runs once after compiling (EditorPrefs key) and from Nemequene > Campaña > Modelos de Bacatá.
+// Trees and bushes (Aliso, Roble, Encenillo, Sauce, ManoDeOso, Chilco, Mortino, Chusque) are built
+// when their folders exist. Runs once after compiling (EditorPrefs key) and from Nemequene >
+// Campaña > Modelos de Bacatá (run it again after adding models).
 [InitializeOnLoad]
 public static class BacataModelSetup
 {
     private const string ArtRoot = "Assets/_Game/Art/Environments/Bacatá/";
-    private const string AutoRunKey = "Bacata.Models.v1";
+    private const string AutoRunKey = "Bacata.Models.v2";
     private enum Fit { Height, Largest, Footprint }
 
     // folder, prefab key, Resources folder, size in metres, how it is measured, centred pivot.
@@ -47,6 +49,15 @@ public static class BacataModelSetup
         ("Bastónbicéfalo", "Baston", "Props", 1.7f, Fit.Largest, false),
         ("Arcoinvasor", "Arco", "Props", 1.4f, Fit.Largest, false),
         ("flechainvasor", "Flecha", "Props", .8f, Fit.Largest, false),
+        // Trees and bushes of the savanna and the páramo (planted and swaying by BacataDirector).
+        ("Aliso", "Aliso", "Bacata", 10f, Fit.Height, false),
+        ("Roble", "Roble", "Bacata", 13f, Fit.Height, false),
+        ("Encenillo", "Encenillo", "Bacata", 6f, Fit.Height, false),
+        ("Sauce", "Sauce", "Bacata", 8f, Fit.Height, false),
+        ("ManoDeOso", "ManoDeOso", "Bacata", 5f, Fit.Height, false),
+        ("Chilco", "Chilco", "Bacata", 1.4f, Fit.Height, false),
+        ("Mortino", "Mortino", "Bacata", 1.1f, Fit.Height, false),
+        ("Chusque", "Chusque", "Bacata", 2.6f, Fit.Height, false),
     };
 
     static BacataModelSetup()
@@ -78,8 +89,8 @@ public static class BacataModelSetup
 
     private static string Build(string folder, string key, string target, float size, Fit fit, bool centred)
     {
-        string dir = ArtRoot + folder;
-        if (!AssetDatabase.IsValidFolder(dir)) return key + ": falta " + dir;
+        string dir = Folder(folder);
+        if (dir == null) return key + ": falta " + ArtRoot + folder;
         string modelPath = AssetDatabase.FindAssets("t:Model", new[] { dir }).Select(AssetDatabase.GUIDToAssetPath).FirstOrDefault();
         var model = modelPath != null ? AssetDatabase.LoadAssetAtPath<GameObject>(modelPath) : null;
         if (model == null) return key + ": falta el modelo en " + dir;
@@ -110,6 +121,22 @@ public static class BacataModelSetup
             return key + ": " + b.size.x.ToString("0.00") + " x " + b.size.y.ToString("0.00") + " x " + b.size.z.ToString("0.00") + " m";
         }
         finally { UnityEngine.Object.DestroyImmediate(root); }
+    }
+
+    // The model's folder: the exact name, or one that matches it ignoring case, accents, spaces,
+    // "+" and "-" (Tripo exports name folders "Mano+de+oso", "Mortiño"...).
+    private static string Folder(string folder)
+    {
+        string exact = ArtRoot + folder;
+        if (AssetDatabase.IsValidFolder(exact)) return exact;
+        string want = Simple(folder);
+        return AssetDatabase.GetSubFolders(ArtRoot.TrimEnd('/')).FirstOrDefault(f => Simple(Path.GetFileName(f)) == want);
+    }
+
+    private static string Simple(string name)
+    {
+        var d = name.Normalize(System.Text.NormalizationForm.FormD);
+        return new string(d.Where(c => char.IsLetterOrDigit(c) && System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray()).ToLowerInvariant();
     }
 
     private static Material Material(string dir, string key)

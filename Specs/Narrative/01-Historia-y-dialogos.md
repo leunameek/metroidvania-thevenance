@@ -177,7 +177,7 @@ Tisquesusa ve metales, humo y bastón partido sin rostro. Nemequene identifica e
 
 TISQUESUSA: Vi oro y plata sobre Bacatá. Y tu bastón entre el humo.
 
-NEMEQUENE: Quimue toma fuerza de dos mundos. Iré a detenerlo.
+NEMEQUENE: Oro y plata: el sol y la luna que Quimue ata. Iré a detenerlo.
 
 TISQUESUSA: No vi su rostro. No conviertas mi miedo en certeza.
 
@@ -202,9 +202,11 @@ NEMEQUENE: ¿Puedes apartarla de Bacatá?
 
 BACHUÉ: No puedo decidir la guerra de los hombres. Sí enseñarte a restituir lo que Quimue torció.
 
-BACHUÉ: Chía y Sué sostienen dos extremos. Sus máscaras deben responder juntas.
+BACHUÉ: Chía y Sué sostienen dos extremos, como tu bastón. Sus máscaras deben responder juntas.
 
 NEMEQUENE: Volveré con ellas.
+
+BACHUÉ: El mapa te llevará a la plaza donde los dos mundos se tocan.
 
 BACHUÉ: El poporo guardará afinidades. Primero aprende a reconocerlas.
 
@@ -238,7 +240,7 @@ BACHUÉ: Examina las tres piezas. Después el círculo enseñará a decidir cuan
 
 **Lugar:** Plaza / tutorial
 
-Vasija enseña giro horizontal, disco inclinación y figura congelación. Tres ataques y dos defensas completan el duelo. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.
+Vasija enseña giro horizontal, disco inclinación y figura congelación. Cinco ataques y cuatro defensas completan el duelo: dos se explican y dos se leen en el cuerpo del guardián. La voz ejecuta una decisión sin gritar. Abre inframundo; superior indica bloqueo futuro.
 
 BACHUÉ, VASIJA: Gira para encontrar lo que el frente oculta.
 
@@ -248,7 +250,7 @@ BACHUÉ, FIGURA: Mantén ambos ejes quietos.
 
 GUARDIÁN: Di atacar cuando decidas. Esperaré.
 
-GUARDIÁN: Esquiva el directo. Bloquea la onda cuando abra la señal.
+GUARDIÁN: No te diré qué golpe viene. Mira mi cuerpo y escucha: si barro de lado, esquiva; si voy de frente, bloquea.
 
 BACHUÉ: La máscara lunar está en las raíces. Su camino debe abrir primero.
 
@@ -307,11 +309,11 @@ NEMEQUENE, TERCER PAR: Comenzar, mantener, terminar. No son tres golpes separado
 
 Después de combatir, primer paso de péndulos y derrumbe sin enemigos. Espera entre peligros; prueba aislada antes de combinación. El corredor lateral abierto deja un retorno seguro. Ofrendas opcionales aportan memoria de antiguos viajeros.
 
-NEMEQUENE: Hay un apoyo entre los péndulos.
+NEMEQUENE: Otros cruzaron antes que yo. Dejaron un apoyo entre los péndulos.
 
-NEMEQUENE: La grieta avisa antes de ceder.
+NEMEQUENE: La grieta avisa antes de ceder. Este lugar no quiere matar; quiere que lo escuchen.
 
-NEMEQUENE: Quien vuelva no repetirá el derrumbe.
+NEMEQUENE: Quien venga detrás no repetirá el derrumbe. Así se deja un regreso.
 
 **Objetivo:** Navegación y atajo.
 
@@ -326,11 +328,11 @@ NEMEQUENE: Quien vuelva no repetirá el derrumbe.
 
 Murciélago en aproximación, fuera del aterrizaje. Cuerno revela canal de respuesta. En 08 abre reja y nicho lunar. Chía se registra sellada hasta cortar vínculo en 09. Eco del Custodio explica Jaguar; tocar cuerno es sonido del juego por interacción, no soplar al micrófono.
 
-NEMEQUENE: El cuerno devuelve un sonido.
+NEMEQUENE: El cuerno responde. Alguien lo dejó para pedir paso, no para forzarlo.
 
-CUSTODIO: Tienes su forma, pero el guardián conserva el lazo.
+CUSTODIO: Ves a Chía, pero el guardián conserva el lazo que la sella.
 
-NEMEQUENE: Aún no puedo llevar su respuesta.
+NEMEQUENE: Entonces no basta con alcanzarla.
 
 CUSTODIO: Cuando el lazo ceda, el jaguar sostendrá tu voluntad.
 
@@ -397,7 +399,7 @@ NEMEQUENE: No hay restos. El soporte espera un sonido.
 
 BACHUÉ: La abertura escucha el cuerno que ya conservas.
 
-NEMEQUENE: Veo dónde termina el vuelo.
+NEMEQUENE: El poporo me muestra el vuelo de quien la dejó. Ya sé adónde lleva.
 
 **Objetivo:** Abrir superior.
 
@@ -496,7 +498,7 @@ QUIMUE, ECO: Sé dónde regresará la luz.
 
 **Lugar:** Plaza / círculo ampliado
 
-Resonancia solar permite que Quimue alcance plaza por su último vínculo. Bachué custodia máscaras; él intenta tomarlas. Duelo con lectura lunar, solar y unión, uso contextual de máscaras y bastón. No roba inventario ni cambia el mapa.
+Resonancia solar permite que Quimue alcance plaza por su último vínculo. Bachué custodia máscaras; él intenta tomarlas porque teme lo que se acerca. Duelo con lectura lunar, solar y unión, uso contextual de máscaras y bastón. No roba inventario ni cambia el mapa. Vencido, se despide: confiesa su miedo, promete refugio en Tunja y vuelve por el último paso que abrió.
 
 QUIMUE: Reuniste lo que no pude tomar unido.
 
@@ -506,7 +508,27 @@ QUIMUE: Tú también querías más tierra.
 
 NEMEQUENE: Por eso no me quedaré con su voluntad.
 
+QUIMUE: Entonces no entiendes lo que viene. Necesito su fuerza antes de que llegue.
+
 BACHUÉ: Corta el vínculo. Las máscaras sostienen tránsito, no dominio.
+
+*Después del duelo, Quimue de rodillas, los dos lazos apagados (despedida):*
+
+QUIMUE: Los lazos callaron. Por primera vez en años, nadie me obedece.
+
+NEMEQUENE: Ahora te escucharán si les hablas, no si los atas.
+
+QUIMUE: Até a los guardianes porque vi venir algo que ningún pueblo detendrá solo.
+
+NEMEQUENE: Si es cierto, Bacatá y Tunja tendrán que encontrarse sin cadenas.
+
+QUIMUE: Fuimos rivales tanto tiempo que olvidé que pisábamos el mismo suelo.
+
+QUIMUE: Si tu gente necesita refugio, Tunja abrirá sus puertas. Te lo prometo por lo que até.
+
+NEMEQUENE: Vuelve con los tuyos. Que te vean llegar sin oro ni plata.
+
+QUIMUE: Ve en paz, Nemequene. Y mira bien antes de nombrar al enemigo. Yo no supe hacerlo.
 
 **Objetivo:** Vencer antagonista.
 
@@ -546,7 +568,7 @@ NEMEQUENE: Tío, he vuelto.
 
 SAGUANMACHICA: No dejes que se pierda el camino.
 
-NEMEQUENE: No era Quimue.
+NEMEQUENE: No era Quimue. Era esto lo que él temía.
 
 TISQUESUSA: ¡Nemequene!
 
@@ -561,17 +583,19 @@ TISQUESUSA: ¡Nemequene!
 
 **Lugar:** Refugio de Tunja
 
-Tisquesusa retira a su tío a refugio de territorios recuperados tras derrota de Quimue. Traslado elidido. Nemequene resume aprendizajes concretos y entrega bastón. Muere sin respawn; sobrino recibe tarea de protección, no mandato de repetir conquista.
+Tisquesusa retira a su tío a Tunja, que abre sus puertas como Quimue prometió. Traslado elidido. Nemequene resume aprendizajes concretos y entrega bastón. Muere sin respawn; sobrino recibe tarea de protección, no mandato de repetir conquista.
+
+TISQUESUSA: Quimue cumplió su palabra. Tunja nos abrió sus puertas.
 
 NEMEQUENE: Tu visión tenía razón. Elegí el rostro equivocado.
 
 TISQUESUSA: Dime qué debo hacer.
 
-NEMEQUENE: Mira antes de nombrar al enemigo. Escucha a quienes guardan el camino.
+NEMEQUENE: Mira antes de nombrar al enemigo. Quimue lo aprendió tarde; yo también.
 
 NEMEQUENE: Las máscaras están con Bachué. El bastón, contigo.
 
-NEMEQUENE: El tiempo de actuar es ahora. Protege a los que aún pueden llegar.
+NEMEQUENE: Escucha a quienes guardan el camino. Protege a los que aún pueden llegar.
 
 **Objetivo:** Muerte y legado.
 
@@ -592,7 +616,7 @@ TISQUESUSA: Las máscaras no detuvieron el asedio.
 
 FURACHOGUA: No deciden el futuro. Ayudan a reconocer el camino.
 
-TISQUESUSA: Llevaré su bastón sin repetir su certeza. Primero reuniré a quienes quedan.
+TISQUESUSA: Llevaré su bastón sin repetir su certeza. Reuniré a quienes quedan, de Bacatá y de Tunja.
 
 **Objetivo:** Cerrar campaña.
 
@@ -611,7 +635,7 @@ TISQUESUSA: Llevaré su bastón sin repetir su certeza. Primero reuniré a quien
 - D07 / Bachué: No lo logré. / Tus hallazgos siguen allí. El diario conserva el siguiente paso. / No avanzar diálogo lunar sin máscara libre.
 - D08 / Bachué: ¿Cómo reconozco urna? / Mira interior. La vacía conserva soporte de cuerno. / No trivia ni dependencia de oír.
 - D09 / Cóndor: ¿Por qué luchabas? / Protegía una memoria. Quimue la convirtió en cierre. / Tras duelo no hostil.
-- D10 / Águila: ¿Qué espera arriba? / Dos voces atadas. Mira cuál cabeza anuncia el ataque. / Prepara serpiente sin revelar solución completa.
+- D10 / Águila: ¿Qué espera arriba? / Dos voces atadas. Golpea la cabeza que brilla; lee el cuerpo de la que ataca. / Prepara serpiente sin revelar solución completa.
 - D11 / Bachué: ¿Salvarán Bacatá? / Restauran pasos. Defender al pueblo seguirá siendo tu tarea. / Antes de Quimue y despedida; nunca prometer escudo.
 - D12 / Ayuda: Necesito pista. / Observa cara, busca marca, luego estabiliza. / Tres niveles a petición; tras tres intentos ofrecer, no penalizar.
 - D13 / Modo recuerdos: ¿Dónde continúa? / Conserva lo ocurrido antes del último regreso. / Etiqueta de menú; no resurrección narrativa.

@@ -40,6 +40,8 @@ namespace Nemequene.UI
                 || _ui.Demo.State != TechnicalDemoState.Exploration))
                 _card.SetActive(false);
             if (!_ui.Settings.Values.tutorials || !_ui.SessionStarted || _ui.Screens.Current != UIScreen.None || Time.unscaledTime < _next) return;
+            // Only the first visit teaches walking: back from a world, the plaza says nothing.
+            if (CampaignProgress.Model.Chapter > CampaignChapter.PlazaTutorial) { if (_card.activeSelf) _card.SetActive(false); return; }
             _next = Time.unscaledTime + .2f;
             var d = _ui.Demo;
             if (_step == -1) { _start = d.Player.transform.position; Advance(0); }

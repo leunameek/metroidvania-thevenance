@@ -11,7 +11,7 @@ namespace Nemequene.UI
         private readonly GameObject _root;
         private readonly TMP_Text _turn, _body, _enemy, _timer, _voice, _hands;
         private readonly Image _progress, _guardian;
-        private readonly RectTransform _commands;
+        private readonly RectTransform _commands, _content;
         private readonly Button _attack, _dodge, _block, _return;
         private float _next;
         public CombatUIController(UIManager ui)
@@ -30,9 +30,10 @@ namespace Nemequene.UI
             enemyName.alignment = TextAlignmentOptions.BottomRight;
             _guardian = f.Bar(enemy, "GuardianResistance", new Vector2(.12f, .22f), new Vector2(1, .52f), UIPalette.Crimson);
             var inner = _guardian.transform.parent;
-            for (int i = 1; i < 3; i++)
+            int segments = PlazaCombatModel.AttacksToWin;
+            for (int i = 1; i < segments; i++)
             {
-                var notch = f.Rect("Segment", inner, new Vector2(i / 3f, 0), new Vector2(i / 3f, 1));
+                var notch = f.Rect("Segment", inner, new Vector2(i / (float)segments, 0), new Vector2(i / (float)segments, 1));
                 notch.sizeDelta = new Vector2(3, 0); notch.gameObject.AddComponent<Image>().color = UIPalette.Charcoal;
             }
             _enemy = UIFactory.Shadow(UIFactory.Tone(f.Label(enemy, "", new Vector2(.12f, -.12f), new Vector2(1, .22f), 18), UITone.Muted));
@@ -40,7 +41,7 @@ namespace Nemequene.UI
             var commands = f.Panel("Commands", _root.transform, new Vector2(.24f, .04f), new Vector2(.76f, .31f), true, true, false);
             _commands = commands;
             // Pixel insets keep reading text clear of the rim and the emblem.
-            var body = f.Scroll(commands, Vector2.zero, Vector2.one);
+            var body = f.Scroll(commands, Vector2.zero, Vector2.one); _content = body;
             ((RectTransform)body.parent.parent).Inset(56, 66, 56, 60);
             body.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperCenter;
             _body = f.Text(body, "", 24); _body.alignment = TextAlignmentOptions.Center;
@@ -77,8 +78,12 @@ namespace Nemequene.UI
         private void OnScreen(UIScreen s) { Refresh(); }
         private static void Label(Button button, string key, string word, string keyName)
         {
-            // UIKeyHint splits it again into the label and the cap on its next LateUpdate.
-            button.GetComponentInChildren<TMP_Text>().text = UIStrings.Get(key, VoicePrompt.Cap(word, keyName));
+            // With the voice on, the button says its word once, in the middle («Atacar»), and the line
+            // below says the voice is listening (2026-10-07 playtest: «Atacar» and «ATACAR» side by
+            // side). With the voice off, UIKeyHint splits "Atacar · E" into the label and its key cap.
+            var text = button.GetComponentInChildren<TMP_Text>();
+            text.text = VoicePrompt.Enabled ? "«" + char.ToUpperInvariant(word[0]) + word.Substring(1) + "»"
+                : UIStrings.Get(key, VoicePrompt.Cap(word, keyName));
         }
         private void Refresh()
         {
@@ -86,25 +91,31 @@ namespace Nemequene.UI
             _root.SetActive(_ui.Demo.State == TechnicalDemoState.Combat && _ui.Screens.Current == UIScreen.None);
             if (!_root.activeSelf) return;
             _turn.text = UIStrings.Get("combat.phase." + model.Phase);
-            int resistance = Mathf.Clamp(3 - model.Hits, 0, 3);
-            _enemy.text = resistance + " / 3"; UIFactory.Fill(_guardian, resistance / 3f);
+            int total = PlazaCombatModel.AttacksToWin;
+            int resistance = Mathf.Clamp(total - model.Hits, 0, total);
+            _enemy.text = resistance + " / " + total; UIFactory.Fill(_guardian, resistance / (float)total);
             // Voice first: each action names its word («atacar»), or its key with the voice off.
-            Label(_attack, "combat.attack", "atacar", "E"); Label(_dodge, "combat.dodge", "esquivar", "Espacio");
-            Label(_block, "combat.block", "bloquear", "F"); Label(_return, "combat.return", "volver", "E");
+            Label(_attack, "combat.attack", "atacar", GameBindings.Cap(GameAction.Attack)); Label(_dodge, "combat.dodge", "esquivar", GameBindings.Cap(GameAction.Dodge));
+            Label(_block, "combat.block", "bloquear", GameBindings.Cap(GameAction.Guard)); Label(_return, "combat.return", "volver", GameBindings.Cap(GameAction.Attack));
             _body.text = UIStrings.Get("combat.body." + model.Phase);
-            if (model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React)
-                _body.text += "\n\n" + (model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", "Espacio"))
-                    : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", "F")));
-            if (model.Phase == PlazaCombatPhase.Feedback) _body.text = UIStrings.Get(model.LastDefenseSucceeded ? "combat.success" : "combat.retry");
+            // The first two blows are explained (what the body shows and the answer); the next two
+            // are only read, as in every duel. After a mistake the panel says what the signal was.
+            bool warning = model.Phase == PlazaCombatPhase.Telegraph || model.Phase == PlazaCombatPhase.React;
+            string answer = model.Expected == PlazaDefense.Dodge ? UIStrings.Get("combat.dodge", VoicePrompt.Cap("esquivar", GameAction.Dodge))
+                : UIStrings.Get("combat.block", VoicePrompt.Cap("bloquear", GameAction.Guard));
+            if (warning && model.Guided) _body.text = UIStrings.Get("combat.guided", model.Tell) + "\n\n" + answer;
+            else if (warning) _body.text = UIStrings.Get("combat.read." + model.Phase) + (model.ShowAnswers ? "\n\n" + answer : "");
+            if (model.Phase == PlazaCombatPhase.Feedback) _body.text = model.LastDefenseSucceeded ? UIStrings.Get("combat.success") : model.Reading;
             _attack.gameObject.SetActive(model.Phase == PlazaCombatPhase.Attack);
             _dodge.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
             _block.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
             _return.gameObject.SetActive(model.Phase == PlazaCombatPhase.Won);
             _progress.transform.parent.parent.gameObject.SetActive(model.Phase == PlazaCombatPhase.React);
-            if (model.Phase == PlazaCombatPhase.React) _body.text = UIStrings.Get(model.Expected == PlazaDefense.Dodge ? "combat.promptDodge" : "combat.promptBlock");
-            if (model.Phase == PlazaCombatPhase.Won) _body.text = UIStrings.Get(_ui.Demo.Objectives.IsComplete ? "hud.portals" : "combat.body.Won");
+            if (model.Phase == PlazaCombatPhase.React && model.Guided) _body.text = model.Tell + "\n\n" + UIStrings.Get(model.Expected == PlazaDefense.Dodge ? "combat.promptDodge" : "combat.promptBlock");
+            if (model.Phase == PlazaCombatPhase.Won) _body.text = UIStrings.Get("combat.signals") + "\n\n" + UIStrings.Get(_ui.Demo.Objectives.IsComplete ? "hud.portals" : "combat.body.Won");
+            // Focus never points at the answer of a blow the player has to read.
             var focus = model.Phase == PlazaCombatPhase.Attack ? _attack : model.Phase == PlazaCombatPhase.Won ? _return
-                : model.Phase == PlazaCombatPhase.React ? model.Expected == PlazaDefense.Dodge ? _dodge : _block : null;
+                : model.Phase == PlazaCombatPhase.React && model.ShowsAnswer ? model.Expected == PlazaDefense.Dodge ? _dodge : _block : null;
             UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(focus != null ? focus.gameObject : null);
         }
         public void Tick()
@@ -112,8 +123,11 @@ namespace Nemequene.UI
             if (!_root.activeSelf || Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + .05f;
             var m = _ui.Demo.Combat.Model;
-            _commands.anchorMax = new Vector2(.76f, .31f + (_ui.Settings.Values.textScale - 1) * .22f
-                + (_ui.Settings.Values.voiceEnabled ? .04f : 0) + (_ui.Demo.Hands.Live ? .08f : 0));
+            // The panel grows to what it holds (instruction, timer, actions, voice and hands lines)
+            // instead of a fixed height that cut them at 150 % text (2026-10-07 audit).
+            float canvas = Mathf.Max(1, ((RectTransform)_root.transform).rect.height);
+            float need = LayoutUtility.GetPreferredHeight(_content) + 66 + 60 + 8;
+            _commands.anchorMax = new Vector2(.76f, Mathf.Clamp(.04f + need / canvas, .22f, .80f));
             _timer.gameObject.SetActive(m.Phase == PlazaCombatPhase.React);
             _voice.text = _ui.Settings.Values.voiceEnabled && _ui.Voice != null ? _ui.Voice.StatusText : "";
             _voice.gameObject.SetActive(_voice.text.Length > 0 && _ui.Voice.State != VoiceState.Inactive);

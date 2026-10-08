@@ -13,7 +13,13 @@ public sealed class MILever : MIInteractable
     private float _t;
     public override bool Available => base.Available && !MIProgress.Has(flagId);
     public override string Prompt => "Accionar " + displayName.ToLowerInvariant();
-    private void Start() { _t = MIProgress.Has(flagId) ? 1 : 0; Apply(); }
+    private void Start()
+    {
+        _t = MIProgress.Has(flagId) ? 1 : 0; Apply();
+        // The Tripo lever has its own handle: the provisional gold one is not shown (2026-10-07
+        // playtest: two levers were seen). It still turns, unseen, with the pull.
+        if (handle != null) foreach (var r in handle.GetComponentsInChildren<Renderer>()) r.enabled = false;
+    }
     // The handle moves (and the gates open) when Nemequene's hands pull it.
     public override void Interact(PlayerController player)
     {

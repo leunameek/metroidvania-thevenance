@@ -46,38 +46,27 @@ namespace Nemequene.UI
             _finish = ui.Factory.Button(objectives, UIStrings.Get("finish"), () => ui.Screens.Show(UIScreen.Complete), true);
             var controls = Page(UIScreen.Controls, UIStrings.Get("controls"));
             BuildControls(controls);
-            var credits = Page(UIScreen.Credits, UIStrings.Get("game.title"));
-            ui.Factory.Text(credits, UIStrings.Get("credits.body"));
+            var credits = Page(UIScreen.Credits, UIStrings.Get("credits"));
+            new CreditsPage(ui.Factory, ui.Settings).Build(credits);
             BuildDefeat();
             BuildComplete();
         }
-        // Controls and help on one page without scrolling (2026-10-06 playtest): the sections of
-        // controls.body (separated by a blank line) in three columns whose text shrinks to fit,
-        // and the three actions side by side under them.
+        // Controls and help (H): the rebindable keys first, then the voice and hands help and the
+        // three actions. The key list scrolls; the help text follows the keys the player chose.
         private void BuildControls(RectTransform body)
         {
             var f = _ui.Factory;
-            var sections = UIStrings.Get("controls.body").Replace("\r", "").Split(new[] { "\n\n" }, System.StringSplitOptions.RemoveEmptyEntries);
-            var columns = f.Row(body, "Columns", 36);
-            var rowLayout = columns.GetComponent<HorizontalLayoutGroup>();
-            rowLayout.childForceExpandHeight = true; rowLayout.childAlignment = TextAnchor.UpperLeft;
-            var size = columns.gameObject.AddComponent<LayoutElement>(); size.minHeight = size.preferredHeight = 500;
-            int perColumn = Mathf.CeilToInt(sections.Length / 3f);
-            for (int c = 0; c < 3; c++)
-            {
-                int from = c * perColumn, count = Mathf.Min(perColumn, sections.Length - from);
-                if (count <= 0) break;
-                var text = f.Text(columns, string.Join("\n\n", sections, from, count), 21);
-                text.alignment = TextAlignmentOptions.TopLeft;
-                text.enableAutoSizing = true; text.fontSizeMax = 21; text.fontSizeMin = 14;
-                text.overflowMode = TextOverflowModes.Truncate;
-                text.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
-            }
             var actions = f.Row(body, "Actions", 18);
             actions.gameObject.AddComponent<LayoutElement>().minHeight = 60;
             f.Button(actions, UIStrings.Get("tutorial.repeat"), _ui.RepeatTutorial);
             Link(actions, "voice.calibrate", UIScreen.VoiceCalibration);
             Link(actions, "hands.calibrate", UIScreen.HandCalibration);
+            new ControlsPage(f, _ui.Settings, _ui.Confirm).Build(f.Column(body, "Teclas", 16));
+            var help = f.Text(body, "", 21); help.alignment = TextAlignmentOptions.TopLeft;
+            help.margin = new Vector4(76, 12, 40, 0);
+            System.Action refresh = () => help.text = UIStrings.Get("controls.body");
+            refresh(); GameBindings.Changed += refresh;
+            help.gameObject.AddComponent<UIDisposeHook>().disposed = () => GameBindings.Changed -= refresh;
         }
 
         // Screen 28 «Derrota y reintento»: no frame, a crimson title over the dimmed scene, the

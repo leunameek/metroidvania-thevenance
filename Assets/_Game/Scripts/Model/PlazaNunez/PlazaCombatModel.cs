@@ -3,11 +3,24 @@ using System;
 public enum PlazaCombatPhase { Idle, Attack, Telegraph, React, Feedback, Won }
 public enum PlazaDefense { Dodge, Guard }
 
-// Guided turns: 3 attacks, a dodge and a guard. Failed reactions repeat the same lesson.
+// Guided turns that teach to read the guardian (the signal language of every duel, DuelSignal):
+// the first two blows are explained (a sweep is dodged, a blow from the front is blocked), the
+// next two are only shown — the player reads them. Five attacks win. A failed reaction repeats the
+// same blow and explains the signal it had.
 public sealed class PlazaCombatModel
 {
+    // The blow after each attack: two guided, then two to read (not a pattern to memorize).
+    private static readonly PlazaDefense[] Lessons = { PlazaDefense.Dodge, PlazaDefense.Guard, PlazaDefense.Guard, PlazaDefense.Dodge };
+    public const int GuidedLessons = 2;
+    public static int AttacksToWin => Lessons.Length + 1;
+
     public PlazaCombatPhase Phase { get; private set; }
-    public PlazaDefense Expected => Hits == 1 ? PlazaDefense.Dodge : PlazaDefense.Guard;
+    public PlazaDefense Expected => Lessons[Math.Max(0, Math.Min(Lessons.Length - 1, Hits - 1))];
+    public DuelSignal Signal => Expected == PlazaDefense.Dodge ? DuelSignal.Sweep : DuelSignal.Front;
+    // Guided blows name their answer; the rest only when the player asked for it (Accesibilidad).
+    public bool Guided => Hits <= GuidedLessons;
+    public bool ShowAnswers { get; set; }
+    public bool ShowsAnswer => Guided || ShowAnswers;
     public int Hits { get; private set; }
     public int Mistakes { get; private set; }
     public float Remaining { get; private set; }
@@ -24,7 +37,7 @@ public sealed class PlazaCombatModel
     {
         if (Phase != PlazaCombatPhase.Attack) return false;
         Hits++;
-        Set(Hits == 3 ? PlazaCombatPhase.Won : PlazaCombatPhase.Telegraph, TelegraphSeconds);
+        Set(Hits == AttacksToWin ? PlazaCombatPhase.Won : PlazaCombatPhase.Telegraph, TelegraphSeconds);
         return true;
     }
     public bool Defend(PlazaDefense defense)
@@ -42,11 +55,21 @@ public sealed class PlazaCombatModel
         else if (Phase == PlazaCombatPhase.React) Resolve(false);
         else Set(LastDefenseSucceeded ? PlazaCombatPhase.Attack : PlazaCombatPhase.Telegraph, TelegraphSeconds);
     }
+
+    // What the guardian's body says, for the guided blows and the panels.
+    public string Tell => Signal == DuelSignal.Sweep
+        ? "Gira el cuerpo y recoge el brazo hacia un lado; el aire silba: viene barriendo."
+        : "Se planta, echa el peso atrás y retumba un tambor grave: viene de frente.";
+    // After a mistake: what it was and why.
+    public string Reading => (Signal == DuelSignal.Sweep ? "Recogió el brazo a un lado y silbó el aire: era Esquivar."
+        : "Se plantó de frente con el tambor grave: era Bloquear.") + " Repetimos el mismo golpe.";
+
     private void Resolve(bool success)
     {
         LastDefenseSucceeded = success;
         if (!success) Mistakes++;
-        Set(PlazaCombatPhase.Feedback, 1.2f);
+        // A mistake stays longer on screen: its explanation is the lesson.
+        Set(PlazaCombatPhase.Feedback, success ? 1.2f : 2.8f);
     }
     private void Set(PlazaCombatPhase phase, float duration = 0)
     {

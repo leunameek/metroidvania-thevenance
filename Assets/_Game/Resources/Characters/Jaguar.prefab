@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Prototype.Runtime::CharacterActions
   restState: Idle
   animator: {fileID: 4427837180253433501}
+  bodyClearance: {x: 0, y: 0, z: 0}
 --- !u!1001 &7789050173472461580
 PrefabInstance:
   m_ObjectHideFlags: 0

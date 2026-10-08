@@ -120,9 +120,13 @@ namespace Nemequene.UI.Editor
             Capture(title.Canvas,"quit-confirmation",1920,1080);yield return Press(Key.Escape);
             Check(title.CurrentView==TitleView.Home&&EventSystem.current.currentSelectedGameObject==FindButton(title,"Salir").gameObject,"cancel exit restores the prior action");
             title.OpenSettings();title.SelectSection(2);yield return null;
-            FindButton(title,UIStrings.Get("graphics.apply")).onClick.Invoke();yield return null;
-            Check(title.CurrentView==TitleView.Quit,"screen mode change offers reversible confirmation");
-            title.CancelConfirmation();yield return null;Check(title.CurrentView==TitleView.Settings,"cancel display change returns to configuration");
+            // Gráficos: a new screen mode is tried in place, with Mantener / Revertir and a 15 s countdown.
+            FindButton(title,UIStrings.Get("gfx.mode")).onClick.Invoke();yield return null;
+            FindButton(title,UIStrings.Get("gfx.applyDisplay")).onClick.Invoke();yield return null;
+            var trial=title.transform.Find("Title_Settings").GetComponentsInChildren<RectTransform>(true).First(r=>r.name=="ConfirmarPantalla");
+            Check(trial.gameObject.activeInHierarchy,"screen mode change offers reversible confirmation");
+            FindButton(title,UIStrings.Get("gfx.revertDisplay")).onClick.Invoke();yield return null;
+            Check(!trial.gameObject.activeInHierarchy&&title.CurrentView==TitleView.Settings,"reverting the display change returns to configuration");
             title.ShowHome();yield return null;
             // Click the real button with an Input System mouse, rather than invoking NewGame directly.
             Canvas.ForceUpdateCanvases();var play=FindButton(title,"Nueva partida");

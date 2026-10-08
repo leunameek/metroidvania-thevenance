@@ -106,7 +106,7 @@
     },
     {
       "key": "controls",
-      "value": "Controles y ayuda"
+      "value": "Controles"
     },
     {
       "key": "restart",
@@ -146,7 +146,7 @@
     },
     {
       "key": "controls.body",
-      "value": "EXPLORACIÓN\nWASD · Caminar\nShift · Correr\nEspacio · Saltar\nQ · Dash\nE · Interactuar\nTab · Diario\nH · Ayuda\nV · Silenciar\nR · Reiniciar (con confirmación)\nEsc · Pausa\n\nVOZ (español o inglés)\nEXAMINAR, HABLAR, ENTRAR, USAR · Interactuar\nSIGUIENTE · Avanzar un diálogo\nTOMAR / SALIR · Tomar o devolver una pieza\nPalma abierta quieta · Interactuar con las manos\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\nC · Activar o pausar cámara\nM · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\nE, puño o ATACAR · Atacar en tu turno\nEspacio, barrido lateral o ESQUIVAR · Esquivar\nF, dos palmas arriba o BLOQUEAR · Bloquear\nEsc · Pausa\n\nDUELOS POR TURNOS\nATACAR, CONTRAATACAR, JAGUAR, CUERNO, ANCLAR, INTERRUMPIR, VINCULAR · Acción (o 1-7)\nBLOQUEAR, ESQUIVAR, CUBRIR, PARAR · Defensa (o F, Espacio, G, R)\nIZQUIERDA / DERECHA, LUNA / SOL · Objetivo (o Z / X)\nLa voz escucha sola; en Ajustes puedes pedir Ctrl para hablar\n\nLa defensa se realiza cuando aparece ¡AHORA! Los errores repiten la práctica. En los mundos, C activa la cámara y la voz se cambia desde la pausa."
+      "value": "EXPLORACIÓN\n[[Move]] · Caminar\n[[Sprint]] · Correr\n[[Jump]] · Saltar\n[[Dash]] · Dash\n[[Interact]] · Interactuar o agarrar\n[[Wings]] · Alas (Mundo Superior)   [[Jump]] / [[Descend]] · Subir o bajar en vuelo\n[[Journal]] · Diario\n[[Help]] · Ayuda\n[[Mute]] · Silenciar\n[[Restart]] · Reiniciar (con confirmación)\nEsc · Pausa\n\nVOZ (español o inglés)\nEXAMINAR, HABLAR, ENTRAR, USAR · Interactuar\nSIGUIENTE · Avanzar un diálogo\nTOMAR / SALIR · Tomar o devolver una pieza\nPalma abierta quieta · Interactuar con las manos\n\nINSPECCIÓN\nArrastrar con clic izquierdo · Rotar\n[[Hands]] · Activar o pausar cámara\n[[InputMode]] · Cambiar entre manos y mouse\nMano izquierda abierta · Giro horizontal\nMano derecha abierta · Giro vertical\nCerrar los puños · Detener el giro\nPuño sostenido o TOMAR · Volver con la lección aprendida\nEsc o SALIR · Cerrar inspección\n\nCOMBATE\n[[Attack]], puño o ATACAR · Atacar en tu turno\n[[Dodge]], barrido lateral o ESQUIVAR · Esquivar\n[[Guard]], dos palmas arriba o BLOQUEAR · Bloquear\nEsc · Pausa\n\nDUELOS POR TURNOS\nATACAR, CONTRAATACAR, JAGUAR, CUERNO, ANCLAR, INTERRUMPIR, VINCULAR · Acción (o 1-7)\nBLOQUEAR, ESQUIVAR, CUBRIR, PARAR · Defensa (o [[Guard]], [[Dodge]], [[Cover]], [[Parry]])\nIZQUIERDA / DERECHA, LUNA / SOL · Objetivo (o Z / X)\nLa voz escucha sola; en Ajustes puedes pedir [[Talk]] para hablar\n\nLa defensa se realiza cuando aparece ¡AHORA! Nadie te dice cuál: lee al enemigo (de frente → bloquear · barriendo → esquivar · sombra que crece bajo tus pies → cubrir · destello dorado → también parar). Los errores repiten la práctica. En los mundos, [[Hands]] activa la cámara y la voz se cambia desde la pausa."
     },
     {
       "key": "tutorial.repeat",
@@ -154,7 +154,7 @@
     },
     {
       "key": "tutorial.move",
-      "value": "Muévete con WASD. Acércate a una estación y di «examinar» (o pulsa E)."
+      "value": "Muévete con [[Move]]. Acércate a una estación y di «examinar» (o pulsa [[Interact]])."
     },
     {
       "key": "credits.body",
@@ -242,7 +242,7 @@
     },
     {
       "key": "hud.controls",
-      "value": "WASD · Caminar     E · Interactuar     Tab · Mapa     H · Ayuda     Esc · Pausa"
+      "value": "[[Move]] · Caminar     [[Interact]] · Interactuar     [[Journal]] · Mapa     [[Help]] · Ayuda     Esc · Pausa"
     },
     {
       "key": "world.plaza",
@@ -262,7 +262,7 @@
     },
     {
       "key": "inspection.mouse",
-      "value": "Arrastra para girar. Suelta para detener.\nC activa la cámara; M cambia de entrada."
+      "value": "Arrastra para girar. Suelta para detener.\n[[Hands]] activa la cámara; [[InputMode]] cambia de entrada."
     },
     {
       "key": "inspection.hands",
@@ -350,7 +350,7 @@
     },
     {
       "key": "combat.body.Telegraph",
-      "value": "Espera la señal."
+      "value": "Observa al guardián."
     },
     {
       "key": "combat.body.React",
@@ -375,6 +375,22 @@
     {
       "key": "combat.retry",
       "value": "Espera la señal y repite la defensa."
+    },
+    {
+      "key": "combat.guided",
+      "value": "Mira al guardián: {0}"
+    },
+    {
+      "key": "combat.read.Telegraph",
+      "value": "Ahora sin ayuda: lee su cuerpo y escucha. ¿Qué golpe prepara?"
+    },
+    {
+      "key": "combat.read.React",
+      "value": "¡Responde! ¿Viene barriendo o de frente?"
+    },
+    {
+      "key": "combat.signals",
+      "value": "Así avisan todos los enemigos, sin decírtelo:\nde frente (tambor grave) → Bloquear · barriendo (silbido) → Esquivar\nuna sombra crece bajo tus pies → Cubrir · destello dorado → también Parar\nEn los combates libres: sal del carril, de la franja o de la sombra; el dorado es tu momento de impulsarte."
     },
     {
       "key": "combat.seconds",
@@ -542,11 +558,11 @@
     },
     {
       "key": "voice.ptt",
-      "value": "Pulsar Ctrl para hablar"
+      "value": "Pulsar [[Talk]] para hablar"
     },
     {
       "key": "voice.toggle",
-      "value": "Alternar escucha con Ctrl"
+      "value": "Alternar escucha con [[Talk]]"
     },
     {
       "key": "voice.confidence",
@@ -641,6 +657,10 @@
       "value": "Tiempo de reacción (multiplicador)"
     },
     {
+      "key": "access.combatAnswers",
+      "value": "Mostrar la defensa correcta en combate"
+    },
+    {
       "key": "access.fallback",
       "value": "El teclado y el mouse siempre están disponibles. Una falla de reconocimiento permite repetir la defensa del entrenamiento."
     },
@@ -710,7 +730,7 @@
     },
     {
       "key": "voice.state.Preparing",
-      "value": "Ctrl · Hablar"
+      "value": "[[Talk]] · Hablar"
     },
     {
       "key": "voice.state.Listening",
@@ -846,19 +866,19 @@
     },
     {
       "key": "tutorial.step.0",
-      "value": "Muévete con WASD. Con la voz activa, di la palabra que aparece en cada aviso."
+      "value": "Muévete con [[Move]]. Con la voz activa, di la palabra que aparece en cada aviso."
     },
     {
       "key": "tutorial.step.1",
-      "value": "Acércate a una estación y di «examinar» (o pulsa E)."
+      "value": "Acércate a una estación y di «examinar» (o pulsa [[Interact]])."
     },
     {
       "key": "tutorial.step.2",
-      "value": "Sigue la instrucción junto al objeto: con la cámara (C), la mano izquierda gira y la derecha inclina."
+      "value": "Sigue la instrucción junto al objeto: con la cámara ([[Hands]]), la mano izquierda gira y la derecha inclina."
     },
     {
       "key": "tutorial.step.3",
-      "value": "Ve al círculo de entrenamiento y di «enfrentar» (o pulsa E) para comenzar el duelo."
+      "value": "Ve al círculo de entrenamiento y di «enfrentar» (o pulsa [[Attack]]) para comenzar el duelo."
     },
     {
       "key": "tutorial.step.4",
@@ -936,61 +956,226 @@
       "key": "dialogue.page",
       "value": "Página {0} de {1}"
     },
-    { "key": "title.exit", "value": "Salir" },
-    { "key": "title.playHint", "value": "Comienza tu viaje en la Plaza Núñez." },
-    { "key": "title.settingsHint", "value": "Ajusta el texto, el contraste, el sonido y los controles." },
-    { "key": "game.title", "value": "El asedio de Bacatá" },
-    { "key": "title.exitHint", "value": "Cierra El asedio de Bacatá y vuelve al escritorio." },
-    { "key": "title.navigation", "value": "Flechas o Tab · Elegir     Enter · Confirmar" },
-    { "key": "title.accessIntro", "value": "Adapta la experiencia antes de comenzar. Estos ajustes también se aplican durante el juego." },
-    { "key": "title.musicIntro", "value": "Bruma del umbral\nUna pieza ambiental creada para este menú." },
-    { "key": "title.music", "value": "Música del menú" },
-    { "key": "title.musicShortcut", "value": "M · Silenciar música" },
-    { "key": "title.musicMuted", "value": "Música silenciada · M para activar" },
-    { "key": "title.resolutionNote", "value": "Al cambiar la resolución tendrás 15 segundos para confirmarla. Si no confirmas, se restaura la anterior." },
-    { "key": "title.controlsIntro", "value": "Puedes jugar con teclado y mouse. La cámara y el micrófono son opcionales; se calibran desde la pausa del juego." },
-    { "key": "title.credits", "value": "Menú: paisaje de fantasía generado, emblema adaptado de la referencia visual del proyecto y composición ambiental original por síntesis. No representan una reconstrucción histórica o musical muisca." },
-    { "key": "title.back", "value": "Volver al menú" },
-    { "key": "title.settingsFooter", "value": "Esc · Volver   |   Rueda o Tab · Recorrer opciones\nLos ajustes se guardan al volver al menú." },
-    { "key": "title.quitConfirm", "value": "¿Salir de El asedio de Bacatá?" },
-    { "key": "title.loading", "value": "Preparando tu llegada a la Plaza Núñez…" },
-    { "key": "title.returning", "value": "Volviendo al menú principal…" },
-    { "key": "title.revert", "value": "Restauración automática en {0} s" },
-    {"key": "journal", "value": "Diario"},
-    {"key": "hud.cameraActive", "value": "Cámara activa · C para pausar"},
-    {"key": "inspection.archived", "value": "Descubrimiento guardado en el diario."},
-    {"key": "inspection.return", "value": "Volver · {0}"},
-    {"key": "inspection.fallback", "value": "M · Utilizar mouse"},
-    {"key": "inspection.mouse.0", "value": "Arrastra con clic izquierdo hacia los lados."},
-    {"key": "inspection.mouse.1", "value": "Arrastra con clic izquierdo hacia arriba o abajo."},
-    {"key": "inspection.mouse.2", "value": "Arrastra en ambas direcciones y suelta el botón."},
-    {"key": "inspection.hands.0", "value": "Mueve la mano izquierda abierta hacia los lados."},
-    {"key": "inspection.hands.1", "value": "Mueve la mano derecha abierta hacia arriba o abajo."},
-    {"key": "inspection.hands.2", "value": "Gira con ambas manos abiertas y cierra los puños."},
-    {"key":"combat.promptDodge","value":"Esquiva el ataque."},
-    {"key":"combat.promptBlock","value":"Bloquea el ataque."},
-    {"key":"save.continue","value":"Continuar"},
-    {"key":"save.load","value":"Cargar partida"},
-    {"key":"save.title","value":"Partidas guardadas"},
-    {"key":"save.slot","value":"Ranura {0} · {1}\n{2} % · {3} jugados · {4}"},
-    {"key":"save.empty","value":"Ranura {0} · Vacía"},
-    {"key":"save.corrupt","value":"Ranura {0} · No se puede leer"},
-    {"key":"save.delete","value":"Eliminar"},
-    {"key":"save.replaceConfirm","value":"¿Crear una nueva partida aquí? Se perderá el progreso de esta ranura."},
-    {"key":"save.deleteConfirm","value":"¿Eliminar esta partida? Esta acción no se puede deshacer."},
-    {"key":"save.game","value":"Guardar partida"},
-    {"key":"save.saved","value":"Partida guardada en Plaza Núñez."},
-    {"key":"save.unavailable","value":"Solo puedes guardar durante la exploración de una partida iniciada desde el menú."},
-    {"key":"save.checkpointNote","value":"Las partidas reaparecen en Plaza Núñez con las lecciones y el entrenamiento completados. Puedes guardar aquí o en la ranura activa desde la pausa."},
-    {"key":"save.loadConfirm","value":"¿Cargar esta partida? Se perderán los cambios desde el último guardado."},
-    {"key":"confirm.replay","value":"¿Repetir desde el comienzo? Se reemplazará el progreso de la ranura actual."},
-    {"key":"inventory","value":"Inventario"},
-    {"key":"inventory.intro","value":"Las piezas examinadas se conservan como hallazgos de esta partida."},
-    {"key":"inventory.unknown","value":"Por descubrir"},
-    {"key":"inventory.locked","value":"Bloqueado"},
-    {"key":"inventory.empty","value":"Aún no has obtenido piezas. Examina una estación de la plaza para registrar un hallazgo."},
-    {"key":"inventory.use","value":"Uso: consulta este hallazgo en el archivo cultural. No es un objeto consumible."},
-    {"key":"access.readableFont","value":"Tipografía de alta legibilidad"},
+    {
+      "key": "title.exit",
+      "value": "Salir"
+    },
+    {
+      "key": "title.playHint",
+      "value": "Comienza tu viaje en la Plaza Núñez."
+    },
+    {
+      "key": "title.settingsHint",
+      "value": "Ajusta el texto, el contraste, el sonido y los controles."
+    },
+    {
+      "key": "game.title",
+      "value": "El asedio de Bacatá"
+    },
+    {
+      "key": "title.exitHint",
+      "value": "Cierra El asedio de Bacatá y vuelve al escritorio."
+    },
+    {
+      "key": "title.navigation",
+      "value": "Flechas o Tab · Elegir     Enter · Confirmar"
+    },
+    {
+      "key": "title.accessIntro",
+      "value": "Adapta la experiencia antes de comenzar. Estos ajustes también se aplican durante el juego."
+    },
+    {
+      "key": "title.musicIntro",
+      "value": "Bruma del umbral\nUna pieza ambiental creada para este menú."
+    },
+    {
+      "key": "title.music",
+      "value": "Música del menú"
+    },
+    {
+      "key": "title.musicShortcut",
+      "value": "M · Silenciar música"
+    },
+    {
+      "key": "title.musicMuted",
+      "value": "Música silenciada · M para activar"
+    },
+    {
+      "key": "title.resolutionNote",
+      "value": "Al cambiar la resolución tendrás 15 segundos para confirmarla. Si no confirmas, se restaura la anterior."
+    },
+    {
+      "key": "title.controlsIntro",
+      "value": "Puedes jugar con teclado y mouse, y cambiar cada tecla en Controles. La cámara y el micrófono son opcionales; se eligen en Accesibilidad y se calibran desde la pausa del juego."
+    },
+    {
+      "key": "title.credits",
+      "value": "Menú: paisaje de fantasía generado, emblema adaptado de la referencia visual del proyecto y composición ambiental original por síntesis. No representan una reconstrucción histórica o musical muisca."
+    },
+    {
+      "key": "title.back",
+      "value": "Volver al menú"
+    },
+    {
+      "key": "title.settingsFooter",
+      "value": "Esc · Volver   |   Rueda o Tab · Recorrer opciones\nLos ajustes se guardan al volver al menú."
+    },
+    {
+      "key": "title.quitConfirm",
+      "value": "¿Salir de El asedio de Bacatá?"
+    },
+    {
+      "key": "title.loading",
+      "value": "Preparando tu llegada a la Plaza Núñez…"
+    },
+    {
+      "key": "title.returning",
+      "value": "Volviendo al menú principal…"
+    },
+    {
+      "key": "title.revert",
+      "value": "Restauración automática en {0} s"
+    },
+    {
+      "key": "journal",
+      "value": "Diario"
+    },
+    {
+      "key": "hud.cameraActive",
+      "value": "Cámara activa · [[Hands]] para pausar"
+    },
+    {
+      "key": "inspection.archived",
+      "value": "Descubrimiento guardado en el diario."
+    },
+    {
+      "key": "inspection.return",
+      "value": "Volver · {0}"
+    },
+    {
+      "key": "inspection.fallback",
+      "value": "M · Utilizar mouse"
+    },
+    {
+      "key": "inspection.mouse.0",
+      "value": "Arrastra con clic izquierdo hacia los lados."
+    },
+    {
+      "key": "inspection.mouse.1",
+      "value": "Arrastra con clic izquierdo hacia arriba o abajo."
+    },
+    {
+      "key": "inspection.mouse.2",
+      "value": "Arrastra en ambas direcciones y suelta el botón."
+    },
+    {
+      "key": "inspection.hands.0",
+      "value": "Mueve la mano izquierda abierta hacia los lados."
+    },
+    {
+      "key": "inspection.hands.1",
+      "value": "Mueve la mano derecha abierta hacia arriba o abajo."
+    },
+    {
+      "key": "inspection.hands.2",
+      "value": "Gira con ambas manos abiertas y cierra los puños."
+    },
+    {
+      "key": "combat.promptDodge",
+      "value": "Esquiva el ataque."
+    },
+    {
+      "key": "combat.promptBlock",
+      "value": "Bloquea el ataque."
+    },
+    {
+      "key": "save.continue",
+      "value": "Continuar"
+    },
+    {
+      "key": "save.load",
+      "value": "Cargar partida"
+    },
+    {
+      "key": "save.title",
+      "value": "Partidas guardadas"
+    },
+    {
+      "key": "save.slot",
+      "value": "Ranura {0} · {1}\n{2} % · {3} jugados · {4}"
+    },
+    {
+      "key": "save.empty",
+      "value": "Ranura {0} · Vacía"
+    },
+    {
+      "key": "save.corrupt",
+      "value": "Ranura {0} · No se puede leer"
+    },
+    {
+      "key": "save.delete",
+      "value": "Eliminar"
+    },
+    {
+      "key": "save.replaceConfirm",
+      "value": "¿Crear una nueva partida aquí? Se perderá el progreso de esta ranura."
+    },
+    {
+      "key": "save.deleteConfirm",
+      "value": "¿Eliminar esta partida? Esta acción no se puede deshacer."
+    },
+    {
+      "key": "save.game",
+      "value": "Guardar partida"
+    },
+    {
+      "key": "save.saved",
+      "value": "Partida guardada en Plaza Núñez."
+    },
+    {
+      "key": "save.unavailable",
+      "value": "Solo puedes guardar durante la exploración de una partida iniciada desde el menú."
+    },
+    {
+      "key": "save.checkpointNote",
+      "value": "Las partidas reaparecen en Plaza Núñez con las lecciones y el entrenamiento completados. Puedes guardar aquí o en la ranura activa desde la pausa."
+    },
+    {
+      "key": "save.loadConfirm",
+      "value": "¿Cargar esta partida? Se perderán los cambios desde el último guardado."
+    },
+    {
+      "key": "confirm.replay",
+      "value": "¿Repetir desde el comienzo? Se reemplazará el progreso de la ranura actual."
+    },
+    {
+      "key": "inventory",
+      "value": "Inventario"
+    },
+    {
+      "key": "inventory.intro",
+      "value": "Las piezas examinadas se conservan como hallazgos de esta partida."
+    },
+    {
+      "key": "inventory.unknown",
+      "value": "Por descubrir"
+    },
+    {
+      "key": "inventory.locked",
+      "value": "Bloqueado"
+    },
+    {
+      "key": "inventory.empty",
+      "value": "Aún no has obtenido piezas. Examina una estación de la plaza para registrar un hallazgo."
+    },
+    {
+      "key": "inventory.use",
+      "value": "Uso: consulta este hallazgo en el archivo cultural. No es un objeto consumible."
+    },
+    {
+      "key": "access.readableFont",
+      "value": "Tipografía de alta legibilidad"
+    },
     {
       "key": "defeat.quote",
       "value": "«La tierra recuerda a quienes se levantan.»"
@@ -1035,41 +1220,737 @@
       "key": "loading.tipTitle",
       "value": "Consejo"
     },
-    { "key": "subtitle.Settings", "value": "Personaliza tu experiencia" },
-    { "key": "subtitle.Accessibility", "value": "Lectura, movimiento y entradas" },
-    { "key": "subtitle.Map", "value": "Mapa · Lugares descubiertos" },
-    { "key": "subtitle.Objectives", "value": "Objetivos y actividades" },
-    { "key": "subtitle.Archive", "value": "Archivo cultural" },
-    { "key": "subtitle.Controls", "value": "Teclado, ratón, manos y voz" },
-    { "key": "subtitle.Credits", "value": "Créditos" },
-    { "key": "subtitle.SaveLoad", "value": "Guarda o recupera tu punto seguro" },
-    { "key": "subtitle.Inventory", "value": "Objetos del recorrido" },
-    { "key": "subtitle.Poporo", "value": "Recursos" },
-    { "key": "subtitle.VoiceCalibration", "value": "Puedes cambiar de entrada sin perder tu progreso" },
-    { "key": "subtitle.HandCalibration", "value": "Puedes cambiar de entrada sin perder tu progreso" },
-    { "key": "subtitle.Saves", "value": "Recupera tu último punto guardado" },
-    { "key": "subtitle.NewGame", "value": "El recorrido comienza en Plaza Núñez" },
-    { "key": "journal.title", "value": "Diario de Bacatá" },
-    { "key": "footer.back", "value": "Volver · Esc" },
-    { "key": "footer.select", "value": "Seleccionar · Enter" },
-    { "key": "footer.change", "value": "Cambiar valor · Enter" },
-    { "key": "footer.pause", "value": "Pausa · Esc" },
-    { "key": "footer.resume", "value": "Continuar · Esc" },
-    { "key": "footer.journal", "value": "Diario · Tab" },
-    { "key": "footer.lesson", "value": "Volver a la plaza · Esc" },
-    { "key": "footer.cancel", "value": "Cancelar · Esc" },
-    { "key": "title.version", "value": "v {0} · El Asedio de Bacatá" },
-    { "key": "inspection.heading", "value": "Lección · {0}" },
-    { "key": "inspection.subtitle", "value": "Inspección de objetos" },
-    { "key": "combat.yourTurn", "value": "Tu turno" },
-    { "key": "title.inputMode", "value": "Modo de entrada" },
-    { "key": "combat.hands.Attack", "value": "Manos · cierra el puño para atacar" },
-    { "key": "combat.hands.Telegraph", "value": "Manos · prepara dos palmas arriba (bloquear) o un barrido lateral (esquivar)" },
-    { "key": "combat.hands.React", "value": "Manos · dos palmas arriba bloquean · barrido lateral esquiva" },
-    { "key": "combat.hands.Feedback", "value": "Manos · espera el siguiente turno" },
-    { "key": "combat.hands.Won", "value": "Manos · puño sostenido para volver a la plaza" },
-    { "key": "inspection.handsReturn", "value": "Cierra el puño y sostenlo para volver a la plaza." },
-    { "key": "hud.voiceListening", "value": "Voz · escuchando" },
-    { "key": "hud.handsHold", "value": "Palma abierta quieta para usar" }
+    {
+      "key": "subtitle.Settings",
+      "value": "Personaliza tu experiencia"
+    },
+    {
+      "key": "subtitle.Accessibility",
+      "value": "Lectura, movimiento y entradas"
+    },
+    {
+      "key": "subtitle.Map",
+      "value": "Mapa · Lugares descubiertos"
+    },
+    {
+      "key": "subtitle.Objectives",
+      "value": "Objetivos y actividades"
+    },
+    {
+      "key": "subtitle.Archive",
+      "value": "Archivo cultural"
+    },
+    {
+      "key": "subtitle.Controls",
+      "value": "Cambia cada tecla; la voz y las manos se explican debajo"
+    },
+    {
+      "key": "subtitle.Credits",
+      "value": "Quienes hicieron este juego y con qué"
+    },
+    {
+      "key": "subtitle.SaveLoad",
+      "value": "Guarda o recupera tu punto seguro"
+    },
+    {
+      "key": "subtitle.Inventory",
+      "value": "Objetos del recorrido"
+    },
+    {
+      "key": "subtitle.Poporo",
+      "value": "Recursos"
+    },
+    {
+      "key": "subtitle.VoiceCalibration",
+      "value": "Puedes cambiar de entrada sin perder tu progreso"
+    },
+    {
+      "key": "subtitle.HandCalibration",
+      "value": "Puedes cambiar de entrada sin perder tu progreso"
+    },
+    {
+      "key": "subtitle.Saves",
+      "value": "Recupera tu último punto guardado"
+    },
+    {
+      "key": "subtitle.NewGame",
+      "value": "El recorrido comienza en Plaza Núñez"
+    },
+    {
+      "key": "journal.title",
+      "value": "Diario de Bacatá"
+    },
+    {
+      "key": "footer.back",
+      "value": "Volver · Esc"
+    },
+    {
+      "key": "footer.select",
+      "value": "Seleccionar · Enter"
+    },
+    {
+      "key": "footer.change",
+      "value": "Cambiar valor · Enter"
+    },
+    {
+      "key": "footer.pause",
+      "value": "Pausa · Esc"
+    },
+    {
+      "key": "footer.resume",
+      "value": "Continuar · Esc"
+    },
+    {
+      "key": "footer.journal",
+      "value": "Diario · [[Journal]]"
+    },
+    {
+      "key": "footer.lesson",
+      "value": "Volver a la plaza · Esc"
+    },
+    {
+      "key": "footer.cancel",
+      "value": "Cancelar · Esc"
+    },
+    {
+      "key": "title.version",
+      "value": "v {0} · El Asedio de Bacatá"
+    },
+    {
+      "key": "inspection.heading",
+      "value": "Lección · {0}"
+    },
+    {
+      "key": "inspection.subtitle",
+      "value": "Inspección de objetos"
+    },
+    {
+      "key": "combat.yourTurn",
+      "value": "Tu turno"
+    },
+    {
+      "key": "title.inputMode",
+      "value": "Modo de entrada"
+    },
+    {
+      "key": "combat.hands.Attack",
+      "value": "Manos · cierra el puño para atacar"
+    },
+    {
+      "key": "combat.hands.Telegraph",
+      "value": "Manos · prepara dos palmas arriba (bloquear) o un barrido lateral (esquivar)"
+    },
+    {
+      "key": "combat.hands.React",
+      "value": "Manos · dos palmas arriba bloquean · barrido lateral esquiva"
+    },
+    {
+      "key": "combat.hands.Feedback",
+      "value": "Manos · espera el siguiente turno"
+    },
+    {
+      "key": "combat.hands.Won",
+      "value": "Manos · puño sostenido para volver a la plaza"
+    },
+    {
+      "key": "inspection.handsReturn",
+      "value": "Cierra el puño y sostenlo para volver a la plaza."
+    },
+    {
+      "key": "hud.voiceListening",
+      "value": "Voz · escuchando"
+    },
+    {
+      "key": "hud.handsHold",
+      "value": "Palma abierta quieta para usar"
+    },
+    {
+      "key": "keys.intro",
+      "value": "Elige una tecla y pulsa Enter (o haz clic); después pulsa la tecla nueva. Esc cancela y Supr deja la casilla vacía."
+    },
+    {
+      "key": "keys.action",
+      "value": "Acción"
+    },
+    {
+      "key": "keys.primary",
+      "value": "Tecla principal"
+    },
+    {
+      "key": "keys.secondary",
+      "value": "Alternativa"
+    },
+    {
+      "key": "keys.group.Exploration",
+      "value": "Movimiento e interacción"
+    },
+    {
+      "key": "keys.group.Combat",
+      "value": "Combate"
+    },
+    {
+      "key": "keys.group.System",
+      "value": "Sistema"
+    },
+    {
+      "key": "keys.press",
+      "value": "Pulsa una tecla…"
+    },
+    {
+      "key": "keys.waiting",
+      "value": "Pulsa la tecla nueva para «{0}». Esc cancela · Supr la deja vacía."
+    },
+    {
+      "key": "keys.cancelled",
+      "value": "Cambio cancelado; la tecla anterior se mantiene."
+    },
+    {
+      "key": "keys.cleared",
+      "value": "«{0}» ya no usa esa casilla."
+    },
+    {
+      "key": "keys.reserved",
+      "value": "{0} está reservada para los menús (Esc vuelve, Enter confirma). Elige otra tecla."
+    },
+    {
+      "key": "keys.assigned",
+      "value": "{0} ahora es «{1}»."
+    },
+    {
+      "key": "keys.swapped",
+      "value": "«{0}» recibió la tecla anterior ({1})."
+    },
+    {
+      "key": "keys.alsoUsed",
+      "value": "También la usa «{0}» en otro momento del juego."
+    },
+    {
+      "key": "keys.shared",
+      "value": "«{0}» comparte tecla con: {1} (en otro momento del juego, sin conflicto)."
+    },
+    {
+      "key": "keys.fixed",
+      "value": "Fijas: Esc (pausa y volver), Enter (confirmar), ratón (girar la cámara y las piezas), 1–7 y Z / X en los duelos por turnos. Los cambios se guardan al instante y valen en la plaza y en los dos mundos."
+    },
+    {
+      "key": "keys.reset",
+      "value": "Restablecer controles"
+    },
+    {
+      "key": "keys.resetConfirm",
+      "value": "¿Restablecer todas las teclas? Vuelven WASD, Espacio, Shift, Q, E y las demás teclas originales."
+    },
+    {
+      "key": "keys.resetDone",
+      "value": "Controles restablecidos."
+    },
+    {
+      "key": "devices.section",
+      "value": "Cámara y micrófono"
+    },
+    {
+      "key": "devices.intro",
+      "value": "Elige los dispositivos de este equipo. La cámara se usa para las manos y el micrófono para la voz."
+    },
+    {
+      "key": "devices.camera",
+      "value": "Cámara"
+    },
+    {
+      "key": "devices.camera.info",
+      "value": "Cámara que abre el seguimiento de manos (MediaPipe). Si el juego está usando la cámara, cambia en el acto."
+    },
+    {
+      "key": "devices.preview",
+      "value": "Vista previa de la cámara"
+    },
+    {
+      "key": "devices.preview.info",
+      "value": "Muestra la imagen de la cámara elegida para comprobar el encuadre y la luz. Se apaga al salir de la página."
+    },
+    {
+      "key": "devices.microphone",
+      "value": "Micrófono"
+    },
+    {
+      "key": "devices.microphone.info",
+      "value": "Micrófono del medidor de esta página y de la calibración de voz."
+    },
+    {
+      "key": "devices.meter",
+      "value": "Probar micrófono"
+    },
+    {
+      "key": "devices.meter.info",
+      "value": "Escucha el micrófono elegido y muestra su nivel. Habla con normalidad: la barra debería llegar a la mitad."
+    },
+    {
+      "key": "devices.windowsVoice",
+      "value": "El reconocimiento de voz de Windows escucha siempre por el micrófono predeterminado del sistema. Si eliges otro aquí, márcalo también como predeterminado en la configuración de sonido de Windows."
+    },
+    {
+      "key": "devices.openSound",
+      "value": "Abrir configuración de sonido de Windows"
+    },
+    {
+      "key": "devices.openSound.info",
+      "value": "Abre Configuración > Sistema > Sonido, donde se elige el micrófono predeterminado."
+    },
+    {
+      "key": "devices.rescan",
+      "value": "Buscar dispositivos de nuevo"
+    },
+    {
+      "key": "devices.rescan.info",
+      "value": "Vuelve a listar cámaras y micrófonos (por ejemplo, después de conectar uno)."
+    },
+    {
+      "key": "devices.default",
+      "value": "Predeterminado del sistema"
+    },
+    {
+      "key": "devices.disconnected",
+      "value": "{0} (no conectado)"
+    },
+    {
+      "key": "devices.noCamera",
+      "value": "No se encontró ninguna cámara. Conecta una y pulsa «Buscar dispositivos de nuevo»."
+    },
+    {
+      "key": "devices.noMicrophone",
+      "value": "No se encontró ningún micrófono. Conecta uno y pulsa «Buscar dispositivos de nuevo»."
+    },
+    {
+      "key": "devices.cameraCount",
+      "value": "Cámaras encontradas: {0}."
+    },
+    {
+      "key": "devices.microphoneCount",
+      "value": "Micrófonos encontrados: {0}."
+    },
+    {
+      "key": "devices.cameraBusy",
+      "value": "La cámara está en uso por el seguimiento de manos; apágalo para ver la vista previa."
+    },
+    {
+      "key": "devices.previewing",
+      "value": "Vista previa: {0}"
+    },
+    {
+      "key": "devices.cameraError",
+      "value": "No se pudo abrir la cámara. Revisa que ninguna otra aplicación la esté usando y el permiso de cámara de Windows."
+    },
+    {
+      "key": "devices.microphoneError",
+      "value": "No se pudo abrir el micrófono. Revisa el permiso de micrófono de Windows."
+    },
+    {
+      "key": "devices.speak",
+      "value": "Habla para ver el nivel de entrada."
+    },
+    {
+      "key": "gfx.section.display",
+      "value": "Pantalla y resolución"
+    },
+    {
+      "key": "gfx.section.quality",
+      "value": "Calidad general"
+    },
+    {
+      "key": "gfx.section.lighting",
+      "value": "Iluminación, sombras y efectos"
+    },
+    {
+      "key": "gfx.section.scaling",
+      "value": "Escalado y latencia"
+    },
+    {
+      "key": "gfx.section.calibration",
+      "value": "Brillo y gamma"
+    },
+    {
+      "key": "gfx.section.changes",
+      "value": "Cambios"
+    },
+    {
+      "key": "gfx.mode",
+      "value": "Modo de pantalla"
+    },
+    {
+      "key": "gfx.mode.info",
+      "value": "Pantalla completa exclusiva da la menor latencia; sin bordes cambia de ventana al instante; ventana deja ver el escritorio. Se aplica con «Aplicar pantalla»."
+    },
+    {
+      "key": "gfx.mode.exclusive",
+      "value": "Pantalla completa"
+    },
+    {
+      "key": "gfx.mode.borderless",
+      "value": "Sin bordes"
+    },
+    {
+      "key": "gfx.mode.window",
+      "value": "Ventana"
+    },
+    {
+      "key": "gfx.resolution",
+      "value": "Resolución de pantalla"
+    },
+    {
+      "key": "gfx.resolution.info",
+      "value": "Tamaño de la imagen en el monitor: la nativa o una inferior. Menos píxeles alivian mucho la GPU, pero la imagen se ve menos nítida."
+    },
+    {
+      "key": "gfx.native",
+      "value": "(nativa)"
+    },
+    {
+      "key": "gfx.refresh",
+      "value": "Tasa de refresco"
+    },
+    {
+      "key": "gfx.refresh.info",
+      "value": "Hercios del monitor en pantalla completa. Más hercios permiten más FPS visibles si la GPU los alcanza."
+    },
+    {
+      "key": "gfx.refresh.monitor",
+      "value": "La del monitor"
+    },
+    {
+      "key": "gfx.refresh.windowed",
+      "value": "En ventana se usa la tasa del escritorio."
+    },
+    {
+      "key": "gfx.applyDisplay",
+      "value": "Aplicar pantalla"
+    },
+    {
+      "key": "gfx.applyDisplay.info",
+      "value": "Prueba el modo, la resolución y la tasa elegidos. Si no confirmas en 15 segundos, vuelve la configuración anterior."
+    },
+    {
+      "key": "gfx.display.current",
+      "value": "En uso: {0}"
+    },
+    {
+      "key": "gfx.display.pending",
+      "value": "En uso: {0}. Hay cambios sin aplicar."
+    },
+    {
+      "key": "gfx.keepQuestion",
+      "value": "¿Mantener esta pantalla? Se revertirá en {0} s."
+    },
+    {
+      "key": "gfx.keep",
+      "value": "Mantener"
+    },
+    {
+      "key": "gfx.revertDisplay",
+      "value": "Revertir"
+    },
+    {
+      "key": "gfx.renderScale",
+      "value": "Resolución de renderizado"
+    },
+    {
+      "key": "gfx.renderScale.info",
+      "value": "Dibuja el mundo a un porcentaje de la resolución (por ejemplo 75 u 85 %) para ganar FPS; la interfaz sigue nítida. Alivia la GPU."
+    },
+    {
+      "key": "gfx.vsync",
+      "value": "Sincronización vertical (V-Sync)"
+    },
+    {
+      "key": "gfx.vsync.info",
+      "value": "Evita el corte de imagen (tearing) esperando al monitor. Con V-Sync el límite de FPS lo pone el monitor y la latencia sube un poco."
+    },
+    {
+      "key": "gfx.fps",
+      "value": "Límite de FPS"
+    },
+    {
+      "key": "gfx.fps.info",
+      "value": "Tope de fotogramas por segundo cuando V-Sync está desactivado. Un tope reduce calor, consumo y trabajo de CPU y GPU."
+    },
+    {
+      "key": "gfx.preset",
+      "value": "Preajuste de calidad"
+    },
+    {
+      "key": "gfx.preset.info",
+      "value": "Cambia de una vez sombras, oclusión, reflejos, texturas, filtrado, distancia, antialiasing y bloom. Si cambias una opción a mano aparece «Personalizado»."
+    },
+    {
+      "key": "gfx.priority",
+      "value": "Prioridad"
+    },
+    {
+      "key": "gfx.priority.info",
+      "value": "Rendimiento: más FPS (Medio, FSR al 59 %, sin V-Sync, latencia baja). Calidad: máxima fidelidad (Ultra a resolución completa). Equilibrado: punto medio."
+    },
+    {
+      "key": "gfx.priority.performance",
+      "value": "Rendimiento"
+    },
+    {
+      "key": "gfx.priority.balanced",
+      "value": "Equilibrado"
+    },
+    {
+      "key": "gfx.priority.quality",
+      "value": "Calidad"
+    },
+    {
+      "key": "gfx.low",
+      "value": "Bajo"
+    },
+    {
+      "key": "gfx.medium",
+      "value": "Medio"
+    },
+    {
+      "key": "gfx.high",
+      "value": "Alto"
+    },
+    {
+      "key": "gfx.ultra",
+      "value": "Ultra"
+    },
+    {
+      "key": "gfx.custom",
+      "value": "Personalizado"
+    },
+    {
+      "key": "gfx.shadows",
+      "value": "Calidad de sombras"
+    },
+    {
+      "key": "gfx.shadows.info",
+      "value": "Resolución de los mapas de sombras y distancia a la que se proyectan (de 20 m en Bajo a 100 m en Ultra). Coste alto de GPU."
+    },
+    {
+      "key": "gfx.ao",
+      "value": "Oclusión ambiental (SSAO)"
+    },
+    {
+      "key": "gfx.ao.info",
+      "value": "Oscurece grietas y rincones donde los objetos se juntan, dando volumen a la piedra y la vegetación. Coste medio de GPU."
+    },
+    {
+      "key": "gfx.reflections",
+      "value": "Reflejos"
+    },
+    {
+      "key": "gfx.reflections.info",
+      "value": "Reflejo del cielo y sondas de reflexión en superficies brillantes y agua. «Tiempo real» actualiza las sondas cada fotograma (más GPU). El motor (URP) no ofrece SSR ni trazado de rayos."
+    },
+    {
+      "key": "gfx.reflections.standard",
+      "value": "Estándar"
+    },
+    {
+      "key": "gfx.reflections.realtime",
+      "value": "Tiempo real"
+    },
+    {
+      "key": "gfx.textures",
+      "value": "Calidad de texturas"
+    },
+    {
+      "key": "gfx.textures.info",
+      "value": "Nitidez de las superficies. Medio y Bajo usan texturas a la mitad y a la cuarta parte: ahorran memoria de vídeo (VRAM)."
+    },
+    {
+      "key": "gfx.aniso",
+      "value": "Filtrado anisotrópico"
+    },
+    {
+      "key": "gfx.aniso.info",
+      "value": "Mantiene nítidas las texturas vistas en ángulo o a distancia (suelos, caminos). Coste bajo de GPU."
+    },
+    {
+      "key": "gfx.distance",
+      "value": "Distancia de visión"
+    },
+    {
+      "key": "gfx.distance.info",
+      "value": "Hasta dónde se dibujan objetos y detalles (nivel de detalle y plano lejano de la cámara). Menos distancia alivia CPU y GPU."
+    },
+    {
+      "key": "gfx.distance.near",
+      "value": "Corta"
+    },
+    {
+      "key": "gfx.distance.far",
+      "value": "Larga"
+    },
+    {
+      "key": "gfx.distance.max",
+      "value": "Máxima"
+    },
+    {
+      "key": "gfx.aa",
+      "value": "Antialiasing"
+    },
+    {
+      "key": "gfx.aa.info",
+      "value": "Suaviza bordes dentados. FXAA es el más barato, SMAA el más limpio en una imagen, TAA usa fotogramas anteriores y MSAA multiplica muestras (el más caro)."
+    },
+    {
+      "key": "gfx.bloom",
+      "value": "Bloom"
+    },
+    {
+      "key": "gfx.bloom.info",
+      "value": "Resplandor alrededor de las luces intensas, como lo diseñó cada escena. Coste bajo de GPU."
+    },
+    {
+      "key": "gfx.motionBlur",
+      "value": "Desenfoque de movimiento"
+    },
+    {
+      "key": "gfx.motionBlur.info",
+      "value": "Difumina la imagen al mover la cámara. Puede marear; coste bajo de GPU."
+    },
+    {
+      "key": "gfx.dof",
+      "value": "Profundidad de campo"
+    },
+    {
+      "key": "gfx.dof.info",
+      "value": "Desenfoca suavemente lo lejano para dar profundidad. Coste medio de GPU."
+    },
+    {
+      "key": "gfx.grain",
+      "value": "Grano de película"
+    },
+    {
+      "key": "gfx.grain.info",
+      "value": "Añade un grano fino tipo película. Puramente estético; coste mínimo."
+    },
+    {
+      "key": "gfx.upscaler",
+      "value": "Reescalador"
+    },
+    {
+      "key": "gfx.upscaler.info",
+      "value": "Cómo se agranda la imagen cuando la resolución de renderizado es menor al 100 %. FSR 1.0 (AMD) afila la imagen; STP (Unity) usa fotogramas anteriores y da más detalle."
+    },
+    {
+      "key": "gfx.upscaler.none",
+      "value": "Bilineal (sin reescalador)"
+    },
+    {
+      "key": "gfx.upscalerMode",
+      "value": "Modo del reescalador"
+    },
+    {
+      "key": "gfx.upscalerMode.info",
+      "value": "Ultra calidad 77 %, Calidad 67 %, Equilibrado 59 % y Rendimiento 50 % de la resolución. Fija la resolución de renderizado."
+    },
+    {
+      "key": "gfx.upscalerMode.ultra",
+      "value": "Ultra calidad"
+    },
+    {
+      "key": "gfx.upscalerMode.quality",
+      "value": "Calidad"
+    },
+    {
+      "key": "gfx.upscalerMode.balanced",
+      "value": "Equilibrado"
+    },
+    {
+      "key": "gfx.upscalerMode.performance",
+      "value": "Rendimiento"
+    },
+    {
+      "key": "gfx.dlss",
+      "value": "NVIDIA DLSS / Intel XeSS"
+    },
+    {
+      "key": "gfx.dlss.info",
+      "value": "Estos reescaladores necesitan bibliotecas del fabricante que el motor del juego (Unity URP) no incluye. Usa FSR 1.0 o STP, que funcionan en cualquier GPU."
+    },
+    {
+      "key": "gfx.frameGen",
+      "value": "Generación de fotogramas"
+    },
+    {
+      "key": "gfx.frameGen.info",
+      "value": "El motor del juego (Unity URP) no admite generación de fotogramas. Para más FPS usa la resolución de renderizado o un reescalador."
+    },
+    {
+      "key": "gfx.unavailable",
+      "value": "No disponible"
+    },
+    {
+      "key": "gfx.latency",
+      "value": "Reducción de latencia"
+    },
+    {
+      "key": "gfx.latency.info",
+      "value": "Equivalente a NVIDIA Reflex: la CPU prepara como máximo un fotograma por adelantado, así la respuesta a las teclas es más rápida. Puede bajar un poco los FPS."
+    },
+    {
+      "key": "gfx.hdr",
+      "value": "HDR"
+    },
+    {
+      "key": "gfx.hdr.info",
+      "value": "Alto rango dinámico en monitores compatibles con HDR activado en Windows: luces más intensas y sombras con más detalle."
+    },
+    {
+      "key": "gfx.hdr.missing",
+      "value": "Monitor no compatible"
+    },
+    {
+      "key": "gfx.paperWhite",
+      "value": "Brillo de blanco HDR"
+    },
+    {
+      "key": "gfx.paperWhite.info",
+      "value": "Brillo del blanco de referencia en HDR (nits). Ajústalo hasta que la interfaz se vea cómoda y no deslumbre."
+    },
+    {
+      "key": "gfx.brightness",
+      "value": "Brillo"
+    },
+    {
+      "key": "gfx.brightness.info",
+      "value": "Sube o baja el brillo de la imagen del juego (no de los menús). Sin coste de rendimiento."
+    },
+    {
+      "key": "gfx.gamma",
+      "value": "Gamma"
+    },
+    {
+      "key": "gfx.gamma.info",
+      "value": "Aclara u oscurece los tonos medios y las zonas oscuras sin quemar los blancos. Sin coste de rendimiento."
+    },
+    {
+      "key": "gfx.calibration.hint",
+      "value": "Ajusta brillo y gamma hasta que el símbolo de la izquierda apenas se vea y el de la derecha se vea con claridad."
+    },
+    {
+      "key": "gfx.revert",
+      "value": "Revertir cambios"
+    },
+    {
+      "key": "gfx.revert.info",
+      "value": "Devuelve los gráficos a como estaban al abrir esta página."
+    },
+    {
+      "key": "gfx.reset",
+      "value": "Restablecer gráficos"
+    },
+    {
+      "key": "gfx.reset.info",
+      "value": "Vuelve al preajuste Alto a resolución completa. No cambia el modo ni la resolución de pantalla."
+    },
+    {
+      "key": "gfx.description.idle",
+      "value": "Elige una opción para ver qué cambia y cuánto cuesta (CPU o GPU). Los cambios se ven al instante en el juego."
+    }
   ]
 }

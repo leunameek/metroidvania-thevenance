@@ -47,8 +47,11 @@ public sealed class MIHud : MonoBehaviour
         if (_health != null) { _health.HealthChanged += OnHealth; OnHealth(_health.CurrentHealth, _health.MaxHealth); }
 
         // Zone, objective and counters on a smoked backdrop (they float over clouds and crystals).
-        _header = UIKit.Scrim(canvas, "HeaderScrim", Vector2.one, Vector2.one, .74f).gameObject;
-        UIKit.Place((RectTransform)_header.transform, Vector2.one, new Vector2(-18f, -18f), new Vector2(820f, 196f));
+        // The backdrop runs past the screen's top-right corner so its feathered edges fall off
+        // screen, not under the text (2026-10-08: over the upper world's bright sky the objective
+        // and counters sat on the faded part and barely read).
+        _header = UIKit.Scrim(canvas, "HeaderScrim", Vector2.one, Vector2.one, .88f).gameObject;
+        UIKit.Place((RectTransform)_header.transform, Vector2.one, new Vector2(200f, 70f), new Vector2(1300f, 380f));
         _zone = UIKit.Shadow(UIKit.Label(canvas, "Mundo inferior", 42f, UIPalette.GoldText, true));
         UIKit.Place(_zone.rectTransform, Vector2.one, new Vector2(-76f, -40f), new Vector2(720f, 60f)); _zone.alignment = TextAlignmentOptions.BottomRight;
         _zone.enableAutoSizing = true; _zone.fontSizeMax = 42; _zone.fontSizeMin = 28; _zone.textWrappingMode = TextWrappingModes.NoWrap;
@@ -74,24 +77,29 @@ public sealed class MIHud : MonoBehaviour
 
         // Inspection of a find (screens 10-12): the piece keeps the left, the panel the right.
         _inspect = UIKit.Rect("Inspection", canvas).gameObject;
-        var panel = UIKit.Rect("Panel", _inspect.transform); panel.anchorMin = new Vector2(.60f, .11f); panel.anchorMax = new Vector2(.94f, .76f);
+        var panel = UIKit.Rect("Panel", _inspect.transform); // Clear of the hands/voice plate below and the counters above; a larger HUD (text size)
+        // widens it to the left instead of growing into them.
+        float grow = UIKit.HudScale - 1f;
+        panel.anchorMin = new Vector2(.60f - grow * .6f, .26f + grow * .2f); panel.anchorMax = new Vector2(.94f, .83f - grow * .2f);
         var bg = panel.gameObject.AddComponent<Image>(); bg.color = UIPalette.Stone; bg.raycastTarget = false;
         if (UIBacata.Available) UIBacata.Frame(panel.gameObject, .6f, true, true);
         _inspectName = UIKit.Label(panel, "", 44, UIPalette.GoldText, true); _inspectName.alignment = TextAlignmentOptions.TopLeft;
-        Inset(_inspectName.rectTransform, 60, 60, 84, -1, 64);
+        Inset(_inspectName.rectTransform, 60, 60, 76, -1, 56);
+        // A long name shrinks to its band instead of running into the kind line below (2026-10-07 audit).
+        _inspectName.enableAutoSizing = true; _inspectName.fontSizeMax = 44; _inspectName.fontSizeMin = 20; _inspectName.textWrappingMode = TextWrappingModes.NoWrap;
         _inspectKind = UIKit.Label(panel, "", 20, UIPalette.Jade); _inspectKind.alignment = TextAlignmentOptions.TopLeft; _inspectKind.characterSpacing = 2;
-        _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 150, -1, 30);
+        _inspectKind.fontStyle = FontStyles.UpperCase; Inset(_inspectKind.rectTransform, 60, 60, 134, -1, 28);
         _inspectBody = UIKit.Label(panel, "", 24, UIPalette.Ivory); _inspectBody.alignment = TextAlignmentOptions.TopLeft;
-        _inspectBody.rectTransform.offsetMin = new Vector2(60, 232); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -190);
-        _inspectBody.enableAutoSizing = true; _inspectBody.fontSizeMax = 24; _inspectBody.fontSizeMin = 17;
+        _inspectBody.rectTransform.offsetMin = new Vector2(60, 184); _inspectBody.rectTransform.offsetMax = new Vector2(-60, -170);
+        _inspectBody.enableAutoSizing = true; _inspectBody.fontSizeMax = 24; _inspectBody.fontSizeMin = 16;
         // What to do with the piece: a rule above it, one line per way of answering.
         var keyRule = UIKit.Icon(panel, UIIcon.Divider, UIPalette.Gold);
         keyRule.rectTransform.anchorMin = new Vector2(0, 0); keyRule.rectTransform.anchorMax = new Vector2(1, 0);
-        keyRule.rectTransform.offsetMin = new Vector2(60, 214); keyRule.rectTransform.offsetMax = new Vector2(-60, 226);
+        keyRule.rectTransform.offsetMin = new Vector2(60, 166); keyRule.rectTransform.offsetMax = new Vector2(-60, 178);
         var keys = _inspectKeys = UIKit.Label(panel, InspectionKeys, 19, UIPalette.Muted);
         keys.alignment = TextAlignmentOptions.TopLeft; keys.rectTransform.anchorMin = Vector2.zero; keys.rectTransform.anchorMax = new Vector2(1, 0);
-        keys.rectTransform.offsetMin = new Vector2(60, 40); keys.rectTransform.offsetMax = new Vector2(-60, 206);
-        keys.textWrappingMode = TextWrappingModes.Normal; keys.enableAutoSizing = true; keys.fontSizeMax = 20; keys.fontSizeMin = 16;
+        keys.rectTransform.offsetMin = new Vector2(60, 30); keys.rectTransform.offsetMax = new Vector2(-60, 160);
+        keys.textWrappingMode = TextWrappingModes.Normal; keys.enableAutoSizing = true; keys.fontSizeMax = 20; keys.fontSizeMin = 13;
         keys.lineSpacing = 6;
         _inspect.SetActive(false);
 
@@ -116,15 +124,18 @@ public sealed class MIHud : MonoBehaviour
         if (UIBacata.Available) UIBacata.Frame(column.gameObject, .6f, true, true);
         var title = UIKit.Label(column, "Pausa", 60, UIPalette.Danger, true); title.rectTransform.anchorMin = new Vector2(.08f, .82f); title.rectTransform.anchorMax = new Vector2(.92f, .92f);
         _pauseZone = UIKit.Label(column, "", 22, UIPalette.Muted); _pauseZone.rectTransform.anchorMin = new Vector2(.08f, .76f); _pauseZone.rectTransform.anchorMax = new Vector2(.92f, .82f);
-        var rule = UIKit.Icon(column, UIIcon.Divider, UIPalette.Gold); rule.rectTransform.anchorMin = new Vector2(.16f, .735f); rule.rectTransform.anchorMax = new Vector2(.84f, .765f);
-        var list = UIKit.Rect("Actions", column); list.anchorMin = new Vector2(.08f, .30f); list.anchorMax = new Vector2(.92f, .72f);
+        var rule = UIKit.Icon(column, UIIcon.Divider, UIPalette.Gold); rule.rectTransform.anchorMin = new Vector2(.16f, .655f); rule.rectTransform.anchorMax = new Vector2(.84f, .685f);
+        // The counters sit on one line under the zone, so the actions (three, plus voice and hands)
+        // have the column down to its foot (2026-10-07 audit: the list ran into the counters).
+        _pauseStats = UIKit.Label(column, "", 20, UIPalette.Muted); _pauseStats.rectTransform.anchorMin = new Vector2(.08f, .69f); _pauseStats.rectTransform.anchorMax = new Vector2(.92f, .735f);
+        _pauseStats.enableAutoSizing = true; _pauseStats.fontSizeMax = 20; _pauseStats.fontSizeMin = 13; _pauseStats.textWrappingMode = TextWrappingModes.NoWrap;
+        var list = UIKit.Rect("Actions", column); list.anchorMin = new Vector2(.08f, .07f); list.anchorMax = new Vector2(.92f, .66f);
         var layout = list.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.childAlignment = TextAnchor.UpperCenter;
         layout.childControlWidth = layout.childControlHeight = true; layout.childForceExpandHeight = false; layout.childForceExpandWidth = true;
         _pauseList = list;
         _resume = UIKitButton.Create(list, "Continuar", resume, true);
         UIKitButton.Create(list, "Volver a Plaza Núñez", toPlaza);
         UIKitButton.Create(list, "Volver al menú principal", toMenu);
-        _pauseStats = UIKit.Label(column, "", 20, UIPalette.Muted); _pauseStats.rectTransform.anchorMin = new Vector2(.08f, .07f); _pauseStats.rectTransform.anchorMax = new Vector2(.92f, .27f);
         UIKit.Hint(_pause.transform, "Esc", "Continuar", Vector2.zero);
         UIKit.Hint(_pause.transform, "Enter", "Seleccionar", Vector2.right);
         _pause.SetActive(false);
@@ -140,7 +151,7 @@ public sealed class MIHud : MonoBehaviour
 
         _hints = UIKit.Rect("Hints", canvas).gameObject;
         UIKit.Hint(_hints.transform, "Esc", "Pausa", Vector2.zero);
-        UIKit.Hint(_hints.transform, VoicePrompt.Cap("impulso", "Q"), "Impulso", Vector2.right);
+        UIKit.Hint(_hints.transform, VoicePrompt.Cap("impulso", GameAction.Dash), "Impulso", Vector2.right);
 
         var fade = UIKit.Rect("Fade", canvas); _fade = fade.gameObject.AddComponent<Image>();
         _fade.color = new Color(.031f, .039f, .043f, 0); _fade.raycastTarget = false;
@@ -173,8 +184,14 @@ public sealed class MIHud : MonoBehaviour
         if (!string.IsNullOrEmpty(_objective.text) && objective != _objective.text) GameAudio.UI(UICue.Objective);
         _objective.text = objective;
     }
-    public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "\n"); }
-    public void SetHintsVisible(bool visible) { if (_hints.activeSelf != visible) _hints.SetActive(visible); }
+    public void SetCounters(string counters) { _counters.text = counters; _pauseStats.text = counters.Replace("   ·   ", "  ·  "); }
+    // The exploration hints («Esc Pausa», «Impulso») hide under the pause, which draws its own in
+    // the same corners (2026-10-07 audit: «Pausa» and «Continuar» were printed over each other).
+    public void SetHintsVisible(bool visible)
+    {
+        visible &= !_pause.activeSelf;
+        if (_hints.activeSelf != visible) _hints.SetActive(visible);
+    }
     // Zone, objective and counters step aside while the turn duel screen uses the top band.
     public void SetHeaderVisible(bool visible)
     {
@@ -195,8 +212,12 @@ public sealed class MIHud : MonoBehaviour
     }
     public void HideInspection() { _inspect.SetActive(false); _fitStatus = null; _guide = null; }
 
-    private const string InspectionKeys = "E · Tomar     Esc · Devolver al altar\nRatón o A / D · Girar";
-    private const string FitKeys = "E · Encajar     Esc · Devolver al altar\nRatón, A / D y W / S · Girar";
+    // The keys follow the Controles page (GameBindings).
+    private static string InspectionKeys => GameBindings.Cap(GameAction.Interact) + " · Tomar     Esc · Devolver al altar\nRatón o "
+        + GameBindings.Cap(GameAction.MoveLeft) + " / " + GameBindings.Cap(GameAction.MoveRight) + " · Girar";
+    private static string FitKeys => GameBindings.Cap(GameAction.Interact) + " · Encajar     Esc · Devolver al altar\nRatón, "
+        + GameBindings.Cap(GameAction.MoveLeft) + " / " + GameBindings.Cap(GameAction.MoveRight) + " y "
+        + GameBindings.Cap(GameAction.MoveForward) + " / " + GameBindings.Cap(GameAction.MoveBack) + " · Girar";
     private string _fitStatus, _guide;
     // Hands or voice on: the words and gestures come first, the keys after them. A piece to fit
     // in its table puts its status (turning, seated, not yet) above them, in gold.
@@ -233,6 +254,7 @@ public sealed class MIHud : MonoBehaviour
 
     public void ShowPause(bool open)
     {
+        if (open) _hints.SetActive(false);
         _pause.SetActive(open);
         if (open) Relabel();
         if (open && EventSystem.current != null) { EventSystem.current.SetSelectedGameObject(null); EventSystem.current.SetSelectedGameObject(_resume.gameObject); }
@@ -255,11 +277,17 @@ public sealed class MIHud : MonoBehaviour
     {
         if (_pause.activeSelf && _pauseLabels.Count > 0) Relabel(); // the camera starts asynchronously
         _healthShown = Mathf.MoveTowards(_healthShown, _healthTarget, Time.unscaledDeltaTime * 1.4f);
-        if (_healthFill != null) _healthFill.fillAmount = _healthShown;
+        if (_healthFill != null)
+        {
+            _healthFill.fillAmount = _healthShown;
+            // In a turn duel the same vitality frame sits at the bottom left (TurnDuelHUD).
+            var vitality = _healthFill.transform.parent.parent.gameObject;
+            if (vitality.activeSelf == _duelRunning) vitality.SetActive(!_duelRunning);
+        }
         _fadeValue = Mathf.MoveTowards(_fadeValue, _fadeTarget, Time.unscaledDeltaTime * 3f);
         _fade.color = new Color(.031f, .039f, .043f, _fadeValue);
         // Notices wait while the inspection, the pause or a duel holds the screen.
-        bool held = _inspect.activeSelf || _pause.activeSelf || _death.activeSelf || TurnDuelController.Running;
+        bool held = _inspect.activeSelf || _pause.activeSelf || _death.activeSelf || _duelRunning;
         if (held) { if (_toast.activeSelf) _toast.SetActive(false); _toastUntil = 0; }
         else if (Time.unscaledTime >= _toastUntil)
         {
@@ -285,5 +313,10 @@ public sealed class MIHud : MonoBehaviour
         _toastText.rectTransform.offsetMin = new Vector2(92, -50 - body - 4);
     }
 
+    // Told by the duel controller when a turn duel starts and ends.
+    private bool _duelRunning;
+    private void OnEnable() { _duelRunning = TurnDuelController.Running; TurnDuelController.RunningChanged += OnDuel; }
+    private void OnDisable() => TurnDuelController.RunningChanged -= OnDuel;
+    private void OnDuel(bool running) => _duelRunning = running;
     private void OnDestroy() { if (_health != null) _health.HealthChanged -= OnHealth; }
 }

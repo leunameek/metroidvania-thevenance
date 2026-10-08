@@ -121,9 +121,8 @@ namespace Nemequene.UI
                     && (phase == PlazaCombatPhase.Attack || phase == PlazaCombatPhase.React || phase == PlazaCombatPhase.Won)
                 || d.State == TechnicalDemoState.Exploration && (HasTarget(d) || PlazaPieceInspection.Active != null)
                 || d.State == TechnicalDemoState.Analyzing);
-            var k = Keyboard.current;
-            if (k != null && k.leftCtrlKey.wasPressedThisFrame && turn) _talkToggle = !_talkToggle;
-            bool talk = !s.pushToTalk || (s.toggleTalk ? _talkToggle : k != null && k.leftCtrlKey.isPressed);
+            if (GameBindings.Pressed(GameAction.Talk) && turn) _talkToggle = !_talkToggle;
+            bool talk = !s.pushToTalk || (s.toggleTalk ? _talkToggle : GameBindings.Held(GameAction.Talk));
             if (!turn || !s.voiceEnabled || !talk)
             {
                 if (Listening) _recognizer.StopListening();

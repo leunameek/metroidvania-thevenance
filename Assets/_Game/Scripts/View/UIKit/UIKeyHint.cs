@@ -18,7 +18,7 @@ namespace Nemequene.UI
             candidate = candidate.Trim();
             // A spoken word («examinar», see VoicePrompt) takes the cap like a key.
             if (candidate.Length > 2 && candidate[0] == '«' && candidate[candidate.Length - 1] == '»') return true;
-            return candidate.Length == 1 && char.IsLetterOrDigit(candidate[0]) || Array.IndexOf(Named, candidate) >= 0;
+            return candidate.Length == 1 && char.IsLetterOrDigit(candidate[0]) || Array.IndexOf(Named, candidate) >= 0 || GameBindings.IsKeyLabel(candidate);
         }
         // Accepts both "E · Examinar" (HUD prompts) and "Atacar · E" (buttons).
         public static bool Split(string value, out string action, out string key)

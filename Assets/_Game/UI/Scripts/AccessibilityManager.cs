@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 namespace Nemequene.UI
 {
@@ -16,13 +15,8 @@ namespace Nemequene.UI
             _ui.Demo.Audio.SetVolumes(s.effects, s.ambience);
             _ui.Demo.ConfigurePresentation(s.cameraSensitivity, s.invertY, s.cameraMotion, s.handSensitivity, s.reducedMotion);
             _ui.Demo.Combat.Model.SetReactionScale(s.reactionScale);
+            _ui.Demo.Combat.Model.ShowAnswers = s.combatAnswers;
             _ui.Demo.Combat.FlashIntensity = s.flashIntensity;
-            var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
-            if (pipeline != null && Application.isPlaying)
-            {
-                // The runtime clone is owned by UIManager; never mutate the source pipeline asset.
-                _ui.ApplyGraphics(s.aa, s.shadows);
-            }
         }
         public void Dispose() { _ui.Settings.Changed -= Apply; }
     }

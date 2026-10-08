@@ -237,10 +237,16 @@ namespace Nemequene.UI
             // that turns into the ribbon on focus (document, «Materiales y acabado»).
             if (UIBacata.Available) UIBacata.Skin(r, primary ? "Controls/Ribbon" : "Controls/Line");
             else Plate(r, primary ? UIPlateKind.Primary : UIPlateKind.Secondary);
-            var h = r.gameObject.AddComponent<HorizontalLayoutGroup>(); h.padding = new RectOffset(76, 40, 10, 10); h.spacing = 16;
+            // The right padding clears the pointed end of the focus ribbon (2026-10-07 audit: values
+            // such as «150 %» sat on its ornament).
+            var h = r.gameObject.AddComponent<HorizontalLayoutGroup>(); h.padding = new RectOffset(76, 60, 10, 10); h.spacing = 16;
             h.childAlignment = TextAnchor.MiddleLeft;
             h.childControlHeight = h.childControlWidth = true; h.childForceExpandHeight = false; h.childForceExpandWidth = false;
             var text = Text(r, label, 26); text.alignment = TextAlignmentOptions.MidlineLeft;
+            // One line per control: at 150 % text the label shrinks instead of wrapping out of its
+            // ribbon (explicit line breaks, as in save slots, are kept and shrink together).
+            text.textWrappingMode = TextWrappingModes.NoWrap; text.enableAutoSizing = true;
+            text.fontSizeMax = 26; text.fontSizeMin = 14;
             text.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             KeyHint(text, r);
             var le = r.gameObject.AddComponent<LayoutElement>(); le.minHeight = 56;
@@ -284,6 +290,7 @@ namespace Nemequene.UI
             h.childAlignment = corner.x < .5f ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight;
             var cap = button.transform.Find("KeyCap"); if (cap != null) cap.SetSiblingIndex(1);
             var label0 = button.GetComponentInChildren<TMP_Text>(); label0.GetComponent<LayoutElement>().flexibleWidth = 0;
+            label0.enableAutoSizing = false; // a single word sized by its own width: it never needs to shrink
             var style = button.GetComponent<TitleMenuButton>(); style.bare = true; style.Refresh();
             return button;
         }
@@ -303,7 +310,8 @@ namespace Nemequene.UI
         public static Button Tab(Button button)
         {
             Center(button);
-            var h = button.GetComponent<HorizontalLayoutGroup>(); if (h != null) { h.padding.left = h.padding.right = 30; }
+            // Room for the pointed ends of the selected tab's ribbon.
+            var h = button.GetComponent<HorizontalLayoutGroup>(); if (h != null) { h.padding.left = h.padding.right = 66; }
             var label = button.GetComponentInChildren<TMP_Text>();
             label.textWrappingMode = TextWrappingModes.NoWrap; label.enableAutoSizing = true;
             label.fontSizeMax = label.fontSize; label.fontSizeMin = 14;
