@@ -39,6 +39,16 @@ public class SpeechVoiceTests
     [TestCase("La plaza espera.", SpeechMood.Calm)]
     public void TheMoodComesFromThePunctuation(string text, SpeechMood mood) => Assert.AreEqual(mood, SpeechVoices.Mood(text));
 
+    // A long line babbles longer than a short one, within a few syllables.
+    [Test]
+    public void LongerLinesBabbleLonger()
+    {
+        Assert.Less(SpeechVoices.SyllablesFor("Sí.", SpeechMood.Calm), SpeechVoices.SyllablesFor(new string('a', 140), SpeechMood.Calm));
+        Assert.LessOrEqual(SpeechVoices.SyllablesFor(new string('a', 900), SpeechMood.Calm), 7);
+        var v = SpeechVoices.For("Nemequene");
+        Assert.Less(SpeechVoices.Render(v, SpeechMood.Calm, 0, 3).Length, SpeechVoices.Render(v, SpeechMood.Calm, 0, 7).Length);
+    }
+
     [Test]
     public void EverySoundIsShortAndClean()
     {
@@ -46,8 +56,8 @@ public class SpeechVoiceTests
             foreach (SpeechMood mood in System.Enum.GetValues(typeof(SpeechMood)))
                 for (int variant = 0; variant < SpeechVoices.Variants; variant++)
                 {
-                    var samples = SpeechVoices.Render(SpeechVoices.For(name), mood, variant);
-                    Assert.That(samples.Length, Is.InRange(SpeechVoices.SampleRate / 10, SpeechVoices.SampleRate), name + " " + mood);
+                    var samples = SpeechVoices.Render(SpeechVoices.For(name), mood, variant, 8);
+                    Assert.That(samples.Length, Is.InRange(SpeechVoices.SampleRate / 4, SpeechVoices.SampleRate * 5 / 2), name + " " + mood);
                     float peak = 0;
                     foreach (var x in samples) { Assert.IsFalse(float.IsNaN(x), name); peak = System.Math.Max(peak, System.Math.Abs(x)); }
                     Assert.That(peak, Is.InRange(.05f, .91f), name + " " + mood);
